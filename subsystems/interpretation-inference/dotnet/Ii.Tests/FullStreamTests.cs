@@ -359,17 +359,45 @@ public sealed class FullStreamTests
     [Trait("Class", "F")]
     public void F2_Meridian_Fingerprint_Pin()
     {
-        // Regression pin: fingerprint must not change when the pipeline logic is unchanged.
-        // On first run this test shows the ACTUAL fingerprint in the failure message;
-        // update PinnedMeridianFingerprint with that value to lock in the baseline.
-        const string PinnedMeridianFingerprint = "72237da04d94ec26401c032c7877608f75f54f0f584c61b7fe3831ca04e00af4";
+        // Tripwire — if an intentional later change shifts a score, re-pin; bands/stances must not change.
+        const string Pin = "72237da04d94ec26401c032c7877608f75f54f0f584c61b7fe3831ca04e00af4";
 
         using var h = TestHarness.FreshEngineWithSeed();
         h.ReplayAllSignals("meridian");
         var actual = h.GetIndex("meridian")!.Fingerprint;
 
         Assert.Equal(64, actual.Length);
-        Assert.Equal(PinnedMeridianFingerprint, actual);
+        Assert.Equal(Pin, actual);
+    }
+
+    [Fact]
+    [Trait("Class", "F")]
+    public void F3_Cloudwave_Fingerprint_Pin()
+    {
+        // Tripwire — if an intentional later change shifts a score, re-pin; bands/stances must not change.
+        const string Pin = "e5d0e9b99409ac2ef0799003e05f27ea90a0d2b524a88fe906ccd0d3722bd78f";
+
+        using var h = TestHarness.FreshEngineWithSeed();
+        h.ReplayAllSignals("cloudwave");
+        var actual = h.GetIndex("cloudwave")!.Fingerprint;
+
+        Assert.Equal(64, actual.Length);
+        Assert.Equal(Pin, actual);
+    }
+
+    [Fact]
+    [Trait("Class", "F")]
+    public void F4_Corvus_Fingerprint_Pin()
+    {
+        // Tripwire — if an intentional later change shifts a score, re-pin; bands/stances must not change.
+        const string Pin = "7e7cf0052779e8aaaa0f2bdc79995efd54dd3cd1bb4911ab8069ac15fd535e13";
+
+        using var h = TestHarness.FreshEngineWithSeed();
+        h.ReplayAllSignals("corvus");
+        var actual = h.GetIndex("corvus")!.Fingerprint;
+
+        Assert.Equal(64, actual.Length);
+        Assert.Equal(Pin, actual);
     }
 
     // ═══════════════════════════════════════════════════════════════════════════
