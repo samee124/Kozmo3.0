@@ -13,11 +13,12 @@ public sealed class PostureModule : IPostureModule
     private const double PatternThreshold = 0.03; // composite delta required to call Improving/Declining
 
     public PostureAssignment Assign(
-        EntityIndex    index,
-        EntityIndex?   previousIndex,
-        DateTimeOffset? contractRenewalDate,
-        SaasProfile    profile,
-        DateTimeOffset now)
+        EntityIndex          index,
+        EntityIndex?         previousIndex,
+        DateTimeOffset?      contractRenewalDate,
+        SaasProfile          profile,
+        DateTimeOffset       now,
+        MetaCognitionResult? meta = null)
     {
         var pattern      = DerivePattern(index, previousIndex);
         var renewalDays  = contractRenewalDate.HasValue

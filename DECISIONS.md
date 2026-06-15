@@ -52,3 +52,15 @@ Read this before proposing structural changes — many "improvements" re-litigat
 **Additional caps:** posture confidence is clamped at 0.95. When meta-cognition detects active contradictions, posture confidence is reduced: `Clamp(index.Confidence - 0.1 × contradictionCount, 0.0, 0.95)`. This lower-confidence caution surfaces in the drill-down without changing the stance taxonomy.
 
 **Anti-proliferation:** meta-cognition contradictions and gaps do *not* mint new stances (`Reconfirm`, `Investigate`, etc.). They attach as `Cautions` and `EvidenceGaps` on the `PostureAssignment`. The stance answers *what to do*; the cautions answer *how sure / what to check first*. Proliferating the taxonomy would duplicate what confidence + cautions already express.
+
+---
+
+## Step 1.0a (erratum) — MetaCognitionResult threaded into IPostureModule.Assign
+
+**What Step 1.0 did:** Added `Cautions`/`EvidenceGaps` init-only properties on `PostureAssignment`, documented the confidence penalty rule (`Clamp(index.ConfidenceFloor - 0.1 × contradictionCount, 0.0, 0.95)`), and generated the `MetaCognitionResult`, `Contradiction`, and `Gap` contract types.
+
+**What it omitted:** Threading `MetaCognitionResult?` as an input parameter into `IPostureModule.Assign`. Without the parameter the module could not receive the meta-cognition output, making Phase A2 (wiring the penalty) impossible to test.
+
+**Fix:** Added `MetaCognitionResult? meta = null` as the final optional parameter to `IPostureModule.Assign` and matched the `PostureModule` implementation signature. `PostureModule` ignores `meta` until A2 implements consumption.
+
+**Scope:** Internal to I&I. `IIiFacade` is unchanged (Spine holds the `MetaCognitionResult` internally). All existing callers are positional and unaffected by the `null` default. Fingerprint inputs, golden bands/stances, and Dev B's surface are all unaffected.
