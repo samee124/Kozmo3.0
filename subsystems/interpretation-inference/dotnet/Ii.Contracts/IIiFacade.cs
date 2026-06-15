@@ -26,9 +26,24 @@ public interface IIiFacade
     /// </summary>
     Task<ReasoningTrail?> GetReasoningTrailAsync(Guid entityId, CancellationToken ct = default);
 
+    /// <summary>
+    /// Get the ordered history of (index version, posture, signal) tuples for the chart.
+    /// One point per processed signal; ordered by timestamp ascending.
+    /// </summary>
+    Task<IReadOnlyList<TrajectoryPoint>> GetTrajectoryAsync(Guid entityId, CancellationToken ct = default);
+
     /// <summary>Reset all state. Demo/test harness only.</summary>
     Task ResetAsync(CancellationToken ct = default);
 }
+
+public sealed record TrajectoryPoint(
+    DateTimeOffset Timestamp,
+    Guid?          SignalId,
+    double         Composite,
+    Band           Band,
+    Stance         Stance,
+    string         Fingerprint
+);
 
 public sealed record ReasoningTrail(
     Guid               EntityId,

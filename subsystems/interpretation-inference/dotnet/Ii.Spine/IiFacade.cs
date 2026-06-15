@@ -126,6 +126,32 @@ public sealed class IiFacade : IIiFacade
         return new ReasoningTrail(entityId, posture, idx, beliefs, signals);
     }
 
+    public async Task<IReadOnlyList<TrajectoryPoint>> GetTrajectoryAsync(
+        Guid entityId, CancellationToken ct = default)
+    {
+        var indices  = await _store.GetIndexHistoryAsync(entityId, ct);
+        var postures = await _store.GetPostureHistoryAsync(entityId, ct);
+        var signals  = await _store.GetSignalsForEntityAsync(entityId, ct);
+
+        var postureByVersion = postures.ToDictionary(p => p.IndexVersion);
+
+        return indices
+            .OrderBy(idx => idx.Version)
+            .Select((idx, i) =>
+            {
+                var posture = postureByVersion.TryGetValue(idx.Version, out var p) ? p : null;
+                Guid? sigId = i < signals.Count ? signals[i].Id : null;
+                return new TrajectoryPoint(
+                    Timestamp:   idx.ComputedAt,
+                    SignalId:    sigId,
+                    Composite:   idx.Composite,
+                    Band:        idx.Band,
+                    Stance:      posture?.Stance ?? Stance.Monitor,
+                    Fingerprint: idx.Fingerprint);
+            })
+            .ToList();
+    }
+
     public Task ResetAsync(CancellationToken ct = default) => _store.ResetAsync(ct);
 
     // ── Private ───────────────────────────────────────────────────────────────

@@ -164,6 +164,40 @@ public sealed class SqliteEntityStore : IEntityStore, IDisposable
         return Task.FromResult(json != null ? JsonSerializer.Deserialize<Signal>(json, Json) : null);
     }
 
+    // ── Posture history ───────────────────────────────────────────────────────
+
+    public Task<IReadOnlyList<PostureAssignment>> GetPostureHistoryAsync(Guid entityId, CancellationToken ct = default)
+    {
+        using var cmd = _conn.CreateCommand();
+        cmd.CommandText = "SELECT data FROM postures WHERE entity_id = @eid ORDER BY assigned_at";
+        cmd.Parameters.AddWithValue("@eid", entityId.ToString());
+        var results = new List<PostureAssignment>();
+        using var reader = cmd.ExecuteReader();
+        while (reader.Read())
+        {
+            var p = JsonSerializer.Deserialize<PostureAssignment>(reader.GetString(0), Json);
+            if (p != null) results.Add(p);
+        }
+        return Task.FromResult<IReadOnlyList<PostureAssignment>>(results);
+    }
+
+    // ── Signal history for entity ─────────────────────────────────────────────
+
+    public Task<IReadOnlyList<Signal>> GetSignalsForEntityAsync(Guid entityId, CancellationToken ct = default)
+    {
+        using var cmd = _conn.CreateCommand();
+        cmd.CommandText = "SELECT data FROM signals WHERE entity_id = @eid ORDER BY received_at";
+        cmd.Parameters.AddWithValue("@eid", entityId.ToString());
+        var results = new List<Signal>();
+        using var reader = cmd.ExecuteReader();
+        while (reader.Read())
+        {
+            var s = JsonSerializer.Deserialize<Signal>(reader.GetString(0), Json);
+            if (s != null) results.Add(s);
+        }
+        return Task.FromResult<IReadOnlyList<Signal>>(results);
+    }
+
     // ── Reset ─────────────────────────────────────────────────────────────────
 
     public Task ResetAsync(CancellationToken ct = default)

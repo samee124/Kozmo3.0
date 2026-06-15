@@ -1,0 +1,100 @@
+namespace Kozmo.Api;
+
+public sealed record VendorSummaryDto(
+    string         EntityId,
+    string         Name,
+    string         Band,
+    string         Stance,
+    double         Confidence,
+    string         Fingerprint,
+    DateTimeOffset AsOf);
+
+public sealed record VendorDetailDto(
+    string         EntityId,
+    string         Name,
+    DateTimeOffset AsOf,
+    IndexViewDto   Index,
+    PostureViewDto Posture);
+
+public sealed record IndexViewDto(
+    double                           Composite,
+    double                           ConfidenceFloor,
+    string                           Band,
+    string                           Fingerprint,
+    string                           ConfigVersion,
+    string                           BandDrivenBy,
+    DimensionMinDto?                 WorstDimension,
+    IReadOnlyList<DimensionScoreViewDto> Dimensions);
+
+public sealed record DimensionMinDto(string Dimension, double Score);
+
+public sealed record DimensionScoreViewDto(
+    string Dimension,
+    double Score,
+    double Confidence,
+    double Weight,
+    double Contribution,
+    int    BeliefCount);
+
+public sealed record PostureViewDto(
+    string                 Stance,
+    double                 Confidence,
+    string                 Rationale,
+    IReadOnlyList<string>  Cautions,
+    IReadOnlyList<string>  EvidenceGaps,
+    RenewalViewDto?        Renewal);
+
+public sealed record RenewalViewDto(
+    DateTimeOffset RenewalDate,
+    bool           WindowActive,
+    int            DaysToRenewal);
+
+public sealed record ReasoningTrailDto(
+    PostureViewDto                      Posture,
+    BandViewDto                         Band,
+    IndexViewDto                        Index,
+    IReadOnlyList<DimensionBeliefViewDto> Dimensions);
+
+public sealed record BandViewDto(
+    string           Band,
+    BandThresholdsDto Thresholds,
+    string           DrivenBy);
+
+public sealed record BandThresholdsDto(
+    double Critical,
+    double AtRisk,
+    double Healthy);
+
+public sealed record DimensionBeliefViewDto(
+    string                    Dimension,
+    double                    Score,
+    double                    Confidence,
+    double                    Weight,
+    IReadOnlyList<BeliefViewDto> Beliefs);
+
+public sealed record BeliefViewDto(
+    string       BeliefId,
+    string       Dimension,
+    string       Criterion,
+    double       Value,
+    double       Confidence,
+    string       SourceTier,
+    string       ClassificationMethod,
+    string?      ReasoningSummary,
+    double       Freshness,
+    SignalRefDto? Signal);
+
+public sealed record SignalRefDto(
+    string         SignalId,
+    string         Type,
+    DateTimeOffset Timestamp,
+    string         Source,
+    string?        Summary);
+
+public sealed record TrajectoryPointDto(
+    DateTimeOffset Timestamp,
+    string?        SignalId,
+    double         Composite,
+    string         Band,
+    string         Stance,
+    string         Fingerprint);

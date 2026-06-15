@@ -10,15 +10,18 @@ using Xunit;
 namespace Ii.Tests;
 
 /// <summary>
-/// Phase A1 — comprehensive test suite across Classes A–F.
-/// All tests compile against frozen contracts; the failing set defines the A1 to-do list.
+/// Phase A1 + A2 — comprehensive test suite across Classes A–I.
+/// All tests compile against frozen contracts; the failing set defines the implementation to-do list.
 ///
-/// Class A  FullStreamGolden  — end-to-end band + stance per vendor
-/// Class B  Structural        — confidence gate, renewal window, REPORTED tier invariant
-/// Class C  Determinism       — fingerprint stability per vendor
-/// Class D  IncrementalFull   — incremental recompute == full recompute per vendor
-/// Class E  Decay             — half-life decay properties
-/// Class F  RegressionPin     — frozen subset + fingerprint pin
+/// Class A  FullStreamGolden      — end-to-end band + stance per vendor
+/// Class B  Structural            — confidence gate, renewal window, REPORTED tier invariant
+/// Class C  Determinism           — fingerprint stability per vendor
+/// Class D  IncrementalFull       — incremental recompute == full recompute per vendor
+/// Class E  Decay                 — half-life decay properties
+/// Class F  RegressionPin         — frozen subset + fingerprint pin
+/// Class G  ConfidencePenalty     — meta-cognition contradiction penalty (A2)
+/// Class H  CautionsGaps          — cautions / gaps surfaced on PostureAssignment (A2)
+/// Class I  MetaRegressionGolden  — no regression with empty MetaCognitionResult (A2)
 /// </summary>
 public sealed class FullStreamTests
 {
@@ -481,5 +484,193 @@ public sealed class FullStreamTests
         var allDims = new[] { Dimension.Operational, Dimension.Experiential, Dimension.Financial, Dimension.Strategic };
         return allDims.ToDictionary(d => d,
             d => new DimensionScore(entityId, d, 0.26, 0.90, []));
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // CLASS G — ConfidencePenalty  (A2 — tests RED until PostureModule consumes meta)
+    // penalty rule: Clamp(index.ConfidenceFloor - 0.10 × contradictionCount, 0.0, 0.95)
+    // ═══════════════════════════════════════════════════════════════════════════
+
+    [Fact]
+    [Trait("Class", "G")]
+    public void G1_ZeroContradictions_Confidence_Unchanged()
+    {
+        // Clamp(0.80 - 0.10×0, 0, 0.95) = 0.80 — meta is a no-op when empty
+        var (posture, idx) = MakePostureWithMeta(confidenceFloorBase: 0.80, contradictionCount: 0);
+        Assert.Equal(idx.ConfidenceFloor, posture.Confidence, precision: 5);
+    }
+
+    [Fact]
+    [Trait("Class", "G")]
+    public void G2_OneContradiction_Reduces_Confidence_By_0_10()
+    {
+        // Clamp(0.80 - 0.10×1, 0, 0.95) = 0.70
+        var (posture, _) = MakePostureWithMeta(confidenceFloorBase: 0.80, contradictionCount: 1);
+        Assert.Equal(0.70, posture.Confidence, precision: 5);
+    }
+
+    [Fact]
+    [Trait("Class", "G")]
+    public void G3_N_Contradictions_Reduces_Confidence_Proportionally()
+    {
+        // Clamp(0.80 - 0.10×5, 0, 0.95) = 0.30
+        var (posture, _) = MakePostureWithMeta(confidenceFloorBase: 0.80, contradictionCount: 5);
+        Assert.Equal(0.30, posture.Confidence, precision: 5);
+    }
+
+    [Fact]
+    [Trait("Class", "G")]
+    public void G4_FloorClamp_NeverBelowZero()
+    {
+        // Clamp(0.80 - 0.10×10, 0, 0.95) = Clamp(-0.20, 0, 0.95) = 0.00
+        var (posture, _) = MakePostureWithMeta(confidenceFloorBase: 0.80, contradictionCount: 10);
+        Assert.Equal(0.00, posture.Confidence, precision: 5);
+    }
+
+    [Fact]
+    [Trait("Class", "G")]
+    public void G5_CeilingClamp_NeverAbove_0_95()
+    {
+        // Clamp(0.99 - 0.10×0, 0, 0.95) = 0.95 — ceiling applies even with zero contradictions
+        var (posture, _) = MakePostureWithMeta(confidenceFloorBase: 0.99, contradictionCount: 0);
+        Assert.Equal(0.95, posture.Confidence, precision: 5);
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // CLASS H — CautionsGaps  (A2 — tests RED until PostureModule populates fields)
+    // ═══════════════════════════════════════════════════════════════════════════
+
+    [Fact]
+    [Trait("Class", "H")]
+    public void H1_TwoGaps_SurfaceAs_EvidenceGaps()
+    {
+        var profile  = TestHelpers.LoadProfile();
+        var module   = new PostureModule();
+        var now      = new DateTimeOffset(2026, 6, 15, 12, 0, 0, TimeSpan.Zero);
+        var id       = Guid.NewGuid();
+        var idx      = new EntityIndex(id, CriticalScores(id), 0.26, 0.80, Band.AtRisk, "fp-h1", 1, now);
+        var gapDescs = new[] { "No financial data for Q2", "No CSAT data since March" };
+        var meta     = FakeMetaCognition.WithGaps(id.ToString(), gapDescs);
+
+        var result = module.Assign(idx, null, null, profile, now, meta);
+
+        Assert.Equal(2, result.EvidenceGaps.Count);
+        Assert.Contains(gapDescs[0], result.EvidenceGaps);
+        Assert.Contains(gapDescs[1], result.EvidenceGaps);
+    }
+
+    [Fact]
+    [Trait("Class", "H")]
+    public void H2_Contradictions_SurfaceAs_Cautions()
+    {
+        var profile = TestHelpers.LoadProfile();
+        var module  = new PostureModule();
+        var now     = new DateTimeOffset(2026, 6, 15, 12, 0, 0, TimeSpan.Zero);
+        var id      = Guid.NewGuid();
+        var idx     = new EntityIndex(id, CriticalScores(id), 0.26, 0.80, Band.AtRisk, "fp-h2", 1, now);
+        var meta    = FakeMetaCognition.WithContradictions(id.ToString(), 2);
+
+        var result = module.Assign(idx, null, null, profile, now, meta);
+
+        Assert.Equal(2, result.Cautions.Count);
+    }
+
+    [Fact]
+    [Trait("Class", "H")]
+    public void H3_EmptyMeta_CautionsAndGaps_AreEmptyNotNull()
+    {
+        var profile = TestHelpers.LoadProfile();
+        var module  = new PostureModule();
+        var now     = new DateTimeOffset(2026, 6, 15, 12, 0, 0, TimeSpan.Zero);
+        var id      = Guid.NewGuid();
+        var idx     = new EntityIndex(id, CriticalScores(id), 0.26, 0.80, Band.AtRisk, "fp-h3", 1, now);
+        var meta    = FakeMetaCognition.Empty(id.ToString());
+
+        var result = module.Assign(idx, null, null, profile, now, meta);
+
+        Assert.NotNull(result.Cautions);
+        Assert.NotNull(result.EvidenceGaps);
+        Assert.Empty(result.Cautions);
+        Assert.Empty(result.EvidenceGaps);
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // CLASS I — MetaRegressionGolden  (A2 — should be GREEN immediately)
+    // Empty MetaCognitionResult must not change Band, Stance, or the A1 fingerprint pins.
+    // ═══════════════════════════════════════════════════════════════════════════
+
+    [Fact]
+    [Trait("Class", "I")]
+    public void I1_Cloudwave_EmptyMeta_GoldenBandStance_Unchanged()
+    {
+        const string FingerprintPin = "e5d0e9b99409ac2ef0799003e05f27ea90a0d2b524a88fe906ccd0d3722bd78f";
+
+        using var h = TestHarness.FreshEngineWithSeed();
+        h.ReplayAllSignals("cloudwave");
+
+        var idx  = h.GetIndex("cloudwave")!;
+        var meta = FakeMetaCognition.Empty(idx.EntityId.ToString());
+
+        Assert.Equal(FingerprintPin, idx.Fingerprint);
+
+        var posture = new PostureModule().Assign(idx, null, null, h.Profile, idx.ComputedAt, meta);
+        Assert.Equal(Band.AtRisk,        posture.Band);
+        Assert.Equal(Stance.Renegotiate, posture.Stance);
+    }
+
+    [Fact]
+    [Trait("Class", "I")]
+    public void I2_Corvus_EmptyMeta_GoldenBandStance_Unchanged()
+    {
+        const string FingerprintPin = "7e7cf0052779e8aaaa0f2bdc79995efd54dd3cd1bb4911ab8069ac15fd535e13";
+
+        using var h = TestHarness.FreshEngineWithSeed();
+        h.ReplayAllSignals("corvus");
+
+        var idx  = h.GetIndex("corvus")!;
+        var meta = FakeMetaCognition.Empty(idx.EntityId.ToString());
+
+        Assert.Equal(FingerprintPin, idx.Fingerprint);
+
+        var posture = new PostureModule().Assign(idx, null, null, h.Profile, idx.ComputedAt, meta);
+        Assert.Equal(Band.Critical,  posture.Band);
+        Assert.Equal(Stance.Escalate, posture.Stance);
+    }
+
+    [Fact]
+    [Trait("Class", "I")]
+    public void I3_Meridian_EmptyMeta_GoldenBandStance_Unchanged()
+    {
+        const string FingerprintPin = "72237da04d94ec26401c032c7877608f75f54f0f584c61b7fe3831ca04e00af4";
+
+        using var h = TestHarness.FreshEngineWithSeed();
+        h.ReplayAllSignals("meridian");
+
+        var idx  = h.GetIndex("meridian")!;
+        var meta = FakeMetaCognition.Empty(idx.EntityId.ToString());
+
+        Assert.Equal(FingerprintPin, idx.Fingerprint);
+
+        var posture = new PostureModule().Assign(idx, null, null, h.Profile, idx.ComputedAt, meta);
+        Assert.Equal(Band.Healthy,   posture.Band);
+        Assert.Equal(Stance.Maintain, posture.Stance);
+    }
+
+    // ── A2 helpers ────────────────────────────────────────────────────────────
+
+    private static (PostureAssignment posture, EntityIndex idx) MakePostureWithMeta(
+        double confidenceFloorBase, int contradictionCount)
+    {
+        var profile = TestHelpers.LoadProfile();
+        var module  = new PostureModule();
+        var now     = new DateTimeOffset(2026, 6, 15, 12, 0, 0, TimeSpan.Zero);
+        var id      = Guid.NewGuid();
+        var allDims = new[] { Dimension.Operational, Dimension.Experiential, Dimension.Financial, Dimension.Strategic };
+        var scores  = allDims.ToDictionary(
+            d => d,
+            d => new DimensionScore(id, d, 0.75, confidenceFloorBase, []));
+        var idx  = new EntityIndex(id, scores, 0.75, confidenceFloorBase, Band.Healthy, "fp-g-test", 1, now);
+        var meta = FakeMetaCognition.WithContradictions(id.ToString(), contradictionCount);
+        return (module.Assign(idx, null, null, profile, now, meta), idx);
     }
 }

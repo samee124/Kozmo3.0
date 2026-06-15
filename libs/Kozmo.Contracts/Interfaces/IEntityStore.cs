@@ -23,6 +23,12 @@ public interface IEntityStore
     Task AppendSignalAsync(Signal signal, CancellationToken ct = default);
     Task<Signal?> GetSignalAsync(Guid signalId, CancellationToken ct = default);
 
+    // Posture history — read-only; used by trajectory endpoint
+    Task<IReadOnlyList<PostureAssignment>> GetPostureHistoryAsync(Guid entityId, CancellationToken ct = default);
+
+    // Signal history for entity — ordered by received_at; used to correlate index versions
+    Task<IReadOnlyList<Signal>> GetSignalsForEntityAsync(Guid entityId, CancellationToken ct = default);
+
     // Reset — test/demo harness only
     Task ResetAsync(CancellationToken ct = default);
 }

@@ -64,3 +64,22 @@ Read this before proposing structural changes — many "improvements" re-litigat
 **Fix:** Added `MetaCognitionResult? meta = null` as the final optional parameter to `IPostureModule.Assign` and matched the `PostureModule` implementation signature. `PostureModule` ignores `meta` until A2 implements consumption.
 
 **Scope:** Internal to I&I. `IIiFacade` is unchanged (Spine holds the `MetaCognitionResult` internally). All existing callers are positional and unaffected by the `null` default. Fingerprint inputs, golden bands/stances, and Dev B's surface are all unaffected.
+
+---
+
+## A3 erratum — trajectory methods added to IEntityStore and IIiFacade
+
+**What A3 needs:** The `/vendors/{id}/trajectory` endpoint exposes one data point per processed signal (composite score, band, stance, fingerprint). The store already retains all index and posture rows (append-and-supersede), and signals are kept forever — the data existed; only the read path was missing.
+
+**What was added:**
+
+| Layer | Addition |
+|---|---|
+| `IEntityStore` | `GetPostureHistoryAsync(entityId)` — all postures ordered by `assigned_at` |
+| `IEntityStore` | `GetSignalsForEntityAsync(entityId)` — all signals for entity ordered by `received_at` |
+| `IIiFacade` | `TrajectoryPoint` record (Timestamp, SignalId, Composite, Band, Stance, Fingerprint) |
+| `IIiFacade` | `GetTrajectoryAsync(entityId)` — joins index history + posture history; correlates signal by position |
+
+**Signal ↔ index version correlation:** Signals are ingested in received_at order; each produces exactly one index version increment. So `signals[V-1].Id` is the signal that triggered index version V. This position-based join is deterministic given the append-only constraint.
+
+**Scope:** Read-only additions. No existing method signatures changed. No fingerprint inputs added. No stance taxonomy changes. The `IIiFacade` contract change requires joint sign-off — surfaced here as the audit trail.
