@@ -3,6 +3,7 @@ using Ii.Decay;
 using Ii.Index;
 using Ii.Posture;
 using Ii.Rubric;
+using Ii.Spine;
 using Kozmo.Contracts;
 using Kozmo.Contracts.Config;
 using Xunit;
@@ -22,6 +23,7 @@ namespace Ii.Tests;
 /// Class G  ConfidencePenalty     — meta-cognition contradiction penalty (A2)
 /// Class H  CautionsGaps          — cautions / gaps surfaced on PostureAssignment (A2)
 /// Class I  MetaRegressionGolden  — no regression with empty MetaCognitionResult (A2)
+/// Class J  ResetDeterminism      — two full seeds with DemoClock produce identical fingerprints (A3)
 /// </summary>
 public sealed class FullStreamTests
 {
@@ -654,6 +656,52 @@ public sealed class FullStreamTests
         var posture = new PostureModule().Assign(idx, null, null, h.Profile, idx.ComputedAt, meta);
         Assert.Equal(Band.Healthy,   posture.Band);
         Assert.Equal(Stance.Maintain, posture.Stance);
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // CLASS J — ResetDeterminism  (A3 cleanup)
+    // Verifies the API demo path produces byte-identical fingerprints across two
+    // independent seed runs, and that DemoClock.Fixed is actually wired through.
+    // J2 fails immediately if IiFacade falls back to DateTimeOffset.UtcNow.
+    // ═══════════════════════════════════════════════════════════════════════════
+
+    [Fact]
+    [Trait("Class", "J")]
+    public void J1_TwoFullSeeds_WithDemoClock_ProduceIdenticalFingerprints()
+    {
+        var (cw1, cor1, mer1) = SeedAllVendors(DemoClock.Fixed);
+        var (cw2, cor2, mer2) = SeedAllVendors(DemoClock.Fixed);
+
+        Assert.Equal(cw1,  cw2);
+        Assert.Equal(cor1, cor2);
+        Assert.Equal(mer1, mer2);
+    }
+
+    [Fact]
+    [Trait("Class", "J")]
+    public void J2_DemoClock_IsWired_ComputedAt_And_AssignedAt_EqualAsOf()
+    {
+        // Fails immediately if IiFacade reads DateTimeOffset.UtcNow instead of DemoClock.AsOf.
+        using var h = TestHarness.FreshEngineWithSeed(DemoClock.Fixed);
+        h.ReplayAllSignals("cloudwave");
+
+        var idx     = h.GetIndex("cloudwave")!;
+        var posture = h.GetPosture("cloudwave")!;
+
+        Assert.Equal(DemoClock.AsOf, idx.ComputedAt);
+        Assert.Equal(DemoClock.AsOf, posture.AssignedAt);
+    }
+
+    private static (string cw, string cor, string mer) SeedAllVendors(IClock clock)
+    {
+        using var h = TestHarness.FreshEngineWithSeed(clock);
+        h.ReplayAllSignals("cloudwave");
+        h.ReplayAllSignals("corvus");
+        h.ReplayAllSignals("meridian");
+        return (
+            h.GetIndex("cloudwave")!.Fingerprint,
+            h.GetIndex("corvus")!.Fingerprint,
+            h.GetIndex("meridian")!.Fingerprint);
     }
 
     // ── A2 helpers ────────────────────────────────────────────────────────────

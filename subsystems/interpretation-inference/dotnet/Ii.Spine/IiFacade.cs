@@ -19,6 +19,7 @@ public sealed class IiFacade : IIiFacade
     private readonly IEntityStore       _store;
     private readonly SaasProfile        _profile;
     private readonly EntityRegistry     _registry;
+    private readonly IClock             _clock;
 
     public IiFacade(
         IObservationModule observation,
@@ -28,7 +29,8 @@ public sealed class IiFacade : IIiFacade
         IDecayEngine       decay,
         IEntityStore       store,
         SaasProfile        profile,
-        EntityRegistry     registry)
+        EntityRegistry     registry,
+        IClock?            clock = null)
     {
         _observation = observation;
         _rubric      = rubric;
@@ -38,11 +40,12 @@ public sealed class IiFacade : IIiFacade
         _store       = store;
         _profile     = profile;
         _registry    = registry;
+        _clock       = clock ?? new WallClock();
     }
 
     public async Task<Guid> SubmitSignalAsync(Signal signal, CancellationToken ct = default)
     {
-        var now = DateTimeOffset.UtcNow;  // clock read — only here in Spine
+        var now = _clock.UtcNow;  // clock read — only here in Spine
 
         await _store.AppendSignalAsync(signal, ct);
 

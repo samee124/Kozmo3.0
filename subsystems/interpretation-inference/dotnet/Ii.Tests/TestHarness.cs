@@ -56,8 +56,9 @@ internal sealed class TestHarness : IDisposable
     /// <summary>
     /// Creates a fresh in-memory engine with the entity registry pre-loaded.
     /// No signals are submitted — call ReplayAllSignals or Ingest to populate data.
+    /// Pass DemoClock.Fixed to pin ComputedAt/AssignedAt to a canonical timestamp.
     /// </summary>
-    public static TestHarness FreshEngineWithSeed()
+    public static TestHarness FreshEngineWithSeed(IClock? clock = null)
     {
         var profile  = TestHelpers.LoadProfile();
         var store    = new SqliteEntityStore("Data Source=:memory:");
@@ -68,7 +69,7 @@ internal sealed class TestHarness : IDisposable
 
         var facade = new IiFacade(
             new ObservationModule(), new RubricModule(), new IndexModule(),
-            new PostureModule(), new DecayEngine(), store, profile, registry);
+            new PostureModule(), new DecayEngine(), store, profile, registry, clock);
 
         return new TestHarness(facade, store, profile);
     }

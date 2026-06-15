@@ -64,7 +64,7 @@ await SeedIfEmptyAsync(facade, store);
 // GET /vendors — list all three vendors
 app.MapGet("/vendors", async (IIiFacade f, EntityRegistry reg, SaasProfile prof) =>
 {
-    var now     = DateTimeOffset.UtcNow;
+    var now     = DemoClock.AsOf;
     var vendors = new List<VendorSummaryDto>();
     foreach (var id in SeedData.VendorIds)
     {
@@ -86,8 +86,7 @@ app.MapGet("/vendors/{id}", async (string id, IIiFacade f, EntityRegistry reg, S
     var idx  = await f.GetIndexAsync(guid);
     var pos  = await f.GetPostureAsync(guid);
     if (idx is null || pos is null) return Results.NotFound();
-    var now = DateTimeOffset.UtcNow;
-    return Results.Ok(DtoMapper.ToDetail(guid, entity, idx, pos, prof, now));
+    return Results.Ok(DtoMapper.ToDetail(guid, entity, idx, pos, prof, DemoClock.AsOf));
 });
 
 // GET /vendors/{id}/trail — full glass-box reasoning chain
@@ -98,10 +97,9 @@ app.MapGet("/vendors/{id}/trail", async (string id, IIiFacade f, EntityRegistry 
     if (entity is null) return Results.NotFound();
     var trail = await f.GetReasoningTrailAsync(guid);
     if (trail?.Index is null || trail.Posture is null) return Results.NotFound();
-    var now = DateTimeOffset.UtcNow;
     return Results.Ok(DtoMapper.ToTrail(
         trail.Index, trail.Posture, entity,
-        trail.CurrentBeliefs, trail.SourceSignals, prof, now));
+        trail.CurrentBeliefs, trail.SourceSignals, prof, DemoClock.AsOf));
 });
 
 // GET /vendors/{id}/trajectory — ordered history for chart
@@ -139,11 +137,10 @@ app.MapPost("/demo/reset", async (IIiFacade f, EntityRegistry reg, SaasProfile p
     foreach (var sig in SeedData.AllSignals)
         await f.SubmitSignalAsync(sig);
 
-    var now     = DateTimeOffset.UtcNow;
-    var vendors = await CollectVendorSummariesAsync(f, reg, prof, now);
+    var vendors = await CollectVendorSummariesAsync(f, reg, prof, DemoClock.AsOf);
 
     hub.Broadcast(JsonSerializer.Serialize(
-        new { type = "reset-complete", ts = now, data = new { vendors } }, JsonOpts));
+        new { type = "reset-complete", ts = DateTimeOffset.UtcNow, data = new { vendors } }, JsonOpts));
 
     return Results.Ok(new { vendors });
 });
@@ -165,7 +162,6 @@ app.MapPost("/demo/replay", (IIiFacade f, EntityRegistry reg, SaasProfile prof, 
 
             if (idx is not null && posture is not null && entity is not null)
             {
-                var stepNow  = DateTimeOffset.UtcNow;
                 var stepData = new
                 {
                     entityId    = sig.EntityId.ToString(),
@@ -176,16 +172,15 @@ app.MapPost("/demo/replay", (IIiFacade f, EntityRegistry reg, SaasProfile prof, 
                     fingerprint = idx.Fingerprint
                 };
                 hub.Broadcast(JsonSerializer.Serialize(
-                    new { type = "replay-step", ts = stepNow, data = stepData }, JsonOpts));
+                    new { type = "replay-step", ts = DateTimeOffset.UtcNow, data = stepData }, JsonOpts));
             }
 
             await Task.Delay(400); // pacing for live demo
         }
 
-        var completeNow = DateTimeOffset.UtcNow;
-        var vendors     = await CollectVendorSummariesAsync(f, reg, prof, completeNow);
+        var vendors = await CollectVendorSummariesAsync(f, reg, prof, DemoClock.AsOf);
         hub.Broadcast(JsonSerializer.Serialize(
-            new { type = "replay-complete", ts = completeNow, data = new { vendors } }, JsonOpts));
+            new { type = "replay-complete", ts = DateTimeOffset.UtcNow, data = new { vendors } }, JsonOpts));
     });
 
     return Results.Accepted();
@@ -229,7 +224,8 @@ static IiFacade BuildFacade(IEntityStore store, SaasProfile profile, EntityRegis
         new DecayEngine(),
         store,
         profile,
-        registry);
+        registry,
+        DemoClock.Fixed);
 
 static async Task SeedIfEmptyAsync(IIiFacade facade, SqliteEntityStore store)
 {
