@@ -25,22 +25,32 @@ public sealed class PostureModule : IPostureModule
             ? (int)(contractRenewalDate.Value - now).TotalDays
             : (int?)null;
 
-        var stance   = SelectStance(index.Band, pattern, renewalDays, profile);
+        var stance    = SelectStance(index.Band, pattern, renewalDays, profile);
         var rationale = BuildRationale(index, pattern, renewalDays);
         var evidence  = BuildEvidence(index);
 
+        var contradictionCount = meta?.Contradictions.Count ?? 0;
+        var confidence         = Math.Clamp(index.ConfidenceFloor - 0.10 * contradictionCount, 0.0, 0.95);
+
+        IReadOnlyList<string> cautions     = meta?.Contradictions.Select(c => c.Description).ToList() ?? [];
+        IReadOnlyList<string> evidenceGaps = meta?.Gaps.Select(g => g.Description).ToList()           ?? [];
+
         return new PostureAssignment(
-            Id:           Guid.NewGuid(),
-            EntityId:     index.EntityId,
-            Band:         index.Band,
-            Stance:       stance,
-            Rationale:    rationale,
+            Id:            Guid.NewGuid(),
+            EntityId:      index.EntityId,
+            Band:          index.Band,
+            Stance:        stance,
+            Rationale:     rationale,
             EvidenceTrail: evidence,
-            Confidence:   index.ConfidenceFloor,
-            Fingerprint:  index.Fingerprint,
-            IndexVersion: index.Version,
-            AssignedAt:   now,
-            ValidUntil:   null);
+            Confidence:    confidence,
+            Fingerprint:   index.Fingerprint,
+            IndexVersion:  index.Version,
+            AssignedAt:    now,
+            ValidUntil:    null)
+        {
+            Cautions     = cautions,
+            EvidenceGaps = evidenceGaps
+        };
     }
 
     private static TrendPattern DerivePattern(EntityIndex current, EntityIndex? previous)
