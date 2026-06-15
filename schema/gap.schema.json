@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "kozmo.gap.v1",
+  "title": "Gap",
+  "description": "A detected absence of evidence for a dimension. Surfaces in the drill-down as 'evidence gap — verify before acting'.",
+  "type": "object",
+  "required": ["entity_id", "dimension", "description", "detected_by"],
+  "properties": {
+    "entity_id":   { "type": "string" },
+    "dimension":   { "type": "string" },
+    "description": { "type": "string" },
+    "detected_by": { "$ref": "#/$defs/DetectionSource" }
+  },
+  "$defs": {
+    "DetectionSource": { "enum": ["Deterministic", "Llm"] }
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "config_type": "dimensions",
+  "profile": "saas",
+  "version": "v1",
+  "dimensions": {
+    "Operational": {
+      "description": "System reliability, uptime, incident handling, support quality",
+      "criteria": ["uptime_sla", "incident_volume", "mttr", "support_response_time"]
+    },
+    "Experiential": {
+      "description": "User satisfaction, adoption depth, engagement and churn signals",
+      "criteria": ["csat_score", "adoption_rate", "active_user_trend", "escalation_count"]
+    },
+    "Financial": {
+      "description": "Invoice accuracy, payment timeliness, overdue balance, contract adherence",
+      "criteria": ["invoice_accuracy", "payment_timeliness", "overdue_balance", "dispute_rate"]
+    },
+    "Strategic": {
+      "description": "Roadmap alignment, executive engagement, renewal likelihood, competitive risk",
+      "criteria": ["roadmap_alignment", "exec_engagement", "renewal_intent", "competitive_risk"]
+    }
+  }
+}

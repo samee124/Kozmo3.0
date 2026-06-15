@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "kozmo.dimension_score.v1",
+  "title": "DimensionScore",
+  "description": "Aggregated 0–1 score and confidence for one dimension of one entity.",
+  "type": "object",
+  "required": ["entity_id", "dimension", "score", "confidence", "contributing_belief_ids"],
+  "properties": {
+    "entity_id":               { "type": "string", "format": "uuid" },
+    "dimension":               { "$ref": "#/$defs/Dimension" },
+    "score":                   { "type": "number", "minimum": 0, "maximum": 1 },
+    "confidence":              { "type": "number", "minimum": 0, "maximum": 1 },
+    "contributing_belief_ids": { "type": "array", "items": { "type": "string", "format": "uuid" } }
+  },
+  "$defs": {
+    "Dimension": { "enum": ["Operational", "Experiential", "Financial", "Strategic"] }
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "config_type": "source_tiers",
+  "profile": "saas",
+  "version": "v1",
+  "tiers": {
+    "Verified": {
+      "weight": 0.95,
+      "description": "Direct integration — CRM, billing system, monitoring platform"
+    },
+    "Inferred": {
+      "weight": 0.70,
+      "description": "Derived from usage patterns or correlated signals"
+    },
+    "Reported": {
+      "weight": 0.50,
+      "description": "Human-submitted: email, call notes, support tickets"
+    },
+    "Unverified": {
+      "weight": 0.30,
+      "description": "Social, unvalidated external sources"
+    }
+  }
+}

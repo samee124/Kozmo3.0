@@ -1,0 +1,171 @@
+{
+  "config_type": "scoring_rubric",
+  "profile": "saas",
+  "version": "v1",
+  "criteria": {
+    "uptime_sla": {
+      "type": "numeric",
+      "thresholds": [
+        { "min": 99.5, "max": 100.0, "score": 1.00 },
+        { "min": 99.0, "max": 99.5,  "score": 0.80 },
+        { "min": 98.0, "max": 99.0,  "score": 0.45 },
+        { "min": 95.0, "max": 98.0,  "score": 0.25 },
+        { "min": 0.0,  "max": 95.0,  "score": 0.10 }
+      ]
+    },
+    "incident_volume": {
+      "type": "numeric",
+      "thresholds": [
+        { "min": 0,   "max": 1,    "score": 1.00 },
+        { "min": 1,   "max": 3,    "score": 0.75 },
+        { "min": 3,   "max": 6,    "score": 0.50 },
+        { "min": 6,   "max": 10,   "score": 0.30 },
+        { "min": 10,  "max": 9999, "score": 0.10 }
+      ]
+    },
+    "mttr": {
+      "type": "numeric",
+      "thresholds": [
+        { "min": 0,   "max": 1,    "score": 1.00 },
+        { "min": 1,   "max": 4,    "score": 0.80 },
+        { "min": 4,   "max": 8,    "score": 0.55 },
+        { "min": 8,   "max": 24,   "score": 0.30 },
+        { "min": 24,  "max": 9999, "score": 0.10 }
+      ]
+    },
+    "support_response_time": {
+      "type": "numeric",
+      "thresholds": [
+        { "min": 0,   "max": 4,    "score": 1.00 },
+        { "min": 4,   "max": 8,    "score": 0.80 },
+        { "min": 8,   "max": 24,   "score": 0.55 },
+        { "min": 24,  "max": 48,   "score": 0.30 },
+        { "min": 48,  "max": 9999, "score": 0.10 }
+      ]
+    },
+    "csat_score": {
+      "type": "numeric",
+      "thresholds": [
+        { "min": 4.5, "max": 5.0, "score": 1.00 },
+        { "min": 4.0, "max": 4.5, "score": 0.80 },
+        { "min": 3.5, "max": 4.0, "score": 0.65 },
+        { "min": 3.0, "max": 3.5, "score": 0.50 },
+        { "min": 2.5, "max": 3.0, "score": 0.40 },
+        { "min": 2.0, "max": 2.5, "score": 0.30 },
+        { "min": 1.0, "max": 2.0, "score": 0.15 }
+      ]
+    },
+    "adoption_rate": {
+      "type": "numeric",
+      "thresholds": [
+        { "min": 80,  "max": 100, "score": 1.00 },
+        { "min": 60,  "max": 80,  "score": 0.80 },
+        { "min": 40,  "max": 60,  "score": 0.60 },
+        { "min": 30,  "max": 40,  "score": 0.40 },
+        { "min": 20,  "max": 30,  "score": 0.25 },
+        { "min": 0,   "max": 20,  "score": 0.10 }
+      ]
+    },
+    "active_user_trend": {
+      "type": "numeric",
+      "thresholds": [
+        { "min": 5,    "max": 9999, "score": 1.00 },
+        { "min": 0,    "max": 5,    "score": 0.75 },
+        { "min": -5,   "max": 0,    "score": 0.50 },
+        { "min": -15,  "max": -5,   "score": 0.30 },
+        { "min": -9999,"max": -15,  "score": 0.10 }
+      ]
+    },
+    "escalation_count": {
+      "type": "numeric",
+      "thresholds": [
+        { "min": 0,  "max": 1,   "score": 1.00 },
+        { "min": 1,  "max": 2,   "score": 0.70 },
+        { "min": 2,  "max": 4,   "score": 0.45 },
+        { "min": 4,  "max": 9999,"score": 0.20 }
+      ]
+    },
+    "invoice_accuracy": {
+      "type": "numeric",
+      "thresholds": [
+        { "min": 99.0,  "max": 100.0, "score": 1.00 },
+        { "min": 97.0,  "max": 99.0,  "score": 0.80 },
+        { "min": 95.0,  "max": 97.0,  "score": 0.60 },
+        { "min": 90.0,  "max": 95.0,  "score": 0.35 },
+        { "min": 0.0,   "max": 90.0,  "score": 0.15 }
+      ]
+    },
+    "payment_timeliness": {
+      "type": "numeric",
+      "thresholds": [
+        { "min": 0,  "max": 1,   "score": 1.00 },
+        { "min": 1,  "max": 7,   "score": 0.80 },
+        { "min": 7,  "max": 14,  "score": 0.55 },
+        { "min": 14, "max": 30,  "score": 0.30 },
+        { "min": 30, "max": 9999,"score": 0.10 }
+      ]
+    },
+    "overdue_balance": {
+      "type": "numeric",
+      "thresholds": [
+        { "min": 0,     "max": 1000,   "score": 1.00 },
+        { "min": 1000,  "max": 5000,   "score": 0.75 },
+        { "min": 5000,  "max": 15000,  "score": 0.60 },
+        { "min": 15000, "max": 30000,  "score": 0.40 },
+        { "min": 30000, "max": 50000,  "score": 0.30 },
+        { "min": 50000, "max": 9999999,"score": 0.20 }
+      ]
+    },
+    "dispute_rate": {
+      "type": "numeric",
+      "thresholds": [
+        { "min": 0,   "max": 1,   "score": 1.00 },
+        { "min": 1,   "max": 3,   "score": 0.75 },
+        { "min": 3,   "max": 7,   "score": 0.45 },
+        { "min": 7,   "max": 100, "score": 0.20 }
+      ]
+    },
+    "roadmap_alignment": {
+      "type": "numeric",
+      "thresholds": [
+        { "min": 0.75, "max": 1.01, "score": 1.00 },
+        { "min": 0.60, "max": 0.75, "score": 0.80 },
+        { "min": 0.45, "max": 0.60, "score": 0.60 },
+        { "min": 0.30, "max": 0.45, "score": 0.35 },
+        { "min": 0.15, "max": 0.30, "score": 0.20 },
+        { "min": 0.00, "max": 0.15, "score": 0.10 }
+      ]
+    },
+    "exec_engagement": {
+      "type": "enum",
+      "scores": {
+        "strong":    1.00,
+        "engaged":   0.80,
+        "neutral":   0.55,
+        "distant":   0.30,
+        "concerned": 0.40,
+        "negative":  0.20
+      }
+    },
+    "renewal_intent": {
+      "type": "enum",
+      "scores": {
+        "positive":  1.00,
+        "cautious":  0.75,
+        "neutral":   0.50,
+        "negative":  0.25,
+        "critical":  0.10
+      }
+    },
+    "competitive_risk": {
+      "type": "enum",
+      "scores": {
+        "none":     1.00,
+        "low":      0.80,
+        "medium":   0.55,
+        "high":     0.30,
+        "critical": 0.10
+      }
+    }
+  }
+}

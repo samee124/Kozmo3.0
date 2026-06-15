@@ -1,0 +1,2 @@
+T:System.Net.Http.HttpClient;No outbound HTTP in the demo runtime (Invariant #5: no-live-dependency).
+N:Anthropic;Real model client lives in Kozmo.Llm.Anthropic — reachable from seed-prep/smoke only (Invariant #5).

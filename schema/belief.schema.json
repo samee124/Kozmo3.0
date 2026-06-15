@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "kozmo.belief.v1",
+  "title": "Belief",
+  "description": "KnowledgeTuple — a versioned, immutable unit of structured knowledge about an entity. Append-and-supersede only; never edited in place.",
+  "type": "object",
+  "required": ["id", "entity_id", "dimension", "criterion", "value", "source_tier", "confidence", "freshness", "derivation", "source_signals", "version", "created_at", "trace_id"],
+  "properties": {
+    "id":             { "type": "string", "format": "uuid" },
+    "entity_id":      { "type": "string", "format": "uuid" },
+    "dimension":      { "$ref": "#/$defs/Dimension" },
+    "criterion":      { "type": "string" },
+    "value":          { "type": "number", "minimum": 0, "maximum": 1 },
+    "source_tier":    { "$ref": "#/$defs/SourceTier" },
+    "confidence":     { "type": "number", "minimum": 0, "maximum": 1 },
+    "freshness":      { "type": "number", "minimum": 0, "maximum": 1 },
+    "derivation":     { "type": "string" },
+    "source_signals": { "type": "array", "items": { "type": "string", "format": "uuid" } },
+    "version":        { "type": "integer", "minimum": 1 },
+    "superseded_by":  { "type": "string", "format": "uuid", "nullable": true },
+    "created_at":     { "type": "string", "format": "date-time" },
+    "trace_id":       { "type": "string", "format": "uuid" }
+  },
+  "$defs": {
+    "Dimension": { "enum": ["Operational", "Experiential", "Financial", "Strategic"] },
+    "SourceTier": { "enum": ["Verified", "Inferred", "Reported", "Unverified"] }
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "config_type": "postures",
+  "profile": "saas",
+  "version": "v1",
+  "rules": [
+    { "band": "Healthy",  "pattern": "any",       "renewal_within_days": null, "stance": "Maintain" },
+    { "band": "AtRisk",   "pattern": "Improving",  "renewal_within_days": null, "stance": "Monitor" },
+    { "band": "AtRisk",   "pattern": "Stable",     "renewal_within_days": null, "stance": "Renegotiate" },
+    { "band": "AtRisk",   "pattern": "Declining",  "renewal_within_days": null, "stance": "Renegotiate" },
+    { "band": "AtRisk",   "pattern": "any",        "renewal_within_days": 90,   "stance": "Renegotiate" },
+    { "band": "Critical", "pattern": "Improving",  "renewal_within_days": null, "stance": "Renegotiate" },
+    { "band": "Critical", "pattern": "Stable",     "renewal_within_days": 30,   "stance": "Remediate" },
+    { "band": "Critical", "pattern": "Declining",  "renewal_within_days": 30,   "stance": "Remediate" },
+    { "band": "Critical", "pattern": "Stable",     "renewal_within_days": null, "stance": "Escalate" },
+    { "band": "Critical", "pattern": "Declining",  "renewal_within_days": null, "stance": "Escalate" }
+  ]
+}

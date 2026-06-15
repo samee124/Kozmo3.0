@@ -1,0 +1,14 @@
+{
+  "config_type": "bands",
+  "profile": "saas",
+  "version": "v1",
+  "bands": {
+    "Healthy": { "min_composite": 0.65, "max_composite": 1.0 },
+    "AtRisk":  { "min_composite": 0.40, "max_composite": 0.65 },
+    "Critical":{ "min_composite": 0.00, "max_composite": 0.40 }
+  },
+  "confidence_floor": {
+    "critical_min_confidence": 0.60,
+    "note": "Composite < AtRiskMin is only banded Critical when confidence_floor >= 0.60. Reported tier weight (0.50) is structurally below this gate."
+  }
+}

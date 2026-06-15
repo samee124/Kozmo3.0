@@ -1,0 +1,32 @@
+# Secrets
+.env
+*.env
+**/appsettings.*.local.json
+
+# .NET build output
+bin/
+obj/
+
+# Node
+node_modules/
+
+# Databases / SQLite (demo runtime artifacts)
+*.db
+*.sqlite
+*.sqlite3
+
+# Slide assets / docs (large binaries, not source)
+slide-*.jpg
+*.pdf
+
+# IDE
+.vs/
+.idea/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# OS
+.DS_Store
+Thumbs.db

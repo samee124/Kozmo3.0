@@ -1,0 +1,54 @@
+# DECISIONS.md — Durable Architectural Choices
+
+These decisions were made in prior design sessions and are not visible in the code itself.
+Read this before proposing structural changes — many "improvements" re-litigate a settled choice.
+
+---
+
+## 1. Plan A: deterministic 4-dimension scoring, not an LLM Q&A graph
+
+**Decision:** The cognition engine is a deterministic, rule-based pipeline — signal → belief → weighted dimension score → confidence-gated band → posture rule → stance. It is not an LLM that answers free-text questions about vendor health.
+
+**Why:** The townhall demo requires a *glass box*. Buyers and finance need to see the exact evidence and arithmetic that produced a stance, not a model's paraphrase. A reproducible fingerprint is the load-bearing proof: same evidence in → identical posture out, every run. An LLM Q&A graph cannot provide this guarantee without additional determinism infrastructure that would take longer to build and harder to audit.
+
+**What this means in practice:** The five modules (Observation, Rubric, Index, Posture, Decay) are pure functions over typed inputs. No model client, no prompt, no sampling. If a task seems to require an LLM in the core scoring path, the spec has been misread — stop and ask.
+
+---
+
+## 2. LLM at the edge only, cached / record-replay in demo
+
+**Decision:** The LLM assists with *reading* (classifying free-text signals, detecting contradictions) not with *deciding* (scoring, banding, stance). Its output is frozen into a typed belief the moment it runs; the deterministic spine downstream never calls it again. In the demo runtime path, LLM outputs are served from a frozen cache — `CachingLlmClient` throws on a cache miss rather than making a network call.
+
+**Why:** Keeps the core deterministic (fingerprint holds) and the demo reliable (no live API dependency, no rate-limit surprises on stage). The LLM runs once during seed-prep; the demo replays from that frozen state.
+
+**Structural consequence:** The real `LlmClient` (Anthropic SDK) must live in its own assembly — `Kozmo.Llm.Anthropic` — reachable *only* from seed-prep and smoke entrypoints. It is never imported by the demo runtime. CI Lane 5 enforces this at build time.
+
+---
+
+## 3. Soft edge, hard core
+
+**Decision:** Classification (the *reading* step) may be probabilistic — rules first, LLM-assisted for free-text. Everything that *decides* — Rubric, Index, fingerprint, Posture — is deterministic and reproducible. The fingerprint is a hash over the *decision* (typed belief values, scores, weights, config version), not over the reading.
+
+**Why:** This is the precise boundary between "glass box" and "black box." The LLM's uncertainty is captured in the `ClassificationConfidence` annotation field and surfaced in the drill-down; it does not leak into the stance arithmetic. Annotation fields (`ClassificationMethod`, `ClassificationConfidence`, `ReasoningSummary`, `Cautions`, `EvidenceGaps`) are explicitly excluded from the fingerprint input.
+
+---
+
+## 4. Split at contracts, not services — and periphery-first if splitting later
+
+**Decision:** Subsystems are independently-owned modules behind frozen contracts, running in-process. No microservices, no message-bus topologies, no distributed coordination in Phase 0 or Phase 1.
+
+**Why:** The bottleneck for the demo is correctness and explainability, not throughput or scale. In-process calls are synchronous, debuggable, and have no distributed-consistency surface. The seams (`IKozmoBus`, `IEntityStore`, `IKozmoLlm`) are designed as interfaces so each can be promoted to a remote call later without touching callers.
+
+**If scale forces a split:** promote periphery first (intake, UI, reporting); keep the I&I ↔ K&M core in-process until last. Only split after a single-writer / versioned-belief spike proves distributed determinism holds (the fingerprint must still be reproducible across nodes).
+
+---
+
+## 5. Confidence discipline — the gate arithmetic is structural, not configurable
+
+**Decision:** `confidence = tier_weight × freshness`, capped at `tier_weight`. The CRITICAL band requires `confidence_floor ≥ 0.60`. `REPORTED` tier weight is 0.50 — structurally below the gate. This means a single human-reported signal can *never* force CRITICAL, regardless of freshness.
+
+**Why:** Prevents a single junior employee's informal report from triggering an escalation to a VP. The gate is structural (baked into the catalogue validator and the invariant test suite) so it cannot be accidentally bypassed by a config change without failing CI.
+
+**Additional caps:** posture confidence is clamped at 0.95. When meta-cognition detects active contradictions, posture confidence is reduced: `Clamp(index.Confidence - 0.1 × contradictionCount, 0.0, 0.95)`. This lower-confidence caution surfaces in the drill-down without changing the stance taxonomy.
+
+**Anti-proliferation:** meta-cognition contradictions and gaps do *not* mint new stances (`Reconfirm`, `Investigate`, etc.). They attach as `Cautions` and `EvidenceGaps` on the `PostureAssignment`. The stance answers *what to do*; the cautions answer *how sure / what to check first*. Proliferating the taxonomy would duplicate what confidence + cautions already express.

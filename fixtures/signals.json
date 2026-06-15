@@ -1,0 +1,135 @@
+[
+  {
+    "_comment": "Signal 1 — Cloudwave: uptime 98.5% → Operational score 0.45",
+    "id": "11111111-0000-0000-0000-000000000001",
+    "entity_id": "eeeeeeee-0001-0000-0000-000000000001",
+    "customer_id": "cccccccc-0000-0000-0000-000000000001",
+    "source_system": "MonitoringPlatform",
+    "external_id": "mon-cw-2026-0514-001",
+    "payload": { "uptime_pct": 98.5 },
+    "observed_at": "2026-05-14T08:00:00Z",
+    "received_at": "2026-05-14T08:05:00Z",
+    "trace_id": "a1a1a1a1-0000-0000-0000-000000000001"
+  },
+  {
+    "_comment": "Signal 2 — Meridian: uptime 99.2% → Operational score 0.80",
+    "id": "11111111-0000-0000-0000-000000000002",
+    "entity_id": "eeeeeeee-0003-0000-0000-000000000001",
+    "customer_id": "cccccccc-0000-0000-0000-000000000001",
+    "source_system": "MonitoringPlatform",
+    "external_id": "mon-mer-2026-0516-001",
+    "payload": { "uptime_pct": 99.2 },
+    "observed_at": "2026-05-16T08:00:00Z",
+    "received_at": "2026-05-16T08:05:00Z",
+    "trace_id": "a2a2a2a2-0000-0000-0000-000000000001"
+  },
+  {
+    "_comment": "Signal 3 — Cloudwave: adoption 35% → Experiential score 0.40",
+    "id": "11111111-0000-0000-0000-000000000003",
+    "entity_id": "eeeeeeee-0001-0000-0000-000000000001",
+    "customer_id": "cccccccc-0000-0000-0000-000000000001",
+    "source_system": "UsageAnalytics",
+    "external_id": "ua-cw-2026-0518-001",
+    "payload": { "adoption_pct": 35 },
+    "observed_at": "2026-05-18T10:00:00Z",
+    "received_at": "2026-05-18T10:15:00Z",
+    "trace_id": "a3a3a3a3-0000-0000-0000-000000000001"
+  },
+  {
+    "_comment": "Signal 4 — Meridian: 0 days overdue → Financial score 1.00",
+    "id": "11111111-0000-0000-0000-000000000004",
+    "entity_id": "eeeeeeee-0003-0000-0000-000000000001",
+    "customer_id": "cccccccc-0000-0000-0000-000000000001",
+    "source_system": "BillingSystem",
+    "external_id": "bill-mer-2026-0520-001",
+    "payload": { "days_overdue": 0 },
+    "observed_at": "2026-05-20T09:00:00Z",
+    "received_at": "2026-05-20T09:02:00Z",
+    "trace_id": "a4a4a4a4-0000-0000-0000-000000000001"
+  },
+  {
+    "_comment": "Signal 5 — Corvus: uptime 96.5% → Operational score 0.25",
+    "id": "11111111-0000-0000-0000-000000000005",
+    "entity_id": "eeeeeeee-0002-0000-0000-000000000001",
+    "customer_id": "cccccccc-0000-0000-0000-000000000001",
+    "source_system": "MonitoringPlatform",
+    "external_id": "mon-cor-2026-0522-001",
+    "payload": { "uptime_pct": 96.5 },
+    "observed_at": "2026-05-22T08:00:00Z",
+    "received_at": "2026-05-22T08:05:00Z",
+    "trace_id": "a5a5a5a5-0000-0000-0000-000000000001"
+  },
+  {
+    "_comment": "Signal 6 — Email mentioning 'Cloudwave' (ALIAS — canonical: 'Cloudwave Systems Inc.'): renewal_intent neutral → Strategic score 0.50 (Reported tier 0.50)",
+    "id": "11111111-0000-0000-0000-000000000006",
+    "entity_id": "eeeeeeee-0001-0000-0000-000000000001",
+    "customer_id": "cccccccc-0000-0000-0000-000000000001",
+    "source_system": "Email",
+    "external_id": "email-2026-0524-cw-renewal",
+    "payload": {
+      "renewal_intent": "neutral",
+      "exec_sentiment": "concerned",
+      "entity_name": "Cloudwave",
+      "subject": "RE: upcoming contract renewal discussion",
+      "body_excerpt": "We've been reviewing our vendor portfolio. Cloudwave has had some operational issues this quarter that we need to discuss before committing to renewal."
+    },
+    "observed_at": "2026-05-24T14:30:00Z",
+    "received_at": "2026-05-24T14:35:00Z",
+    "trace_id": "a6a6a6a6-0000-0000-0000-000000000001"
+  },
+  {
+    "_comment": "Signal 7 — Corvus: CSAT 2.3/5 → Experiential score 0.30",
+    "id": "11111111-0000-0000-0000-000000000007",
+    "entity_id": "eeeeeeee-0002-0000-0000-000000000001",
+    "customer_id": "cccccccc-0000-0000-0000-000000000001",
+    "source_system": "CRM",
+    "external_id": "crm-cor-2026-0526-csat",
+    "payload": { "csat_score": 2.3 },
+    "observed_at": "2026-05-26T11:00:00Z",
+    "received_at": "2026-05-26T11:10:00Z",
+    "trace_id": "a7a7a7a7-0000-0000-0000-000000000001"
+  },
+  {
+    "_comment": "Signal 8 — Cloudwave: 10 days overdue → Financial score 0.55",
+    "id": "11111111-0000-0000-0000-000000000008",
+    "entity_id": "eeeeeeee-0001-0000-0000-000000000001",
+    "customer_id": "cccccccc-0000-0000-0000-000000000001",
+    "source_system": "BillingSystem",
+    "external_id": "bill-cw-2026-0528-overdue",
+    "payload": { "days_overdue": 10 },
+    "observed_at": "2026-05-28T09:00:00Z",
+    "received_at": "2026-05-28T09:02:00Z",
+    "trace_id": "a8a8a8a8-0000-0000-0000-000000000001"
+  },
+  {
+    "_comment": "Signal 9 — Corvus: invoice overdue $52,000 → Financial score 0.20 (CRITICAL indicator)",
+    "id": "11111111-0000-0000-0000-000000000009",
+    "entity_id": "eeeeeeee-0002-0000-0000-000000000001",
+    "customer_id": "cccccccc-0000-0000-0000-000000000001",
+    "source_system": "BillingSystem",
+    "external_id": "bill-cor-2026-0530-invoice-047",
+    "payload": {
+      "overdue_amount_usd": 52000,
+      "invoice_number": "INV-CORVUS-2026-047",
+      "invoice_date": "2026-04-30",
+      "due_date": "2026-05-15",
+      "contract_value_monthly_usd": 70000,
+      "outstanding_invoices": 1
+    },
+    "observed_at": "2026-05-30T10:00:00Z",
+    "received_at": "2026-05-30T10:05:00Z",
+    "trace_id": "a9a9a9a9-0000-0000-0000-000000000001"
+  },
+  {
+    "_comment": "Signal 10 — Corvus: roadmap fit 0.30 → Strategic score 0.35",
+    "id": "11111111-0000-0000-0000-000000000010",
+    "entity_id": "eeeeeeee-0002-0000-0000-000000000001",
+    "customer_id": "cccccccc-0000-0000-0000-000000000001",
+    "source_system": "CRM",
+    "external_id": "crm-cor-2026-0601-roadmap",
+    "payload": { "roadmap_fit_score": 0.30 },
+    "observed_at": "2026-06-01T09:00:00Z",
+    "received_at": "2026-06-01T09:15:00Z",
+    "trace_id": "b0b0b0b0-0000-0000-0000-000000000001"
+  }
+]

@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "kozmo.contradiction.v1",
+  "title": "Contradiction",
+  "description": "A detected conflict between two or more beliefs about the same entity dimension. Lowers confidence; does not change stance.",
+  "type": "object",
+  "required": ["entity_id", "dimension", "description", "severity", "conflicting_belief_ids", "detected_by"],
+  "properties": {
+    "entity_id":              { "type": "string" },
+    "dimension":              { "type": "string" },
+    "description":            { "type": "string" },
+    "severity":               { "$ref": "#/$defs/ContradictionSeverity" },
+    "conflicting_belief_ids": { "type": "array", "items": { "type": "string", "format": "uuid" } },
+    "detected_by":            { "$ref": "#/$defs/DetectionSource" }
+  },
+  "$defs": {
+    "ContradictionSeverity": { "enum": ["Low", "Medium", "High"] },
+    "DetectionSource":       { "enum": ["Deterministic", "Llm"] }
+  }
+}

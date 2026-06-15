@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>Ii.Spine</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Ii.Contracts\Ii.Contracts.csproj" />
+    <ProjectReference Include="..\Ii.Observation\Ii.Observation.csproj" />
+    <ProjectReference Include="..\Ii.Rubric\Ii.Rubric.csproj" />
+    <ProjectReference Include="..\Ii.Index\Ii.Index.csproj" />
+    <ProjectReference Include="..\Ii.Posture\Ii.Posture.csproj" />
+    <ProjectReference Include="..\Ii.Decay\Ii.Decay.csproj" />
+    <ProjectReference Include="..\Ii.Fakes\Ii.Fakes.csproj" />
+    <ProjectReference Include="..\..\..\..\subsystems\knowledge-memory\dotnet\Km.Store\Km.Store.csproj" />
+    <ProjectReference Include="..\..\..\..\libs\Kozmo.Platform\Kozmo.Platform.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.BannedApiAnalyzers" Version="3.3.4" PrivateAssets="all" />
+    <AdditionalFiles Include="BannedSymbols.txt" />
+  </ItemGroup>
+  <PropertyGroup>
+    <WarningsAsErrors>RS0030</WarningsAsErrors>
+  </PropertyGroup>
+</Project>

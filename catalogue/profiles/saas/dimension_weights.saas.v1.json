@@ -1,0 +1,11 @@
+{
+  "config_type": "dimension_weights",
+  "profile": "saas",
+  "version": "v1",
+  "weights": {
+    "Operational":  0.25,
+    "Experiential": 0.25,
+    "Financial":    0.25,
+    "Strategic":    0.25
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "config_type": "decay",
+  "profile": "saas",
+  "version": "v1",
+  "unit": "days",
+  "half_life_by_tier": {
+    "Verified":   90,
+    "Inferred":   60,
+    "Reported":   30,
+    "Unverified": 14
+  }
+}

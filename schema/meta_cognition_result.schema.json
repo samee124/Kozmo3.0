@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "kozmo.meta_cognition_result.v1",
+  "title": "MetaCognitionResult",
+  "description": "Output of the meta-cognition pass: contradictions, evidence gaps, and an epistemic summary. Annotation only — not an input to stance or fingerprint.",
+  "type": "object",
+  "required": ["entity_id", "contradictions", "gaps", "epistemic_summary"],
+  "properties": {
+    "entity_id":         { "type": "string" },
+    "contradictions":    { "type": "array", "items": { "$ref": "kozmo.contradiction.v1" } },
+    "gaps":              { "type": "array", "items": { "$ref": "kozmo.gap.v1" } },
+    "epistemic_summary": { "type": "string" }
+  }
+}

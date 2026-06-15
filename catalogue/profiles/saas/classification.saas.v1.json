@@ -1,0 +1,21 @@
+{
+  "config_type": "classification",
+  "profile": "saas",
+  "version": "v1",
+  "rules": [
+    { "source_system": "MonitoringPlatform", "payload_key": "uptime_pct",            "dimension": "Operational",  "criterion": "uptime_sla",           "tier": "Verified" },
+    { "source_system": "MonitoringPlatform", "payload_key": "incident_count",         "dimension": "Operational",  "criterion": "incident_volume",       "tier": "Verified" },
+    { "source_system": "MonitoringPlatform", "payload_key": "mttr_hours",             "dimension": "Operational",  "criterion": "mttr",                  "tier": "Verified" },
+    { "source_system": "SupportSystem",      "payload_key": "response_hours",         "dimension": "Operational",  "criterion": "support_response_time", "tier": "Verified" },
+    { "source_system": "CRM",                "payload_key": "csat_score",             "dimension": "Experiential", "criterion": "csat_score",            "tier": "Verified" },
+    { "source_system": "UsageAnalytics",     "payload_key": "adoption_pct",           "dimension": "Experiential", "criterion": "adoption_rate",         "tier": "Inferred" },
+    { "source_system": "UsageAnalytics",     "payload_key": "active_user_trend",      "dimension": "Experiential", "criterion": "active_user_trend",     "tier": "Inferred" },
+    { "source_system": "BillingSystem",      "payload_key": "invoice_accuracy_pct",   "dimension": "Financial",    "criterion": "invoice_accuracy",      "tier": "Verified" },
+    { "source_system": "BillingSystem",      "payload_key": "days_overdue",           "dimension": "Financial",    "criterion": "payment_timeliness",    "tier": "Verified" },
+    { "source_system": "BillingSystem",      "payload_key": "overdue_amount_usd",     "dimension": "Financial",    "criterion": "overdue_balance",       "tier": "Verified" },
+    { "source_system": "CRM",                "payload_key": "roadmap_fit_score",      "dimension": "Strategic",    "criterion": "roadmap_alignment",     "tier": "Verified" },
+    { "source_system": "CRM",                "payload_key": "competitive_risk",       "dimension": "Strategic",    "criterion": "competitive_risk",      "tier": "Inferred" },
+    { "source_system": "Email",              "payload_key": "renewal_intent",         "dimension": "Strategic",    "criterion": "renewal_intent",        "tier": "Reported" },
+    { "source_system": "Email",              "payload_key": "exec_sentiment",         "dimension": "Strategic",    "criterion": "exec_engagement",       "tier": "Reported" }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "config_type": "entity_resolution",
+  "profile": "saas",
+  "version": "v1",
+  "strategy": "fuzzy_canonical",
+  "fuzzy_threshold": 0.80,
+  "alias_map": {
+    "Cloudwave": "Cloudwave Systems Inc."
+  },
+  "note": "alias_map maps raw mention strings to canonical entity names. Fuzzy matching is Phase 1."
+}

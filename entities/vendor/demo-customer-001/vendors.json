@@ -1,0 +1,47 @@
+[
+  {
+    "id": "eeeeeeee-0001-0000-0000-000000000001",
+    "canonical_name": "Cloudwave Systems Inc.",
+    "contract_value_monthly_usd": 54000,
+    "renewal_date": "2026-09-01",
+    "expected_band": "AtRisk",
+    "expected_stance": "Renegotiate",
+    "expected_dimension_scores": {
+      "Operational":  0.45,
+      "Experiential": 0.40,
+      "Financial":    0.55,
+      "Strategic":    0.50
+    },
+    "_note": "AT_RISK / RENEGOTIATE. Alias 'Cloudwave' in signal #6 resolves to this canonical name."
+  },
+  {
+    "id": "eeeeeeee-0002-0000-0000-000000000001",
+    "canonical_name": "Corvus Infrastructure Ltd.",
+    "contract_value_monthly_usd": 70000,
+    "renewal_date": "2026-08-15",
+    "expected_band": "Critical",
+    "expected_stance": "Escalate",
+    "expected_dimension_scores": {
+      "Operational":  0.25,
+      "Experiential": 0.30,
+      "Financial":    0.20,
+      "Strategic":    0.35
+    },
+    "_note": "CRITICAL / ESCALATE. Invoice #9 shows $52k overdue."
+  },
+  {
+    "id": "eeeeeeee-0003-0000-0000-000000000001",
+    "canonical_name": "Meridian IT Services Ltd.",
+    "contract_value_monthly_usd": 48500,
+    "renewal_date": "2027-01-15",
+    "expected_band": "Healthy",
+    "expected_stance": "Maintain",
+    "expected_dimension_scores": {
+      "Operational":  0.80,
+      "Experiential": 0.50,
+      "Financial":    1.00,
+      "Strategic":    0.50
+    },
+    "_note": "HEALTHY / MAINTAIN. Control vendor. Experiential/Strategic at neutral 0.50 (no signal seeded)."
+  }
+]
