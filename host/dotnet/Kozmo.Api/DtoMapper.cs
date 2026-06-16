@@ -57,7 +57,7 @@ internal static class DtoMapper
             Band:            idx.Band.ToString(),
             Fingerprint:     idx.Fingerprint,
             ConfigVersion:   profile.ConfigVersion,
-            BandDrivenBy:    "composite",
+            BandDrivenBy:    idx.BandDrivenBy,
             WorstDimension:  worst is null ? null : new DimensionMinDto(worst.Dimension, worst.Score),
             Dimensions:      dimViews);
     }
@@ -98,7 +98,7 @@ internal static class DtoMapper
                 Critical: 0.0,
                 AtRisk:   profile.Bands.AtRiskMin,
                 Healthy:  profile.Bands.HealthyMin),
-            DrivenBy: "composite");
+            DrivenBy: idx.BandDrivenBy);
 
         var dimViews = idx.DimensionScores
             .OrderBy(kv => kv.Key.ToString(), StringComparer.Ordinal)

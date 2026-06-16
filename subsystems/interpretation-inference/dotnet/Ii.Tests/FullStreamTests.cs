@@ -704,6 +704,65 @@ public sealed class FullStreamTests
             h.GetIndex("meridian")!.Fingerprint);
     }
 
+    // ═══════════════════════════════════════════════════════════════════════════
+    // CLASS K — BandDrivenBy correctness
+    // Both tests fail the old `band == Band.Critical ? "worst-dimension-floor" : "composite"` shortcut.
+    // K1: Critical band, composite drove it → "composite"  (old returns "worst-dimension-floor").
+    // K2: AtRisk band, floor raised it from Healthy → "worst-dimension-floor"  (old returns "composite").
+    // ═══════════════════════════════════════════════════════════════════════════
+
+    [Fact]
+    [Trait("Class", "K")]
+    public void K1_UniformlyCritical_BandDrivenBy_IsComposite()
+    {
+        // All 4 dims score 0.26 (Critical range) with Verified confidence (0.95 > gate 0.60).
+        // compositeBand = Critical; worstBand = Critical. Neither elevates the other.
+        // → BandDrivenBy = "composite"; the composite alone landed in Critical.
+        var profile  = TestHelpers.LoadProfile();
+        var index    = new IndexModule();
+        var now      = new DateTimeOffset(2026, 6, 15, 10, 0, 0, TimeSpan.Zero);
+        var entityId = Guid.NewGuid();
+
+        var beliefs = new[]
+        {
+            MakeBelief(entityId, Dimension.Operational,  "uptime_sla",         0.26, SourceTier.Verified, profile, now),
+            MakeBelief(entityId, Dimension.Experiential, "csat_score",         0.26, SourceTier.Verified, profile, now),
+            MakeBelief(entityId, Dimension.Financial,    "payment_timeliness", 0.26, SourceTier.Verified, profile, now),
+            MakeBelief(entityId, Dimension.Strategic,    "renewal_intent",     0.26, SourceTier.Verified, profile, now),
+        };
+        var scores = AllDimScores(entityId, beliefs, profile);
+        var idx    = index.Aggregate(entityId, scores, beliefs, null, profile, now);
+
+        Assert.Equal(Band.Critical, idx.Band);
+        Assert.Equal("composite", idx.BandDrivenBy);
+    }
+
+    [Fact]
+    [Trait("Class", "K")]
+    public void K2_FloorRaisesFromHealthy_ToAtRisk_BandDrivenBy_IsWorstDimensionFloor()
+    {
+        // 3 dims at 0.80 (Healthy), 1 dim at 0.50 (AtRisk). Composite = 0.725 → Healthy.
+        // worstDimScore = 0.50 → AssignBand → AtRisk. MoreSevere(Healthy, AtRisk) = AtRisk.
+        // worstBand(AtRisk) > compositeBand(Healthy) → BandDrivenBy = "worst-dimension-floor".
+        var profile  = TestHelpers.LoadProfile();
+        var index    = new IndexModule();
+        var now      = new DateTimeOffset(2026, 6, 15, 10, 0, 0, TimeSpan.Zero);
+        var entityId = Guid.NewGuid();
+
+        var beliefs = new[]
+        {
+            MakeBelief(entityId, Dimension.Operational,  "uptime_sla",         0.80, SourceTier.Verified, profile, now),
+            MakeBelief(entityId, Dimension.Experiential, "csat_score",         0.80, SourceTier.Verified, profile, now),
+            MakeBelief(entityId, Dimension.Financial,    "payment_timeliness", 0.80, SourceTier.Verified, profile, now),
+            MakeBelief(entityId, Dimension.Strategic,    "renewal_intent",     0.50, SourceTier.Verified, profile, now),
+        };
+        var scores = AllDimScores(entityId, beliefs, profile);
+        var idx    = index.Aggregate(entityId, scores, beliefs, null, profile, now);
+
+        Assert.Equal(Band.AtRisk, idx.Band);
+        Assert.Equal("worst-dimension-floor", idx.BandDrivenBy);
+    }
+
     // ── A2 helpers ────────────────────────────────────────────────────────────
 
     private static (PostureAssignment posture, EntityIndex idx) MakePostureWithMeta(

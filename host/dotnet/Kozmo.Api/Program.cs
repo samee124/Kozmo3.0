@@ -279,3 +279,6 @@ public sealed class SseHub
         }
     }
 }
+
+// Required for WebApplicationFactory<Program> in Kozmo.Api.Tests
+public partial class Program { }

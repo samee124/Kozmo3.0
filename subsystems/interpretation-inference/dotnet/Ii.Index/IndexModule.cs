@@ -67,12 +67,25 @@ public sealed class IndexModule : IIndexModule
     {
         var composite       = ComputeComposite(scores, profile);
         var confidenceFloor = ComputeConfidenceFloor(scores);
-        var band            = AssignBand(composite, confidenceFloor, profile);
+
+        var compositeBand   = AssignBand(composite, confidenceFloor, profile);
+
+        var withBeliefs     = scores.Values.Where(s => s.ContributingBeliefIds.Count > 0).ToList();
+        var worstDimScore   = withBeliefs.Count > 0 ? withBeliefs.Min(s => s.Score) : composite;
+        var worstBand       = AssignBand(worstDimScore, confidenceFloor, profile);
+
+        var band            = MoreSevere(compositeBand, worstBand);
+        var bandDrivenBy    = worstBand > compositeBand ? "worst-dimension-floor" : "composite";
         var version         = (previous?.Version ?? 0) + 1;
         var fingerprint     = ComputeFingerprint(scores, allBeliefs, profile);
 
-        return new EntityIndex(entityId, scores, composite, confidenceFloor, band, fingerprint, version, now);
+        return new EntityIndex(entityId, scores, composite, confidenceFloor, band, fingerprint, version, now)
+        {
+            BandDrivenBy = bandDrivenBy
+        };
     }
+
+    private static Band MoreSevere(Band a, Band b) => a > b ? a : b;
 
     private static double ComputeComposite(
         IReadOnlyDictionary<Dimension, DimensionScore> scores,

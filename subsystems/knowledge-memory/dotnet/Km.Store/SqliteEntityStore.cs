@@ -135,7 +135,7 @@ public sealed class SqliteEntityStore : IEntityStore, IDisposable
     public Task<PostureAssignment?> GetCurrentPostureAsync(Guid entityId, CancellationToken ct = default)
     {
         using var cmd = _conn.CreateCommand();
-        cmd.CommandText = "SELECT data FROM postures WHERE entity_id = @eid ORDER BY assigned_at DESC LIMIT 1";
+        cmd.CommandText = "SELECT data FROM postures WHERE entity_id = @eid ORDER BY assigned_at DESC, rowid DESC LIMIT 1";
         cmd.Parameters.AddWithValue("@eid", entityId.ToString());
         var json = cmd.ExecuteScalar() as string;
         return Task.FromResult(json != null ? JsonSerializer.Deserialize<PostureAssignment>(json, Json) : null);
