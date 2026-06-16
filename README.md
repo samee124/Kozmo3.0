@@ -16,7 +16,7 @@ Kozmo is a deterministic commercial-intelligence platform that turns vendor sign
 # Build
 dotnet build Kozmo.sln -c Release
 
-# Test (23 tests — determinism spike + golden path + invariant lanes)
+# Test (71 tests — determinism spike + golden path + API integration + invariant lanes)
 dotnet test Kozmo.sln -c Release
 
 # PR gate (build -warnaserror + invariant filter — required to pass before merge)
@@ -30,6 +30,9 @@ libs/                          core libraries (Contracts, Platform, Llm, Bus, Id
 subsystems/
   interpretation-inference/    I&I pipeline: Observation → Rubric → Index → Posture → Decay
   knowledge-memory/            Km.Store: SQLite belief store + Catalogue loader
+host/dotnet/
+  Kozmo.Api/                   ASP.NET 8 REST host (/vendors, /trail, /trajectory)
+  Kozmo.Api.Tests/             WebApplicationFactory integration tests (Classes K–N)
 tests/
   Kozmo.Architecture.Tests/   five CI invariant lanes (NetArchTest + BannedApiAnalyzers)
 catalogue/profiles/saas/       nine *.saas.v1.json config files — the cognition parameters

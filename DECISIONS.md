@@ -88,29 +88,33 @@ Read this before proposing structural changes — many "improvements" re-litigat
 
 ## A4 erratum — BandDrivenBy on EntityIndex (fingerprint-excluded metadata)
 
-**What A4 needed:** The drill-down trail exposes `band.drivenBy` so a reviewer can see whether the band was determined by the weighted composite score or elevated by the confidence-floor gate. L1 proved that hardcoding `"composite"` was wrong for Corvus (Critical via floor gate).
+**What A4 needed:** The drill-down trail exposes `band.drivenBy` to show whether the final band came from the weighted composite alone or was pulled down by a single underperforming dimension.
 
 **What was added:**
 
 | Layer | Addition |
 |---|---|
 | `EntityIndex` | `string BandDrivenBy { get; init; } = "composite"` — non-positional init-only property |
-| `IndexModule.Build` | Sets `BandDrivenBy = band == Band.Critical ? "worst-dimension-floor" : "composite"` |
+| `IndexModule.Build` | `MoreSevere(compositeBand, worstBand)` → band; `worstBand > compositeBand` → `"worst-dimension-floor"` |
 | `DtoMapper.ToIndexView` | `BandDrivenBy: idx.BandDrivenBy` (was hardcoded `"composite"`) |
 | `DtoMapper.ToTrail` | `DrivenBy: idx.BandDrivenBy` (was hardcoded `"composite"`) |
 
-**Corrected algorithm (A4 erratum v2):** The initial fix (`band == Band.Critical ? "worst-dimension-floor" : "composite"`) was wrong — it conflated "is Critical" with "floor-driven" and only passed L1 by seed coincidence (all Corvus dims happen to be uniformly Critical, so the composite itself lands there). The correct mechanism compares bands:
+**Algorithm:**
 
 ```
 compositeBand = AssignBand(composite, confidenceFloor, profile)
-worstDimScore = min score across dims with beliefs (composite if none)
+worstDimScore = min score across dims with beliefs  (falls back to composite if none)
 worstBand     = AssignBand(worstDimScore, confidenceFloor, profile)
 band          = MoreSevere(compositeBand, worstBand)
 BandDrivenBy  = worstBand > compositeBand ? "worst-dimension-floor" : "composite"
 ```
 
-"worst-dimension-floor" when a single dim's score pulls the band *below* where the composite would place it (e.g. composite Healthy, worst dim AtRisk → final AtRisk). "composite" when neither overrides the other (both same band — includes the uniformly-Critical Corvus case). Two new unit tests K1/K2 in `Ii.Tests` bite the old shortcut.
+**The floor mechanism is real and tested — but no current seed vendor exercises it.** K2 (`Ii.Tests`) demonstrates it: composite Healthy (0.725), one dim at AtRisk (0.50) → final band AtRisk, `BandDrivenBy = "worst-dimension-floor"`. No seed vendor has this profile; all three are composite-driven:
 
-**Fingerprint discipline:** `BandDrivenBy` is derivation metadata — it records *how* a decision was made, not *what* the evidence was. It is a non-positional property on `EntityIndex` and is NOT passed into `FingerprintInput`. The A1 pins (e5d0e9b9 / 7e7cf005 / 72237da0) are unchanged — `band` itself does not change for the seed data because `MoreSevere(compositeBand, worstBand)` produces the same final band as the previous `AssignBand(composite, floor, profile)` for all three vendors.
+- **Cloudwave** — composite 0.475, worst dim (Exp) 0.40; both AtRisk → `"composite"`.
+- **Corvus** — all four dimensions score 0.20–0.35, well inside the Critical range (< 0.40). Composite is 0.275. Both `compositeBand` and `worstBand` resolve to Critical; neither elevates the other → `"composite"`. **Corvus is Critical because its composite is uniformly Critical, not because of any floor override.** The original claim ("Corvus is Critical via the floor gate") was false and is retired.
+- **Meridian** — composite 0.70, all scored dims (Op, Fin) ≥ 0.80; both Healthy → `"composite"`.
+
+**Fingerprint discipline:** `BandDrivenBy` is derivation metadata — excluded from `FingerprintInput`. The A1 pins (e5d0e9b9 / 7e7cf005 / 72237da0) are unchanged; `MoreSevere(compositeBand, worstBand)` produces the same final band for the seed data as the old `AssignBand(composite, floor, profile)`.
 
 **Scope:** No method signatures changed. No fingerprint inputs added. No stance taxonomy changes. Old `EntityIndex` rows in SQLite deserialize with `BandDrivenBy = "composite"` (the default).
