@@ -5,4 +5,10 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>Kozmo.Llm</RootNamespace>
   </PropertyGroup>
+  <ItemGroup>
+    <!-- CachingLlmClient.ComputeKey is internal — exposed to tests only -->
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+      <_Parameter1>Kozmo.Llm.Tests</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
 </Project>

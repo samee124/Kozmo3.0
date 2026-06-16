@@ -82,7 +82,19 @@ public sealed record BeliefViewDto(
     string       ClassificationMethod,
     string?      ReasoningSummary,
     double       Freshness,
-    SignalRefDto? Signal);
+    SignalRefDto? Signal)
+{
+    // ── Confidence-anchor provenance — annotation only, never fingerprint inputs ─
+
+    /// <summary>Confidence before the anchor was applied. Non-null when anchor fired.</summary>
+    public double? AnchorRawConfidence { get; init; } = null;
+
+    /// <summary>Id of the predecessor belief that provided the confidence floor.</summary>
+    public string? AnchorPredecessorId { get; init; } = null;
+
+    /// <summary>SourceTier name of the predecessor belief.</summary>
+    public string? AnchorPredecessorTier { get; init; } = null;
+}
 
 public sealed record SignalRefDto(
     string         SignalId,

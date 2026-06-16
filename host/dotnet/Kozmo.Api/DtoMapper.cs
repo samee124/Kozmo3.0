@@ -126,7 +126,12 @@ internal static class DtoMapper
                             ClassificationMethod: b.ClassificationMethod.ToString().ToLowerInvariant(),
                             ReasoningSummary:     b.ReasoningSummary,
                             Freshness:            b.Freshness,
-                            Signal:               sig is null ? null : ToSignalRef(sig));
+                            Signal:               sig is null ? null : ToSignalRef(sig))
+                        {
+                            AnchorRawConfidence   = b.AnchorRawConfidence,
+                            AnchorPredecessorId   = b.AnchorPredecessorId?.ToString(),
+                            AnchorPredecessorTier = b.AnchorPredecessorTier?.ToString()
+                        };
                     })
                     .ToList();
 

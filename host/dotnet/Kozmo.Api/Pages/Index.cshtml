@@ -1,0 +1,31 @@
+@page
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Kozmo — Vendor Intelligence</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<div id="app">
+  <nav class="sidebar">
+    <div class="brand">Kozmo</div>
+    <div id="vendor-list" class="vendor-list"></div>
+    <div class="controls">
+      <button id="btn-reset" type="button">Reset</button>
+      <button id="btn-replay" type="button">Replay</button>
+    </div>
+    <div id="replay-status" class="replay-status hidden"></div>
+  </nav>
+  <main id="main-panel" class="main-panel">
+    <div id="no-selection" class="placeholder">Select a vendor to explore</div>
+    <div id="detail-view" class="detail-view hidden"></div>
+  </main>
+</div>
+<script src="/app.js"></script>
+</body>
+</html>

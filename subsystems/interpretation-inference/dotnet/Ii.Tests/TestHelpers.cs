@@ -8,6 +8,19 @@ internal static class TestHelpers
     public static SaasProfile LoadProfile() =>
         new Catalogue().Load(FindCatalogueDir());
 
+    public static string FindLlmCachePath()
+    {
+        var dir = AppContext.BaseDirectory;
+        while (!string.IsNullOrEmpty(dir))
+        {
+            var candidate = Path.Combine(dir, "fixtures", "llm-cache.json");
+            if (File.Exists(candidate)) return candidate;
+            dir = Path.GetDirectoryName(dir);
+        }
+        throw new FileNotFoundException(
+            "fixtures/llm-cache.json not found. Run 'dotnet run --project tools/Kozmo.SeedPrep' first.");
+    }
+
     private static string FindCatalogueDir()
     {
         var dir = new DirectoryInfo(AppContext.BaseDirectory);

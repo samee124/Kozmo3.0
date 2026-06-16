@@ -90,11 +90,14 @@ public sealed class Catalogue : ICatalogue
             weightMap[kv.Key] = kv.Value!.GetValue<double>();
 
         // Bands
-        var bandsObj = bands["bands"]!.AsObject();
+        var bandsObj    = bands["bands"]!.AsObject();
+        var floorObj    = bands["confidence_floor"]!.AsObject();
         var bandsConfig = new BandsConfig(
-            HealthyMin:            bandsObj["Healthy"]!.AsObject()["min_composite"]!.GetValue<double>(),
-            AtRiskMin:             bandsObj["AtRisk"]!.AsObject()["min_composite"]!.GetValue<double>(),
-            CriticalConfidenceGate: bands["confidence_floor"]!.AsObject()["critical_min_confidence"]!.GetValue<double>()
+            HealthyMin:              bandsObj["Healthy"]!.AsObject()["min_composite"]!.GetValue<double>(),
+            AtRiskMin:               bandsObj["AtRisk"]!.AsObject()["min_composite"]!.GetValue<double>(),
+            CriticalConfidenceGate:  floorObj["critical_min_confidence"]!.GetValue<double>(),
+            PerContradictionPenalty: floorObj["per_contradiction_penalty"]!.GetValue<double>(),
+            PerGapPenalty:           floorObj["per_gap_penalty"]!.GetValue<double>()
         );
 
         // Posture rules

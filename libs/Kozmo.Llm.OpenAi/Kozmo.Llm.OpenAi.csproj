@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>Kozmo.Llm.OpenAi</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Kozmo.Llm\Kozmo.Llm.csproj" />
+    <PackageReference Include="OpenAI" Version="2.1.0" />
+  </ItemGroup>
+</Project>

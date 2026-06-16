@@ -35,4 +35,19 @@ public sealed record Belief(
 
     /// <summary>LLM rationale when ClassificationMethod == Llm. Null for rule-classified beliefs.</summary>
     public string? ReasoningSummary { get; init; } = null;
+
+    // ── Confidence-anchor provenance — annotation only, never fingerprint inputs ─
+
+    /// <summary>
+    /// The effective confidence before the confidence anchor was applied (the Reported-tier value).
+    /// Non-null only when AnchorConfidences raised this belief's Confidence above its raw computed level.
+    /// Enables the drill-down to explain why a Reported-tier belief sits at a Verified-tier confidence.
+    /// </summary>
+    public double? AnchorRawConfidence { get; init; } = null;
+
+    /// <summary>Id of the predecessor belief that provided the confidence floor. Non-null iff AnchorRawConfidence is set.</summary>
+    public Guid? AnchorPredecessorId { get; init; } = null;
+
+    /// <summary>SourceTier of the predecessor belief. Non-null iff AnchorRawConfidence is set.</summary>
+    public SourceTier? AnchorPredecessorTier { get; init; } = null;
 }

@@ -18,5 +18,6 @@
     <ProjectReference Include="..\Ii.Spine\Ii.Spine.csproj" />
     <ProjectReference Include="..\Ii.Fakes\Ii.Fakes.csproj" />
     <ProjectReference Include="..\Ii.Contracts\Ii.Contracts.csproj" />
+    <ProjectReference Include="..\..\..\..\libs\Kozmo.Llm\Kozmo.Llm.csproj" />
   </ItemGroup>
 </Project>

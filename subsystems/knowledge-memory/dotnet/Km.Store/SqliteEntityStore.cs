@@ -31,7 +31,7 @@ public sealed class SqliteEntityStore : IEntityStore, IDisposable
     {
         using var cmd = _conn.CreateCommand();
         cmd.CommandText = """
-            INSERT INTO beliefs
+            INSERT OR REPLACE INTO beliefs
               (id, entity_id, dimension, criterion, value, source_tier, confidence,
                freshness, derivation, source_signals, version, superseded_by, created_at, trace_id,
                classification_method, classification_confidence, reasoning_summary)
@@ -146,7 +146,7 @@ public sealed class SqliteEntityStore : IEntityStore, IDisposable
     public Task AppendSignalAsync(Signal signal, CancellationToken ct = default)
     {
         using var cmd = _conn.CreateCommand();
-        cmd.CommandText = "INSERT INTO signals (id, entity_id, data, received_at) VALUES (@id, @eid, @data, @at)";
+        cmd.CommandText = "INSERT OR IGNORE INTO signals (id, entity_id, data, received_at) VALUES (@id, @eid, @data, @at)";
         cmd.Parameters.AddWithValue("@id",   signal.Id.ToString());
         cmd.Parameters.AddWithValue("@eid",  signal.EntityId.ToString());
         cmd.Parameters.AddWithValue("@data", JsonSerializer.Serialize(signal, Json));

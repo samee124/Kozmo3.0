@@ -1,0 +1,22 @@
+{
+  "225aa58ddd644ac0ad4a3fe0412cce3525f2ac367aabd74e0c04a27b3b9c6ff7": {
+    "answerJson": "{\u0022dimension\u0022:\u0022Operational\u0022,\u0022criterion\u0022:\u0022uptime_sla\u0022,\u0022value\u0022:0.5,\u0022confidence\u0022:0.7,\u0022reasoning\u0022:\u0022The mention of an SLA breach indicates potential operational issues, leading to a moderate confidence in the uptime performance.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "cc30b2a2ecb0c24f8bfd44b0d6cedf255120f93119ea2cee60ec53371d7893ba": {
+    "answerJson": "{\u0022dimension\u0022:\u0022Operational\u0022,\u0022criterion\u0022:\u0022uptime_sla\u0022,\u0022value\u0022:0.2,\u0022confidence\u0022:0.9,\u0022reasoning\u0022:\u0022The consistently high support ticket response times and unresolved critical incidents indicate poor performance against uptime SLA expectations.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "037d269a2d09472da3ae8c42b73b8197657ca1e7d7c8ee207e61f04c83c0aa01": {
+    "answerJson": "{\u0022dimension\u0022:\u0022Operational\u0022,\u0022criterion\u0022:\u0022uptime_sla\u0022,\u0022value\u0022:1.0,\u0022confidence\u0022:0.9,\u0022reasoning\u0022:\u0022The vendor has maintained a platform uptime of 99.9% with zero incidents, indicating excellent operational performance.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "78c93fed1acd46c95a00e4729e86399e5d649426e656154b491d3a6649471e50": {
+    "answerJson": "{\u0022dimension\u0022:\u0022Strategic\u0022,\u0022criterion\u0022:\u0022renewal_intent\u0022,\u0022value\u0022:1.0,\u0022confidence\u0022:0.9,\u0022reasoning\u0022:\u0022The executive sponsor confirmed strong intent to renew and expand the license footprint, indicating high renewal intent.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  }
+}

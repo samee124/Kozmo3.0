@@ -30,7 +30,10 @@ public sealed class PostureModule : IPostureModule
         var evidence  = BuildEvidence(index);
 
         var contradictionCount = meta?.Contradictions.Count ?? 0;
-        var confidence         = Math.Clamp(index.ConfidenceFloor - 0.10 * contradictionCount, 0.0, 0.95);
+        var gapCount           = meta?.Gaps.Count          ?? 0;
+        var penalty            = profile.Bands.PerContradictionPenalty * contradictionCount
+                               + profile.Bands.PerGapPenalty           * gapCount;
+        var confidence         = Math.Clamp(index.ConfidenceFloor - penalty, 0.0, 0.95);
 
         IReadOnlyList<string> cautions     = meta?.Contradictions.Select(c => c.Description).ToList() ?? [];
         IReadOnlyList<string> evidenceGaps = meta?.Gaps.Select(g => g.Description).ToList()           ?? [];

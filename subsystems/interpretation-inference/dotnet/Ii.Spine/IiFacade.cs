@@ -86,7 +86,12 @@ public sealed class IiFacade : IIiFacade
             Version:       version,
             SupersededBy:  null,
             CreatedAt:     now,
-            TraceId:       signal.TraceId);
+            TraceId:       signal.TraceId)
+        {
+            ClassificationMethod     = classification.Method,
+            ClassificationConfidence = classification.MethodConfidence,
+            ReasoningSummary         = classification.ReasoningSummary
+        };
 
         await _store.AppendBeliefAsync(belief, ct);
 
@@ -114,9 +119,10 @@ public sealed class IiFacade : IIiFacade
 
     public async Task<ReasoningTrail?> GetReasoningTrailAsync(Guid entityId, CancellationToken ct = default)
     {
-        var posture  = await _store.GetCurrentPostureAsync(entityId, ct);
-        var idx      = await _store.GetIndexAsync(entityId, ct);
-        var beliefs  = await _store.GetCurrentBeliefsAsync(entityId, ct);
+        var posture    = await _store.GetCurrentPostureAsync(entityId, ct);
+        var idx        = await _store.GetIndexAsync(entityId, ct);
+        var beliefs    = await _store.GetCurrentBeliefsAsync(entityId, ct);
+        var allHistory = await _store.GetBeliefHistoryAsync(entityId, ct);
 
         var signals = new List<Signal>();
         foreach (var b in beliefs)
@@ -126,7 +132,19 @@ public sealed class IiFacade : IIiFacade
             if (sig != null) signals.Add(sig);
         }
 
-        return new ReasoningTrail(entityId, posture, idx, beliefs, signals);
+        MetaCognitionResult? meta      = null;
+        IReadOnlyList<Belief> trailBeliefs = beliefs; // default: stored beliefs (no data yet)
+        if (beliefs.Count > 0)
+        {
+            var now      = _clock.UtcNow;
+            var decayed  = beliefs.Select(b => _decay.WithCurrentFreshness(b, _profile, now)).ToList();
+            var anchored = AnchorConfidences(decayed, allHistory, now);
+            meta         = ComputeMeta(entityId, decayed, anchored, allHistory, now);
+            // Return anchored beliefs so the drill-down exposes current freshness + anchor provenance.
+            trailBeliefs = anchored;
+        }
+
+        return new ReasoningTrail(entityId, posture, idx, trailBeliefs, signals) { Meta = meta };
     }
 
     public async Task<IReadOnlyList<TrajectoryPoint>> GetTrajectoryAsync(
@@ -162,11 +180,20 @@ public sealed class IiFacade : IIiFacade
     private async Task RecomputeIndexAsync(Guid entityId, Dimension dirtyDim, DateTimeOffset now, CancellationToken ct)
     {
         var allBeliefs = await _store.GetCurrentBeliefsAsync(entityId, ct);
+        var allHistory = await _store.GetBeliefHistoryAsync(entityId, ct);
 
-        // Apply decay to all beliefs before scoring
+        // Apply decay to all current beliefs
         var decayed = allBeliefs
             .Select(b => _decay.WithCurrentFreshness(b, _profile, now))
             .ToList();
+
+        // Confidence anchor: corroborating evidence must never lower a dimension's effective
+        // confidence below the strongest still-valid predecessor in the same slot.
+        // For each current belief, if it superseded a predecessor with higher decayed confidence,
+        // floor the current belief's confidence at the predecessor's decayed confidence.
+        // This ensures that adding Reported evidence that confirms a Verified bad signal
+        // cannot demote the band by collapsing the confidence floor below 0.60.
+        var anchored = AnchorConfidences(decayed, allHistory, now);
 
         var previous = await _store.GetIndexAsync(entityId, ct);
 
@@ -174,22 +201,148 @@ public sealed class IiFacade : IIiFacade
         if (previous == null)
         {
             // First signal — full aggregate
-            var scores = BuildAllDimensionScores(entityId, decayed);
-            newIndex = _index.Aggregate(entityId, scores, decayed, null, _profile, now);
+            var scores = BuildAllDimensionScores(entityId, anchored);
+            newIndex = _index.Aggregate(entityId, scores, anchored, null, _profile, now);
         }
         else
         {
             // Incremental — only recompute the dirty dimension
-            var dimBeliefs = decayed.Where(b => b.Dimension == dirtyDim).ToList();
+            var dimBeliefs = anchored.Where(b => b.Dimension == dirtyDim).ToList();
             var dimScore   = _rubric.ScoreDimension(entityId, dirtyDim, dimBeliefs, _profile);
-            newIndex = _index.RecomputeDirty(entityId, dirtyDim, dimScore, decayed, previous, _profile, now);
+            newIndex = _index.RecomputeDirty(entityId, dirtyDim, dimScore, anchored, previous, _profile, now);
         }
 
         await _store.SaveIndexAsync(newIndex, ct);
 
+        var meta    = ComputeMeta(entityId, decayed, anchored, allHistory, now);
         var entity  = _registry.GetEntity(entityId);
-        var posture = _posture.Assign(newIndex, previous, entity?.RenewalDate, _profile, now);
+        var posture = _posture.Assign(newIndex, previous, entity?.RenewalDate, _profile, now, meta);
         await _store.AppendPostureAsync(posture, ct);
+    }
+
+    /// <summary>
+    /// For each current belief, check whether its direct predecessor (the belief it superseded)
+    /// had a higher decayed confidence. If so, raise the current belief's effective confidence
+    /// to that predecessor's level. When the anchor fires, sets AnchorRawConfidence,
+    /// AnchorPredecessorId, and AnchorPredecessorTier annotation fields for provenance.
+    /// The stored belief is unchanged; this affects scoring and the reasoning trail only.
+    /// </summary>
+    private IReadOnlyList<Belief> AnchorConfidences(
+        IReadOnlyList<Belief> decayed,
+        IReadOnlyList<Belief> allHistory,
+        DateTimeOffset now)
+    {
+        var result = new List<Belief>(decayed.Count);
+        foreach (var b in decayed)
+        {
+            // Find the best predecessor by decayed confidence in the same (Dimension, Criterion) slot.
+            var predecessors = allHistory
+                .Where(h => h.SupersededBy == b.Id
+                         && h.Dimension   == b.Dimension
+                         && h.Criterion   == b.Criterion)
+                .Select(h => (belief: h, conf: _decay.WithCurrentFreshness(h, _profile, now).Confidence))
+                .ToList();
+
+            if (predecessors.Count == 0)
+            {
+                result.Add(b);
+                continue;
+            }
+
+            var best = predecessors.MaxBy(x => x.conf);
+            if (b.Confidence < best.conf)
+            {
+                result.Add(b with
+                {
+                    Confidence            = best.conf,
+                    AnchorRawConfidence   = b.Confidence,
+                    AnchorPredecessorId   = best.belief.Id,
+                    AnchorPredecessorTier = best.belief.SourceTier
+                });
+            }
+            else
+            {
+                result.Add(b);
+            }
+        }
+        return result;
+    }
+
+    /// <summary>
+    /// Compute a deterministic MetaCognitionResult from the current (decayed + anchored) belief set.
+    /// Contradictions: current value diverges ≥ 0.30 from direct predecessor in the same slot.
+    /// Gaps: a dimension has no current belief at all.
+    /// EpistemicSummary: plain-language description of any confidence anchors that fired.
+    /// </summary>
+    private MetaCognitionResult ComputeMeta(
+        Guid entityId,
+        IReadOnlyList<Belief> decayed,
+        IReadOnlyList<Belief> anchored,
+        IReadOnlyList<Belief> allHistory,
+        DateTimeOffset now)
+    {
+        const double ContradictionThreshold = 0.30;
+
+        var contradictions = new List<Contradiction>();
+        var anchorNotes    = new List<string>();
+
+        // Contradiction detection: superseding belief value diverges from its predecessor
+        foreach (var b in decayed)
+        {
+            var predecessor = allHistory
+                .FirstOrDefault(h => h.SupersededBy == b.Id
+                                  && h.Dimension     == b.Dimension
+                                  && h.Criterion     == b.Criterion);
+            if (predecessor == null) continue;
+
+            var delta = Math.Abs(b.Value - predecessor.Value);
+            if (delta < ContradictionThreshold) continue;
+
+            var severity = delta >= 0.70 ? ContradictionSeverity.High
+                         : delta >= 0.50 ? ContradictionSeverity.Medium
+                         :                 ContradictionSeverity.Low;
+
+            contradictions.Add(new Contradiction(
+                EntityId:             entityId.ToString(),
+                Dimension:            b.Dimension.ToString(),
+                Description:          $"{b.Dimension}/{b.Criterion}: new value {b.Value:F2} diverges from prior {predecessor.Value:F2} (\u0394={delta:F2})",
+                Severity:             severity,
+                ConflictingBeliefIds: new List<Guid> { predecessor.Id, b.Id },
+                DetectedBy:           DetectionSource.Deterministic));
+        }
+
+        // Gap detection: dimensions with no current evidence
+        var gaps        = new List<Gap>();
+        var coveredDims = decayed.Select(b => b.Dimension).ToHashSet();
+        foreach (var dim in Enum.GetValues<Dimension>())
+        {
+            if (!coveredDims.Contains(dim))
+                gaps.Add(new Gap(
+                    EntityId:    entityId.ToString(),
+                    Dimension:   dim.ToString(),
+                    Description: $"{dim}: no current evidence available.",
+                    DetectedBy:  DetectionSource.Deterministic));
+        }
+
+        // Anchor trace: beliefs where confidence was raised by AnchorConfidences
+        foreach (var (orig, anch) in decayed.Zip(anchored))
+        {
+            if (anch.Confidence > orig.Confidence + 1e-6)
+                anchorNotes.Add(
+                    $"{anch.Dimension}/{anch.Criterion}: confidence anchored " +
+                    $"{orig.Confidence:F3}\u2192{anch.Confidence:F3} " +
+                    $"(floor from prior {orig.SourceTier} belief)");
+        }
+
+        var summary = anchorNotes.Count > 0
+            ? string.Join("; ", anchorNotes)
+            : "No confidence anchors active.";
+
+        return new MetaCognitionResult(
+            EntityId:         entityId.ToString(),
+            Contradictions:   contradictions,
+            Gaps:             gaps,
+            EpistemicSummary: summary);
     }
 
     private IReadOnlyDictionary<Dimension, DimensionScore> BuildAllDimensionScores(
