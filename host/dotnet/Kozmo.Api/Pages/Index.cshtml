@@ -20,6 +20,18 @@
       <button id="btn-replay" type="button">Replay</button>
     </div>
     <div id="replay-status" class="replay-status hidden"></div>
+    <div class="live-panel">
+      <div class="live-panel-title">Send a signal (live)</div>
+      <select id="live-vendor-select">
+        <option value="eeeeeeee-0001-0000-0000-000000000001">Cloudwave Systems Inc.</option>
+        <option value="eeeeeeee-0002-0000-0000-000000000001">Corvus Infrastructure Ltd.</option>
+        <option value="eeeeeeee-0003-0000-0000-000000000001">Meridian IT Services Ltd.</option>
+      </select>
+      <textarea id="live-body" placeholder="Type a free-text note about the vendor…"></textarea>
+      <button id="btn-live-send" class="btn-live" type="button">Classify &amp; Inject</button>
+      <div id="live-status" class="live-status"></div>
+      <div id="live-result" class="live-result hidden"></div>
+    </div>
   </nav>
   <main id="main-panel" class="main-panel">
     <div id="no-selection" class="placeholder">Select a vendor to explore</div>

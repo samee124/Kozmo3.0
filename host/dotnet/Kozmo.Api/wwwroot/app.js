@@ -7,11 +7,16 @@
 // ── API ───────────────────────────────────────────────────────────────────────
 
 const API = {
-  vendors:    ()   => fetch('/vendors').then(assertOk),
-  trail:      (id) => fetch(`/vendors/${id}/trail`).then(assertOk),
-  trajectory: (id) => fetch(`/vendors/${id}/trajectory`).then(assertOk),
-  reset:      ()   => fetch('/demo/reset', { method: 'POST' }).then(assertOk),
-  replay:     ()   => fetch('/demo/replay', { method: 'POST' }),
+  vendors:     ()              => fetch('/vendors').then(assertOk),
+  trail:       (id)            => fetch(`/vendors/${id}/trail`).then(assertOk),
+  trajectory:  (id)            => fetch(`/vendors/${id}/trajectory`).then(assertOk),
+  reset:       ()              => fetch('/demo/reset', { method: 'POST' }).then(assertOk),
+  replay:      ()              => fetch('/demo/replay', { method: 'POST' }),
+  liveSignal:  (vendorId, body) => fetch('/demo/live-signal', {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body:    JSON.stringify({ vendorId, body }),
+  }),
 };
 
 async function assertOk(res) {
@@ -37,6 +42,8 @@ async function init() {
   renderVendorList();
   document.getElementById('btn-reset').addEventListener('click', onReset);
   document.getElementById('btn-replay').addEventListener('click', onReplay);
+  document.getElementById('btn-live-send').addEventListener('click', onLiveSend);
+  initLiveSseHandler();
 }
 
 // ── Vendor list ───────────────────────────────────────────────────────────────
@@ -482,6 +489,131 @@ function fmtDate(ts) {
   try {
     return new Date(ts).toLocaleDateString('en-GB', { month: 'short', day: 'numeric' });
   } catch { return ''; }
+}
+
+// ── Live signal injection ─────────────────────────────────────────────────────
+
+function initLiveSseHandler() {
+  // Attach to the existing SSE stream once; the onReplay handler creates its own EventSource.
+  // We piggyback on the shared /events endpoint for live-classifying / live-update events.
+  // A persistent background EventSource handles live events outside of replay.
+  const es = new EventSource('/events');
+  es.onmessage = (evt) => {
+    let msg;
+    try { msg = JSON.parse(evt.data); } catch { return; }
+    if (msg.type === 'live-classifying') onLiveClassifying(msg.data);
+    if (msg.type === 'live-update')      onLiveUpdateSse(msg.data);
+    if (msg.type === 'live-error')       onLiveErrorSse(msg.data);
+  };
+}
+
+async function onLiveSend() {
+  const btn      = document.getElementById('btn-live-send');
+  const statusEl = document.getElementById('live-status');
+  const resultEl = document.getElementById('live-result');
+  const vendorId = document.getElementById('live-vendor-select').value;
+  const body     = document.getElementById('live-body').value.trim();
+
+  if (!body) {
+    setLiveStatus('Enter a note before sending.', 'live-error');
+    return;
+  }
+
+  btn.disabled = true;
+  resultEl.classList.add('hidden');
+  setLiveStatus('Submitting…', '');
+
+  try {
+    const res = await API.liveSignal(vendorId, body);
+
+    if (res.status === 503) {
+      setLiveStatus('OPENAI_API_KEY not configured — live classification unavailable.', 'live-error');
+      return;
+    }
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ error: res.statusText }));
+      setLiveStatus(`Error ${res.status}: ${err.error ?? res.statusText}`, 'live-error');
+      return;
+    }
+
+    const data = await res.json();
+    renderLiveResult(data, resultEl);
+    setLiveStatus('Classification complete.', 'live-success');
+
+    // Refresh vendor list and detail view if this vendor is selected
+    state.vendors = await API.vendors();
+    renderVendorList();
+
+    if (state.selectedId === vendorId) {
+      const [trail, trajectory] = await Promise.all([
+        API.trail(vendorId),
+        API.trajectory(vendorId),
+      ]);
+      state.trail           = trail;
+      state.trajectory      = trajectory;
+      state.lastFingerprint = trail.index.fingerprint;
+      renderDetailView(false);
+    }
+  } catch (err) {
+    setLiveStatus(`Failed: ${err.message}`, 'live-error');
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+function onLiveClassifying(data) {
+  setLiveStatus(`Classifying with the model…  (${esc(data.vendorName)})`, 'live-classifying');
+}
+
+function onLiveUpdateSse(data) {
+  // SSE live-update: update vendor card in the list without waiting for the HTTP response
+  const v = state.vendors.find(x => x.entityId === data.vendorId);
+  if (v && data.vendor) {
+    v.band   = data.vendor.band;
+    v.stance = data.vendor.stance;
+    renderVendorList();
+  }
+}
+
+function onLiveErrorSse(data) {
+  if (data.error) setLiveStatus(`Error: ${esc(data.error)}`, 'live-error');
+}
+
+function renderLiveResult(data, el) {
+  const cl = data.classification;
+  el.innerHTML = `
+    <div class="live-result-row">
+      <span class="live-result-label">Dimension</span>
+      <span class="live-result-value">${esc(cl.dimension)}</span>
+    </div>
+    <div class="live-result-row">
+      <span class="live-result-label">Criterion</span>
+      <span class="live-result-value">${esc(cl.criterion)}</span>
+    </div>
+    <div class="live-result-row">
+      <span class="live-result-label">Value</span>
+      <span class="live-result-value">${cl.value.toFixed(3)}</span>
+    </div>
+    <div class="live-result-row">
+      <span class="live-result-label">Confidence</span>
+      <span class="live-result-value">${pct(cl.methodConfidence)}</span>
+    </div>
+    <div class="live-result-row">
+      <span class="live-result-label">Tier</span>
+      <span class="live-result-value">${esc(cl.sourceTier)}</span>
+    </div>
+    <div class="live-result-row">
+      <span class="live-result-label">Band → </span>
+      <span class="live-result-value">${esc(data.index.band)}</span>
+    </div>
+    ${cl.reasoningSummary ? `<div class="live-reasoning">"${esc(cl.reasoningSummary)}"</div>` : ''}`;
+  el.classList.remove('hidden');
+}
+
+function setLiveStatus(msg, cls) {
+  const el  = document.getElementById('live-status');
+  el.textContent = msg;
+  el.className   = 'live-status' + (cls ? ' ' + cls : '');
 }
 
 // ── Init ──────────────────────────────────────────────────────────────────────

@@ -6,7 +6,9 @@ using Ii.Posture;
 using Ii.Rubric;
 using Ii.Spine;
 using Km.Store;
+using Kozmo.Contracts;
 using Kozmo.Contracts.Config;
+using Kozmo.Llm;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
@@ -15,6 +17,9 @@ namespace Kozmo.Api.Tests;
 
 [CollectionDefinition("ApiTests")]
 public class ApiTestsCollection : ICollectionFixture<ApiFixture> { }
+
+[CollectionDefinition("LiveSignalTests")]
+public class LiveSignalTestsCollection : ICollectionFixture<LiveSignalFixture> { }
 
 public sealed class ApiFixture : WebApplicationFactory<Program>, IAsyncLifetime
 {
@@ -29,10 +34,16 @@ public sealed class ApiFixture : WebApplicationFactory<Program>, IAsyncLifetime
             var profile  = FindAndLoadProfile();
             var registry = BuildTestRegistry();
 
+            services.AddSingleton(store);
             services.AddSingleton<IIiFacade>(new IiFacade(
                 new ObservationModule(), new RubricModule(), new IndexModule(),
                 new PostureModule(), new DecayEngine(),
                 store, profile, registry, DemoClock.Fixed));
+
+            // Live LLM factory: return null so /demo/live-signal returns 503 in baseline tests.
+            var oldLlm = services.SingleOrDefault(d => d.ServiceType == typeof(Func<IKozmoLlm?>));
+            if (oldLlm != null) services.Remove(oldLlm);
+            services.AddSingleton<Func<IKozmoLlm?>>(() => null);
         });
     }
 
@@ -60,7 +71,7 @@ public sealed class ApiFixture : WebApplicationFactory<Program>, IAsyncLifetime
         throw new InvalidOperationException("Cannot locate catalogue/profiles/saas/");
     }
 
-    private static EntityRegistry BuildTestRegistry()
+    internal static EntityRegistry BuildTestRegistry()
     {
         var reg = new EntityRegistry();
         reg.Register(Guid.Parse("eeeeeeee-0001-0000-0000-000000000001"), "Cloudwave Systems Inc.",
@@ -70,5 +81,76 @@ public sealed class ApiFixture : WebApplicationFactory<Program>, IAsyncLifetime
         reg.Register(Guid.Parse("eeeeeeee-0003-0000-0000-000000000001"), "Meridian IT Services Ltd.",
             new DateTimeOffset(2027, 1, 15, 0, 0, 0, TimeSpan.Zero));
         return reg;
+    }
+
+    internal static SaasProfile FindAndLoadProfileInternal()
+    {
+        var dir = AppContext.BaseDirectory;
+        while (!string.IsNullOrEmpty(dir))
+        {
+            var candidate = Path.Combine(dir, "catalogue", "profiles", "saas");
+            if (Directory.Exists(candidate)) return new Catalogue().Load(candidate);
+            dir = Path.GetDirectoryName(dir);
+        }
+        throw new InvalidOperationException("Cannot locate catalogue/profiles/saas/");
+    }
+}
+
+/// <summary>
+/// Fixture for live-signal tests. Uses an in-memory store and a stub IKozmoLlm
+/// that returns a canned classification — CI never calls OpenAI.
+/// </summary>
+public sealed class LiveSignalFixture : WebApplicationFactory<Program>, IAsyncLifetime
+{
+    protected override void ConfigureWebHost(IWebHostBuilder builder)
+    {
+        builder.ConfigureServices(services =>
+        {
+            var old = services.SingleOrDefault(d => d.ServiceType == typeof(IIiFacade));
+            if (old != null) services.Remove(old);
+
+            var store    = new SqliteEntityStore("Data Source=:memory:");
+            var profile  = ApiFixture.FindAndLoadProfileInternal();
+            var registry = ApiFixture.BuildTestRegistry();
+
+            services.AddSingleton(store);
+            services.AddSingleton<IIiFacade>(new IiFacade(
+                new ObservationModule(), new RubricModule(), new IndexModule(),
+                new PostureModule(), new DecayEngine(),
+                store, profile, registry, DemoClock.Fixed));
+
+            // Stub live LLM: returns an Operational/uptime_sla=0.10 classification.
+            // Targeting Cloudwave (AtRisk) so a very low uptime_sla belief is meaningful.
+            var oldLlm = services.SingleOrDefault(d => d.ServiceType == typeof(Func<IKozmoLlm?>));
+            if (oldLlm != null) services.Remove(oldLlm);
+
+            IKozmoLlm stub = new StubLlmClient();
+            services.AddSingleton<Func<IKozmoLlm?>>(() => stub);
+        });
+    }
+
+    async Task IAsyncLifetime.InitializeAsync()
+    {
+        var response = await CreateClient().PostAsync("/demo/reset", null);
+        response.EnsureSuccessStatusCode();
+    }
+
+    Task IAsyncLifetime.DisposeAsync() { Dispose(); return Task.CompletedTask; }
+}
+
+/// <summary>
+/// Stub LLM client used in CI tests. Returns a deterministic Operational/uptime_sla=0.10 classification.
+/// Never makes a network call.
+/// </summary>
+internal sealed class StubLlmClient : IKozmoLlm
+{
+    private const string Response = """
+        {"dimension":"Operational","criterion":"uptime_sla","value":0.10,"confidence":0.85,"reasoning":"Stub: critical uptime issue detected."}
+        """;
+
+    public Task<LlmResult> CompleteJsonAsync(string system, string user, int maxTokens = 500, CancellationToken ct = default)
+    {
+        var je = System.Text.Json.JsonSerializer.Deserialize<System.Text.Json.JsonElement>(Response);
+        return Task.FromResult(new LlmResult(je, Confidence: 0.85, ReasoningSummary: "Stub: critical uptime issue detected."));
     }
 }

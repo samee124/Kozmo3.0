@@ -453,3 +453,62 @@ The test walks up from `AppContext.BaseDirectory` to locate `host/dotnet/Kozmo.A
 - No server-side rendering of API data — the Razor page is a static HTML shell only.
 - No fingerprint, scoring, or decision logic in JavaScript.
 - No new API endpoints or contract changes.
+
+---
+
+## Live signal injection — `POST /demo/live-signal`
+
+**Branch:** `feature/live-signal`
+
+### What was built
+
+A live classification path layered on top of the reproducible offline demo. A presenter can type a free-text note in the UI, send it to `POST /demo/live-signal { vendorId, body }`, watch the model classify it in real time, and see the posture update — all without touching the frozen seed fixtures.
+
+### The single live-wiring point
+
+`Kozmo.Api/Program.cs` is the **only** place the real `OpenAiLlmClient` is wired. It constructs a `Func<IKozmoLlm?>` factory and registers it in DI. The live-signal endpoint resolves this factory and, if the key is present, builds a per-request `CachingLlmClient(cachePath, recordMode: true, inner: new OpenAiLlmClient())`. No I&I module, no Spine, no Km.Store references the real client — Lane 5a's assembly scan continues to enforce this.
+
+### Record-then-replay mechanics
+
+The live `CachingLlmClient` runs in **record mode**: on a cache miss it calls OpenAI, writes the result to `fixtures/llm-cache.json`, and returns it. The endpoint then calls a per-request `IiFacade` (temporary, sharing the runtime `SqliteEntityStore`) — this second call to `ObservationModule.Classify` for the same body hits the cache and never calls OpenAI again. Total live calls: exactly one per unique body text. After the call, the response is permanently in the cache, so a subsequent `/demo/replay` can replay it offline.
+
+### Guard scoping
+
+Lane 5a (`Demo_runtime_has_no_network_or_real_llm_dependency`) checks only the I&I module assemblies: `Ii.Spine`, `Ii.Observation`, `Ii.Rubric`, `Ii.Index`, `Ii.Posture`, `Ii.Decay`, `Km.Store`. It does not check `Kozmo.Api`. This is deliberate: the API host is an orchestration layer that is explicitly allowed to wire live dependencies at the boundary. The modules never see the real client.
+
+`Kozmo.Api/BannedSymbols.txt` still bans `N:OpenAI` direct usage — this prevents importing raw `OpenAI.*` SDK types into the API. The live endpoint uses `Kozmo.Llm.OpenAi.OpenAiLlmClient` (a different namespace), so the ban does not trigger. The intent is preserved: the SDK is wrapped, not spread.
+
+### Data model — live signals are runtime-only
+
+Live-injected signals go into the **runtime `SqliteEntityStore`** only — never into `fixtures/signals.json`. `POST /demo/reset` calls `IiFacade.ResetAsync()` → `IEntityStore.ResetAsync()` → drops and recreates all SQLite tables → re-seeds from the frozen fixtures. After reset, live signals are gone and the three golden seed fingerprints (e5d0e9b9 / 7e7cf005 / 72237da0) are restored. This makes the live beat fully repeatable on stage.
+
+### SSE events emitted
+
+| Event | When | Payload |
+|---|---|---|
+| `live-classifying` | Before OpenAI call | `{ vendorId, vendorName }` |
+| `live-update` | After pipeline completes | `{ vendorId, classification, vendor, index }` |
+| `live-error` | On any exception | `{ vendorId, error }` |
+
+### Failure modes
+
+- No `OPENAI_API_KEY` → factory returns null → 503 returned immediately; SSE not emitted.
+- OpenAI API error or timeout → exception caught in endpoint try/catch → `live-error` SSE emitted, 502 returned.
+- Model returns malformed JSON → `Classify` returns null → 422 returned; state unchanged.
+- All failures are non-destructive: nothing is written to the store unless `SubmitSignalAsync` completes successfully.
+
+### Tests (Class O — live signal)
+
+| ID | Description |
+|---|---|
+| O1 | Stub LLM returns `Operational/uptime_sla=0.10`; POST `/demo/live-signal` → 200; new belief appears in trail with `classificationMethod = "llm"`; fingerprint changes |
+| O2 | Live signal mutates state; POST `/demo/reset` → golden fingerprints (e5d0e9b9 / 7e7cf005 / 72237da0) restored |
+
+CI uses `StubLlmClient` — a zero-network `IKozmoLlm` returning a deterministic classification. The real OpenAI path is exercisable manually by setting `OPENAI_API_KEY` (same pattern as `OpenAiSmokeTests`).
+
+### Non-goals
+
+- No change to the deterministic replay path — the offline demo works exactly as before.
+- No change to contracts, fingerprint inputs, or seed pins.
+- No persisting live signals to fixtures.
+- No replacing the frozen-cache baseline with the live path.

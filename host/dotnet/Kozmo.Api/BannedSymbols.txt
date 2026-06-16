@@ -1,2 +1,2 @@
 T:System.Net.Http.HttpClient;No outbound HTTP in the demo runtime (Invariant #5: no-live-dependency).
-N:OpenAI;Real model client lives in Kozmo.Llm.OpenAi — reachable from seed-prep/smoke only (Invariant #5).
+N:OpenAI;Do not use OpenAI SDK types (OpenAI.*) directly in Kozmo.Api. Use Kozmo.Llm.OpenAi.OpenAiLlmClient as the isolation wrapper — the live-signal endpoint is the only sanctioned wiring point (see DECISIONS.md).
