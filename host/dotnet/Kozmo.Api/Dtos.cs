@@ -110,3 +110,20 @@ public sealed record TrajectoryPointDto(
     string         Band,
     string         Stance,
     string         Fingerprint);
+
+// ── Live signal injection ──────────────────────────────────────────────────────
+
+public sealed record LiveSignalRequest(string VendorId, string Body);
+
+public sealed record ClassificationView(
+    string Dimension,
+    string Criterion,
+    double Value,
+    double MethodConfidence,
+    string ReasoningSummary,
+    string SourceTier);
+
+public sealed record LiveSignalResponse(
+    ClassificationView Classification,
+    VendorSummaryDto   Vendor,
+    IndexViewDto       Index);

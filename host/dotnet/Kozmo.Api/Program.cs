@@ -14,6 +14,7 @@ using Kozmo.Contracts;
 using Kozmo.Contracts.Config;
 using Kozmo.Contracts.Interfaces;
 using Kozmo.Llm;
+using Kozmo.Llm.OpenAi;
 
 // ── JSON options (shared by SSE serialisation) ─────────────────────────────
 
@@ -26,13 +27,14 @@ var JsonOpts = new JsonSerializerOptions
 
 // ── Compose the demo stack ─────────────────────────────────────────────────
 
-var catalogueDir = FindCatalogueDir();
-var profile      = new Catalogue().Load(catalogueDir);
-var dbPath       = Path.Combine(AppContext.BaseDirectory, "kozmo-demo.db");
-var store        = new SqliteEntityStore($"Data Source={dbPath}");
-var registry     = BuildRegistry();
-var facade       = BuildFacade(store, profile, registry);
-var sseHub       = new SseHub();
+var catalogueDir  = FindCatalogueDir();
+var profile       = new Catalogue().Load(catalogueDir);
+var dbPath        = Path.Combine(AppContext.BaseDirectory, "kozmo-demo.db");
+var store         = new SqliteEntityStore($"Data Source={dbPath}");
+var registry      = BuildRegistry();
+var liveCachePath = FindLlmCachePath(); // resolved once; used for both replay and live-classify
+var facade        = BuildFacade(store, profile, registry, liveCachePath);
+var sseHub        = new SseHub();
 
 // ── ASP.NET Core setup ────────────────────────────────────────────────────
 
@@ -54,6 +56,16 @@ builder.Services.AddSingleton<IIiFacade>(facade);
 builder.Services.AddSingleton(profile);
 builder.Services.AddSingleton(registry);
 builder.Services.AddSingleton(sseHub);
+builder.Services.AddSingleton(store);
+
+// Live LLM factory: record-mode CachingLlmClient wrapping real OpenAiLlmClient.
+// Returns null when OPENAI_API_KEY is absent or fixture cache path unavailable → endpoint returns 503.
+builder.Services.AddSingleton<Func<IKozmoLlm?>>(sp => () =>
+{
+    if (liveCachePath == null) return null;
+    try { return new CachingLlmClient(liveCachePath, recordMode: true, inner: new OpenAiLlmClient()); }
+    catch (InvalidOperationException) { return null; } // OPENAI_API_KEY not set
+});
 
 var app = builder.Build();
 app.UseStaticFiles();
@@ -191,6 +203,101 @@ app.MapPost("/demo/replay", (IIiFacade f, EntityRegistry reg, SaasProfile prof, 
     return Results.Accepted();
 });
 
+// POST /demo/live-signal — classify free text with live OpenAI, run through deterministic engine
+// This is the ONE endpoint that makes a live network call; the I&I modules never touch the real client.
+app.MapPost("/demo/live-signal", async (
+    LiveSignalRequest        request,
+    IIiFacade                f,
+    SqliteEntityStore        storeInst,
+    EntityRegistry           reg,
+    SaasProfile              prof,
+    SseHub                   hub,
+    Func<IKozmoLlm?>         liveLlmFactory) =>
+{
+    if (!Guid.TryParse(request.VendorId, out var entityGuid))
+        return Results.BadRequest(new { error = "Invalid vendorId." });
+
+    if (string.IsNullOrWhiteSpace(request.Body))
+        return Results.BadRequest(new { error = "Body must not be empty." });
+
+    var entity = reg.GetEntity(entityGuid);
+    if (entity is null) return Results.NotFound(new { error = "Vendor not found." });
+
+    // Resolve live LLM — absent = no API key or no cache path
+    var liveLlm = liveLlmFactory();
+    if (liveLlm is null)
+        return Results.Problem(
+            detail:     "OPENAI_API_KEY is not set or fixture cache path is unavailable.",
+            statusCode: 503);
+
+    hub.Broadcast(JsonSerializer.Serialize(
+        new { type = "live-classifying", ts = DateTimeOffset.UtcNow,
+              data = new { vendorId = request.VendorId, vendorName = entity.CanonicalName } }, JsonOpts));
+
+    try
+    {
+        // Build a temporary live spine that shares the runtime store but uses the live LLM.
+        // Modules are stateless pure functions — safe to instantiate per-request.
+        var liveObs   = new ObservationModule(liveLlm);
+        var liveSpine = new IiFacade(liveObs, new RubricModule(), new IndexModule(),
+                                     new PostureModule(), new DecayEngine(),
+                                     storeInst, prof, reg, DemoClock.Fixed);
+
+        var traceId = Guid.NewGuid();
+        var signal  = new Signal(
+            Id:           Guid.NewGuid(),
+            EntityId:     entityGuid,
+            CustomerId:   SeedData.CustomerId,
+            SourceSystem: SourceSystem.HumanReport,
+            ExternalId:   $"live-{traceId:N}",
+            Payload:      new Dictionary<string, object?> { ["body"] = request.Body },
+            ObservedAt:   DemoClock.AsOf,
+            ReceivedAt:   DemoClock.AsOf,
+            TraceId:      traceId);
+
+        // Pre-classify to capture classification metadata for the response.
+        // Record-mode CachingLlmClient calls OpenAI once, writes to cache; the subsequent
+        // SubmitSignalAsync call hits the cache and never calls OpenAI again.
+        var cl = liveObs.Classify(signal, prof);
+        if (cl is null)
+            return Results.UnprocessableEntity(new { error = "Model could not classify the signal." });
+
+        var classificationView = new ClassificationView(
+            Dimension:        cl.Dimension.ToString(),
+            Criterion:        cl.Criterion,
+            Value:            cl.Value,
+            MethodConfidence: cl.MethodConfidence ?? 0.0,
+            ReasoningSummary: cl.ReasoningSummary ?? "",
+            SourceTier:       (signal.SourceSystem == SourceSystem.HumanReport
+                                    ? SourceTier.Reported : SourceTier.Inferred).ToString());
+
+        // Full pipeline: belief created, index recomputed, posture assigned, written to store
+        await liveSpine.SubmitSignalAsync(signal);
+
+        var idx     = await f.GetIndexAsync(entityGuid);
+        var posture = await f.GetPostureAsync(entityGuid);
+        if (idx is null || posture is null)
+            return Results.Problem("Engine state unavailable after submission.", statusCode: 500);
+
+        var vendorDto = DtoMapper.ToSummary(entityGuid, entity, idx, posture, DemoClock.AsOf);
+        var indexDto  = DtoMapper.ToIndexView(idx, prof);
+
+        hub.Broadcast(JsonSerializer.Serialize(
+            new { type = "live-update", ts = DateTimeOffset.UtcNow,
+                  data = new { vendorId = request.VendorId, classification = classificationView,
+                               vendor = vendorDto, index = indexDto } }, JsonOpts));
+
+        return Results.Ok(new LiveSignalResponse(classificationView, vendorDto, indexDto));
+    }
+    catch (Exception ex)
+    {
+        hub.Broadcast(JsonSerializer.Serialize(
+            new { type = "live-error", ts = DateTimeOffset.UtcNow,
+                  data = new { vendorId = request.VendorId, error = ex.Message } }, JsonOpts));
+        return Results.Problem(detail: ex.Message, statusCode: 502);
+    }
+});
+
 app.Run();
 
 // ── Local helpers ─────────────────────────────────────────────────────────
@@ -220,12 +327,11 @@ static EntityRegistry BuildRegistry()
     return reg;
 }
 
-static IiFacade BuildFacade(IEntityStore store, SaasProfile profile, EntityRegistry registry)
+static IiFacade BuildFacade(IEntityStore store, SaasProfile profile, EntityRegistry registry, string? cachePath)
 {
     // Wire CachingLlmClient (replay) if llm-cache.json exists and is non-empty.
     // Before seed-prep runs the cache is empty ({}) — LLM is null and free-text signals are silently skipped.
     IKozmoLlm? llm = null;
-    var cachePath = FindLlmCachePath();
     if (cachePath != null)
     {
         var info = new FileInfo(cachePath);

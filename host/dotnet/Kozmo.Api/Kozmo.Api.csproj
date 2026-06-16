@@ -9,6 +9,7 @@
     <ProjectReference Include="..\..\..\subsystems\interpretation-inference\dotnet\Ii.Spine\Ii.Spine.csproj" />
     <ProjectReference Include="..\..\..\subsystems\knowledge-memory\dotnet\Km.Store\Km.Store.csproj" />
     <ProjectReference Include="..\..\..\libs\Kozmo.Llm\Kozmo.Llm.csproj" />
+    <ProjectReference Include="..\..\..\libs\Kozmo.Llm.OpenAi\Kozmo.Llm.OpenAi.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.BannedApiAnalyzers" Version="3.3.4" PrivateAssets="all" />
