@@ -13,6 +13,7 @@ using Kozmo.Api;
 using Kozmo.Contracts;
 using Kozmo.Contracts.Config;
 using Kozmo.Contracts.Interfaces;
+using Kozmo.Llm;
 
 // ── JSON options (shared by SSE serialisation) ─────────────────────────────
 
@@ -44,6 +45,8 @@ builder.Services.ConfigureHttpJsonOptions(o =>
     o.SerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
 });
 
+builder.Services.AddRazorPages();
+
 builder.Services.AddCors(c =>
     c.AddDefaultPolicy(p => p.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod()));
 
@@ -53,7 +56,9 @@ builder.Services.AddSingleton(registry);
 builder.Services.AddSingleton(sseHub);
 
 var app = builder.Build();
+app.UseStaticFiles();
 app.UseCors();
+app.MapRazorPages();
 
 // ── Seed on first start ───────────────────────────────────────────────────
 
@@ -215,9 +220,21 @@ static EntityRegistry BuildRegistry()
     return reg;
 }
 
-static IiFacade BuildFacade(IEntityStore store, SaasProfile profile, EntityRegistry registry) =>
-    new IiFacade(
-        new ObservationModule(),
+static IiFacade BuildFacade(IEntityStore store, SaasProfile profile, EntityRegistry registry)
+{
+    // Wire CachingLlmClient (replay) if llm-cache.json exists and is non-empty.
+    // Before seed-prep runs the cache is empty ({}) — LLM is null and free-text signals are silently skipped.
+    IKozmoLlm? llm = null;
+    var cachePath = FindLlmCachePath();
+    if (cachePath != null)
+    {
+        var info = new FileInfo(cachePath);
+        if (info.Length > 4) // more than just "{}" or "{}\n"
+            llm = new CachingLlmClient(cachePath, recordMode: false);
+    }
+
+    return new IiFacade(
+        new ObservationModule(llm),
         new RubricModule(),
         new IndexModule(),
         new PostureModule(),
@@ -226,6 +243,19 @@ static IiFacade BuildFacade(IEntityStore store, SaasProfile profile, EntityRegis
         profile,
         registry,
         DemoClock.Fixed);
+}
+
+static string? FindLlmCachePath()
+{
+    var dir = AppContext.BaseDirectory;
+    while (!string.IsNullOrEmpty(dir))
+    {
+        var candidate = Path.Combine(dir, "fixtures", "llm-cache.json");
+        if (File.Exists(candidate)) return candidate;
+        dir = Path.GetDirectoryName(dir);
+    }
+    return null;
+}
 
 static async Task SeedIfEmptyAsync(IIiFacade facade, SqliteEntityStore store)
 {

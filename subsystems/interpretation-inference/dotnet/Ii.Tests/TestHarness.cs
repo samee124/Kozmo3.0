@@ -8,6 +8,7 @@ using Ii.Spine;
 using Km.Store;
 using Kozmo.Contracts;
 using Kozmo.Contracts.Config;
+using Kozmo.Llm;
 
 namespace Ii.Tests;
 
@@ -57,8 +58,9 @@ internal sealed class TestHarness : IDisposable
     /// Creates a fresh in-memory engine with the entity registry pre-loaded.
     /// No signals are submitted — call ReplayAllSignals or Ingest to populate data.
     /// Pass DemoClock.Fixed to pin ComputedAt/AssignedAt to a canonical timestamp.
+    /// Pass an <see cref="IKozmoLlm"/> to enable the LLM path in ObservationModule (e.g. for Class L tests).
     /// </summary>
-    public static TestHarness FreshEngineWithSeed(IClock? clock = null)
+    public static TestHarness FreshEngineWithSeed(IClock? clock = null, IKozmoLlm? llm = null)
     {
         var profile  = TestHelpers.LoadProfile();
         var store    = new SqliteEntityStore("Data Source=:memory:");
@@ -68,7 +70,7 @@ internal sealed class TestHarness : IDisposable
         registry.Register(MerId, "Meridian IT Services Ltd.",   new DateTimeOffset(2027,  1, 15, 0, 0, 0, TimeSpan.Zero));
 
         var facade = new IiFacade(
-            new ObservationModule(), new RubricModule(), new IndexModule(),
+            new ObservationModule(llm), new RubricModule(), new IndexModule(),
             new PostureModule(), new DecayEngine(), store, profile, registry, clock);
 
         return new TestHarness(facade, store, profile);
@@ -95,6 +97,9 @@ internal sealed class TestHarness : IDisposable
 
     public IReadOnlyList<Belief> GetBeliefs(string vendor) =>
         _store.GetCurrentBeliefsAsync(VendorIds[vendor]).GetAwaiter().GetResult();
+
+    public ReasoningTrail? GetReasoningTrail(string vendor) =>
+        _facade.GetReasoningTrailAsync(VendorIds[vendor]).GetAwaiter().GetResult();
 
     public void Dispose() => _store.Dispose();
 

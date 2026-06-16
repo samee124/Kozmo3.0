@@ -9,6 +9,8 @@
   },
   "confidence_floor": {
     "critical_min_confidence": 0.60,
-    "note": "Composite < AtRiskMin is only banded Critical when confidence_floor >= 0.60. Reported tier weight (0.50) is structurally below this gate."
+    "per_contradiction_penalty": 0.10,
+    "per_gap_penalty": 0.05,
+    "note": "Composite < AtRiskMin is only banded Critical when confidence_floor >= 0.60. Reported tier weight (0.50) is structurally below this gate. Penalty rates reduce PostureAssignment.Confidence only — they never feed back into banding."
   }
 }

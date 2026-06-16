@@ -131,5 +131,47 @@
     "observed_at": "2026-06-01T09:00:00Z",
     "received_at": "2026-06-01T09:15:00Z",
     "trace_id": "b0b0b0b0-0000-0000-0000-000000000001"
+  },
+  {
+    "_comment": "Signal 11 — Cloudwave: CSM free-text note → Experiential/adoption_rate 0.30 (Reported tier, LLM-classified)",
+    "id": "11111111-0000-0000-0000-000000000011",
+    "entity_id": "eeeeeeee-0001-0000-0000-000000000001",
+    "customer_id": "cccccccc-0000-0000-0000-000000000001",
+    "source_system": "HumanReport",
+    "external_id": "hr-cw-2026-0603-csm-001",
+    "payload": {
+      "body": "Spoke with Cloudwave's account manager today. Adoption is tracking at 30-35% of licensed seats. They mentioned an SLA breach last week that is still being investigated."
+    },
+    "observed_at": "2026-06-03T11:00:00Z",
+    "received_at": "2026-06-03T11:05:00Z",
+    "trace_id": "b1b1b1b1-0000-0000-0000-000000000011"
+  },
+  {
+    "_comment": "Signal 12 — Corvus: CSM free-text note about SLA failures and reliability concerns (Reported tier, LLM-classified)",
+    "id": "11111111-0000-0000-0000-000000000012",
+    "entity_id": "eeeeeeee-0002-0000-0000-000000000001",
+    "customer_id": "cccccccc-0000-0000-0000-000000000001",
+    "source_system": "HumanReport",
+    "external_id": "hr-cor-2026-0605-csm-001",
+    "payload": {
+      "body": "Support ticket response times from Corvus have been consistently above 48 hours over the past month. Three critical incidents were not resolved within SLA. The team is losing confidence in the platform's reliability and we are considering escalating this to executive level."
+    },
+    "observed_at": "2026-06-05T09:00:00Z",
+    "received_at": "2026-06-05T09:10:00Z",
+    "trace_id": "b2b2b2b2-0000-0000-0000-000000000012"
+  },
+  {
+    "_comment": "Signal 13 — Meridian: CSM free-text note (body mentions 'Meridian' alias for entity resolution), positive renewal intent (Reported tier, LLM-classified). Reworded in B3-fix to remove uptime figure that misled the LLM into Operational classification; primary signal is Strategic.",
+    "id": "11111111-0000-0000-0000-000000000013",
+    "entity_id": "eeeeeeee-0003-0000-0000-000000000001",
+    "customer_id": "cccccccc-0000-0000-0000-000000000001",
+    "source_system": "HumanReport",
+    "external_id": "hr-mer-2026-0607-csm-001",
+    "payload": {
+      "body": "Quarterly business review with Meridian went very well. Executive sponsor confirmed strong intent to renew and expand the license footprint next year. Product roadmap is well-aligned with our long-term strategic direction and the team is highly satisfied with responsiveness and value delivered. Recommending renewal."
+    },
+    "observed_at": "2026-06-07T10:00:00Z",
+    "received_at": "2026-06-07T10:05:00Z",
+    "trace_id": "b3b3b3b3-0000-0000-0000-000000000013"
   }
 ]

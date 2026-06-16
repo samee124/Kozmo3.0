@@ -5,7 +5,9 @@
   "strategy": "fuzzy_canonical",
   "fuzzy_threshold": 0.80,
   "alias_map": {
-    "Cloudwave": "Cloudwave Systems Inc."
+    "Cloudwave": "Cloudwave Systems Inc.",
+    "Corvus": "Corvus Infrastructure Ltd.",
+    "Meridian": "Meridian IT Services Ltd."
   },
   "note": "alias_map maps raw mention strings to canonical entity names. Fuzzy matching is Phase 1."
 }

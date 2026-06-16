@@ -15,6 +15,10 @@ node_modules/
 *.sqlite
 *.sqlite3
 
+# Test output
+TestResults/
+*.trx
+
 # Slide assets / docs (large binaries, not source)
 slide-*.jpg
 *.pdf

@@ -4,4 +4,4 @@ P:System.DateTime.Now;Inject time via Spine — modules are clock-free (Invarian
 T:System.Random;No randomness in deterministic modules (Invariant #3: determinism).
 T:System.Diagnostics.Stopwatch;No wall-clock in deterministic modules (Invariant #3: determinism).
 T:System.Net.Http.HttpClient;No outbound HTTP in the demo runtime (Invariant #5: no-live-dependency).
-N:Anthropic;Real model client lives in Kozmo.Llm.Anthropic — reachable from seed-prep/smoke only (Invariant #5).
+N:OpenAI;Real model client lives in Kozmo.Llm.OpenAi — reachable from seed-prep/smoke only (Invariant #5).

@@ -23,4 +23,16 @@ public sealed record ClassificationResult(
     double     Value,       // 0–1 normalised rubric score
     SourceTier SourceTier,
     string     Derivation
-);
+)
+{
+    // ── Annotation fields — NOT fingerprint inputs ──────────────────────────
+
+    /// <summary>How this classification was produced. Defaults to Rule.</summary>
+    public ClassificationMethod Method { get; init; } = ClassificationMethod.Rule;
+
+    /// <summary>Raw model confidence (0–1) before tier×freshness fold-in. Null for rule path.</summary>
+    public double? MethodConfidence { get; init; } = null;
+
+    /// <summary>LLM reasoning text when Method == Llm. Null for rule-classified results.</summary>
+    public string? ReasoningSummary { get; init; } = null;
+}

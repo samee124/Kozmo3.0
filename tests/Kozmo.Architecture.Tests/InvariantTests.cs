@@ -117,6 +117,48 @@ public sealed class InvariantTests
                 $"Tier '{name}' weight {tier.Weight} exceeds 1.0 — confidence = tier_weight × freshness ≤ tier_weight requires weight ≤ 1.");
     }
 
+    // ── Lane 6: No external CDN references in UI assets ──────────────────────
+
+    [Fact, Trait("Category", "Invariant")]
+    public void UI_assets_reference_no_external_urls()
+    {
+        // The demo runs offline. No asset file (HTML, CSS, JS, cshtml) may reference
+        // an external URL — every dependency must be locally vendored.
+        var wwwroot = FindApiSubDir("wwwroot");
+        var pages   = FindApiSubDir("Pages");
+
+        var files = Directory.GetFiles(wwwroot, "*.*", SearchOption.AllDirectories)
+            .Concat(Directory.GetFiles(pages, "*.cshtml", SearchOption.AllDirectories))
+            .ToList();
+
+        Assert.NotEmpty(files); // guard: wwwroot and Pages must be populated
+
+        var extUrl = new System.Text.RegularExpressions.Regex(
+            @"https?://(?!localhost)", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+
+        var violations = files
+            .Where(f => extUrl.IsMatch(File.ReadAllText(f)))
+            .Select(f => Path.GetRelativePath(AppContext.BaseDirectory, f))
+            .ToList();
+
+        Assert.True(violations.Count == 0,
+            "UI asset(s) contain external URL references (CDN rule violation):\n" +
+            string.Join("\n", violations));
+    }
+
+    private static string FindApiSubDir(string subDir)
+    {
+        var dir = new DirectoryInfo(AppContext.BaseDirectory);
+        while (dir != null)
+        {
+            var candidate = Path.Combine(dir.FullName, "host", "dotnet", "Kozmo.Api", subDir);
+            if (Directory.Exists(candidate)) return candidate;
+            dir = dir.Parent;
+        }
+        throw new InvalidOperationException(
+            $"Cannot locate Kozmo.Api/{subDir}/ walking up from {AppContext.BaseDirectory}");
+    }
+
     // ── Lane 5a: No live dependency in demo runtime ───────────────────────────
 
     [Fact, Trait("Category", "Invariant")]
@@ -128,7 +170,7 @@ public sealed class InvariantTests
         for (var i = 0; i < runtimeAsms.Length; i++)
         {
             var result = Types.InAssembly(runtimeAsms[i])
-                .ShouldNot().HaveDependencyOnAny("Kozmo.Llm.Anthropic", "System.Net.Http")
+                .ShouldNot().HaveDependencyOnAny("Kozmo.Llm.OpenAi", "System.Net.Http")
                 .GetResult();
             Assert.True(result.IsSuccessful,
                 $"{runtimeNames[i]} has a forbidden live dependency: " +

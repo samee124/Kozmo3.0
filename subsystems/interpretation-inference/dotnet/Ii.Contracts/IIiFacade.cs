@@ -51,4 +51,12 @@ public sealed record ReasoningTrail(
     EntityIndex?       Index,
     IReadOnlyList<Belief>  CurrentBeliefs,
     IReadOnlyList<Signal>  SourceSignals
-);
+)
+{
+    /// <summary>
+    /// MetaCognition result for this entity (STEP 1 — B4).
+    /// Populated by GetReasoningTrailAsync; null when entity has no data yet.
+    /// Annotation only — NOT a fingerprint input.
+    /// </summary>
+    public MetaCognitionResult? Meta { get; init; } = null;
+}

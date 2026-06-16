@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>Kozmo.SeedPrep</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- Ii.Observation (with LLM path) and Kozmo.Llm.OpenAi (real client) are allowed here — seed-prep is NOT the demo runtime -->
+    <ProjectReference Include="..\..\subsystems\interpretation-inference\dotnet\Ii.Observation\Ii.Observation.csproj" />
+    <ProjectReference Include="..\..\libs\Kozmo.Llm.OpenAi\Kozmo.Llm.OpenAi.csproj" />
+    <ProjectReference Include="..\..\libs\Kozmo.Llm\Kozmo.Llm.csproj" />
+    <ProjectReference Include="..\..\subsystems\knowledge-memory\dotnet\Km.Store\Km.Store.csproj" />
+  </ItemGroup>
+</Project>

@@ -20,17 +20,29 @@ public sealed class EntityRegistry
 
     public Guid Resolve(Guid signalEntityId, IReadOnlyDictionary<string, object?> payload, SaasProfile profile)
     {
-        // Check alias map for any string in the payload that might reference an entity
+        // 1. Exact alias match on structured string values (e.g. "entity_name": "Cloudwave")
         foreach (var kv in payload)
         {
             if (kv.Value is string strVal)
             {
-                // Exact alias map lookup
                 if (profile.EntityResolution.AliasMap.TryGetValue(strVal, out var canonical)
                     && _byRef.TryGetValue(canonical, out var resolvedId))
                     return resolvedId;
             }
         }
+
+        // 2. Substring scan on "body" text — first alias keyword found wins
+        if (payload.TryGetValue("body", out var bodyObj) && bodyObj is string bodyText)
+        {
+            foreach (var alias in profile.EntityResolution.AliasMap.Keys)
+            {
+                if (bodyText.Contains(alias, StringComparison.OrdinalIgnoreCase)
+                    && profile.EntityResolution.AliasMap.TryGetValue(alias, out var canonical)
+                    && _byRef.TryGetValue(canonical, out var resolvedId))
+                    return resolvedId;
+            }
+        }
+
         return signalEntityId;
     }
 

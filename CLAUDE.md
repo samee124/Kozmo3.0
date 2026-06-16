@@ -12,7 +12,7 @@ Dev A work (A1–A4) is **complete**. 71 tests green, 5 CI invariant lanes passi
 
 - 16 .NET 8 projects, frozen contracts, 9 catalogue configs, 3-vendor / 10-signal seed, deterministic pipeline
 - Full REST API (`host/dotnet/Kozmo.Api`) with `/vendors`, `/vendors/{id}`, `/vendors/{id}/trail`, `/vendors/{id}/trajectory`
-- Dev B owns: `CachingLlmClient`, real `LlmClient` (in `Kozmo.Llm.Anthropic` only), contradiction + gap detection, data seed-prep tooling, React UI
+- Dev B owns: `CachingLlmClient`, real `OpenAiLlmClient` (in `Kozmo.Llm.OpenAi` only), contradiction + gap detection, data seed-prep tooling, React UI
 - `PHASE_1.md` must exist before starting Phase 1 work — if absent, stop and ask
 
 ## Spec — read before touching anything
@@ -44,7 +44,8 @@ dotnet test Kozmo.sln --filter "Golden"                                         
 libs/
   Kozmo.Contracts/          shared records + enums — generated from schema/; never hand-edit
   Kozmo.Platform/           FingerprintComputer (SHA-256, deterministic)
-  Kozmo.Llm/                IKozmoLlm + LlmResult (Dev B implements CachingLlmClient here)
+  Kozmo.Llm/                IKozmoLlm + LlmResult + CachingLlmClient + LlmCacheMissException
+  Kozmo.Llm.OpenAi/         OpenAiLlmClient (real GPT-4o-mini client) — banned from demo runtime
   Kozmo.Bus/                IKozmoBus (reserved)
   Kozmo.Identity/           ICustomerContext (reserved)
 subsystems/interpretation-inference/dotnet/
@@ -64,6 +65,7 @@ host/dotnet/
   Kozmo.Api.Tests/          integration tests via WebApplicationFactory (Classes K–N)
 tests/
   Kozmo.Architecture.Tests/ 7 invariant-lane tests (all 5 CI lanes)
+  Kozmo.Llm.Tests/          CachingLlmClient round-trip + throw-on-miss + OpenAI smoke (offline-skipped)
 catalogue/profiles/saas/    9 *.saas.v1.json configs
 ci/check-invariants.sh      PR gate command
 ```
@@ -81,18 +83,18 @@ ci/check-invariants.sh      PR gate command
 2. **Belief immutability** — `Belief` is all-init-only; `IEntityStore` exposes no belief-edit path; reflection tests
 3. **Determinism** — `DateTime.UtcNow`, `DateTimeOffset.UtcNow`, `Random`, `Stopwatch` banned in 5 module projects via `BannedApiAnalyzers`; violation = RS0030 build error
 4. **Confidence discipline** — `REPORTED` weight (0.50) < CRITICAL gate (0.60); all tier weights ≤ 1.0; catalogue config tests
-5. **No live dependency** — `HttpClient` + `Anthropic` namespace banned in all demo-runtime projects; `Kozmo.Llm.Anthropic` (real client) must never be imported by demo runtime
+5. **No live dependency** — `HttpClient` + `OpenAI` namespace banned in all demo-runtime projects; `Kozmo.Llm.OpenAi` (real client) must never be imported by demo runtime
 
 ## Dev A / Dev B split (Phase 1)
 
 | Dev A — complete | Dev B — starts here |
 |---|---|
-| `IIiFacade` pipeline (A1–A4) | `CachingLlmClient` — no network; cache miss must throw |
-| API host + trail/trajectory endpoints | `LlmClient` — real Anthropic; lives in `Kozmo.Llm.Anthropic` only |
+| `IIiFacade` pipeline (A1–A4) | `CachingLlmClient` — no network; cache miss must throw ✓ (B1 done) |
+| API host + trail/trajectory endpoints | `OpenAiLlmClient` — real GPT-4o-mini; lives in `Kozmo.Llm.OpenAi` only ✓ (B1 done) |
 | CI invariant lanes (all 5 green) | Contradiction + gap detection logic |
 | BandDrivenBy mechanism (A4) | Data seed-prep tooling; React UI |
 
-**Dev B hard rule:** `LlmClient` lives in `Kozmo.Llm.Anthropic` — never imported by demo runtime (Lane 5 rejects it at build). A `CachingLlmClient` cache miss must fail the run, never fall through to the network.
+**Dev B hard rule:** `OpenAiLlmClient` lives in `Kozmo.Llm.OpenAi` — never imported by demo runtime (Lane 5 rejects it at build). A `CachingLlmClient` cache miss must fail the run, never fall through to the network.
 
 ## Prime directives (non-negotiable)
 

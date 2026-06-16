@@ -31,9 +31,11 @@ public sealed record CriterionRubric(
 public sealed record RubricThreshold(double Min, double Max, double Score);
 
 public sealed record BandsConfig(
-    double HealthyMin,      // composite >= HealthyMin → Healthy
-    double AtRiskMin,       // composite >= AtRiskMin  → AtRisk (else Critical, subject to confidence gate)
-    double CriticalConfidenceGate  // confidence_floor must be >= this to assign Critical
+    double HealthyMin,              // composite >= HealthyMin → Healthy
+    double AtRiskMin,               // composite >= AtRiskMin  → AtRisk (else Critical, subject to confidence gate)
+    double CriticalConfidenceGate,  // confidence_floor must be >= this to assign Critical
+    double PerContradictionPenalty, // posture confidence penalty per detected contradiction
+    double PerGapPenalty            // posture confidence penalty per evidence gap (must be ≤ PerContradictionPenalty)
 );
 
 public sealed record PostureRule(
