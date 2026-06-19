@@ -161,6 +161,18 @@
     "trace_id": "b2b2b2b2-0000-0000-0000-000000000012"
   },
   {
+    "_comment": "Signal 14 — Meridian: roadmap fit 0.85 → Strategic/roadmap_alignment = 1.00 (Verified, CRM). Added so live HumanReport notes can supersede a Verified Strategic predecessor — enabling the Confidence Anchor to fire and lifting the confidence floor above the 0.60 Critical gate.",
+    "id": "11111111-0000-0000-0000-000000000014",
+    "entity_id": "eeeeeeee-0003-0000-0000-000000000001",
+    "customer_id": "cccccccc-0000-0000-0000-000000000001",
+    "source_system": "CRM",
+    "external_id": "crm-mer-2026-0601-roadmap",
+    "payload": { "roadmap_fit_score": 0.85 },
+    "observed_at": "2026-06-01T09:00:00Z",
+    "received_at": "2026-06-01T09:05:00Z",
+    "trace_id": "c1c1c1c1-0000-0000-0000-000000000014"
+  },
+  {
     "_comment": "Signal 13 — Meridian: CSM free-text note (body mentions 'Meridian' alias for entity resolution), positive renewal intent (Reported tier, LLM-classified). Reworded in B3-fix to remove uptime figure that misled the LLM into Operational classification; primary signal is Strategic.",
     "id": "11111111-0000-0000-0000-000000000013",
     "entity_id": "eeeeeeee-0003-0000-0000-000000000001",
