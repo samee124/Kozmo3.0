@@ -1,101 +1,131 @@
 {
   "225aa58ddd644ac0ad4a3fe0412cce3525f2ac367aabd74e0c04a27b3b9c6ff7": {
-    "answerJson": "{\u0022dimension\u0022:\u0022Operational\u0022,\u0022criterion\u0022:\u0022uptime_sla\u0022,\u0022value\u0022:0.5,\u0022confidence\u0022:0.7,\u0022reasoning\u0022:\u0022The mention of an SLA breach indicates potential operational issues, leading to a moderate confidence in the uptime performance.\u0022}",
+    "answerJson": "{\"dimension\":\"Operational\",\"criterion\":\"uptime_sla\",\"value\":0.5,\"confidence\":0.7,\"reasoning\":\"The mention of an SLA breach indicates potential operational issues, leading to a moderate confidence in the uptime performance.\"}",
     "confidence": 0.85,
     "reasoningSummary": ""
   },
   "cc30b2a2ecb0c24f8bfd44b0d6cedf255120f93119ea2cee60ec53371d7893ba": {
-    "answerJson": "{\u0022dimension\u0022:\u0022Operational\u0022,\u0022criterion\u0022:\u0022uptime_sla\u0022,\u0022value\u0022:0.2,\u0022confidence\u0022:0.9,\u0022reasoning\u0022:\u0022The consistently high support ticket response times and unresolved critical incidents indicate poor performance against uptime SLA expectations.\u0022}",
+    "answerJson": "{\"dimension\":\"Operational\",\"criterion\":\"uptime_sla\",\"value\":0.2,\"confidence\":0.9,\"reasoning\":\"The consistently high support ticket response times and unresolved critical incidents indicate poor performance against uptime SLA expectations.\"}",
     "confidence": 0.85,
     "reasoningSummary": ""
   },
   "037d269a2d09472da3ae8c42b73b8197657ca1e7d7c8ee207e61f04c83c0aa01": {
-    "answerJson": "{\u0022dimension\u0022:\u0022Operational\u0022,\u0022criterion\u0022:\u0022uptime_sla\u0022,\u0022value\u0022:1.0,\u0022confidence\u0022:0.9,\u0022reasoning\u0022:\u0022The vendor has maintained a platform uptime of 99.9% with zero incidents, indicating excellent operational performance.\u0022}",
+    "answerJson": "{\"dimension\":\"Operational\",\"criterion\":\"uptime_sla\",\"value\":1.0,\"confidence\":0.9,\"reasoning\":\"The vendor has maintained a platform uptime of 99.9% with zero incidents, indicating excellent operational performance.\"}",
     "confidence": 0.85,
     "reasoningSummary": ""
   },
   "78c93fed1acd46c95a00e4729e86399e5d649426e656154b491d3a6649471e50": {
-    "answerJson": "{\u0022dimension\u0022:\u0022Strategic\u0022,\u0022criterion\u0022:\u0022renewal_intent\u0022,\u0022value\u0022:1.0,\u0022confidence\u0022:0.9,\u0022reasoning\u0022:\u0022The executive sponsor confirmed strong intent to renew and expand the license footprint, indicating high renewal intent.\u0022}",
+    "answerJson": "{\"dimension\":\"Strategic\",\"criterion\":\"renewal_intent\",\"value\":1.0,\"confidence\":0.9,\"reasoning\":\"The executive sponsor confirmed strong intent to renew and expand the license footprint, indicating high renewal intent.\"}",
     "confidence": 0.85,
     "reasoningSummary": ""
   },
   "4c89c8c15594b91c16cca1b28c0db1bbf9f7b1ab6082c4d536f7450d06b10d80": {
-    "answerJson": "{\u0022dimension\u0022:\u0022Operational\u0022,\u0022criterion\u0022:\u0022uptime_sla\u0022,\u0022value\u0022:0.3,\u0022confidence\u0022:0.8,\u0022reasoning\u0022:\u0022The slow response and open tickets past SLA indicate significant operational issues affecting service reliability.\u0022}",
+    "answerJson": "{\"dimension\":\"Operational\",\"criterion\":\"uptime_sla\",\"value\":0.3,\"confidence\":0.8,\"reasoning\":\"The slow response and open tickets past SLA indicate significant operational issues affecting service reliability.\"}",
     "confidence": 0.85,
     "reasoningSummary": ""
   },
   "83798b418dc25848271f009f19c7eb4c3e7e85a96b95c002c81ff94171ba54ee": {
-    "answerJson": "{\u0022dimension\u0022:\u0022Financial\u0022,\u0022criterion\u0022:\u0022payment_timeliness\u0022,\u0022value\u0022:0.1,\u0022confidence\u0022:0.9,\u0022reasoning\u0022:\u0022The vendor has a significant overdue balance and has not responded to multiple escalations, indicating poor payment timeliness.\u0022}",
+    "answerJson": "{\"dimension\":\"Financial\",\"criterion\":\"payment_timeliness\",\"value\":0.1,\"confidence\":0.9,\"reasoning\":\"The vendor has a significant overdue balance and has not responded to multiple escalations, indicating poor payment timeliness.\"}",
     "confidence": 0.85,
     "reasoningSummary": ""
   },
   "daf12c3769879e64781843fdec0b9a9681c4b3c18ab04bf8ea137de0a513fcad": {
-    "answerJson": "{\u0022dimension\u0022:\u0022Strategic\u0022,\u0022criterion\u0022:\u0022renewal_intent\u0022,\u0022value\u0022:0.1,\u0022confidence\u0022:0.9,\u0022reasoning\u0022:\u0022The executive sponsor has confirmed they are unlikely to renew, indicating a very low renewal intent.\u0022}",
+    "answerJson": "{\"dimension\":\"Strategic\",\"criterion\":\"renewal_intent\",\"value\":0.1,\"confidence\":0.9,\"reasoning\":\"The executive sponsor has confirmed they are unlikely to renew, indicating a very low renewal intent.\"}",
     "confidence": 0.85,
     "reasoningSummary": ""
   },
   "b7cb64adfd84f4695c68c803044083197ad1e60665d70ab93ab6f069aa4c0af7": {
-    "answerJson": "{\u0022dimension\u0022:\u0022Operational\u0022,\u0022criterion\u0022:\u0022uptime_sla\u0022,\u0022value\u0022:0.2,\u0022confidence\u0022:0.9,\u0022reasoning\u0022:\u0022The major outages and unresolved incidents indicate a significant failure in uptime and reliability.\u0022}",
+    "answerJson": "{\"dimension\":\"Operational\",\"criterion\":\"uptime_sla\",\"value\":0.2,\"confidence\":0.9,\"reasoning\":\"The major outages and unresolved incidents indicate a significant failure in uptime and reliability.\"}",
     "confidence": 0.85,
     "reasoningSummary": ""
   },
   "d3d62d9d1d87e6b7d08ce79ee7b2d4e411812906edcbf965527ed0707ebae42c": {
-    "answerJson": "{\u0022dimension\u0022:\u0022Financial\u0022,\u0022criterion\u0022:\u0022payment_timeliness\u0022,\u0022value\u0022:0.1,\u0022confidence\u0022:0.9,\u0022reasoning\u0022:\u0022The vendor has a significant overdue balance and has not responded to multiple escalations, indicating poor payment timeliness.\u0022}",
+    "answerJson": "{\"dimension\":\"Financial\",\"criterion\":\"payment_timeliness\",\"value\":0.1,\"confidence\":0.9,\"reasoning\":\"The vendor has a significant overdue balance and has not responded to multiple escalations, indicating poor payment timeliness.\"}",
     "confidence": 0.85,
     "reasoningSummary": ""
   },
   "536c676378ebb2f7f57f7eb5cc15828329e59d8b8670f2f25dd2c5397d5ed47d": {
-    "answerJson": "{\u0022dimension\u0022:\u0022Strategic\u0022,\u0022criterion\u0022:\u0022renewal_intent\u0022,\u0022value\u0022:0.1,\u0022confidence\u0022:0.9,\u0022reasoning\u0022:\u0022The executive sponsor confirmed they are unlikely to renew, indicating a very low renewal intent.\u0022}",
+    "answerJson": "{\"dimension\":\"Strategic\",\"criterion\":\"renewal_intent\",\"value\":0.1,\"confidence\":0.9,\"reasoning\":\"The executive sponsor confirmed they are unlikely to renew, indicating a very low renewal intent.\"}",
     "confidence": 0.85,
     "reasoningSummary": ""
   },
   "d0fbd549e1971a458ee099ca73a8afed221f5ecf17606574445d13615fef2f88": {
-    "answerJson": "{\u0022dimension\u0022:\u0022Operational\u0022,\u0022criterion\u0022:\u0022uptime_sla\u0022,\u0022value\u0022:0.2,\u0022confidence\u0022:0.9,\u0022reasoning\u0022:\u0022The major outages and unresolved incidents indicate a significant failure in operational reliability.\u0022}",
+    "answerJson": "{\"dimension\":\"Operational\",\"criterion\":\"uptime_sla\",\"value\":0.2,\"confidence\":0.9,\"reasoning\":\"The major outages and unresolved incidents indicate a significant failure in operational reliability.\"}",
     "confidence": 0.85,
     "reasoningSummary": ""
   },
   "9ad004840c69c60ff26d5e52bdf0542e1ccc7a542736fe4b0f8ebfa753c87465": {
-    "answerJson": "{\u0022dimension\u0022:\u0022Strategic\u0022,\u0022criterion\u0022:\u0022roadmap_fit_score\u0022,\u0022value\u0022:0.1,\u0022confidence\u0022:0.9,\u0022reasoning\u0022:\u0022The vendor\\u0027s product roadmap is misaligned with the customer\\u0027s technical requirements, indicating a low roadmap fit score.\u0022}",
+    "answerJson": "{\"dimension\":\"Strategic\",\"criterion\":\"roadmap_fit_score\",\"value\":0.1,\"confidence\":0.9,\"reasoning\":\"The vendor\\u0027s product roadmap is misaligned with the customer\\u0027s technical requirements, indicating a low roadmap fit score.\"}",
     "confidence": 0.85,
     "reasoningSummary": ""
   },
   "2efc31919904e6297e6575bcba26019aefb339bb54f06af757643db427655140": {
-    "answerJson": "{\u0022dimension\u0022:\u0022Operational\u0022,\u0022criterion\u0022:\u0022uptime_sla\u0022,\u0022value\u0022:0.998,\u0022confidence\u0022:0.9,\u0022reasoning\u0022:\u0022The note indicates that platform uptime has been restored to 99.8%, which reflects strong operational performance.\u0022}",
+    "answerJson": "{\"dimension\":\"Operational\",\"criterion\":\"uptime_sla\",\"value\":0.998,\"confidence\":0.9,\"reasoning\":\"The note indicates that platform uptime has been restored to 99.8%, which reflects strong operational performance.\"}",
     "confidence": 0.85,
     "reasoningSummary": ""
   },
   "22696ef87e834af5cbc4b83f2cb8e0ef6bc93ad80e2c8f07ffb33207f4a48df3": {
-    "answerJson": "{\u0022dimension\u0022:\u0022Operational\u0022,\u0022criterion\u0022:\u0022uptime_sla\u0022,\u0022value\u0022:0.2,\u0022confidence\u0022:0.9,\u0022reasoning\u0022:\u0022The significant delay in support response times indicates a failure to meet the operational SLA expectations.\u0022}",
+    "answerJson": "{\"dimension\":\"Operational\",\"criterion\":\"uptime_sla\",\"value\":0.2,\"confidence\":0.9,\"reasoning\":\"The significant delay in support response times indicates a failure to meet the operational SLA expectations.\"}",
     "confidence": 0.85,
     "reasoningSummary": ""
   },
   "1b56554258517e557702be33d7c54b47bed759da7cba351779b3831b94721915": {
-    "answerJson": "{\u0022dimension\u0022:\u0022Financial\u0022,\u0022criterion\u0022:\u0022payment_timeliness\u0022,\u0022value\u0022:0.1,\u0022confidence\u0022:0.9,\u0022reasoning\u0022:\u0022The vendor has an overdue balance and has not responded to payment reminders, indicating poor payment timeliness.\u0022}",
+    "answerJson": "{\"dimension\":\"Financial\",\"criterion\":\"payment_timeliness\",\"value\":0.1,\"confidence\":0.9,\"reasoning\":\"The vendor has an overdue balance and has not responded to payment reminders, indicating poor payment timeliness.\"}",
     "confidence": 0.85,
     "reasoningSummary": ""
   },
   "d74b6bc107999e79d919551a848334024e086b5f054a5e3f31cf266d67ddc071": {
-    "answerJson": "{\u0022dimension\u0022:\u0022Strategic\u0022,\u0022criterion\u0022:\u0022renewal_intent\u0022,\u0022value\u0022:0.3,\u0022confidence\u0022:0.8,\u0022reasoning\u0022:\u0022The account manager\\u0027s non-committal response indicates uncertainty about renewal, suggesting a low intent to renew the contract.\u0022}",
+    "answerJson": "{\"dimension\":\"Strategic\",\"criterion\":\"renewal_intent\",\"value\":0.3,\"confidence\":0.8,\"reasoning\":\"The account manager\\u0027s non-committal response indicates uncertainty about renewal, suggesting a low intent to renew the contract.\"}",
     "confidence": 0.85,
     "reasoningSummary": ""
   },
   "33bbc61dd28a1d7d7b25da877847cca42d4c22d543c2950e0a89dde32ba70f29": {
-    "answerJson": "{\u0022dimension\u0022:\u0022Operational\u0022,\u0022criterion\u0022:\u0022uptime_sla\u0022,\u0022value\u0022:1.0,\u0022confidence\u0022:0.9,\u0022reasoning\u0022:\u0022The support team\\u0027s overhaul and timely resolution of tickets indicate strong operational performance and adherence to SLA.\u0022}",
+    "answerJson": "{\"dimension\":\"Operational\",\"criterion\":\"uptime_sla\",\"value\":1.0,\"confidence\":0.9,\"reasoning\":\"The support team\\u0027s overhaul and timely resolution of tickets indicate strong operational performance and adherence to SLA.\"}",
     "confidence": 0.85,
     "reasoningSummary": ""
   },
   "8b79bc74fd1e49ecc435af0d28fc21e4670068b983869ee3de6d0c200331fbe9": {
-    "answerJson": "{\u0022dimension\u0022:\u0022Operational\u0022,\u0022criterion\u0022:\u0022uptime_sla\u0022,\u0022value\u0022:0.99,\u0022confidence\u0022:0.9,\u0022reasoning\u0022:\u0022The platform\\u0027s uptime has returned to 99.9% with new controls implemented, indicating strong operational performance.\u0022}",
+    "answerJson": "{\"dimension\":\"Operational\",\"criterion\":\"uptime_sla\",\"value\":0.99,\"confidence\":0.9,\"reasoning\":\"The platform\\u0027s uptime has returned to 99.9% with new controls implemented, indicating strong operational performance.\"}",
     "confidence": 0.85,
     "reasoningSummary": ""
   },
   "b2ab64f56b59868584ba7aea16d06e639b3e42399de8fa21b5b7be45feb9ff5f": {
-    "answerJson": "{\u0022dimension\u0022:\u0022Strategic\u0022,\u0022criterion\u0022:\u0022roadmap_fit_score\u0022,\u0022value\u0022:0.9,\u0022confidence\u0022:0.8,\u0022reasoning\u0022:\u0022The alignment session and inclusion of key integration requirements in the delivery plan indicate a strong strategic fit with the vendor\\u0027s roadmap.\u0022}",
+    "answerJson": "{\"dimension\":\"Strategic\",\"criterion\":\"roadmap_fit_score\",\"value\":0.9,\"confidence\":0.8,\"reasoning\":\"The alignment session and inclusion of key integration requirements in the delivery plan indicate a strong strategic fit with the vendor\\u0027s roadmap.\"}",
     "confidence": 0.85,
     "reasoningSummary": ""
   },
   "a291fd698d370d13b77a06e615431eedf37e63d1039107328dd58ea45dc53382": {
-    "answerJson": "{\u0022dimension\u0022:\u0022Strategic\u0022,\u0022criterion\u0022:\u0022renewal_intent\u0022,\u0022value\u0022:1.0,\u0022confidence\u0022:0.9,\u0022reasoning\u0022:\u0022The executive sponsor\\u0027s personal confirmation of commitment to a two-year renewal indicates strong renewal intent and a strategic partnership.\u0022}",
+    "answerJson": "{\"dimension\":\"Strategic\",\"criterion\":\"renewal_intent\",\"value\":1.0,\"confidence\":0.9,\"reasoning\":\"The executive sponsor\\u0027s personal confirmation of commitment to a two-year renewal indicates strong renewal intent and a strategic partnership.\"}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "3c4c9d1f39f64d2053a943682426d9573d4b2c1de6781b54ada27c4bb91293d1": {
+    "answerJson": "{\"dimension\":\"Financial\",\"criterion\":\"payment_timeliness\",\"value\":0.0,\"confidence\":0.9,\"reasoning\":\"The note indicates a payment failure, which directly impacts the vendor\\u0027s financial health and payment timeliness.\"}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "27c7f91c42cedaede9e96483c7801254b62fa9a2f78e902539ed39a28d38c1cc": {
+    "answerJson": "{\"dimension\":\"Financial\",\"criterion\":\"payment_timeliness\",\"value\":0.0,\"confidence\":0.9,\"reasoning\":\"The note indicates a failure in payment, suggesting significant issues with payment timeliness.\"}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "0385da354fe3afd7b8f566eac28b50fca7b0fcc961a00b596298058f3b62358f": {
+    "answerJson": "{\"dimension\":\"Financial\",\"criterion\":\"payment_timeliness\",\"value\":0.0,\"confidence\":0.9,\"reasoning\":\"The note indicates a payment failure, suggesting poor payment timeliness.\"}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "630669073bfea8246cf6ffabd3cd7c46168eaa353f0020dbb66b88de24c1761c": {
+    "answerJson": "{\"dimension\":\"Operational\",\"criterion\":\"uptime_sla\",\"value\":0.2,\"confidence\":0.9,\"reasoning\":\"The report of major outages and uptime being well below SLA indicates significant operational issues.\"}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "45bcedda2cfcbc0f1adebe2130a7d5edcfe42b695a15411e592f7241791f4ca5": {
+    "answerJson": "{\"dimension\":\"Strategic\",\"criterion\":\"renewal_intent\",\"value\":0.3,\"confidence\":0.8,\"reasoning\":\"The client\\u0027s lukewarm feelings about renewal and consideration of a competitor indicate a low intent to renew.\"}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "d04a4d0efaf4dfcc7f9053623ed80fc47d19ae14d87bcc33dddf8c6e38c113ae": {
+    "answerJson": "{\"dimension\":\"Experiential\",\"criterion\":\"csat_score\",\"value\":0.3,\"confidence\":0.9,\"reasoning\":\"The note indicates a significant decline in customer satisfaction, suggesting a low csat_score.\"}",
     "confidence": 0.85,
     "reasoningSummary": ""
   }

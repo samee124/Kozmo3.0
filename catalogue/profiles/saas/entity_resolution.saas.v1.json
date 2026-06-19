@@ -7,7 +7,8 @@
   "alias_map": {
     "Cloudwave": "Cloudwave Systems Inc.",
     "Corvus": "Corvus Infrastructure Ltd.",
-    "Meridian": "Meridian IT Services Ltd."
+    "Meridian": "Meridian IT Services Ltd.",
+    "Helix": "Helix Systems Ltd."
   },
   "note": "alias_map maps raw mention strings to canonical entity names. Fuzzy matching is Phase 1."
 }
