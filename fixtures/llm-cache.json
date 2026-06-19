@@ -18,5 +18,35 @@
     "answerJson": "{\u0022dimension\u0022:\u0022Strategic\u0022,\u0022criterion\u0022:\u0022renewal_intent\u0022,\u0022value\u0022:1.0,\u0022confidence\u0022:0.9,\u0022reasoning\u0022:\u0022The executive sponsor confirmed strong intent to renew and expand the license footprint, indicating high renewal intent.\u0022}",
     "confidence": 0.85,
     "reasoningSummary": ""
+  },
+  "3c4c9d1f39f64d2053a943682426d9573d4b2c1de6781b54ada27c4bb91293d1": {
+    "answerJson": "{\u0022dimension\u0022:\u0022Financial\u0022,\u0022criterion\u0022:\u0022payment_timeliness\u0022,\u0022value\u0022:0.0,\u0022confidence\u0022:0.9,\u0022reasoning\u0022:\u0022The note indicates a payment failure, which directly impacts the vendor\\u0027s financial health and payment timeliness.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "27c7f91c42cedaede9e96483c7801254b62fa9a2f78e902539ed39a28d38c1cc": {
+    "answerJson": "{\u0022dimension\u0022:\u0022Financial\u0022,\u0022criterion\u0022:\u0022payment_timeliness\u0022,\u0022value\u0022:0.0,\u0022confidence\u0022:0.9,\u0022reasoning\u0022:\u0022The note indicates a failure in payment, suggesting significant issues with payment timeliness.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "0385da354fe3afd7b8f566eac28b50fca7b0fcc961a00b596298058f3b62358f": {
+    "answerJson": "{\u0022dimension\u0022:\u0022Financial\u0022,\u0022criterion\u0022:\u0022payment_timeliness\u0022,\u0022value\u0022:0.0,\u0022confidence\u0022:0.9,\u0022reasoning\u0022:\u0022The note indicates a payment failure, suggesting poor payment timeliness.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "630669073bfea8246cf6ffabd3cd7c46168eaa353f0020dbb66b88de24c1761c": {
+    "answerJson": "{\u0022dimension\u0022:\u0022Operational\u0022,\u0022criterion\u0022:\u0022uptime_sla\u0022,\u0022value\u0022:0.2,\u0022confidence\u0022:0.9,\u0022reasoning\u0022:\u0022The report of major outages and uptime being well below SLA indicates significant operational issues.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "45bcedda2cfcbc0f1adebe2130a7d5edcfe42b695a15411e592f7241791f4ca5": {
+    "answerJson": "{\u0022dimension\u0022:\u0022Strategic\u0022,\u0022criterion\u0022:\u0022renewal_intent\u0022,\u0022value\u0022:0.3,\u0022confidence\u0022:0.8,\u0022reasoning\u0022:\u0022The client\\u0027s lukewarm feelings about renewal and consideration of a competitor indicate a low intent to renew.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "d04a4d0efaf4dfcc7f9053623ed80fc47d19ae14d87bcc33dddf8c6e38c113ae": {
+    "answerJson": "{\u0022dimension\u0022:\u0022Experiential\u0022,\u0022criterion\u0022:\u0022csat_score\u0022,\u0022value\u0022:0.3,\u0022confidence\u0022:0.9,\u0022reasoning\u0022:\u0022The note indicates a significant decline in customer satisfaction, suggesting a low csat_score.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
   }
 }

@@ -12,10 +12,10 @@ const API = {
   trajectory:  (id)            => fetch(`/vendors/${id}/trajectory`).then(assertOk),
   reset:       ()              => fetch('/demo/reset', { method: 'POST' }).then(assertOk),
   replay:      ()              => fetch('/demo/replay', { method: 'POST' }),
-  liveSignal:  (vendorId, body) => fetch('/demo/live-signal', {
+  liveSignal:  (body) => fetch('/demo/live-signal', {
     method:  'POST',
     headers: { 'Content-Type': 'application/json' },
-    body:    JSON.stringify({ vendorId, body }),
+    body:    JSON.stringify({ body }),
   }),
 };
 
@@ -511,7 +511,6 @@ async function onLiveSend() {
   const btn      = document.getElementById('btn-live-send');
   const statusEl = document.getElementById('live-status');
   const resultEl = document.getElementById('live-result');
-  const vendorId = document.getElementById('live-vendor-select').value;
   const body     = document.getElementById('live-body').value.trim();
 
   if (!body) {
@@ -524,10 +523,15 @@ async function onLiveSend() {
   setLiveStatus('Submitting…', '');
 
   try {
-    const res = await API.liveSignal(vendorId, body);
+    const res = await API.liveSignal(body);
 
     if (res.status === 503) {
       setLiveStatus('OPENAI_API_KEY not configured — live classification unavailable.', 'live-error');
+      return;
+    }
+    if (res.status === 422) {
+      const err = await res.json().catch(() => ({ error: res.statusText }));
+      setLiveStatus(err.error ?? 'Vendor not identified.', 'live-error');
       return;
     }
     if (!res.ok) {
@@ -536,18 +540,19 @@ async function onLiveSend() {
       return;
     }
 
-    const data = await res.json();
+    const data       = await res.json();
+    const updatedId  = data.vendor.entityId;
     renderLiveResult(data, resultEl);
     setLiveStatus('Classification complete.', 'live-success');
 
-    // Refresh vendor list and detail view if this vendor is selected
+    // Refresh vendor list and detail view if the detected vendor is currently selected
     state.vendors = await API.vendors();
     renderVendorList();
 
-    if (state.selectedId === vendorId) {
+    if (state.selectedId === updatedId) {
       const [trail, trajectory] = await Promise.all([
-        API.trail(vendorId),
-        API.trajectory(vendorId),
+        API.trail(updatedId),
+        API.trajectory(updatedId),
       ]);
       state.trail           = trail;
       state.trajectory      = trajectory;
@@ -582,6 +587,10 @@ function onLiveErrorSse(data) {
 function renderLiveResult(data, el) {
   const cl = data.classification;
   el.innerHTML = `
+    <div class="live-result-row">
+      <span class="live-result-label">Vendor</span>
+      <span class="live-result-value">${esc(data.vendor.name)}</span>
+    </div>
     <div class="live-result-row">
       <span class="live-result-label">Dimension</span>
       <span class="live-result-value">${esc(cl.dimension)}</span>

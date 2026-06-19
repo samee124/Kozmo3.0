@@ -11,10 +11,11 @@ internal static class SeedData
 {
     internal static readonly Guid CloudwaveId = Guid.Parse("eeeeeeee-0001-0000-0000-000000000001");
     internal static readonly Guid CorvusId    = Guid.Parse("eeeeeeee-0002-0000-0000-000000000001");
-    internal static readonly Guid MeridianId  = Guid.Parse("eeeeeeee-0003-0000-0000-000000000001");
+    internal static readonly Guid MeridianId = Guid.Parse("eeeeeeee-0003-0000-0000-000000000001");
+    internal static readonly Guid HelixId = Guid.Parse("eeeeeeee-0004-0000-0000-000000000001");
     internal static readonly Guid CustomerId  = Guid.Parse("cccccccc-0000-0000-0000-000000000001");
 
-    internal static readonly Guid[] VendorIds = [CloudwaveId, CorvusId, MeridianId];
+    internal static readonly Guid[] VendorIds = [CloudwaveId, CorvusId, MeridianId, HelixId];
 
     internal static readonly Signal[] AllSignals = LoadSignals();
 

@@ -32,7 +32,7 @@ public class OTests
         var beforeFp = beforeTrail!.Index.Fingerprint;
 
         // Send a live signal — stub returns Operational/uptime_sla=0.10
-        var req      = new { vendorId = CloudwaveId, body = "The platform has been experiencing critical outages." };
+        var req      = new { body = "The Cloudwave platform has been experiencing critical outages." };
         var response = await _client.PostAsJsonAsync("/demo/live-signal", req);
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -41,7 +41,8 @@ public class OTests
         Assert.NotNull(result);
 
         // Classification fields populated
-        Assert.Equal("Operational", result!.Classification.Dimension);
+        Assert.Equal(CloudwaveId,   result!.Vendor.EntityId);
+        Assert.Equal("Operational", result.Classification.Dimension);
         Assert.Equal("uptime_sla",  result.Classification.Criterion);
         Assert.InRange(result.Classification.Value, 0.0, 0.30); // stub returns 0.10
 
@@ -60,7 +61,7 @@ public class OTests
     public async Task O2_LiveSignalThenReset_RestoresGoldenFingerprints()
     {
         // Send a live signal to mutate the state
-        var req = new { vendorId = CloudwaveId, body = "Serious stability problems this week." };
+        var req = new { body = "Serious Cloudwave stability problems this week." };
         await _client.PostAsJsonAsync("/demo/live-signal", req);
 
         // Verify state has changed (non-golden fingerprint)

@@ -173,5 +173,53 @@
     "observed_at": "2026-06-07T10:00:00Z",
     "received_at": "2026-06-07T10:05:00Z",
     "trace_id": "b3b3b3b3-0000-0000-0000-000000000013"
+  },
+  {
+    "_comment": "Helix seed 1 — uptime 99.2% → Operational/uptime_sla 0.80 (Verified)",
+    "id": "eeeeeeee-0004-1001-0000-000000000001",
+    "entity_id": "eeeeeeee-0004-0000-0000-000000000001",
+    "customer_id": "cccccccc-0000-0000-0000-000000000001",
+    "source_system": "MonitoringPlatform",
+    "external_id": "helix-seed-uptime",
+    "payload": { "uptime_pct": 99.2 },
+    "observed_at": "2026-06-15T10:00:00Z",
+    "received_at": "2026-06-15T10:00:00Z",
+    "trace_id": "aaaaaaaa-0004-1001-0000-000000000001"
+  },
+  {
+    "_comment": "Helix seed 2 — CSAT 4.2 → Experiential/csat_score 0.80 (Verified)",
+    "id": "eeeeeeee-0004-1002-0000-000000000001",
+    "entity_id": "eeeeeeee-0004-0000-0000-000000000001",
+    "customer_id": "cccccccc-0000-0000-0000-000000000001",
+    "source_system": "CRM",
+    "external_id": "helix-seed-csat",
+    "payload": { "csat_score": 4.2 },
+    "observed_at": "2026-06-15T10:00:00Z",
+    "received_at": "2026-06-15T10:00:00Z",
+    "trace_id": "aaaaaaaa-0004-1002-0000-000000000001"
+  },
+  {
+    "_comment": "Helix seed 3 — invoice accuracy 98.0% → Financial/invoice_accuracy 0.80 (Verified)",
+    "id": "eeeeeeee-0004-1003-0000-000000000001",
+    "entity_id": "eeeeeeee-0004-0000-0000-000000000001",
+    "customer_id": "cccccccc-0000-0000-0000-000000000001",
+    "source_system": "BillingSystem",
+    "external_id": "helix-seed-invoice",
+    "payload": { "invoice_accuracy_pct": 98.0 },
+    "observed_at": "2026-06-15T10:00:00Z",
+    "received_at": "2026-06-15T10:00:00Z",
+    "trace_id": "aaaaaaaa-0004-1003-0000-000000000001"
+  },
+  {
+    "_comment": "Helix seed 4 — roadmap fit 0.65 → Strategic/roadmap_alignment 0.80 (Verified)",
+    "id": "eeeeeeee-0004-1004-0000-000000000001",
+    "entity_id": "eeeeeeee-0004-0000-0000-000000000001",
+    "customer_id": "cccccccc-0000-0000-0000-000000000001",
+    "source_system": "CRM",
+    "external_id": "helix-seed-roadmap",
+    "payload": { "roadmap_fit_score": 0.65 },
+    "observed_at": "2026-06-15T10:00:00Z",
+    "received_at": "2026-06-15T10:00:00Z",
+    "trace_id": "aaaaaaaa-0004-1004-0000-000000000001"
   }
 ]

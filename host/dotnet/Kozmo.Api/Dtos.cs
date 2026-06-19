@@ -113,7 +113,7 @@ public sealed record TrajectoryPointDto(
 
 // ── Live signal injection ──────────────────────────────────────────────────────
 
-public sealed record LiveSignalRequest(string VendorId, string Body);
+public sealed record LiveSignalRequest(string Body);
 
 public sealed record ClassificationView(
     string Dimension,

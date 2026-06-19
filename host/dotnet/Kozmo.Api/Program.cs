@@ -214,11 +214,13 @@ app.MapPost("/demo/live-signal", async (
     SseHub                   hub,
     Func<IKozmoLlm?>         liveLlmFactory) =>
 {
-    if (!Guid.TryParse(request.VendorId, out var entityGuid))
-        return Results.BadRequest(new { error = "Invalid vendorId." });
-
     if (string.IsNullOrWhiteSpace(request.Body))
         return Results.BadRequest(new { error = "Body must not be empty." });
+
+    var bodyPayload = new Dictionary<string, object?> { ["body"] = request.Body };
+    var entityGuid  = reg.Resolve(Guid.Empty, bodyPayload, prof);
+    if (entityGuid == Guid.Empty)
+        return Results.UnprocessableEntity(new { error = "Cannot identify vendor — mention Cloudwave, Corvus, or Meridian by name." });
 
     var entity = reg.GetEntity(entityGuid);
     if (entity is null) return Results.NotFound(new { error = "Vendor not found." });
@@ -232,7 +234,7 @@ app.MapPost("/demo/live-signal", async (
 
     hub.Broadcast(JsonSerializer.Serialize(
         new { type = "live-classifying", ts = DateTimeOffset.UtcNow,
-              data = new { vendorId = request.VendorId, vendorName = entity.CanonicalName } }, JsonOpts));
+              data = new { vendorId = entityGuid.ToString(), vendorName = entity.CanonicalName } }, JsonOpts));
 
     try
     {
@@ -284,7 +286,7 @@ app.MapPost("/demo/live-signal", async (
 
         hub.Broadcast(JsonSerializer.Serialize(
             new { type = "live-update", ts = DateTimeOffset.UtcNow,
-                  data = new { vendorId = request.VendorId, classification = classificationView,
+                  data = new { vendorId = entityGuid.ToString(), classification = classificationView,
                                vendor = vendorDto, index = indexDto } }, JsonOpts));
 
         return Results.Ok(new LiveSignalResponse(classificationView, vendorDto, indexDto));
@@ -293,7 +295,7 @@ app.MapPost("/demo/live-signal", async (
     {
         hub.Broadcast(JsonSerializer.Serialize(
             new { type = "live-error", ts = DateTimeOffset.UtcNow,
-                  data = new { vendorId = request.VendorId, error = ex.Message } }, JsonOpts));
+                  data = new { vendorId = entityGuid.ToString(), error = ex.Message } }, JsonOpts));
         return Results.Problem(detail: ex.Message, statusCode: 502);
     }
 });
@@ -322,8 +324,9 @@ static EntityRegistry BuildRegistry()
         new DateTimeOffset(2026, 9,  1, 0, 0, 0, TimeSpan.Zero));
     reg.Register(SeedData.CorvusId,    "Corvus Infrastructure Ltd.",
         new DateTimeOffset(2026, 8, 15, 0, 0, 0, TimeSpan.Zero));
-    reg.Register(SeedData.MeridianId,  "Meridian IT Services Ltd.",
+    reg.Register(SeedData.MeridianId, "Meridian IT Services Ltd.",
         new DateTimeOffset(2027, 1, 15, 0, 0, 0, TimeSpan.Zero));
+    reg.Register(SeedData.HelixId, "Helix Systems Ltd.");
     return reg;
 }
 
