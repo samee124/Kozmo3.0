@@ -266,6 +266,10 @@ function renderTrajectoryPanel(points, thresholds) {
     <div class="chart-container">
       <h4>Composite Score Trajectory</h4>
       ${buildSvgChart(points, thresholds)}
+    </div>
+    <div class="chart-container" style="margin-top:24px;">
+      <h4>Signal-by-Signal Journey &nbsp;<span style="font-size:11px;color:#64748b;font-weight:400;">each step = one signal processed</span></h4>
+      ${buildJourneyChart(points, thresholds)}
     </div>`;
 }
 
@@ -352,6 +356,137 @@ function buildSvgChart(points, thresholds) {
     ${dots}
     ${bandLabels}
   </svg>`;
+}
+
+// ── Journey chart — equally spaced steps, no date axis ───────────────────────
+
+function buildJourneyChart(points, thresholds) {
+  const W = 600, H = 280;
+  const PAD = { top: 20, right: 80, bottom: 64, left: 50 };
+  const iW = W - PAD.left - PAD.right;
+  const iH = H - PAD.top  - PAD.bottom;
+
+  const healthy = (thresholds && thresholds.healthy != null) ? thresholds.healthy : 0.70;
+  const atRisk  = (thresholds && thresholds.atRisk  != null) ? thresholds.atRisk  : 0.40;
+
+  const n    = points.length;
+  const step = n > 1 ? iW / (n - 1) : iW;
+
+  const xOf = i => PAD.left + i * (n > 1 ? iW / (n - 1) : 0);
+  const yOf = v => PAD.top  + (1 - v) * iH;
+
+  const yH  = yOf(healthy);
+  const yAR = yOf(atRisk);
+  const yT  = PAD.top;
+  const yB  = PAD.top + iH;
+  const xL  = PAD.left;
+  const xR  = PAD.left + iW;
+
+  // Band colour regions
+  const regions = `
+    <rect x="${xL}" y="${yT}"  width="${iW}" height="${yH  - yT}"  fill="#dcfce7" opacity="0.45"/>
+    <rect x="${xL}" y="${yH}"  width="${iW}" height="${yAR - yH}"  fill="#fef9c3" opacity="0.45"/>
+    <rect x="${xL}" y="${yAR}" width="${iW}" height="${yB  - yAR}" fill="#fee2e2" opacity="0.45"/>`;
+
+  // Threshold dashed lines
+  const thresh = `
+    <line x1="${xL}" y1="${yH}"  x2="${xR}" y2="${yH}"  stroke="#86efac" stroke-dasharray="5,3" stroke-width="1"/>
+    <line x1="${xL}" y1="${yAR}" x2="${xR}" y2="${yAR}" stroke="#fca5a5" stroke-dasharray="5,3" stroke-width="1"/>`;
+
+  // Axes
+  const axes = `
+    <line x1="${xL}" y1="${yT}" x2="${xL}" y2="${yB}" stroke="#94a3b8" stroke-width="1.5"/>
+    <line x1="${xL}" y1="${yB}" x2="${xR}" y2="${yB}" stroke="#94a3b8" stroke-width="1.5"/>`;
+
+  // Y axis labels
+  const yLabels = [0.0, 0.2, 0.4, 0.6, 0.8, 1.0].map(v =>
+    `<text x="${xL - 6}" y="${yOf(v) + 4}" text-anchor="end" class="cl">${v.toFixed(1)}</text>` +
+    `<line x1="${xL - 3}" y1="${yOf(v)}" x2="${xL}" y2="${yOf(v)}" stroke="#94a3b8" stroke-width="1"/>`
+  ).join('');
+
+  // Line path — segments coloured by band transition
+  const segments = points.slice(0, -1).map((p, i) => {
+    const x1 = xOf(i).toFixed(1),   y1 = yOf(p.composite).toFixed(1);
+    const x2 = xOf(i+1).toFixed(1), y2 = yOf(points[i+1].composite).toFixed(1);
+    const col = bandFill(points[i+1].composite >= healthy ? 'Healthy'
+               : points[i+1].composite >= atRisk  ? 'AtRisk' : 'Critical');
+    return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${col}" stroke-width="2.5" stroke-linejoin="round"/>`;
+  }).join('');
+
+  // Up/down delta arrows between consecutive points
+  const arrows = points.slice(1).map((p, i) => {
+    const prev  = points[i].composite;
+    const curr  = p.composite;
+    const delta = curr - prev;
+    if (Math.abs(delta) < 0.005) return '';
+    const mx  = ((xOf(i) + xOf(i+1)) / 2).toFixed(1);
+    const my  = ((yOf(prev) + yOf(curr)) / 2 - 10).toFixed(1);
+    const sign = delta > 0 ? '▲' : '▼';
+    const col  = delta > 0 ? '#22c55e' : '#ef4444';
+    return `<text x="${mx}" y="${my}" text-anchor="middle" style="font-size:8px;fill:${col};font-weight:700;">${sign}${Math.abs(delta).toFixed(2)}</text>`;
+  }).join('');
+
+  // Dots with stance label below x-axis
+  const dots = points.map((p, i) => {
+    const cx   = xOf(i).toFixed(1);
+    const cy   = yOf(p.composite).toFixed(1);
+    const fill = bandFill(p.composite >= healthy ? 'Healthy'
+               : p.composite >= atRisk  ? 'AtRisk' : 'Critical');
+    const stanceShort = stanceAbbr(p.stance);
+    const stanceCol   = stanceColor(p.stance);
+    // Step label below axis
+    const labelY = yB + 14;
+    const stanceY = yB + 26;
+    const stepLbl = `<text x="${cx}" y="${labelY}" text-anchor="middle" class="cl">S${i+1}</text>`;
+    const stanceLbl = `<text x="${cx}" y="${stanceY}" text-anchor="middle" style="font-size:8px;fill:${stanceCol};font-weight:700;">${esc(stanceShort)}</text>`;
+    // Value label above dot (only if not crowded)
+    const valLbl = n <= 12 ? `<text x="${cx}" y="${(+cy - 8).toFixed(1)}" text-anchor="middle" class="cl">${p.composite.toFixed(2)}</text>` : '';
+    return `${stepLbl}${stanceLbl}${valLbl}
+    <circle cx="${cx}" cy="${cy}" r="5" fill="${fill}" stroke="white" stroke-width="2">
+      <title>Step ${i+1} | ${esc(p.band)} | ${p.composite.toFixed(3)} | ${esc(p.stance)}</title>
+    </circle>`;
+  }).join('');
+
+  // Band labels on right
+  const bandLabels = `
+    <text x="${xR + 4}" y="${yOf((1.0 + healthy) / 2) + 4}"  class="bl">Healthy</text>
+    <text x="${xR + 4}" y="${yOf((healthy + atRisk) / 2) + 4}" class="bl">At-Risk</text>
+    <text x="${xR + 4}" y="${yOf(atRisk / 2) + 4}"            class="bl">Critical</text>`;
+
+  // X axis title
+  const xTitle = `<text x="${xL + iW/2}" y="${yB + 50}" text-anchor="middle" class="cl" style="fill:#94a3b8;">← each point is one signal processed →</text>`;
+
+  return `<svg viewBox="0 0 ${W} ${H}" class="trajectory-chart">
+    <style>
+      .cl { font-size: 9px; fill: #64748b; font-family: monospace; }
+      .bl { font-size: 9px; fill: #94a3b8; font-family: monospace; }
+    </style>
+    ${regions}${thresh}${axes}${yLabels}
+    ${segments}${arrows}${dots}
+    ${bandLabels}${xTitle}
+  </svg>`;
+}
+
+function stanceAbbr(stance) {
+  if (!stance) return '—';
+  const s = stance.toLowerCase();
+  if (s === 'maintain')    return 'Maintain';
+  if (s === 'monitor')     return 'Monitor';
+  if (s === 'renegotiate') return 'Reneg.';
+  if (s === 'escalate')    return 'Escalate';
+  if (s === 'remediate')   return 'Remediate';
+  return stance;
+}
+
+function stanceColor(stance) {
+  if (!stance) return '#94a3b8';
+  const s = stance.toLowerCase();
+  if (s === 'maintain')    return '#22c55e';
+  if (s === 'monitor')     return '#3b82f6';
+  if (s === 'renegotiate') return '#f59e0b';
+  if (s === 'escalate')    return '#ef4444';
+  if (s === 'remediate')   return '#f97316';
+  return '#94a3b8';
 }
 
 function bandFill(band) {
