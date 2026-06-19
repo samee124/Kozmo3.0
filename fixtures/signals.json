@@ -187,51 +187,51 @@
     "trace_id": "b3b3b3b3-0000-0000-0000-000000000013"
   },
   {
-    "_comment": "Helix seed 1 — uptime 99.2% → Operational/uptime_sla 0.80 (Verified)",
-    "id": "eeeeeeee-0004-1001-0000-000000000001",
+    "_comment": "H1 — Helix: uptime 99.2% → Operational/uptime_sla = 0.80 (Verified). Score 0.80 not 1.00 — gives headroom for Stage-1 to reach AtRisk via new-slot notes without triggering worst-dimension-floor.",
+    "id": "11111111-0000-0000-0000-000000000101",
     "entity_id": "eeeeeeee-0004-0000-0000-000000000001",
     "customer_id": "cccccccc-0000-0000-0000-000000000001",
     "source_system": "MonitoringPlatform",
-    "external_id": "helix-seed-uptime",
+    "external_id": "mon-hx-2026-0601-001",
     "payload": { "uptime_pct": 99.2 },
-    "observed_at": "2026-06-15T10:00:00Z",
-    "received_at": "2026-06-15T10:00:00Z",
-    "trace_id": "aaaaaaaa-0004-1001-0000-000000000001"
+    "observed_at": "2026-06-01T08:00:00Z",
+    "received_at": "2026-06-01T08:05:00Z",
+    "trace_id": "e1e1e1e1-0000-0000-0000-000000000101"
   },
   {
-    "_comment": "Helix seed 2 — CSAT 4.2 → Experiential/csat_score 0.80 (Verified)",
-    "id": "eeeeeeee-0004-1002-0000-000000000001",
-    "entity_id": "eeeeeeee-0004-0000-0000-000000000001",
-    "customer_id": "cccccccc-0000-0000-0000-000000000001",
-    "source_system": "CRM",
-    "external_id": "helix-seed-csat",
-    "payload": { "csat_score": 4.2 },
-    "observed_at": "2026-06-15T10:00:00Z",
-    "received_at": "2026-06-15T10:00:00Z",
-    "trace_id": "aaaaaaaa-0004-1002-0000-000000000001"
-  },
-  {
-    "_comment": "Helix seed 3 — invoice accuracy 98.0% → Financial/invoice_accuracy 0.80 (Verified)",
-    "id": "eeeeeeee-0004-1003-0000-000000000001",
+    "_comment": "H2 — Helix: days_overdue 3 → Financial/payment_timeliness = 0.80 (Verified). Score 0.80 not 1.00 — gives headroom.",
+    "id": "11111111-0000-0000-0000-000000000102",
     "entity_id": "eeeeeeee-0004-0000-0000-000000000001",
     "customer_id": "cccccccc-0000-0000-0000-000000000001",
     "source_system": "BillingSystem",
-    "external_id": "helix-seed-invoice",
-    "payload": { "invoice_accuracy_pct": 98.0 },
-    "observed_at": "2026-06-15T10:00:00Z",
-    "received_at": "2026-06-15T10:00:00Z",
-    "trace_id": "aaaaaaaa-0004-1003-0000-000000000001"
+    "external_id": "bill-hx-2026-0601-001",
+    "payload": { "days_overdue": 3 },
+    "observed_at": "2026-06-01T09:00:00Z",
+    "received_at": "2026-06-01T09:05:00Z",
+    "trace_id": "e2e2e2e2-0000-0000-0000-000000000102"
   },
   {
-    "_comment": "Helix seed 4 — roadmap fit 0.65 → Strategic/roadmap_alignment 0.80 (Verified)",
-    "id": "eeeeeeee-0004-1004-0000-000000000001",
+    "_comment": "H3 — Helix: roadmap_fit 0.70 → Strategic/roadmap_alignment = 0.80 (Verified). Score 0.80 not 1.00 — gives headroom.",
+    "id": "11111111-0000-0000-0000-000000000103",
     "entity_id": "eeeeeeee-0004-0000-0000-000000000001",
     "customer_id": "cccccccc-0000-0000-0000-000000000001",
     "source_system": "CRM",
-    "external_id": "helix-seed-roadmap",
-    "payload": { "roadmap_fit_score": 0.65 },
-    "observed_at": "2026-06-15T10:00:00Z",
-    "received_at": "2026-06-15T10:00:00Z",
-    "trace_id": "aaaaaaaa-0004-1004-0000-000000000001"
+    "external_id": "crm-hx-2026-0601-001",
+    "payload": { "roadmap_fit_score": 0.70 },
+    "observed_at": "2026-06-01T10:00:00Z",
+    "received_at": "2026-06-01T10:05:00Z",
+    "trace_id": "e3e3e3e3-0000-0000-0000-000000000103"
+  },
+  {
+    "_comment": "H4 — Helix: csat_score 4.2 → Experiential/csat_score = 0.80 (Verified). Score 0.80 not 1.00 — gives headroom.",
+    "id": "11111111-0000-0000-0000-000000000104",
+    "entity_id": "eeeeeeee-0004-0000-0000-000000000001",
+    "customer_id": "cccccccc-0000-0000-0000-000000000001",
+    "source_system": "CRM",
+    "external_id": "crm-hx-2026-0601-csat",
+    "payload": { "csat_score": 4.2 },
+    "observed_at": "2026-06-01T11:00:00Z",
+    "received_at": "2026-06-01T11:05:00Z",
+    "trace_id": "e4e4e4e4-0000-0000-0000-000000000104"
   }
 ]

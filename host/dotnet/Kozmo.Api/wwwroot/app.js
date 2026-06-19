@@ -408,8 +408,7 @@ function buildJourneyChart(points, thresholds) {
   const segments = points.slice(0, -1).map((p, i) => {
     const x1 = xOf(i).toFixed(1),   y1 = yOf(p.composite).toFixed(1);
     const x2 = xOf(i+1).toFixed(1), y2 = yOf(points[i+1].composite).toFixed(1);
-    const col = bandFill(points[i+1].composite >= healthy ? 'Healthy'
-               : points[i+1].composite >= atRisk  ? 'AtRisk' : 'Critical');
+    const col = bandFill(points[i+1].band);
     return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${col}" stroke-width="2.5" stroke-linejoin="round"/>`;
   }).join('');
 
@@ -430,8 +429,7 @@ function buildJourneyChart(points, thresholds) {
   const dots = points.map((p, i) => {
     const cx   = xOf(i).toFixed(1);
     const cy   = yOf(p.composite).toFixed(1);
-    const fill = bandFill(p.composite >= healthy ? 'Healthy'
-               : p.composite >= atRisk  ? 'AtRisk' : 'Critical');
+    const fill = bandFill(p.band);
     const stanceShort = stanceAbbr(p.stance);
     const stanceCol   = stanceColor(p.stance);
     // Step label below axis
