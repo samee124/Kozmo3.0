@@ -22,6 +22,8 @@ TestResults/
 # Slide assets / docs (large binaries, not source)
 slide-*.jpg
 *.pdf
+# Exception: committed test fixture PDFs
+!fixtures/pdf-samples/*.pdf
 
 # IDE
 .vs/
