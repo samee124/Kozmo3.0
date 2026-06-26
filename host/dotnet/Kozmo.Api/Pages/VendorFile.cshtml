@@ -1,0 +1,628 @@
+@page "/vendor-file/{id}"
+@model Kozmo.Api.Pages.VendorFileModel
+@using Kozmo.Contracts
+@using Ii.Contracts
+@using System.Linq
+@{
+    Layout = null;
+
+    var idx  = Model.Judgement?.Index;
+    var pos  = Model.Judgement?.Posture;
+    var meta = Model.Judgement?.Meta;
+    var mgmt = Model.Judgement?.Management;
+
+    var beliefsById  = Model.Beliefs.ToDictionary(b => b.Id);
+    var evidenceById = Model.Evidence.ToDictionary(e => e.EvidenceId);
+
+    // Worst-dimension for drill chain
+    KeyValuePair<Dimension, DimensionScore>? worstDim = null;
+    if (idx != null)
+    {
+        var ranked = idx.DimensionScores
+            .Where(kv => kv.Value.ContributingBeliefIds.Count > 0)
+            .OrderBy(kv => kv.Value.Score)
+            .ToList();
+        if (ranked.Count > 0) worstDim = ranked[0];
+    }
+
+    // Worst contributing belief in that dimension
+    Belief? worstBelief = null;
+    if (worstDim.HasValue)
+    {
+        var ids = worstDim.Value.Value.ContributingBeliefIds;
+        worstBelief = Model.Beliefs
+            .Where(b => b.Dimension == worstDim.Value.Key && ids.Contains(b.Id))
+            .OrderBy(b => b.Value)
+            .FirstOrDefault();
+    }
+
+    Evidence? proofEv = null;
+    if (worstBelief?.Provenance != null
+        && evidenceById.TryGetValue(worstBelief.Provenance.EvidenceId, out var _pe))
+        proofEv = _pe;
+
+    // Helpers (local fns work in .NET 8 Razor — compiled into the async Execute method)
+    double FreshnessFactor(DateTimeOffset? observed, int? hl)
+    {
+        if (observed == null || hl == null || hl.Value <= 0) return 1.0;
+        return Math.Pow(2.0, -(Model.AsOf - observed.Value).TotalDays / hl.Value);
+    }
+
+    string FmtVal(double v) =>
+        v >= 10_000 ? v.ToString("N0") :
+        v >= 100    ? v.ToString("F0") :
+        v >= 1.0    ? v.ToString("F2") :
+                      v.ToString("F3");
+
+    string TierDesc(SourceTier t) => t switch {
+        SourceTier.Primary    => "PRIMARY — contractual document; highest rank",
+        SourceTier.Verified   => "VERIFIED — third-party verified (platform data or CSV); ceiling 0.80",
+        SourceTier.Reported   => "REPORTED — vendor self-reported or email; ceiling 0.50",
+        SourceTier.Inferred   => "INFERRED — machine-inferred from indirect evidence; ceiling 0.30",
+        SourceTier.Unverified => "UNVERIFIED — unverified public source; confidence ceiling 0.20",
+        _ => t.ToString()
+    };
+
+    string ScoreCls(double score) => score < 0.35 ? "low" : score < 0.60 ? "mid" : "high";
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Kozmo — @Model.VendorName</title>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --ground: #f7f8fa;
+            --surface: #ffffff;
+            --border: #e4e7ee;
+            --border-strong: #c8ccd8;
+            --text: #1a1d23;
+            --muted: #5a6478;
+            --faint: #7b8299;
+            --accent: #2563eb;
+            --accent-bg: #eff6ff;
+            --warn-bg: #fff7ed;
+            --warn-border: #fed7aa;
+            --warn-text: #9a3412;
+            --err-bg: #fef2f2;
+            --err-border: #fecaca;
+            --err-text: #b91c1c;
+        }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 14px; background: var(--ground); color: var(--text); line-height: 1.5; }
+        .page { max-width: 980px; margin: 0 auto; padding: 32px 24px 64px; }
+
+        /* Navigation */
+        .back { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); text-decoration: none; font-size: 13px; margin-bottom: 20px; }
+        .back:hover { color: var(--text); }
+        h1 { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+        .sub { color: var(--muted); font-size: 13px; margin-bottom: 20px; }
+
+        /* Drill chain */
+        .drill-chain { display: flex; align-items: center; flex-wrap: wrap; gap: 0; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 10px 16px; margin-bottom: 24px; font-size: 13px; }
+        .drill-chain a { color: var(--accent); text-decoration: none; padding: 2px 4px; border-radius: 3px; transition: background .15s; }
+        .drill-chain a:hover { background: var(--accent-bg); }
+        .drill-arrow { color: var(--faint); margin: 0 6px; }
+        .drill-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--faint); margin-right: 6px; }
+
+        /* Cards */
+        .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+        .card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 18px 20px; }
+        .card h3 { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .07em; color: var(--faint); margin-bottom: 10px; }
+        .card-detail { font-size: 12px; color: var(--muted); margin-top: 8px; line-height: 1.6; }
+        .card-detail strong { color: var(--text); font-weight: 600; }
+
+        /* Alert cards */
+        .alert-warn { background: var(--warn-bg); border: 1px solid var(--warn-border); border-radius: 8px; padding: 14px 18px; margin-bottom: 16px; font-size: 13px; color: var(--warn-text); }
+        .alert-err  { background: var(--err-bg);  border: 1px solid var(--err-border);  border-radius: 8px; padding: 14px 18px; margin-bottom: 16px; font-size: 13px; color: var(--err-text); }
+        .alert-warn a, .alert-err a { color: inherit; font-weight: 600; }
+
+        /* Stance + Band badges */
+        .stance-badge { display: inline-block; padding: 4px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; }
+        .stance-Maintain    { background: #e6f7ee; color: #1a7a3c; }
+        .stance-Monitor     { background: #fff7e0; color: #8a6200; }
+        .stance-Renegotiate { background: #fff0e8; color: #c45000; }
+        .stance-Escalate    { background: #fde8e8; color: #b91c1c; }
+        .stance-Remediate   { background: #f3e8ff; color: #7c3aed; }
+        .band-badge { display: inline-block; padding: 3px 12px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+        .band-Healthy  { background: #e6f7ee; color: #1a7a3c; }
+        .band-AtRisk   { background: #fff7e0; color: #8a6200; }
+        .band-Critical { background: #fde8e8; color: #b91c1c; }
+
+        /* Tier badges */
+        .tier-badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; cursor: default; }
+        .tier-Primary    { background: #eff6ff; color: #1d4ed8; }
+        .tier-Verified   { background: #f0fdf4; color: #166534; }
+        .tier-Reported   { background: #fff7ed; color: #9a3412; }
+        .tier-Inferred   { background: #faf5ff; color: #6b21a8; }
+        .tier-Unverified { background: #f9fafb; color: #374151; border: 1px solid #e5e7eb; }
+
+        /* Dimension grid */
+        .dim-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-bottom: 20px; }
+        .dim-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; cursor: pointer; transition: border-color .15s; }
+        .dim-card:hover { border-color: var(--accent); }
+        .dim-card.flash { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(37,99,235,.15); }
+        .dim-name { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--faint); margin-bottom: 8px; }
+        .dim-score { font-size: 26px; font-weight: 700; }
+        .dim-score.low  { color: #b91c1c; }
+        .dim-score.mid  { color: #c45000; }
+        .dim-score.high { color: #1a7a3c; }
+        .dim-conf { font-size: 11px; color: var(--faint); margin-top: 4px; }
+        .progress-outer { height: 5px; background: #e8eaee; border-radius: 3px; margin-top: 8px; }
+        .progress-inner { height: 5px; border-radius: 3px; }
+        .progress-low  { background: #ef4444; }
+        .progress-mid  { background: #f97316; }
+        .progress-high { background: #22c55e; }
+
+        /* Section titles */
+        .section-title { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--faint); margin: 28px 0 10px; border-bottom: 1px solid var(--border); padding-bottom: 6px; }
+
+        /* Belief accordion */
+        .belief-list { display: flex; flex-direction: column; gap: 4px; }
+        details.belief { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; overflow: hidden; scroll-margin-top: 80px; }
+        details.belief.flash { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(37,99,235,.15); }
+        details.belief > summary { list-style: none; cursor: pointer; padding: 10px 14px; display: flex; align-items: center; gap: 10px; user-select: none; }
+        details.belief > summary::-webkit-details-marker { display: none; }
+        details.belief > summary::before { content: "▶"; font-size: 9px; color: var(--faint); transition: transform .15s; flex-shrink: 0; }
+        details.belief[open] > summary::before { transform: rotate(90deg); }
+        details.belief[open] { border-color: var(--border-strong); }
+        .belief-claim { font-size: 13px; font-weight: 600; flex: 1; }
+        .dim-chip { font-size: 11px; background: #f1f5f9; color: #475569; border-radius: 3px; padding: 1px 6px; }
+        .belief-val { font-size: 13px; font-weight: 600; color: var(--text); min-width: 60px; text-align: right; }
+        .belief-conf { font-size: 12px; color: var(--muted); min-width: 50px; text-align: right; }
+
+        /* Belief expanded body */
+        .belief-body { padding: 0 14px 14px 32px; display: flex; flex-direction: column; gap: 10px; }
+        .panel { background: var(--ground); border: 1px solid var(--border); border-radius: 6px; padding: 10px 14px; font-size: 12px; }
+        .panel-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--faint); margin-bottom: 6px; }
+        .panel-row { display: flex; gap: 8px; align-items: baseline; margin-bottom: 3px; }
+        .panel-key { color: var(--faint); min-width: 110px; flex-shrink: 0; }
+        .panel-val { color: var(--text); font-weight: 500; }
+        .panel-val a { color: var(--accent); text-decoration: none; }
+        .panel-val a:hover { text-decoration: underline; }
+        .locator { font-family: monospace; font-size: 11px; color: var(--muted); word-break: break-all; }
+        .freshness-eq { font-family: monospace; font-size: 11px; color: var(--text); background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 4px 8px; margin-top: 4px; }
+
+        /* Contradiction panel */
+        .contradiction-block { border: 1px solid var(--err-border); border-radius: 8px; overflow: hidden; margin-bottom: 8px; }
+        .contradiction-header { background: var(--err-bg); padding: 10px 14px; font-size: 13px; font-weight: 600; color: var(--err-text); display: flex; align-items: center; gap: 8px; }
+        .contradiction-body { padding: 12px 14px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: var(--surface); }
+        .conflict-side { border: 1px solid var(--border); border-radius: 6px; padding: 10px 12px; font-size: 12px; }
+        .conflict-side.active { border-color: #22c55e; background: #f0fdf4; }
+        .conflict-side.inactive { border-color: var(--border); background: var(--ground); opacity: .8; }
+        .conflict-tag { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 6px; }
+        .active-tag   { color: #166534; }
+        .inactive-tag { color: var(--faint); }
+
+        /* Evidence table */
+        .tbl-wrap { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; }
+        th { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; color: var(--faint); padding: 9px 14px; text-align: left; border-bottom: 1px solid var(--border); }
+        td { padding: 9px 14px; border-bottom: 1px solid #f2f3f7; font-size: 13px; vertical-align: top; }
+        tr:last-child td { border-bottom: none; }
+        tr.flash td { background: var(--accent-bg); }
+
+        /* Completeness */
+        .completeness-bar-outer { height: 7px; background: #e8eaee; border-radius: 4px; margin: 8px 0; }
+        .completeness-bar-inner { height: 7px; border-radius: 4px; background: #3b82f6; }
+        .gap-chip { display: inline-block; background: #fff1f2; color: #9f1239; border: 1px solid #fecdd3; border-radius: 4px; padding: 2px 7px; font-size: 11px; margin: 2px; }
+
+        /* Fingerprint */
+        .fp { font-family: monospace; font-size: 11px; color: var(--faint); word-break: break-all; }
+
+        @@keyframes flash-in {
+            0%   { background: rgba(37,99,235,.18); }
+            100% { background: transparent; }
+        }
+        .flash-anim { animation: flash-in .8s ease-out forwards; }
+
+        @@media (max-width: 700px) {
+            .grid2 { grid-template-columns: 1fr; }
+            .dim-grid { grid-template-columns: repeat(2,1fr); }
+            .contradiction-body { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+<div class="page">
+    <a class="back" href="/">&#8592; Back to dashboard</a>
+    <h1>@Model.VendorName</h1>
+    <p class="sub">Vendor File &middot; as of @Model.AsOf.ToString("yyyy-MM-dd")</p>
+
+    <div style="display:flex;align-items:center;flex-wrap:wrap;gap:10px;padding:8px 0 16px;">
+      <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--faint);">Re-upload Contract</span>
+      <input type="hidden" id="vf-vendor-name" value="@Html.Encode(Model.VendorName)">
+      <input type="file" id="vf-upload-file" accept=".pdf" style="font-size:11px;color:var(--muted);">
+      <button id="vf-upload-btn" type="button"
+              style="font-size:11px;font-weight:600;padding:5px 12px;border-radius:4px;border:none;cursor:pointer;background:#2563eb;color:#fff;">
+        Extract &amp; refresh →
+      </button>
+      <span id="vf-upload-status" style="font-size:11px;color:var(--muted);"></span>
+    </div>
+
+    @if (Model.Judgement == null)
+    {
+        <div class="card"><p>No vendor file data found. Ingest evidence to generate this view.</p></div>
+    }
+    else
+    {
+        <!-- ── Drill chain ──────────────────────────────────────────────────────── -->
+        @if (worstBelief != null)
+        {
+            <div class="drill-chain">
+                <span class="drill-label">Drill</span>
+                <a href="#sec-stance">@(pos?.Stance.ToString() ?? "—")</a>
+                <span class="drill-arrow">›</span>
+                <a href="#sec-band">@(idx?.Band.ToString() ?? "—")</a>
+                <span class="drill-arrow">›</span>
+                <a href="#dim-@worstDim!.Value.Key" onclick="drillToDim('@worstDim!.Value.Key')">
+                    @worstDim!.Value.Key
+                </a>
+                <span class="drill-arrow">›</span>
+                <a href="#belief-@worstBelief.ClaimKey">@worstBelief.ClaimKey</a>
+                @if (worstBelief.Provenance != null)
+                {
+                    <span class="drill-arrow">›</span>
+                    <a href="#evidence-@worstBelief.Provenance.EvidenceId"
+                       title="@(proofEv?.Ref ?? "evidence source")">
+                        <span class="locator" style="font-size:12px">@worstBelief.Provenance.Locator</span>
+                    </a>
+                }
+            </div>
+        }
+
+        <!-- ── Stance + Band cards ─────────────────────────────────────────────── -->
+        <div class="grid2">
+            <div class="card" id="sec-stance">
+                <h3>Stance</h3>
+                <span class="stance-badge stance-@pos!.Stance.ToString()">@pos.Stance</span>
+                @if (!string.IsNullOrEmpty(pos.Rationale))
+                {
+                    <div class="card-detail">@pos.Rationale</div>
+                }
+            </div>
+            <div class="card" id="sec-band">
+                <h3>Band &amp; Composite</h3>
+                <span class="band-badge band-@idx!.Band.ToString()">@idx.Band</span>
+                <span style="margin-left:10px;font-size:20px;font-weight:700">@idx.Composite.ToString("P0")</span>
+                <div class="card-detail">
+                    <strong>Confidence floor:</strong> @idx.ConfidenceFloor.ToString("F3")
+                    @if (idx.BandDrivenBy != "composite")
+                    {
+                        <span style="margin-left:8px;font-size:11px;background:#fde8e8;color:#b91c1c;border-radius:3px;padding:1px 5px">@idx.BandDrivenBy</span>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- ── Renewal deadline flag ───────────────────────────────────────────── -->
+        @if (mgmt!.Flags.RenewalDeadline.HasValue)
+        {
+            var rd = mgmt.Flags.RenewalDeadline.Value;
+            var daysToRenewal = (int)(rd - Model.AsOf).TotalDays;
+            var urgentClass = daysToRenewal <= 30 ? "alert-err" : "alert-warn";
+            <div class="@urgentClass">
+                &#128197; <strong>Renewal deadline</strong>
+                @rd.ToString("yyyy-MM-dd") &mdash; <strong>@daysToRenewal day@(daysToRenewal == 1 ? "" : "s")</strong> from now.
+                <a href="#belief-renewal_date">View source belief ›</a>
+            </div>
+        }
+
+        <!-- ── Contradictions ─────────────────────────────────────────────────── -->
+        @if (meta!.Value.Contradictions.Count > 0)
+        {
+            <div class="section-title" style="color:#b91c1c">Contradictions detected</div>
+            @foreach (var c in meta.Value.Contradictions)
+            {
+                <div class="contradiction-block">
+                    <div class="contradiction-header">
+                        &#9888; @c.Description
+                        @if (!string.IsNullOrEmpty(c.Dimension))
+                        {
+                            <span style="font-size:11px;font-weight:400;opacity:.8">(@c.Dimension)</span>
+                        }
+                    </div>
+                    <div class="contradiction-body">
+                        @foreach (var cid in c.ConflictingBeliefIds)
+                        {
+                            bool found = beliefsById.TryGetValue(cid, out var cb);
+                            bool isActive = found && cb!.SupersededBy == null;
+                            <div class="conflict-side @(isActive ? "active" : "inactive")">
+                                <div class="conflict-tag @(isActive ? "active-tag" : "inactive-tag")">
+                                    @(isActive ? "● Active" : "○ Superseded")
+                                </div>
+                                @if (found)
+                                {
+                                    <div><span class="tier-badge tier-@cb!.SourceTier">@cb.SourceTier</span></div>
+                                    <div style="margin-top:6px;font-weight:600">@cb.ClaimKey</div>
+                                    <div style="font-size:13px;color:#1a1d23;margin-top:2px">@FmtVal(cb.Value)</div>
+                                    @if (!string.IsNullOrEmpty(cb.Provenance?.Locator))
+                                    {
+                                        <div class="locator" style="margin-top:4px">@cb.Provenance!.Locator</div>
+                                    }
+                                }
+                                else
+                                {
+                                    <div style="color:#7b8299;font-size:12px">Belief @cid.ToString("D")[..8]… (not in active set)</div>
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        }
+
+        <!-- ── Dimension scores ───────────────────────────────────────────────── -->
+        @if (idx.DimensionScores.Count > 0)
+        {
+            <div class="dim-grid">
+                @foreach (var kv in idx.DimensionScores.OrderBy(kv => kv.Value.Score))
+                {
+                    var pct = (int)(kv.Value.Score * 100);
+                    var cls = ScoreCls(kv.Value.Score);
+                    <div class="dim-card" id="dim-@kv.Key"
+                         onclick="scrollToBeliefs('@kv.Key')"
+                         title="Click to scroll to @kv.Key beliefs">
+                        <div class="dim-name">@kv.Key</div>
+                        <div class="dim-score @cls">@pct<span style="font-size:14px;font-weight:400">%</span></div>
+                        <div class="dim-conf">conf @kv.Value.Confidence.ToString("F3")</div>
+                        <div class="progress-outer">
+                            <div class="progress-inner progress-@cls" style="width:@pct%"></div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+
+        <!-- ── Completeness ───────────────────────────────────────────────────── -->
+        <div class="card" style="margin-bottom:20px">
+            @{
+                var fillPct = mgmt.ExpectedCount > 0
+                    ? (int)(100.0 * mgmt.FilledCount / mgmt.ExpectedCount)
+                    : 0;
+            }
+            <h3>Completeness &mdash; @fillPct% (@mgmt.FilledCount / @mgmt.ExpectedCount expected slots)</h3>
+            <div class="completeness-bar-outer">
+                <div class="completeness-bar-inner" style="width:@fillPct%"></div>
+            </div>
+            @if (mgmt.GapSlots.Count > 0)
+            {
+                <div style="margin-top:8px;font-size:12px;color:#7b8299">Missing:
+                    @foreach (var gap in mgmt.GapSlots)
+                    {
+                        <span class="gap-chip">@gap</span>
+                    }
+                </div>
+            }
+            @if (!string.IsNullOrEmpty(mgmt.CoverageStatement))
+            {
+                <div class="card-detail" style="margin-top:6px">@mgmt.CoverageStatement</div>
+            }
+        </div>
+
+        <!-- ── Beliefs accordion ─────────────────────────────────────────────── -->
+        @if (Model.Beliefs.Count > 0)
+        {
+            <div class="section-title">Claims &amp; Provenance</div>
+            <div class="belief-list">
+                @foreach (var b in Model.Beliefs
+                    .OrderBy(b => b.Dimension?.ToString() ?? "zzz")
+                    .ThenBy(b => b.ClaimKey))
+                {
+                    var fresh = FreshnessFactor(b.ObservedAt, b.HalfLifeDays);
+                    var effConf = b.Confidence * fresh;
+                    var isDecaying = b.HalfLifeDays.HasValue && b.HalfLifeDays.Value > 0;
+                    var ageDays = b.ObservedAt.HasValue
+                        ? (int)(Model.AsOf - b.ObservedAt.Value).TotalDays
+                        : (int?)null;
+
+                    Evidence? ev = null;
+                    if (b.Provenance != null)
+                        evidenceById.TryGetValue(b.Provenance.EvidenceId, out ev);
+
+                    <details class="belief" id="belief-@b.ClaimKey">
+                        <summary>
+                            <span class="tier-badge tier-@b.SourceTier" title="@TierDesc(b.SourceTier)">@b.SourceTier</span>
+                            <span class="belief-claim">@b.ClaimKey</span>
+                            @if (b.Dimension.HasValue)
+                            {
+                                <span class="dim-chip">@b.Dimension.Value</span>
+                            }
+                            <span class="belief-val">@FmtVal(b.Value)</span>
+                            <span class="belief-conf" title="@(isDecaying ? "Stored confidence (un-decayed)" : "Confidence")">
+                                conf @b.Confidence.ToString("F3")
+                            </span>
+                        </summary>
+                        <div class="belief-body">
+                            <!-- Provenance panel -->
+                            @if (b.Provenance != null)
+                            {
+                                <div class="panel">
+                                    <div class="panel-title">Provenance</div>
+                                    <div class="panel-row">
+                                        <span class="panel-key">Source</span>
+                                        <span class="panel-val">
+                                            <a href="#evidence-@b.Provenance.EvidenceId">
+                                                @(ev?.Ref ?? b.Provenance.EvidenceId.ToString()[..8] + "…")
+                                            </a>
+                                            &nbsp;<span class="tier-badge tier-@b.SourceTier" title="@TierDesc(b.SourceTier)">@b.SourceTier</span>
+                                        </span>
+                                    </div>
+                                    @if (!string.IsNullOrEmpty(b.Provenance.Locator))
+                                    {
+                                        <div class="panel-row">
+                                            <span class="panel-key">Locator</span>
+                                            <span class="panel-val locator">@b.Provenance.Locator</span>
+                                        </div>
+                                    }
+                                    @if (b.ValidUntil.HasValue)
+                                    {
+                                        <div class="panel-row">
+                                            <span class="panel-key">Valid until</span>
+                                            <span class="panel-val">@b.ValidUntil.Value.ToString("yyyy-MM-dd")</span>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                            <!-- Freshness panel (scored decaying beliefs only) -->
+                            @if (isDecaying && b.ObservedAt.HasValue && ageDays.HasValue)
+                            {
+                                <div class="panel">
+                                    <div class="panel-title">Freshness &amp; Decay</div>
+                                    <div class="panel-row">
+                                        <span class="panel-key">Half-life</span>
+                                        <span class="panel-val">@b.HalfLifeDays!.Value d</span>
+                                    </div>
+                                    <div class="panel-row">
+                                        <span class="panel-key">Observed</span>
+                                        <span class="panel-val">@b.ObservedAt!.Value.ToString("yyyy-MM-dd")</span>
+                                    </div>
+                                    <div class="panel-row">
+                                        <span class="panel-key">Age</span>
+                                        <span class="panel-val">@ageDays.Value d</span>
+                                    </div>
+                                    <div class="panel-row">
+                                        <span class="panel-key">Effective conf</span>
+                                        <span class="panel-val" style="color:@(effConf < 0.20 ? "#b91c1c" : "inherit")">@effConf.ToString("F3")</span>
+                                    </div>
+                                    <div class="freshness-eq">
+                                        @b.Confidence.ToString("F3") × 2^(&minus;@ageDays.Value/@b.HalfLifeDays!.Value) = @fresh.ToString("F4") → eff @effConf.ToString("F3")
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </details>
+                }
+            </div>
+        }
+
+        <!-- ── Evidence table ────────────────────────────────────────────────── -->
+        @if (Model.Evidence.Count > 0)
+        {
+            <div class="section-title">Evidence Sources</div>
+            <div class="tbl-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Ref</th>
+                            <th>Type</th>
+                            <th>Tier</th>
+                            <th>Ingested</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var ev in Model.Evidence)
+                        {
+                            <tr id="evidence-@ev.EvidenceId">
+                                <td style="font-weight:600">@ev.Ref</td>
+                                <td>@ev.DocType</td>
+                                <td><span class="tier-badge tier-@ev.SourceTier.ToString()">@ev.SourceTier</span></td>
+                                <td style="color:var(--muted)">@ev.IngestedAt.ToString("yyyy-MM-dd")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+
+        <!-- ── Fingerprint ────────────────────────────────────────────────────── -->
+        @if (idx != null)
+        {
+            <div style="margin-top:24px">
+                <span style="font-size:12px;color:#7b8299">Fingerprint: </span>
+                <span class="fp">@idx.Fingerprint</span>
+            </div>
+        }
+    }
+</div>
+
+<script>
+    // ── Contract upload ────────────────────────────────────────────────────────
+    (function () {
+        var btn      = document.getElementById('vf-upload-btn');
+        var statusEl = document.getElementById('vf-upload-status');
+        if (!btn) return;
+
+        btn.addEventListener('click', async function () {
+            var fileInput  = document.getElementById('vf-upload-file');
+            var vendorName = document.getElementById('vf-vendor-name').value;
+            var file = fileInput && fileInput.files && fileInput.files[0];
+
+            if (!file) { setStatus('Select a PDF first.', '#dc2626'); return; }
+
+            btn.disabled    = true;
+            setStatus('Extracting… (may take a moment)', '#ca8a04');
+
+            var form = new FormData();
+            form.append('file', file);
+            form.append('vendorName', vendorName);
+
+            try {
+                var res = await fetch('/vendors/vendor-file/upload-contract', { method: 'POST', body: form });
+                if (res.status === 503) { setStatus('OPENAI_API_KEY not configured.', '#dc2626'); return; }
+                if (!res.ok) {
+                    var e = await res.json().catch(function () { return {}; });
+                    setStatus('Error ' + res.status + ': ' + (e.error || res.statusText), '#dc2626');
+                    return;
+                }
+                var data = await res.json();
+                setStatus('Done — refreshing…', '#16a34a');
+                window.location.href = '/vendor-file/' + data.vendorId;
+            } catch (err) {
+                setStatus('Failed: ' + err.message, '#dc2626');
+            } finally {
+                btn.disabled = false;
+            }
+        });
+
+        function setStatus(msg, color) {
+            statusEl.textContent = msg;
+            statusEl.style.color = color;
+        }
+    })();
+
+    // ── Glass-box drill navigation ─────────────────────────────────────────────
+    function scrollToBeliefs(dim) {
+        // Find first belief in this dimension
+        const list = document.querySelectorAll('details.belief');
+        for (const el of list) {
+            const chip = el.querySelector('.dim-chip');
+            if (chip && chip.textContent.trim() === dim) {
+                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                flash(el);
+                return;
+            }
+        }
+    }
+
+    function drillToDim(dim) {
+        const card = document.getElementById('dim-' + dim);
+        if (card) flash(card);
+    }
+
+    function flash(el) {
+        el.classList.remove('flash');
+        // Force reflow so re-adding triggers animation
+        void el.offsetWidth;
+        el.classList.add('flash');
+        setTimeout(() => el.classList.remove('flash'), 900);
+    }
+
+    // Highlight evidence rows when navigated to via anchor
+    document.addEventListener('DOMContentLoaded', () => {
+        const hash = location.hash;
+        if (!hash) return;
+        const el = document.querySelector(hash);
+        if (!el) return;
+        if (el.tagName === 'TR') {
+            el.classList.add('flash-anim');
+        } else if (el.tagName === 'DETAILS') {
+            el.open = true;
+            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            flash(el);
+        }
+    });
+</script>
+</body>
+</html>

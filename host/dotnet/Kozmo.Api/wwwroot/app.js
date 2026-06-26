@@ -7,15 +7,19 @@
 // ── API ───────────────────────────────────────────────────────────────────────
 
 const API = {
-  vendors:     ()              => fetch('/vendors').then(assertOk),
-  trail:       (id)            => fetch(`/vendors/${id}/trail`).then(assertOk),
-  trajectory:  (id)            => fetch(`/vendors/${id}/trajectory`).then(assertOk),
-  reset:       ()              => fetch('/demo/reset', { method: 'POST' }).then(assertOk),
-  replay:      ()              => fetch('/demo/replay', { method: 'POST' }),
-  liveSignal:  (body) => fetch('/demo/live-signal', {
+  vendors:        ()     => fetch('/vendors').then(assertOk),
+  trail:          (id)   => fetch(`/vendors/${id}/trail`).then(assertOk),
+  trajectory:     (id)   => fetch(`/vendors/${id}/trajectory`).then(assertOk),
+  reset:          ()     => fetch('/demo/reset', { method: 'POST' }).then(assertOk),
+  replay:         ()     => fetch('/demo/replay', { method: 'POST' }),
+  liveSignal:     (body) => fetch('/demo/live-signal', {
     method:  'POST',
     headers: { 'Content-Type': 'application/json' },
     body:    JSON.stringify({ body }),
+  }),
+  uploadContract: (form) => fetch('/vendors/vendor-file/upload-contract', {
+    method: 'POST',
+    body:   form,
   }),
 };
 
@@ -43,6 +47,10 @@ async function init() {
   document.getElementById('btn-reset').addEventListener('click', onReset);
   document.getElementById('btn-replay').addEventListener('click', onReplay);
   document.getElementById('btn-live-send').addEventListener('click', onLiveSend);
+  document.getElementById('btn-upload').addEventListener('click', () => {
+    const vendorName = document.getElementById('upload-vendor-name').value.trim();
+    onUploadContract('upload-file', 'upload-status', 'btn-upload', vendorName);
+  });
   initLiveSseHandler();
 }
 
@@ -59,6 +67,7 @@ function renderVendorList() {
         <span class="badge stance-badge">${esc(v.stance)}</span>
       </div>
       <div class="vendor-confidence">conf ${pct(v.confidence)}</div>
+      <a class="vf-link" href="/vendor-file/${v.entityId}" onclick="event.stopPropagation()" tabindex="-1">Vendor File →</a>
     </div>`).join('');
 
   el.querySelectorAll('.vendor-card').forEach(card =>
@@ -110,6 +119,14 @@ function renderDetailView(fingerprintMatch) {
         <div class="fingerprint-full">${esc(fp)}</div>
       </div>
     </div>
+    <div class="detail-upload">
+      <span class="detail-upload-label">Upload Contract</span>
+      <div class="detail-upload-row">
+        <input type="file" id="duf-file" accept=".pdf" class="detail-upload-file">
+        <button id="duf-btn" type="button" class="btn-upload">Extract &amp; open Vendor File →</button>
+      </div>
+      <span id="duf-status" class="detail-upload-status"></span>
+    </div>
     ${renderMetaCaveats(trail.posture)}
     <div class="tabs">
       <button class="tab-btn active" data-tab="trail"      type="button">Trail</button>
@@ -123,6 +140,13 @@ function renderDetailView(fingerprintMatch) {
 
   el.querySelectorAll('.dim-header').forEach(header =>
     header.addEventListener('click', () => header.parentElement.classList.toggle('expanded')));
+
+  const dufBtn = document.getElementById('duf-btn');
+  if (dufBtn) {
+    const vendorName = (v && v.name) ? v.name : '';
+    dufBtn.addEventListener('click', () =>
+      onUploadContract('duf-file', 'duf-status', 'duf-btn', vendorName));
+  }
 }
 
 function switchTab(tab) {
@@ -756,6 +780,58 @@ function setLiveStatus(msg, cls) {
   const el  = document.getElementById('live-status');
   el.textContent = msg;
   el.className   = 'live-status' + (cls ? ' ' + cls : '');
+}
+
+// ── Upload contract ───────────────────────────────────────────────────────────
+
+async function onUploadContract(fileInputId, statusId, btnId, vendorName) {
+  const fileInput = document.getElementById(fileInputId);
+  const statusEl  = document.getElementById(statusId);
+  const btn       = document.getElementById(btnId);
+  const file      = fileInput && fileInput.files && fileInput.files[0];
+
+  if (!file) {
+    setUploadStatus(statusEl, 'Select a PDF first.', 'upload-err');
+    return;
+  }
+  if (!vendorName) {
+    setUploadStatus(statusEl, 'Enter a vendor name.', 'upload-err');
+    return;
+  }
+
+  if (btn) btn.disabled = true;
+  setUploadStatus(statusEl, 'Extracting… (may take a moment)', 'upload-busy');
+
+  const form = new FormData();
+  form.append('file', file);
+  form.append('vendorName', vendorName);
+
+  try {
+    const res = await API.uploadContract(form);
+    if (res.status === 503) {
+      setUploadStatus(statusEl, 'OPENAI_API_KEY not configured — live extraction unavailable.', 'upload-err');
+      return;
+    }
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      setUploadStatus(statusEl, `Error ${res.status}: ${err.error ?? res.statusText}`, 'upload-err');
+      return;
+    }
+    const data = await res.json();
+    setUploadStatus(statusEl, 'Done — opening vendor file…', 'upload-ok');
+    window.location.href = `/vendor-file/${data.vendorId}`;
+  } catch (err) {
+    setUploadStatus(statusEl, `Failed: ${err.message}`, 'upload-err');
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+
+function setUploadStatus(el, msg, cls) {
+  if (!el) return;
+  el.textContent = msg;
+  el.className   = (el.classList.contains('detail-upload-status') ? 'detail-upload-status' : 'upload-status') +
+                   (cls ? ' ' + cls : '');
 }
 
 // ── Init ──────────────────────────────────────────────────────────────────────
