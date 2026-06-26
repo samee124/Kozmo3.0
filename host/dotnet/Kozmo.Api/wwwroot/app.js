@@ -47,10 +47,13 @@ async function init() {
   document.getElementById('btn-reset').addEventListener('click', onReset);
   document.getElementById('btn-replay').addEventListener('click', onReplay);
   document.getElementById('btn-live-send').addEventListener('click', onLiveSend);
-  document.getElementById('btn-upload').addEventListener('click', () => {
-    const vendorName = document.getElementById('upload-vendor-name').value.trim();
-    onUploadContract('upload-file', 'upload-status', 'btn-upload', vendorName);
-  });
+  const uploadBtn = document.getElementById('btn-upload');
+  if (uploadBtn) {
+    uploadBtn.addEventListener('click', () => {
+      const vendorName = (document.getElementById('upload-vendor-name')?.value ?? '').trim();
+      onUploadContract('upload-file', 'upload-status', 'btn-upload', vendorName);
+    });
+  }
   initLiveSseHandler();
 }
 
