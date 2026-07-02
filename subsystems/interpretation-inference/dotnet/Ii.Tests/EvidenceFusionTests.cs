@@ -127,6 +127,86 @@ public sealed class EvidenceFusionTests
         Assert.Equal(Band.Critical, idxAfter!.Band);
     }
 
+    // ── Q3: two-step supersession holds Critical (R-1 full-chain fix) ────────
+    // Seed: four Verified Critical-range beliefs, one per dimension.
+    // Step 1: Reported supersedes the Verified Operational belief (first reversal).
+    //         Direct-predecessor anchor fires (both old and new code) → Critical holds.
+    // Step 2: Reported supersedes the FIRST Reported in the same slot (second reversal).
+    //         OLD code: direct predecessor is Reported (conf=0.50 < 0.60) → anchor
+    //           does not fire (0.50 < 0.50 is false) → ConfidenceFloor collapses → AtRisk (BUG).
+    //         NEW code: chain walk reaches the original Verified ancestor (conf=0.95)
+    //           → anchor fires, floor at 0.95 → ConfidenceFloor ≥ 0.60 → Critical (CORRECT).
+
+    [Fact]
+    [Trait("Class", "Q")]
+    public async Task Q3_Supersession_TwoStep_HoldsBand()
+    {
+        var entityId   = Guid.NewGuid();
+        var customerId = Guid.NewGuid();
+
+        var profile  = TestHelpers.LoadProfile();
+        using var store = new SqliteEntityStore("Data Source=:memory:");
+        var registry = new EntityRegistry();
+        registry.Register(entityId, "TestEntity", renewalDate: null);
+
+        // FixedLlmClient: always returns Operational/uptime_sla=0.15 regardless of body text.
+        var llm = new FixedLlmClient(
+            "{\"dimension\":\"Operational\",\"criterion\":\"uptime_sla\",\"value\":0.15," +
+            "\"confidence\":0.9,\"reasoning\":\"Fixed: SLA breach confirmed.\"}");
+
+        var facade = new IiFacade(
+            new ObservationModule(llm), new RubricModule(), new IndexModule(),
+            new PostureModule(), new DecayEngine(), store, profile, registry, DemoClock.Fixed);
+
+        // All signals observed 5 min before DemoClock.Fixed → freshness ≈ 1.0 → confidence ≈ tier weight.
+        static Signal Sig(Guid eid, Guid cid, SourceSystem src, string ext,
+            IReadOnlyDictionary<string, object?> payload) =>
+            new Signal(Guid.NewGuid(), eid, cid, src, ext, payload,
+                ObservedAt: DemoClock.AsOf.AddMinutes(-5),
+                ReceivedAt: DemoClock.AsOf.AddMinutes(-4),
+                TraceId: Guid.NewGuid());
+
+        // Four Verified Critical-range beliefs, one per dimension.
+        // uptime=96.5 → Op 0.25; csat=2.3 → Exp 0.30; overdue=51000 → Fin 0.20; roadmap=0.25 → Strat 0.20
+        // Composite ≈ 0.2375 < 0.40 → Critical; Verified conf ≈ 0.95 > 0.60 → gate passes.
+        await facade.SubmitSignalAsync(Sig(entityId, customerId, SourceSystem.MonitoringPlatform, "q3-s1",
+            new Dictionary<string, object?> { ["uptime_pct"] = 96.5 }));
+        await facade.SubmitSignalAsync(Sig(entityId, customerId, SourceSystem.CRM, "q3-s2",
+            new Dictionary<string, object?> { ["csat_score"] = 2.3 }));
+        await facade.SubmitSignalAsync(Sig(entityId, customerId, SourceSystem.BillingSystem, "q3-s3",
+            new Dictionary<string, object?> { ["overdue_amount_usd"] = 51000.0 }));
+        await facade.SubmitSignalAsync(Sig(entityId, customerId, SourceSystem.CRM, "q3-s4",
+            new Dictionary<string, object?> { ["roadmap_fit_score"] = 0.25 }));
+
+        var idxBase = await store.GetIndexAsync(entityId);
+        Assert.Equal(Band.Critical, idxBase!.Band);
+        Assert.True(idxBase.ConfidenceFloor >= 0.60,
+            $"Pre-condition failed: ConfidenceFloor={idxBase.ConfidenceFloor:F3}");
+
+        // Step 1: first Reported supersession on Op/uptime_sla.
+        // Anchor finds Verified predecessor (conf≈0.95) → floor fires → Critical holds.
+        // Both old and new code pass this step.
+        await facade.SubmitSignalAsync(Sig(entityId, customerId, SourceSystem.HumanReport, "q3-s5",
+            new Dictionary<string, object?> { ["body"] = "Step-1 SLA breach." }));
+
+        var idx1 = await store.GetIndexAsync(entityId);
+        Assert.Equal(Band.Critical, idx1!.Band);
+        Assert.True(idx1.ConfidenceFloor >= 0.60,
+            $"After step-1 supersession: ConfidenceFloor={idx1.ConfidenceFloor:F3}");
+
+        // Step 2: second Reported supersession on the SAME Op/uptime_sla slot.
+        // OLD code: direct predecessor is Reported B (conf=0.50 < 0.60) → no anchor (0.50 < 0.50 false)
+        //           → ConfidenceFloor=0.50 < 0.60 → AtRisk (BUG — this assertion fails on old code).
+        // NEW code: chain walk finds Verified A (conf≈0.95) → anchor fires → ConfidenceFloor≥0.60 → Critical.
+        await facade.SubmitSignalAsync(Sig(entityId, customerId, SourceSystem.HumanReport, "q3-s6",
+            new Dictionary<string, object?> { ["body"] = "Step-2 SLA breach confirmed." }));
+
+        var idx2 = await store.GetIndexAsync(entityId);
+        Assert.Equal(Band.Critical, idx2!.Band);
+        Assert.True(idx2.ConfidenceFloor >= 0.60,
+            $"After step-2 supersession: ConfidenceFloor={idx2.ConfidenceFloor:F3}");
+    }
+
     // ── Helpers ───────────────────────────────────────────────────────────────
 
     /// <summary>

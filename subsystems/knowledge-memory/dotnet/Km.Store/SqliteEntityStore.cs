@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Kozmo.Contracts;
+using Kozmo.Contracts.Config;
 using Kozmo.Contracts.Interfaces;
 using Microsoft.Data.Sqlite;
 
@@ -9,18 +10,20 @@ namespace Km.Store;
 /// IEntityStore over SQLite. Beliefs and postures are append-only; no edit/delete path.
 /// Behind IEntityStore so Azure SQL drops in without caller changes.
 /// </summary>
-public sealed class SqliteEntityStore : IEntityStore, IDisposable
+public sealed class SqliteEntityStore : IEntityStore, IRegistryStore, ICheckInRowStore, IDisposable
 {
     private readonly SqliteConnection _conn;
+    private readonly SaasProfile?     _profile;
     private static readonly JsonSerializerOptions Json = new()
     {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         WriteIndented        = false
     };
 
-    public SqliteEntityStore(string connectionString)
+    public SqliteEntityStore(string connectionString, SaasProfile? profile = null)
     {
-        _conn = new SqliteConnection(connectionString);
+        _conn    = new SqliteConnection(connectionString);
+        _profile = profile;
         _conn.Open();
         EnsureSchema();
     }
@@ -29,20 +32,50 @@ public sealed class SqliteEntityStore : IEntityStore, IDisposable
 
     public Task AppendBeliefAsync(Belief belief, CancellationToken ct = default)
     {
+        // Vendor file write-path enforcement (§2 + §7).
+        // Keyed on non-empty ClaimKey so the signal pipeline (ClaimKey="") is unaffected.
+        var priorsToSupersede = new List<Guid>();
+        if (!string.IsNullOrEmpty(belief.ClaimKey))
+        {
+            // §2: clamp confidence to tier ceiling — ceiling values come from source_tiers config
+            var ceiling = _profile is not null
+                       && _profile.SourceTiers.TryGetValue(belief.SourceTier.ToString(), out var tc)
+                        ? tc.Ceiling
+                        : double.MaxValue;
+            var clamped = Math.Min(belief.Confidence, ceiling);
+            if (clamped != belief.Confidence)
+                belief = belief with { Confidence = clamped };
+
+            // §7: append-and-supersede keyed on (entity_id, claim_key).
+            // Collects ALL active priors in the slot (not just the first) so that a re-upload
+            // after a duplicate-write incident collapses the slot back to one active belief.
+            if (belief.SupersededBy == null)
+            {
+                var priors = FindActivePriorsInSlot(belief.EntityId, belief.ClaimKey);
+                foreach (var p in priors)
+                    if (VendorFileShouldSupersede(p.tier, p.observedAt, belief.SourceTier, belief.ObservedAt))
+                        priorsToSupersede.Add(p.id);
+            }
+        }
+
         using var cmd = _conn.CreateCommand();
         cmd.CommandText = """
             INSERT OR REPLACE INTO beliefs
               (id, entity_id, dimension, criterion, value, source_tier, confidence,
                freshness, derivation, source_signals, version, superseded_by, created_at, trace_id,
-               classification_method, classification_confidence, reasoning_summary)
+               classification_method, classification_confidence, reasoning_summary,
+               claim_key, observed_at, half_life_days, valid_until,
+               provenance_evidence_id, provenance_locator)
             VALUES
               (@id, @entity_id, @dimension, @criterion, @value, @source_tier, @confidence,
                @freshness, @derivation, @source_signals, @version, @superseded_by, @created_at, @trace_id,
-               @classification_method, @classification_confidence, @reasoning_summary)
+               @classification_method, @classification_confidence, @reasoning_summary,
+               @claim_key, @observed_at, @half_life_days, @valid_until,
+               @provenance_evidence_id, @provenance_locator)
             """;
         cmd.Parameters.AddWithValue("@id",             belief.Id.ToString());
         cmd.Parameters.AddWithValue("@entity_id",      belief.EntityId.ToString());
-        cmd.Parameters.AddWithValue("@dimension",      belief.Dimension.ToString());
+        cmd.Parameters.AddWithValue("@dimension",      belief.Dimension?.ToString() ?? "");
         cmd.Parameters.AddWithValue("@criterion",      belief.Criterion);
         cmd.Parameters.AddWithValue("@value",          belief.Value);
         cmd.Parameters.AddWithValue("@source_tier",    belief.SourceTier.ToString());
@@ -57,7 +90,36 @@ public sealed class SqliteEntityStore : IEntityStore, IDisposable
         cmd.Parameters.AddWithValue("@classification_method",     belief.ClassificationMethod.ToString());
         cmd.Parameters.AddWithValue("@classification_confidence", belief.ClassificationConfidence.HasValue ? belief.ClassificationConfidence.Value : DBNull.Value);
         cmd.Parameters.AddWithValue("@reasoning_summary",        belief.ReasoningSummary is not null ? belief.ReasoningSummary : DBNull.Value);
-        cmd.ExecuteNonQuery();
+        cmd.Parameters.AddWithValue("@claim_key",                belief.ClaimKey);
+        cmd.Parameters.AddWithValue("@observed_at",              belief.ObservedAt.HasValue ? belief.ObservedAt.Value.ToString("O") : DBNull.Value);
+        cmd.Parameters.AddWithValue("@half_life_days",           belief.HalfLifeDays.HasValue ? belief.HalfLifeDays.Value : DBNull.Value);
+        cmd.Parameters.AddWithValue("@valid_until",              belief.ValidUntil.HasValue ? belief.ValidUntil.Value.ToString("O") : DBNull.Value);
+        cmd.Parameters.AddWithValue("@provenance_evidence_id",   belief.Provenance?.EvidenceId.ToString() ?? (object)DBNull.Value);
+        cmd.Parameters.AddWithValue("@provenance_locator",       belief.Provenance?.Locator ?? (object)DBNull.Value);
+        if (priorsToSupersede.Count > 0)
+        {
+            // Atomic: INSERT new belief + UPDATE all prior superseded_by in a single transaction.
+            // Using a single UPDATE ... WHERE id IN (...) for efficiency.
+            using var txn = _conn.BeginTransaction();
+            cmd.Transaction = txn;
+            cmd.ExecuteNonQuery();
+
+            var placeholders = string.Join(",", priorsToSupersede.Select((_, i) => $"@p{i}"));
+            using var upd = _conn.CreateCommand();
+            upd.Transaction = txn;
+            upd.CommandText = $"UPDATE beliefs SET superseded_by = @new_id WHERE id IN ({placeholders})";
+            upd.Parameters.AddWithValue("@new_id", belief.Id.ToString());
+            for (var i = 0; i < priorsToSupersede.Count; i++)
+                upd.Parameters.AddWithValue($"@p{i}", priorsToSupersede[i].ToString());
+            upd.ExecuteNonQuery();
+
+            txn.Commit();
+        }
+        else
+        {
+            cmd.ExecuteNonQuery();
+        }
+
         return Task.CompletedTask;
     }
 
@@ -198,12 +260,88 @@ public sealed class SqliteEntityStore : IEntityStore, IDisposable
         return Task.FromResult<IReadOnlyList<Signal>>(results);
     }
 
+    // ── Evidence ──────────────────────────────────────────────────────────────
+
+    public Task AppendEvidenceAsync(Evidence evidence, CancellationToken ct = default)
+    {
+        using var cmd = _conn.CreateCommand();
+        cmd.CommandText = """
+            INSERT OR IGNORE INTO evidence
+              (evidence_id, vendor_id, doc_type, source_tier, ref, doc_version, ingested_at)
+            VALUES
+              (@eid, @vid, @dtype, @tier, @ref, @ver, @at)
+            """;
+        cmd.Parameters.AddWithValue("@eid",   evidence.EvidenceId.ToString());
+        cmd.Parameters.AddWithValue("@vid",   evidence.VendorId.ToString());
+        cmd.Parameters.AddWithValue("@dtype", evidence.DocType.ToString());
+        cmd.Parameters.AddWithValue("@tier",  evidence.SourceTier.ToString());
+        cmd.Parameters.AddWithValue("@ref",   evidence.Ref);
+        cmd.Parameters.AddWithValue("@ver",   evidence.DocVersion);
+        cmd.Parameters.AddWithValue("@at",    evidence.IngestedAt.ToString("O"));
+        cmd.ExecuteNonQuery();
+        return Task.CompletedTask;
+    }
+
+    public Task<Evidence?> GetEvidenceAsync(Guid evidenceId, CancellationToken ct = default)
+    {
+        using var cmd = _conn.CreateCommand();
+        cmd.CommandText = "SELECT * FROM evidence WHERE evidence_id = @eid";
+        cmd.Parameters.AddWithValue("@eid", evidenceId.ToString());
+        var results = ReadEvidence(cmd);
+        return Task.FromResult(results.Count > 0 ? results[0] : (Evidence?)null);
+    }
+
+    public Task<IReadOnlyList<Evidence>> GetEvidenceForVendorAsync(Guid vendorId, CancellationToken ct = default)
+    {
+        using var cmd = _conn.CreateCommand();
+        cmd.CommandText = "SELECT * FROM evidence WHERE vendor_id = @vid ORDER BY ingested_at";
+        cmd.Parameters.AddWithValue("@vid", vendorId.ToString());
+        return Task.FromResult(ReadEvidence(cmd));
+    }
+
+    // ── Vendor registry persistence ───────────────────────────────────────────
+
+    /// <summary>Persist a user-created vendor so it survives process restart.</summary>
+    public Task SaveVendorAsync(Guid id, string canonicalName, DateTimeOffset? renewalDate, DateTimeOffset createdAt)
+    {
+        using var cmd = _conn.CreateCommand();
+        cmd.CommandText = """
+            INSERT OR REPLACE INTO vendors (id, canonical_name, renewal_date, created_at)
+            VALUES (@id, @name, @renewal, @created_at)
+            """;
+        cmd.Parameters.AddWithValue("@id",         id.ToString());
+        cmd.Parameters.AddWithValue("@name",        canonicalName);
+        cmd.Parameters.AddWithValue("@renewal",     renewalDate.HasValue ? (object)renewalDate.Value.ToString("O") : DBNull.Value);
+        cmd.Parameters.AddWithValue("@created_at",  createdAt.ToString("O"));
+        cmd.ExecuteNonQuery();
+        return Task.CompletedTask;
+    }
+
+    /// <summary>Load all persisted vendors (user-created). Seeded vendors are not stored here.</summary>
+    public Task<IReadOnlyList<(Guid Id, string Name, DateTimeOffset? RenewalDate)>> LoadVendorsAsync()
+    {
+        using var cmd = _conn.CreateCommand();
+        cmd.CommandText = "SELECT id, canonical_name, renewal_date FROM vendors WHERE program_run_id IS NULL";
+        var results = new List<(Guid, string, DateTimeOffset?)>();
+        using var reader = cmd.ExecuteReader();
+        while (reader.Read())
+        {
+            var id         = Guid.Parse(reader.GetString(0));
+            var name       = reader.GetString(1);
+            var renewalRaw = reader.IsDBNull(2) ? null : reader.GetString(2);
+            DateTimeOffset? renewal = renewalRaw is null ? null : DateTimeOffset.Parse(renewalRaw);
+            results.Add((id, name, renewal));
+        }
+        return Task.FromResult<IReadOnlyList<(Guid, string, DateTimeOffset?)>>(results);
+    }
+
     // ── Reset ─────────────────────────────────────────────────────────────────
 
     public Task ResetAsync(CancellationToken ct = default)
     {
         using var cmd = _conn.CreateCommand();
-        cmd.CommandText = "DELETE FROM beliefs; DELETE FROM entity_indices; DELETE FROM postures; DELETE FROM signals;";
+        // vendors table is intentionally excluded — user-created vendors survive demo resets.
+        cmd.CommandText = "DELETE FROM beliefs; DELETE FROM entity_indices; DELETE FROM postures; DELETE FROM signals; DELETE FROM evidence;";
         cmd.ExecuteNonQuery();
         return Task.CompletedTask;
     }
@@ -233,10 +371,33 @@ public sealed class SqliteEntityStore : IEntityStore, IDisposable
                 ? ClassificationMethod.Rule
                 : Enum.Parse<ClassificationMethod>(classMethodRaw.ToString()!);
 
+            // Vendor file fields
+            var observedAtRaw = reader["observed_at"];
+            DateTimeOffset? observedAt = observedAtRaw is DBNull or null ? null
+                : DateTimeOffset.Parse(observedAtRaw.ToString()!);
+
+            var hldRaw     = reader["half_life_days"];
+            int? halfLifeDays = hldRaw is DBNull or null ? null : Convert.ToInt32(hldRaw);
+
+            var validUntilRaw = reader["valid_until"];
+            DateTimeOffset? validUntil = validUntilRaw is DBNull or null ? null
+                : DateTimeOffset.Parse(validUntilRaw.ToString()!);
+
+            var provEidRaw = reader["provenance_evidence_id"];
+            var provLocRaw = reader["provenance_locator"];
+            BeliefProvenance? provenance = null;
+            if (provEidRaw is not DBNull and not null && provLocRaw is not DBNull and not null)
+                provenance = new BeliefProvenance(Guid.Parse(provEidRaw.ToString()!), provLocRaw.ToString()!);
+
+            var claimKeyRaw = reader["claim_key"];
+            var claimKey = claimKeyRaw is DBNull or null ? "" : claimKeyRaw.ToString()!;
+
+            var dimensionRaw = reader.GetString(reader.GetOrdinal("dimension"));
+
             results.Add(new Belief(
                 Id:            Guid.Parse(reader.GetString(reader.GetOrdinal("id"))),
                 EntityId:      Guid.Parse(reader.GetString(reader.GetOrdinal("entity_id"))),
-                Dimension:     Enum.Parse<Dimension>(reader.GetString(reader.GetOrdinal("dimension"))),
+                Dimension:     string.IsNullOrEmpty(dimensionRaw) ? null : Enum.Parse<Dimension>(dimensionRaw),
                 Criterion:     reader.GetString(reader.GetOrdinal("criterion")),
                 Value:         reader.GetDouble(reader.GetOrdinal("value")),
                 SourceTier:    Enum.Parse<SourceTier>(reader.GetString(reader.GetOrdinal("source_tier"))),
@@ -251,8 +412,31 @@ public sealed class SqliteEntityStore : IEntityStore, IDisposable
             ) {
                 ClassificationMethod     = classMethod,
                 ClassificationConfidence = classConf,
-                ReasoningSummary         = reasoning
+                ReasoningSummary         = reasoning,
+                ClaimKey                 = claimKey,
+                ObservedAt               = observedAt,
+                HalfLifeDays             = halfLifeDays,
+                ValidUntil               = validUntil,
+                Provenance               = provenance
             });
+        }
+        return results;
+    }
+
+    private static IReadOnlyList<Evidence> ReadEvidence(SqliteCommand cmd)
+    {
+        var results = new List<Evidence>();
+        using var reader = cmd.ExecuteReader();
+        while (reader.Read())
+        {
+            results.Add(new Evidence(
+                EvidenceId:  Guid.Parse(reader.GetString(reader.GetOrdinal("evidence_id"))),
+                VendorId:    Guid.Parse(reader.GetString(reader.GetOrdinal("vendor_id"))),
+                DocType:     Enum.Parse<DocType>(reader.GetString(reader.GetOrdinal("doc_type"))),
+                SourceTier:  Enum.Parse<SourceTier>(reader.GetString(reader.GetOrdinal("source_tier"))),
+                Ref:         reader.GetString(reader.GetOrdinal("ref")),
+                DocVersion:  reader.GetInt32(reader.GetOrdinal("doc_version")),
+                IngestedAt:  DateTimeOffset.Parse(reader.GetString(reader.GetOrdinal("ingested_at")))));
         }
         return results;
     }
@@ -262,6 +446,302 @@ public sealed class SqliteEntityStore : IEntityStore, IDisposable
         using var cmd = _conn.CreateCommand();
         cmd.CommandText = DbSchema.Ddl;
         cmd.ExecuteNonQuery();
+        MigrateBeliefColumns();
+        MigrateRegistryColumns();
+        MigrateCheckInColumns();
+    }
+
+    /// <summary>Adds identity-resolution columns to the vendors table and creates vendor_aliases if absent.</summary>
+    private void MigrateRegistryColumns()
+    {
+        var vendorCols = new[]
+        {
+            ("comparison_key",         "TEXT"),
+            ("entity_type",            "TEXT"),
+            ("confidence",             "REAL"),
+            ("flags",                  "TEXT"),
+            ("status",                 "TEXT"),
+            ("rebrand_map_ref",        "TEXT"),
+            ("acquisition_map_ref",    "TEXT"),
+            ("absorbed_into_vendor_id","TEXT"),
+            ("program_run_id",         "TEXT"),
+        };
+        foreach (var (col, def) in vendorCols)
+            TryAddColumn("vendors", col, def);
+
+        // vendor_aliases is in the DDL with CREATE TABLE IF NOT EXISTS; the migration is a no-op
+        // on fresh databases but safe to call after MigrateBeliefColumns on existing ones.
+    }
+
+    /// <summary>Adds vendor file columns to the beliefs table if they are absent (safe on fresh DBs too).</summary>
+    private void MigrateBeliefColumns()
+    {
+        var migrations = new[]
+        {
+            ("claim_key",              "TEXT NOT NULL DEFAULT ''"),
+            ("observed_at",            "TEXT"),
+            ("half_life_days",         "INTEGER"),
+            ("valid_until",            "TEXT"),
+            ("provenance_evidence_id", "TEXT"),
+            ("provenance_locator",     "TEXT"),
+        };
+        foreach (var (col, def) in migrations)
+            TryAddColumn("beliefs", col, def);
+    }
+
+    private void TryAddColumn(string table, string column, string definition)
+    {
+        try
+        {
+            using var cmd = _conn.CreateCommand();
+            cmd.CommandText = $"ALTER TABLE {table} ADD COLUMN {column} {definition}";
+            cmd.ExecuteNonQuery();
+        }
+        catch { /* column already exists — SQLite has no IF NOT EXISTS for ALTER TABLE */ }
+    }
+
+    // ── Vendor file write-path helpers (§2 ceilings + §7 supersession) ───────
+
+    private IReadOnlyList<(Guid id, SourceTier tier, DateTimeOffset? observedAt)> FindActivePriorsInSlot(
+        Guid entityId, string claimKey)
+    {
+        using var cmd = _conn.CreateCommand();
+        cmd.CommandText =
+            "SELECT id, source_tier, observed_at FROM beliefs " +
+            "WHERE entity_id = @eid AND claim_key = @ck AND superseded_by IS NULL";
+        cmd.Parameters.AddWithValue("@eid", entityId.ToString());
+        cmd.Parameters.AddWithValue("@ck",  claimKey);
+        using var reader = cmd.ExecuteReader();
+        var results = new List<(Guid, SourceTier, DateTimeOffset?)>();
+        while (reader.Read())
+        {
+            var id     = Guid.Parse(reader.GetString(0));
+            var tier   = Enum.Parse<SourceTier>(reader.GetString(1));
+            var obsRaw = reader.IsDBNull(2) ? null : reader.GetString(2);
+            DateTimeOffset? obs = obsRaw is null ? null : DateTimeOffset.Parse(obsRaw);
+            results.Add((id, tier, obs));
+        }
+        return results;
+    }
+
+    private static bool VendorFileShouldSupersede(
+        SourceTier priorTier, DateTimeOffset? priorObservedAt,
+        SourceTier newTier,   DateTimeOffset? newObservedAt)
+    {
+        var priorRank = VendorFileTierRank(priorTier);
+        var newRank   = VendorFileTierRank(newTier);
+        if (newRank > priorRank) return true;
+        if (newRank == priorRank)
+            return !newObservedAt.HasValue || !priorObservedAt.HasValue
+                   || newObservedAt.Value >= priorObservedAt.Value;
+        return false;
+    }
+
+    private static int VendorFileTierRank(SourceTier tier) => tier switch
+    {
+        SourceTier.Primary    => 4,
+        SourceTier.Verified   => 3,
+        SourceTier.Reported   => 2,
+        SourceTier.Inferred   => 1,
+        SourceTier.Unverified => 0,
+        _                     => 0
+    };
+
+    // ── IRegistryStore — canonical vendor + alias persistence ─────────────────
+
+    public Task SaveRegistryVendorAsync(RegistryVendorRow vendor, CancellationToken ct = default)
+    {
+        using var cmd = _conn.CreateCommand();
+        cmd.CommandText = """
+            INSERT OR REPLACE INTO vendors
+              (id, canonical_name, created_at,
+               comparison_key, entity_type, confidence, flags, status,
+               rebrand_map_ref, acquisition_map_ref, absorbed_into_vendor_id,
+               program_run_id)
+            VALUES
+              (@id, @name, @created_at,
+               @comparison_key, @entity_type, @confidence, @flags, @status,
+               @rebrand_map_ref, @acquisition_map_ref, @absorbed_into_vendor_id,
+               @program_run_id)
+            """;
+        cmd.Parameters.AddWithValue("@id",                      vendor.VendorId.ToString());
+        cmd.Parameters.AddWithValue("@name",                    vendor.CanonicalName);
+        cmd.Parameters.AddWithValue("@created_at",              vendor.CreatedAt.ToString("O"));
+        cmd.Parameters.AddWithValue("@comparison_key",          vendor.ComparisonKey          ?? (object)DBNull.Value);
+        cmd.Parameters.AddWithValue("@entity_type",             vendor.EntityType             ?? (object)DBNull.Value);
+        cmd.Parameters.AddWithValue("@confidence",              vendor.Confidence.HasValue ? vendor.Confidence.Value : DBNull.Value);
+        cmd.Parameters.AddWithValue("@flags",                   vendor.FlagsJson              ?? (object)DBNull.Value);
+        cmd.Parameters.AddWithValue("@status",                  vendor.Status                 ?? (object)DBNull.Value);
+        cmd.Parameters.AddWithValue("@rebrand_map_ref",         vendor.RebrandMapRef          ?? (object)DBNull.Value);
+        cmd.Parameters.AddWithValue("@acquisition_map_ref",     vendor.AcquisitionMapRef      ?? (object)DBNull.Value);
+        cmd.Parameters.AddWithValue("@absorbed_into_vendor_id", vendor.AbsorbedIntoVendorId.HasValue
+                                                                    ? vendor.AbsorbedIntoVendorId.Value.ToString()
+                                                                    : (object)DBNull.Value);
+        cmd.Parameters.AddWithValue("@program_run_id",          vendor.ProgramRunId.HasValue
+                                                                    ? vendor.ProgramRunId.Value.ToString()
+                                                                    : (object)DBNull.Value);
+        cmd.ExecuteNonQuery();
+        return Task.CompletedTask;
+    }
+
+    public Task SaveVendorAliasAsync(VendorAliasRow alias, CancellationToken ct = default)
+    {
+        using var cmd = _conn.CreateCommand();
+        cmd.CommandText = """
+            INSERT OR REPLACE INTO vendor_aliases
+              (id, vendor_id, raw_name, provenance_doc_id, provenance_span)
+            VALUES
+              (@id, @vendor_id, @raw_name, @provenance_doc_id, @provenance_span)
+            """;
+        cmd.Parameters.AddWithValue("@id",                alias.AliasId.ToString());
+        cmd.Parameters.AddWithValue("@vendor_id",         alias.VendorId.ToString());
+        cmd.Parameters.AddWithValue("@raw_name",          alias.RawName);
+        cmd.Parameters.AddWithValue("@provenance_doc_id", alias.ProvenanceDocId ?? (object)DBNull.Value);
+        cmd.Parameters.AddWithValue("@provenance_span",   alias.ProvenanceSpan  ?? (object)DBNull.Value);
+        cmd.ExecuteNonQuery();
+        return Task.CompletedTask;
+    }
+
+    public Task<RegistryVendorRow?> GetRegistryVendorAsync(Guid vendorId, CancellationToken ct = default)
+    {
+        using var cmd = _conn.CreateCommand();
+        cmd.CommandText =
+            "SELECT id, canonical_name, created_at, comparison_key, entity_type, " +
+            "       confidence, flags, status, rebrand_map_ref, acquisition_map_ref, " +
+            "       absorbed_into_vendor_id, program_run_id " +
+            "FROM vendors WHERE id = @id";
+        cmd.Parameters.AddWithValue("@id", vendorId.ToString());
+        using var reader = cmd.ExecuteReader();
+        if (!reader.Read()) return Task.FromResult<RegistryVendorRow?>(null);
+        return Task.FromResult<RegistryVendorRow?>(ReadRegistryVendorRow(reader));
+    }
+
+    public Task<IReadOnlyList<VendorAliasRow>> GetVendorAliasesAsync(Guid vendorId, CancellationToken ct = default)
+    {
+        using var cmd = _conn.CreateCommand();
+        cmd.CommandText =
+            "SELECT id, vendor_id, raw_name, provenance_doc_id, provenance_span " +
+            "FROM vendor_aliases WHERE vendor_id = @vid";
+        cmd.Parameters.AddWithValue("@vid", vendorId.ToString());
+        var results = new List<VendorAliasRow>();
+        using var reader = cmd.ExecuteReader();
+        while (reader.Read())
+            results.Add(new VendorAliasRow(
+                AliasId:         Guid.Parse(reader.GetString(0)),
+                VendorId:        Guid.Parse(reader.GetString(1)),
+                RawName:         reader.GetString(2),
+                ProvenanceDocId: reader.IsDBNull(3) ? null : reader.GetString(3),
+                ProvenanceSpan:  reader.IsDBNull(4) ? null : reader.GetString(4)));
+        return Task.FromResult<IReadOnlyList<VendorAliasRow>>(results);
+    }
+
+    public Task<IReadOnlyList<RegistryVendorRow>> GetAllRegistryVendorsAsync(CancellationToken ct = default)
+    {
+        using var cmd = _conn.CreateCommand();
+        cmd.CommandText =
+            "SELECT id, canonical_name, created_at, comparison_key, entity_type, " +
+            "       confidence, flags, status, rebrand_map_ref, acquisition_map_ref, " +
+            "       absorbed_into_vendor_id, program_run_id " +
+            "FROM vendors";
+        var results = new List<RegistryVendorRow>();
+        using var reader = cmd.ExecuteReader();
+        while (reader.Read())
+            results.Add(ReadRegistryVendorRow(reader));
+        return Task.FromResult<IReadOnlyList<RegistryVendorRow>>(results);
+    }
+
+    private static RegistryVendorRow ReadRegistryVendorRow(Microsoft.Data.Sqlite.SqliteDataReader reader) =>
+        new RegistryVendorRow(
+            VendorId:             Guid.Parse(reader.GetString(0)),
+            CanonicalName:        reader.GetString(1),
+            CreatedAt:            DateTimeOffset.Parse(reader.GetString(2)),
+            ComparisonKey:        reader.IsDBNull(3)  ? null : reader.GetString(3),
+            EntityType:           reader.IsDBNull(4)  ? null : reader.GetString(4),
+            Confidence:           reader.IsDBNull(5)  ? null : reader.GetDouble(5),
+            FlagsJson:            reader.IsDBNull(6)  ? null : reader.GetString(6),
+            Status:               reader.IsDBNull(7)  ? null : reader.GetString(7),
+            RebrandMapRef:        reader.IsDBNull(8)  ? null : reader.GetString(8),
+            AcquisitionMapRef:    reader.IsDBNull(9)  ? null : reader.GetString(9),
+            AbsorbedIntoVendorId: reader.IsDBNull(10) ? null : Guid.Parse(reader.GetString(10)),
+            ProgramRunId:         reader.IsDBNull(11) ? null : Guid.Parse(reader.GetString(11)));
+
+    // ── ICheckInRowStore ──────────────────────────────────────────────────────
+
+    public Task SaveCheckInAsync(CheckInRow row, CancellationToken ct = default)
+    {
+        using var cmd = _conn.CreateCommand();
+        cmd.CommandText = """
+            INSERT OR REPLACE INTO checkins
+              (checkin_id, vendor_id, program_run_id, kind, question, response_shape,
+               target_field, owner, status, raised_at, answered_at, expires_at,
+               response_value, paired_vendor_id)
+            VALUES
+              (@checkin_id, @vendor_id, @program_run_id, @kind, @question, @response_shape,
+               @target_field, @owner, @status, @raised_at, @answered_at, @expires_at,
+               @response_value, @paired_vendor_id)
+            """;
+        cmd.Parameters.AddWithValue("@checkin_id",       row.CheckInId.ToString());
+        cmd.Parameters.AddWithValue("@vendor_id",        row.VendorId.ToString());
+        cmd.Parameters.AddWithValue("@program_run_id",   row.ProgramRunId.ToString());
+        cmd.Parameters.AddWithValue("@kind",             row.Kind);
+        cmd.Parameters.AddWithValue("@question",         row.Question);
+        cmd.Parameters.AddWithValue("@response_shape",   row.ResponseShape);
+        cmd.Parameters.AddWithValue("@target_field",     row.TargetField      ?? (object)DBNull.Value);
+        cmd.Parameters.AddWithValue("@owner",            row.Owner);
+        cmd.Parameters.AddWithValue("@status",           row.Status);
+        cmd.Parameters.AddWithValue("@raised_at",        row.RaisedAt.ToString("O"));
+        cmd.Parameters.AddWithValue("@answered_at",      row.AnsweredAt.HasValue    ? row.AnsweredAt.Value.ToString("O")    : (object)DBNull.Value);
+        cmd.Parameters.AddWithValue("@expires_at",       row.ExpiresAt.HasValue     ? row.ExpiresAt.Value.ToString("O")     : (object)DBNull.Value);
+        cmd.Parameters.AddWithValue("@response_value",   row.ResponseValue          ?? (object)DBNull.Value);
+        cmd.Parameters.AddWithValue("@paired_vendor_id", row.PairedVendorId.HasValue ? row.PairedVendorId.Value.ToString() : (object)DBNull.Value);
+        cmd.ExecuteNonQuery();
+        return Task.CompletedTask;
+    }
+
+    public Task<IReadOnlyList<CheckInRow>> GetOpenCheckInsAsync(CancellationToken ct = default)
+    {
+        using var cmd = _conn.CreateCommand();
+        cmd.CommandText = "SELECT * FROM checkins WHERE status = 'OPEN' ORDER BY raised_at";
+        var results = new List<CheckInRow>();
+        using var reader = cmd.ExecuteReader();
+        while (reader.Read())
+            results.Add(ReadCheckInRow(reader));
+        return Task.FromResult<IReadOnlyList<CheckInRow>>(results);
+    }
+
+    public Task<CheckInRow?> GetCheckInAsync(Guid checkInId, CancellationToken ct = default)
+    {
+        using var cmd = _conn.CreateCommand();
+        cmd.CommandText = "SELECT * FROM checkins WHERE checkin_id = @id";
+        cmd.Parameters.AddWithValue("@id", checkInId.ToString());
+        using var reader = cmd.ExecuteReader();
+        if (!reader.Read()) return Task.FromResult<CheckInRow?>(null);
+        return Task.FromResult<CheckInRow?>(ReadCheckInRow(reader));
+    }
+
+    private static CheckInRow ReadCheckInRow(Microsoft.Data.Sqlite.SqliteDataReader reader)
+    {
+        var pairedCol = reader.GetOrdinal("paired_vendor_id");
+        return new CheckInRow(
+            CheckInId:      Guid.Parse(reader.GetString(reader.GetOrdinal("checkin_id"))),
+            VendorId:       Guid.Parse(reader.GetString(reader.GetOrdinal("vendor_id"))),
+            ProgramRunId:   Guid.Parse(reader.GetString(reader.GetOrdinal("program_run_id"))),
+            Kind:           reader.GetString(reader.GetOrdinal("kind")),
+            Question:       reader.GetString(reader.GetOrdinal("question")),
+            ResponseShape:  reader.GetString(reader.GetOrdinal("response_shape")),
+            TargetField:    reader.IsDBNull(reader.GetOrdinal("target_field"))    ? null : reader.GetString(reader.GetOrdinal("target_field")),
+            Owner:          reader.GetString(reader.GetOrdinal("owner")),
+            Status:         reader.GetString(reader.GetOrdinal("status")),
+            RaisedAt:       DateTimeOffset.Parse(reader.GetString(reader.GetOrdinal("raised_at"))),
+            AnsweredAt:     reader.IsDBNull(reader.GetOrdinal("answered_at"))   ? null : DateTimeOffset.Parse(reader.GetString(reader.GetOrdinal("answered_at"))),
+            ExpiresAt:      reader.IsDBNull(reader.GetOrdinal("expires_at"))    ? null : DateTimeOffset.Parse(reader.GetString(reader.GetOrdinal("expires_at"))),
+            ResponseValue:  reader.IsDBNull(reader.GetOrdinal("response_value")) ? null : reader.GetString(reader.GetOrdinal("response_value")),
+            PairedVendorId: reader.IsDBNull(pairedCol) ? null : Guid.Parse(reader.GetString(pairedCol)));
+    }
+
+    private void MigrateCheckInColumns()
+    {
+        TryAddColumn("checkins", "paired_vendor_id", "TEXT");
     }
 
     public void Dispose() => _conn.Dispose();

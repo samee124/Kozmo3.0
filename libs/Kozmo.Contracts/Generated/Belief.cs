@@ -11,7 +11,7 @@ namespace Kozmo.Contracts;
 public sealed record Belief(
     Guid           Id,
     Guid           EntityId,
-    Dimension      Dimension,
+    Dimension?     Dimension,
     string         Criterion,
     double         Value,          // normalised 0–1 rubric score
     SourceTier     SourceTier,
@@ -35,6 +35,26 @@ public sealed record Belief(
 
     /// <summary>LLM rationale when ClassificationMethod == Llm. Null for rule-classified beliefs.</summary>
     public string? ReasoningSummary { get; init; } = null;
+
+    // ── Vendor file fields — NOT fingerprint inputs ──────────────────────────────
+
+    /// <summary>Claim key from the claim_key catalogue (§4). Empty for signal-pipeline beliefs.</summary>
+    public string ClaimKey { get; init; } = "";
+
+    /// <summary>Timestamp of the evidence itself (not of ingestion). Used as decay base when set.</summary>
+    public DateTimeOffset? ObservedAt { get; init; } = null;
+
+    /// <summary>
+    /// Half-life in days from the claim_key catalogue. Null = not a vendor file belief (use tier-based).
+    /// Zero = contractual fact, no decay.
+    /// </summary>
+    public int? HalfLifeDays { get; init; } = null;
+
+    /// <summary>Optional validity horizon for contractual beliefs (e.g. contract expiry date).</summary>
+    public DateTimeOffset? ValidUntil { get; init; } = null;
+
+    /// <summary>Evidence reference for vendor file beliefs. Null for signal-pipeline beliefs.</summary>
+    public BeliefProvenance? Provenance { get; init; } = null;
 
     // ── Confidence-anchor provenance — annotation only, never fingerprint inputs ─
 

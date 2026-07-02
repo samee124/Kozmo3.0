@@ -3,21 +3,30 @@
   "profile": "saas",
   "version": "v1",
   "tiers": {
+    "Primary": {
+      "weight": 1.0,
+      "ceiling": 1.0,
+      "description": "Of-record, executed — signed contract, executed agreement, amendment"
+    },
     "Verified": {
-      "weight": 0.95,
-      "description": "Direct integration — CRM, billing system, monitoring platform"
+      "weight": 0.8,
+      "ceiling": 0.8,
+      "description": "Strong system fact — system export, invoice, PO, monitoring platform"
     },
     "Inferred": {
-      "weight": 0.70,
-      "description": "Derived from usage patterns or correlated signals"
+      "weight": 0.3,
+      "ceiling": 0.3,
+      "description": "Model-derived analytical claim"
     },
     "Reported": {
       "weight": 0.50,
-      "description": "Human-submitted: email, call notes, support tickets"
+      "ceiling": 0.5,
+      "description": "One voice — email, owner note, feedback, quote"
     },
     "Unverified": {
-      "weight": 0.30,
-      "description": "Social, unvalidated external sources"
+      "weight": 0.2,
+      "ceiling": 0.2,
+      "description": "Weak — web profile, unsourced"
     }
   }
 }

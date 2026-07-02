@@ -7,16 +7,21 @@
 // ── API ───────────────────────────────────────────────────────────────────────
 
 const API = {
-  vendors:     ()              => fetch('/vendors').then(assertOk),
-  trail:       (id)            => fetch(`/vendors/${id}/trail`).then(assertOk),
-  trajectory:  (id)            => fetch(`/vendors/${id}/trajectory`).then(assertOk),
-  reset:       ()              => fetch('/demo/reset', { method: 'POST' }).then(assertOk),
-  replay:      ()              => fetch('/demo/replay', { method: 'POST' }),
-  liveSignal:  (body) => fetch('/demo/live-signal', {
+  vendors:        ()     => fetch('/vendors').then(assertOk),
+  trail:          (id)   => fetch(`/vendors/${id}/trail`).then(assertOk),
+  trajectory:     (id)   => fetch(`/vendors/${id}/trajectory`).then(assertOk),
+  reset:          ()     => fetch('/demo/reset', { method: 'POST' }).then(assertOk),
+  replay:         ()     => fetch('/demo/replay', { method: 'POST' }),
+  liveSignal:     (body) => fetch('/demo/live-signal', {
     method:  'POST',
     headers: { 'Content-Type': 'application/json' },
     body:    JSON.stringify({ body }),
   }),
+  uploadContract: (form) => fetch('/vendors/vendor-file/upload-contract', {
+    method: 'POST',
+    body:   form,
+  }),
+  vendorFileMd: (id) => fetch(`/vendors/${id}/vendor-file/markdown`),
 };
 
 async function assertOk(res) {
@@ -43,6 +48,13 @@ async function init() {
   document.getElementById('btn-reset').addEventListener('click', onReset);
   document.getElementById('btn-replay').addEventListener('click', onReplay);
   document.getElementById('btn-live-send').addEventListener('click', onLiveSend);
+  const uploadBtn = document.getElementById('btn-upload');
+  if (uploadBtn) {
+    uploadBtn.addEventListener('click', () => {
+      const vendorName = (document.getElementById('upload-vendor-name')?.value ?? '').trim();
+      onUploadContract('upload-file', 'upload-status', 'btn-upload', vendorName);
+    });
+  }
   initLiveSseHandler();
 }
 
@@ -110,19 +122,44 @@ function renderDetailView(fingerprintMatch) {
         <div class="fingerprint-full">${esc(fp)}</div>
       </div>
     </div>
+    <div class="detail-upload">
+      <span class="detail-upload-label">Upload Document</span>
+      <div class="detail-upload-row">
+        <input type="file" id="duf-file" accept=".pdf" class="detail-upload-file">
+        <button id="duf-btn" type="button" class="btn-upload">Process →</button>
+      </div>
+      <span id="duf-status" class="detail-upload-status"></span>
+    </div>
     ${renderMetaCaveats(trail.posture)}
     <div class="tabs">
-      <button class="tab-btn active" data-tab="trail"      type="button">Trail</button>
-      <button class="tab-btn"        data-tab="trajectory" type="button">Trajectory</button>
+      <button class="tab-btn active" data-tab="overview"    type="button">Overview</button>
+      <button class="tab-btn"        data-tab="file"        type="button">File</button>
+      <button class="tab-btn"        data-tab="reality"     type="button">Reality</button>
+      <button class="tab-btn"        data-tab="trajectory"  type="button">Trajectory</button>
     </div>
-    <div id="tab-trail"      class="tab-panel">${renderTrailPanel(trail)}</div>
-    <div id="tab-trajectory" class="tab-panel hidden">${renderTrajectoryPanel(state.trajectory, trail.band.thresholds)}</div>`;
+    <div id="tab-overview"    class="tab-panel">
+      <iframe id="vf-frame" src="about:blank" style="width:100%;border:none;display:block;min-height:1200px;"></iframe>
+    </div>
+    <div id="tab-file"        class="tab-panel hidden">
+      <pre id="vf-md-pre" class="vf-md-pre">Loading…</pre>
+    </div>
+    <div id="tab-reality"     class="tab-panel hidden">${renderTrailPanel(trail)}</div>
+    <div id="tab-trajectory"  class="tab-panel hidden">${renderTrajectoryPanel(state.trajectory, trail.band.thresholds)}</div>`;
 
   el.querySelectorAll('.tab-btn').forEach(btn =>
     btn.addEventListener('click', () => switchTab(btn.dataset.tab)));
 
   el.querySelectorAll('.dim-header').forEach(header =>
     header.addEventListener('click', () => header.parentElement.classList.toggle('expanded')));
+
+  const dufBtn = document.getElementById('duf-btn');
+  if (dufBtn) {
+    const vendorName = (v && v.name) ? v.name : '';
+    dufBtn.addEventListener('click', () =>
+      onUploadContract('duf-file', 'duf-status', 'duf-btn', vendorName));
+  }
+
+  loadOverviewTab();
 }
 
 function switchTab(tab) {
@@ -132,6 +169,39 @@ function switchTab(tab) {
     const match = p.id === `tab-${tab}`;
     p.classList.toggle('hidden', !match);
   });
+  if (tab === 'overview') loadOverviewTab();
+  if (tab === 'file')     loadFileTab();
+}
+
+// ── Overview / File tab loaders ───────────────────────────────────────────────
+
+function loadOverviewTab() {
+  const frame = document.getElementById('vf-frame');
+  if (!frame || frame.dataset.loaded === '1') return;
+  frame.src = `/vendor-file/${state.selectedId}`;
+  frame.dataset.loaded = '1';
+  frame.addEventListener('load', () => {
+    try {
+      const h = Math.max(
+        frame.contentDocument.body.scrollHeight,
+        frame.contentDocument.documentElement.scrollHeight);
+      if (h > 200) frame.style.height = h + 32 + 'px';
+    } catch {}
+  }, { once: true });
+}
+
+async function loadFileTab() {
+  const pre = document.getElementById('vf-md-pre');
+  if (!pre || pre.dataset.loaded === '1') return;
+  pre.textContent = 'Loading…';
+  try {
+    const res = await API.vendorFileMd(state.selectedId);
+    if (!res.ok) { pre.textContent = 'No vendor file available yet.'; return; }
+    pre.textContent = await res.text();
+    pre.dataset.loaded = '1';
+  } catch (err) {
+    pre.textContent = 'Error: ' + err.message;
+  }
 }
 
 // ── Trail panel ───────────────────────────────────────────────────────────────
@@ -756,6 +826,61 @@ function setLiveStatus(msg, cls) {
   const el  = document.getElementById('live-status');
   el.textContent = msg;
   el.className   = 'live-status' + (cls ? ' ' + cls : '');
+}
+
+// ── Upload contract ───────────────────────────────────────────────────────────
+
+async function onUploadContract(fileInputId, statusId, btnId, vendorName) {
+  const fileInput = document.getElementById(fileInputId);
+  const statusEl  = document.getElementById(statusId);
+  const btn       = document.getElementById(btnId);
+  const file      = fileInput && fileInput.files && fileInput.files[0];
+
+  if (!file) {
+    setUploadStatus(statusEl, 'Select a PDF first.', 'upload-err');
+    return;
+  }
+  if (!vendorName) {
+    setUploadStatus(statusEl, 'Enter a vendor name.', 'upload-err');
+    return;
+  }
+
+  if (btn) btn.disabled = true;
+  setUploadStatus(statusEl, 'Extracting… (may take a moment)', 'upload-busy');
+
+  const form = new FormData();
+  form.append('file', file);
+  form.append('vendorName', vendorName);
+
+  try {
+    const res = await API.uploadContract(form);
+    if (res.status === 503) {
+      setUploadStatus(statusEl, 'OPENAI_API_KEY not configured — live extraction unavailable.', 'upload-err');
+      return;
+    }
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      setUploadStatus(statusEl, `Error ${res.status}: ${err.error ?? res.statusText}`, 'upload-err');
+      return;
+    }
+    const data = await res.json();
+    setUploadStatus(statusEl, 'Done — opening Overview…', 'upload-ok');
+    try { state.vendors = await API.vendors(); } catch {}
+    renderVendorList();
+    await selectVendor(data.vendorId);
+    switchTab('overview');
+  } catch (err) {
+    setUploadStatus(statusEl, `Failed: ${err.message}`, 'upload-err');
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+
+function setUploadStatus(el, msg, cls) {
+  if (!el) return;
+  el.textContent = msg;
+  el.className   = (el.classList.contains('detail-upload-status') ? 'detail-upload-status' : 'upload-status') +
+                   (cls ? ' ' + cls : '');
 }
 
 // ── Init ──────────────────────────────────────────────────────────────────────

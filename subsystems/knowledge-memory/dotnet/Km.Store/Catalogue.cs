@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using Kozmo.Contracts;
 using Kozmo.Contracts.Config;
 using Kozmo.Contracts.Interfaces;
 
@@ -24,7 +25,13 @@ public sealed class Catalogue : ICatalogue
         var decay    = LoadJson(dir, "decay.saas.v1.json");
         var entityRes= LoadJson(dir, "entity_resolution.saas.v1.json");
 
-        var profile = Assemble(dims, rubric, weights, bands, postures, tiers, classify, decay, entityRes);
+        // Vendor file extensions — optional; silently absent pre-migration
+        var claimKeys    = TryLoadJson(dir, "claim_key_catalogue.saas.v1.json");
+        var docTypeMap   = TryLoadJson(dir, "doc_type_tier_map.saas.v1.json");
+        var expectedSets = TryLoadJson(dir, "expected_belief_sets.saas.v1.json");
+
+        var profile = Assemble(dims, rubric, weights, bands, postures, tiers, classify, decay, entityRes,
+                               claimKeys, docTypeMap, expectedSets);
         Validate(profile);
         return profile;
     }
@@ -39,9 +46,18 @@ public sealed class Catalogue : ICatalogue
             ?? throw new InvalidOperationException($"Catalogue file is not a JSON object: {path}");
     }
 
+    private static JsonObject? TryLoadJson(string dir, string file)
+    {
+        var path = Path.Combine(dir, file);
+        if (!File.Exists(path)) return null;
+        var text = File.ReadAllText(path);
+        return JsonNode.Parse(text)?.AsObject();
+    }
+
     private static SaasProfile Assemble(
         JsonObject dims, JsonObject rubric, JsonObject weights, JsonObject bands,
-        JsonObject postures, JsonObject tiers, JsonObject classify, JsonObject decay, JsonObject entityRes)
+        JsonObject postures, JsonObject tiers, JsonObject classify, JsonObject decay, JsonObject entityRes,
+        JsonObject? claimKeys, JsonObject? docTypeMap, JsonObject? expectedSets)
     {
         var version = weights["version"]?.GetValue<string>() ?? "unknown";
 
@@ -116,10 +132,13 @@ public sealed class Catalogue : ICatalogue
         var tierMap = new Dictionary<string, SourceTierConfig>();
         foreach (var kv in tiers["tiers"]!.AsObject())
         {
-            var to = kv.Value!.AsObject();
-            tierMap[kv.Key] = new SourceTierConfig(
-                to["weight"]!.GetValue<double>(),
-                to["description"]?.GetValue<string>() ?? "");
+            var to     = kv.Value!.AsObject();
+            var weight = to["weight"]!.GetValue<double>();
+            var ceiling = to["ceiling"]?.GetValue<double>() ?? weight;  // default ceiling = weight
+            tierMap[kv.Key] = new SourceTierConfig(weight, to["description"]?.GetValue<string>() ?? "")
+            {
+                Ceiling = ceiling
+            };
         }
 
         // Classification rules
@@ -151,6 +170,42 @@ public sealed class Catalogue : ICatalogue
             FuzzyThreshold: erObj["fuzzy_threshold"]?.GetValue<double>() ?? 0.80,
             AliasMap:       aliasMap);
 
+        // Claim key catalogue (vendor file extension)
+        var claimKeyDefs = new Dictionary<string, ClaimKeyDefinition>();
+        if (claimKeys != null)
+        {
+            foreach (var kv in claimKeys["claim_keys"]!.AsObject())
+            {
+                var ck  = kv.Value!.AsObject();
+                var hld = ck["half_life_days"]?.GetValue<int?>();
+                claimKeyDefs[kv.Key] = new ClaimKeyDefinition(
+                    ClaimClass:     ck["class"]!.GetValue<string>(),
+                    ValueType:      ck["value_type"]!.GetValue<string>(),
+                    Dimension:      ck["dimension"]?.GetValue<string>() ?? "",
+                    TypicalTier:    ck["typical_tier"]?.GetValue<string>() ?? "",
+                    HalfLifeDays:   hld,
+                    DimensionWeight: ck["dimension_weight"]?.GetValue<double>() ?? 0.0);
+            }
+        }
+
+        // Doc-type → tier map (vendor file extension)
+        var docTypeTierMap = new Dictionary<string, string>();
+        if (docTypeMap != null)
+            foreach (var kv in docTypeMap["map"]!.AsObject())
+                docTypeTierMap[kv.Key] = kv.Value!.GetValue<string>();
+
+        // Expected belief sets (vendor file extension)
+        var expectedBeliefSets = new Dictionary<string, IReadOnlyList<string>>();
+        if (expectedSets != null)
+            foreach (var kv in expectedSets["vendor_classes"]!.AsObject())
+            {
+                var vc   = kv.Value!.AsObject();
+                var keys = vc["expected_claim_keys"]!.AsArray()
+                            .Select(x => x!.GetValue<string>())
+                            .ToList();
+                expectedBeliefSets[kv.Key] = keys;
+            }
+
         return new SaasProfile(
             ConfigVersion:       $"saas.{version}",
             Dimensions:          dimDefs,
@@ -161,7 +216,12 @@ public sealed class Catalogue : ICatalogue
             SourceTiers:         tierMap,
             ClassificationRules: classifyRules,
             HalfLifeDays:        halfLifeMap,
-            EntityResolution:    erConfig);
+            EntityResolution:    erConfig)
+        {
+            ClaimKeyCatalogue  = claimKeyDefs,
+            DocTypeTierMap     = docTypeTierMap,
+            ExpectedBeliefSets = expectedBeliefSets
+        };
     }
 
     private static void Validate(SaasProfile p)
@@ -192,6 +252,14 @@ public sealed class Catalogue : ICatalogue
                 $"Catalogue invariant #4 violated: Reported tier weight {reportedCfg.Weight} >= " +
                 $"critical confidence gate {p.Bands.CriticalConfidenceGate}. " +
                 "A single Reported signal must never be able to force CRITICAL.");
+
+        // 4b. Vendor file gate: INFERRED ceiling must also be below the critical confidence gate
+        if (p.SourceTiers.TryGetValue("Inferred", out var inferredCfg)
+            && inferredCfg.Ceiling >= p.Bands.CriticalConfidenceGate)
+            throw new InvalidOperationException(
+                $"Catalogue vendor-file invariant violated: Inferred tier ceiling {inferredCfg.Ceiling} >= " +
+                $"critical confidence gate {p.Bands.CriticalConfidenceGate}. " +
+                "INFERRED evidence must never force Critical on its own.");
 
         // 5. Posture rules must reference valid stances
         var validStances = new HashSet<string>(StringComparer.OrdinalIgnoreCase)

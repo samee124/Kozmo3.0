@@ -365,7 +365,7 @@ public sealed class FullStreamTests
     public void F2_Meridian_Fingerprint_Pin()
     {
         // Tripwire — if an intentional later change shifts a score, re-pin; bands/stances must not change.
-        const string Pin = "72237da04d94ec26401c032c7877608f75f54f0f584c61b7fe3831ca04e00af4";
+        const string Pin = "8868dcaaa496f9454c57674a017f78fece85bedde265db61a39ebf293d6d52a9";
 
         using var h = TestHarness.FreshEngineWithSeed();
         h.ReplayAllSignals("meridian");
@@ -380,7 +380,7 @@ public sealed class FullStreamTests
     public void F3_Cloudwave_Fingerprint_Pin()
     {
         // Tripwire — if an intentional later change shifts a score, re-pin; bands/stances must not change.
-        const string Pin = "e5d0e9b99409ac2ef0799003e05f27ea90a0d2b524a88fe906ccd0d3722bd78f";
+        const string Pin = "d977be9b3f2039eb2c0af6ad9e9fd762a3c5b0925688376cce8cb5b295b10586";
 
         using var h = TestHarness.FreshEngineWithSeed();
         h.ReplayAllSignals("cloudwave");
@@ -395,7 +395,7 @@ public sealed class FullStreamTests
     public void F4_Corvus_Fingerprint_Pin()
     {
         // Tripwire — if an intentional later change shifts a score, re-pin; bands/stances must not change.
-        const string Pin = "7e7cf0052779e8aaaa0f2bdc79995efd54dd3cd1bb4911ab8069ac15fd535e13";
+        const string Pin = "d81422d2dea427a9f4f36d20e2afdabcbc918dc257c55667d673c73615ca8682";
 
         using var h = TestHarness.FreshEngineWithSeed();
         h.ReplayAllSignals("corvus");
@@ -473,7 +473,7 @@ public sealed class FullStreamTests
     {
         var rubric  = new RubricModule();
         var allDims = new[] { Dimension.Operational, Dimension.Experiential, Dimension.Financial, Dimension.Strategic };
-        var byDim   = beliefs.GroupBy(b => b.Dimension).ToDictionary(g => g.Key, g => g.ToList());
+        var byDim   = beliefs.Where(b => b.Dimension.HasValue).GroupBy(b => b.Dimension!.Value).ToDictionary(g => g.Key, g => g.ToList());
 
         return allDims.ToDictionary(d => d, d =>
             byDim.TryGetValue(d, out var db)
@@ -605,7 +605,7 @@ public sealed class FullStreamTests
     [Trait("Class", "I")]
     public void I1_Cloudwave_EmptyMeta_GoldenBandStance_Unchanged()
     {
-        const string FingerprintPin = "e5d0e9b99409ac2ef0799003e05f27ea90a0d2b524a88fe906ccd0d3722bd78f";
+        const string FingerprintPin = "d977be9b3f2039eb2c0af6ad9e9fd762a3c5b0925688376cce8cb5b295b10586";
 
         using var h = TestHarness.FreshEngineWithSeed();
         h.ReplayAllSignals("cloudwave");
@@ -624,7 +624,7 @@ public sealed class FullStreamTests
     [Trait("Class", "I")]
     public void I2_Corvus_EmptyMeta_GoldenBandStance_Unchanged()
     {
-        const string FingerprintPin = "7e7cf0052779e8aaaa0f2bdc79995efd54dd3cd1bb4911ab8069ac15fd535e13";
+        const string FingerprintPin = "d81422d2dea427a9f4f36d20e2afdabcbc918dc257c55667d673c73615ca8682";
 
         using var h = TestHarness.FreshEngineWithSeed();
         h.ReplayAllSignals("corvus");
@@ -643,7 +643,7 @@ public sealed class FullStreamTests
     [Trait("Class", "I")]
     public void I3_Meridian_EmptyMeta_GoldenBandStance_Unchanged()
     {
-        const string FingerprintPin = "72237da04d94ec26401c032c7877608f75f54f0f584c61b7fe3831ca04e00af4";
+        const string FingerprintPin = "8868dcaaa496f9454c57674a017f78fece85bedde265db61a39ebf293d6d52a9";
 
         using var h = TestHarness.FreshEngineWithSeed();
         h.ReplayAllSignals("meridian");
@@ -780,4 +780,5 @@ public sealed class FullStreamTests
         var meta = FakeMetaCognition.WithContradictions(id.ToString(), contradictionCount);
         return (module.Assign(idx, null, null, profile, now, meta), idx);
     }
+
 }

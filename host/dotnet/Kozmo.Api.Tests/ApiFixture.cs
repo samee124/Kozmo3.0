@@ -80,6 +80,16 @@ public sealed class ApiFixture : WebApplicationFactory<Program>, IAsyncLifetime
             new DateTimeOffset(2026, 8, 15, 0, 0, 0, TimeSpan.Zero));
         reg.Register(Guid.Parse("eeeeeeee-0003-0000-0000-000000000001"), "Meridian IT Services Ltd.",
             new DateTimeOffset(2027, 1, 15, 0, 0, 0, TimeSpan.Zero));
+        reg.Register(Guid.Parse("eeeeeeee-0004-0000-0000-000000000001"), "Helix Solutions AG",
+            null);
+        reg.Register(Guid.Parse("eeeeeeee-0005-0000-0000-000000000001"), "Northwind Logistics Inc.",
+            null);
+        reg.Register(Guid.Parse("eeeeeeee-0006-0000-0000-000000000001"), "Vertex Systems Ltd.",
+            null);
+        reg.Register(Guid.Parse("eeeeeeee-0007-0000-0000-000000000001"), "Aster Analytics Co.",
+            null);
+        reg.Register(Guid.Parse("eeeeeeee-0008-0000-0000-000000000001"), "Borealis Cloud GmbH",
+            null);
         return reg;
     }
 

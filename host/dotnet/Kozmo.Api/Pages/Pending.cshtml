@@ -1,0 +1,175 @@
+@page
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Kozmo — Pending Check-Ins</title>
+    <link rel="stylesheet" href="/style.css">
+    <style>
+        body { font-family: system-ui, sans-serif; margin: 0; background: #0f1117; color: #e2e8f0; }
+        .pending-shell { max-width: 760px; margin: 0 auto; padding: 2rem 1rem; }
+        .pending-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem; }
+        .pending-header a { color: #7dd3fc; font-size: 0.85rem; text-decoration: none; }
+        .pending-header a:hover { text-decoration: underline; }
+        h1 { font-size: 1.4rem; font-weight: 600; margin: 0; }
+        .badge { font-size: 0.7rem; background: #f59e0b; color: #000; border-radius: 4px; padding: 2px 6px; font-weight: 700; }
+        .empty-state { color: #64748b; text-align: center; padding: 3rem 0; font-size: 0.95rem; }
+        .checkin-card { background: #1e2533; border: 1px solid #2d3748; border-radius: 8px;
+                        padding: 1.2rem 1.4rem; margin-bottom: 1.2rem; }
+        .ci-meta { display: flex; gap: 0.6rem; align-items: center; margin-bottom: 0.6rem; flex-wrap: wrap; }
+        .ci-kind { font-size: 0.7rem; font-weight: 700; border-radius: 4px; padding: 2px 6px; }
+        .ci-kind.identity { background: #7c3aed; color: #fff; }
+        .ci-kind.gap { background: #0369a1; color: #fff; }
+        .ci-shape { font-size: 0.7rem; color: #94a3b8; border: 1px solid #334155; border-radius: 4px; padding: 1px 5px; }
+        .ci-target { font-size: 0.7rem; color: #94a3b8; }
+        .ci-question { font-size: 0.95rem; line-height: 1.5; margin-bottom: 1rem; }
+        .ci-form { display: flex; gap: 0.6rem; align-items: flex-start; flex-wrap: wrap; }
+        .ci-form input[type=text], .ci-form select {
+            flex: 1; min-width: 180px; background: #0f1117; border: 1px solid #334155;
+            border-radius: 4px; padding: 0.4rem 0.6rem; color: #e2e8f0; font-size: 0.9rem;
+        }
+        .ci-radio-group { display: flex; gap: 0.8rem; align-items: center; padding: 0.4rem 0; }
+        .ci-radio-group label { display: flex; gap: 0.4rem; align-items: center; cursor: pointer;
+                                font-size: 0.9rem; }
+        .btn-answer { background: #2563eb; color: #fff; border: none; border-radius: 4px;
+                      padding: 0.4rem 1rem; font-size: 0.9rem; cursor: pointer; white-space: nowrap; }
+        .btn-answer:hover { background: #1d4ed8; }
+        .btn-answer:disabled { background: #334155; cursor: not-allowed; }
+        .ci-status { font-size: 0.8rem; margin-top: 0.6rem; }
+        .ci-status.ok  { color: #34d399; }
+        .ci-status.err { color: #f87171; }
+        .loading { color: #64748b; padding: 2rem 0; text-align: center; }
+    </style>
+</head>
+<body>
+<div class="pending-shell">
+    <div class="pending-header">
+        <a href="/">&larr; Dashboard</a>
+        <h1>Pending Check-Ins</h1>
+        <span class="badge" id="open-count" style="display:none"></span>
+    </div>
+    <div id="list-root"><div class="loading">Loading…</div></div>
+</div>
+<script>
+(function () {
+    const STATUS_OPTIONS = ['Active','Inactive','Suspended','Dissolved','Draft','Signed','None','Unknown'];
+
+    async function load() {
+        const root = document.getElementById('list-root');
+        try {
+            const res  = await fetch('/checkins');
+            const list = await res.json();
+            render(list);
+        } catch (e) {
+            root.innerHTML = '<div class="ci-status err">Failed to load check-ins: ' + e.message + '</div>';
+        }
+    }
+
+    function render(list) {
+        const root  = document.getElementById('list-root');
+        const badge = document.getElementById('open-count');
+        if (!list.length) {
+            root.innerHTML = '<div class="empty-state">No open check-ins — all questions answered.</div>';
+            badge.style.display = 'none';
+            return;
+        }
+        badge.textContent = list.length + ' open';
+        badge.style.display = '';
+        root.innerHTML = list.map(ci => card(ci)).join('');
+        list.forEach(ci => wireForm(ci));
+    }
+
+    function card(ci) {
+        const kindClass = ci.kind === 'IDENTITY_CONFIRM' ? 'identity' : 'gap';
+        const kindLabel = ci.kind === 'IDENTITY_CONFIRM' ? 'Identity' : 'Gap';
+        const target    = ci.targetField ? '<span class="ci-target">field: ' + ci.targetField + '</span>' : '';
+        return `
+        <div class="checkin-card" id="card-${ci.checkInId}">
+          <div class="ci-meta">
+            <span class="ci-kind ${kindClass}">${kindLabel}</span>
+            <span class="ci-shape">${ci.responseShape}</span>
+            ${target}
+          </div>
+          <div class="ci-question">${escHtml(ci.question)}</div>
+          <div class="ci-form" id="form-${ci.checkInId}">
+            ${inputFor(ci)}
+            <button class="btn-answer" id="btn-${ci.checkInId}" onclick="submitAnswer('${ci.checkInId}')">Submit</button>
+          </div>
+          <div class="ci-status" id="status-${ci.checkInId}"></div>
+        </div>`;
+    }
+
+    function inputFor(ci) {
+        if (ci.responseShape === 'YES_NO') {
+            return `<div class="ci-radio-group">
+              <label><input type="radio" name="ans-${ci.checkInId}" value="true"> Yes</label>
+              <label><input type="radio" name="ans-${ci.checkInId}" value="false"> No</label>
+            </div>`;
+        }
+        if (ci.responseShape === 'STATUS_SELECT') {
+            const opts = STATUS_OPTIONS.map(s => `<option value="${s}">${s}</option>`).join('');
+            return `<select id="input-${ci.checkInId}"><option value="">— select —</option>${opts}</select>`;
+        }
+        // TYPED_VALUE
+        const ph = ci.targetField ? 'Enter ' + ci.targetField + '…' : 'Enter value…';
+        return `<input type="text" id="input-${ci.checkInId}" placeholder="${escHtml(ph)}">`;
+    }
+
+    function wireForm(ci) {}  // onclick handles it inline
+
+    window.submitAnswer = async function(id) {
+        const btn    = document.getElementById('btn-' + id);
+        const status = document.getElementById('status-' + id);
+        let value;
+
+        const radios = document.querySelectorAll(`input[name="ans-${id}"]`);
+        if (radios.length) {
+            const checked = [...radios].find(r => r.checked);
+            if (!checked) { status.className = 'ci-status err'; status.textContent = 'Please select Yes or No.'; return; }
+            value = checked.value;
+        } else {
+            const inp = document.getElementById('input-' + id);
+            value = inp ? inp.value.trim() : '';
+            if (!value) { status.className = 'ci-status err'; status.textContent = 'Please enter a value.'; return; }
+        }
+
+        btn.disabled = true;
+        status.textContent = 'Submitting…';
+        status.className = 'ci-status';
+
+        try {
+            const res  = await fetch('/checkins/' + id + '/answer', {
+                method:  'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body:    JSON.stringify({ responseValue: value })
+            });
+            const body = await res.json();
+            if (res.ok) {
+                status.className = 'ci-status ok';
+                status.textContent = 'Answered — reloading…';
+                setTimeout(load, 800);
+            } else {
+                status.className = 'ci-status err';
+                status.textContent = body.error || 'Submission failed.';
+                btn.disabled = false;
+            }
+        } catch (e) {
+            status.className = 'ci-status err';
+            status.textContent = 'Network error: ' + e.message;
+            btn.disabled = false;
+        }
+    };
+
+    function escHtml(s) {
+        return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    load();
+})();
+</script>
+</body>
+</html>

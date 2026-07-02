@@ -7,7 +7,7 @@ namespace Kozmo.Api.Tests;
 /// Class M — Trajectory assertions against GET /vendors/{id}/trajectory.
 /// M1: Cloudwave — 4 points, non-decreasing timestamps, all have SignalId, final = golden.
 /// M2: Corvus    — 4 points, non-decreasing timestamps, all have SignalId, final = golden.
-/// M3: Meridian  — 2 points, non-decreasing timestamps, all have SignalId, final = golden.
+/// M3: Meridian  — 3 points, non-decreasing timestamps, all have SignalId, final = golden.
 /// </summary>
 [Collection("ApiTests")]
 [Trait("Class", "M")]
@@ -36,7 +36,7 @@ public class MTests
         var last = points.Last();
         Assert.Equal("AtRisk",      last.Band);
         Assert.Equal("Renegotiate", last.Stance);
-        Assert.StartsWith("e5d0e9b9", last.Fingerprint);
+        Assert.StartsWith("d977be9b", last.Fingerprint);
     }
 
     [Fact] [Trait("Class", "M")]
@@ -53,24 +53,24 @@ public class MTests
         var last = points.Last();
         Assert.Equal("Critical", last.Band);
         Assert.Equal("Escalate", last.Stance);
-        Assert.StartsWith("7e7cf005", last.Fingerprint);
+        Assert.StartsWith("d81422d2", last.Fingerprint);
     }
 
     [Fact] [Trait("Class", "M")]
-    public async Task M3_MeridianTrajectory_TwoPoints_GoldenFinalState()
+    public async Task M3_MeridianTrajectory_ThreePoints_GoldenFinalState()
     {
         var points = await _client.GetFromJsonAsync<TrajectoryPointDto[]>(
             $"/vendors/{MeridianId}/trajectory", JsonOpts);
 
         Assert.NotNull(points);
-        Assert.Equal(2, points!.Length);
+        Assert.Equal(3, points!.Length);
         AssertNonDecreasing(points);
         Assert.All(points, p => Assert.NotNull(p.SignalId));
 
         var last = points.Last();
         Assert.Equal("Healthy",  last.Band);
         Assert.Equal("Maintain", last.Stance);
-        Assert.StartsWith("72237da0", last.Fingerprint);
+        Assert.StartsWith("b2e03ff0", last.Fingerprint);
     }
 
     private static void AssertNonDecreasing(TrajectoryPointDto[] points)

@@ -95,7 +95,7 @@ public sealed class GoldenStreamB3Tests
     [Trait("Golden", "true")]
     public void P1_Corvus_WithLlmBelief_FingerprintPin()
     {
-        const string Pin = "9c33aaee76ce8a3df3798797d5d6194cf51765a28064f18560a38f4792b20385";
+        const string Pin = "5381cb5b4e0c207033f7a78417d0b1e764396b9fc52da11aae2bcd9ec5b1a51d";
 
         using var h = TestHarness.FreshEngineWithSeed(clock: DemoClock.Fixed, llm: MakeReplayClient());
         h.ReplayAllSignals("corvus");
@@ -112,7 +112,7 @@ public sealed class GoldenStreamB3Tests
     [Trait("Golden", "true")]
     public void P2_Meridian_WithLlmBelief_FingerprintPin()
     {
-        const string Pin = "5b67c2ae7691c88cb88f7c641af974a95385d753790e8ba7b76d936314976c4a";
+        const string Pin = "18fca78e2b018544de85650f0a19253170db521648450613e87312c196410322";
 
         using var h = TestHarness.FreshEngineWithSeed(clock: DemoClock.Fixed, llm: MakeReplayClient());
         h.ReplayAllSignals("meridian");

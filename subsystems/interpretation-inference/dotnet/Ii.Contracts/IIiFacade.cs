@@ -34,7 +34,39 @@ public interface IIiFacade
 
     /// <summary>Reset all state. Demo/test harness only.</summary>
     Task ResetAsync(CancellationToken ct = default);
+
+    /// <summary>
+    /// Recompute a full banded judgement from the vendor-file belief set currently in the store.
+    /// decay → anchor → Rubric (scored only) → Index → Posture → MetaCognition.
+    /// Read-only; does not persist results.
+    /// </summary>
+    Task<VendorJudgement> RecomputeVendorAsync(Guid entityId, CancellationToken ct = default);
 }
+
+public sealed record VendorJudgement(
+    EntityIndex         Index,
+    PostureAssignment   Posture,
+    MetaCognitionResult Meta,
+    ManagementBlock     Management
+);
+
+public enum VerificationState { Unverified, PartiallyVerified, OwnerConfirmed }
+
+public sealed record ManagementFlags(DateTimeOffset? RenewalDeadline, bool HasContradictions);
+
+public sealed record RefreshInfo(DateTimeOffset? NextDue);
+
+public sealed record ManagementBlock(
+    double                   Completeness,
+    int                      FilledCount,
+    int                      ExpectedCount,
+    IReadOnlyList<string>    GapSlots,
+    IReadOnlyList<Dimension> WeakDimensions,
+    ManagementFlags          Flags,
+    VerificationState        VerificationState,
+    RefreshInfo              Refresh,
+    string                   CoverageStatement
+);
 
 public sealed record TrajectoryPoint(
     DateTimeOffset Timestamp,

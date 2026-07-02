@@ -1,0 +1,38 @@
+[
+  {
+    "_proves": "contradiction detection: payment_terms PRIMARY=45 (Net45) conflicts with REPORTED=30 (Net30); PRIMARY tier wins by supersession precedence but REPORTED remains active → cross-source contradiction raised",
+    "evidence": {
+      "evidence_id": "aa000006-0001-0000-0000-000000000001",
+      "vendor_id": "eeeeeeee-0006-0000-0000-000000000001",
+      "doc_type": "SignedContract",
+      "source_tier": "Primary",
+      "ref": "contracts/vertex-msa-v2.pdf",
+      "doc_version": 2,
+      "ingested_at": "2025-10-01T00:00:00Z"
+    },
+    "observed_at": "2025-09-01T00:00:00Z",
+    "claims": [
+      { "claim_key": "sla_uptime",       "raw_value": 0.90, "locator": "page:4 §5.1", "extractor_confidence": 1.0 },
+      { "claim_key": "payment_terms",    "raw_value": 45,   "locator": "page:3 §4.2", "extractor_confidence": 1.0 },
+      { "claim_key": "annual_value",     "raw_value": 320000, "locator": "page:2 §2.1", "extractor_confidence": 1.0 },
+      { "claim_key": "renewal_date",     "raw_value": 1769817600, "locator": "page:2 §2.3", "extractor_confidence": 1.0 },
+      { "claim_key": "contract_on_file", "raw_value": 1,    "locator": "page:1 cover", "extractor_confidence": 1.0 }
+    ]
+  },
+  {
+    "evidence": {
+      "evidence_id": "aa000006-0002-0000-0000-000000000001",
+      "vendor_id": "eeeeeeee-0006-0000-0000-000000000001",
+      "doc_type": "Email",
+      "source_tier": "Reported",
+      "ref": "email/vertex-payment-dispute-sep2025.eml",
+      "doc_version": 1,
+      "ingested_at": "2025-10-01T00:00:00Z"
+    },
+    "observed_at": "2025-09-28T00:00:00Z",
+    "claims": [
+      { "claim_key": "payment_terms",  "raw_value": 30,   "locator": "field:dispute_body", "extractor_confidence": 0.85 },
+      { "claim_key": "renewal_intent", "raw_value": 0.55, "locator": "field:intent_cue",   "extractor_confidence": 0.70 }
+    ]
+  }
+]

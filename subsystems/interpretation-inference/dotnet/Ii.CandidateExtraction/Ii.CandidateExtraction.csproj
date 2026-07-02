@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>Ii.CandidateExtraction</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- Ig.Contracts owns CandidateIdentityBelief — the type this module produces.
+         Dependency direction: Ii.CandidateExtraction → Ig.Contracts (produces for Ig.Resolution to consume).
+         Lane 1 guards the 5 deterministic core modules; this soft-edge module is not in that set.
+         Kozmo.Llm provides IKozmoLlm + CachingLlmClient — no OpenAI dependency allowed here. -->
+    <ProjectReference Include="..\..\..\identity-governance\dotnet\Ig.Contracts\Ig.Contracts.csproj" />
+    <ProjectReference Include="..\..\..\..\libs\Kozmo.Llm\Kozmo.Llm.csproj" />
+  </ItemGroup>
+</Project>

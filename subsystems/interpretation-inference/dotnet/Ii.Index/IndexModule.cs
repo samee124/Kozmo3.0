@@ -134,7 +134,7 @@ public sealed class IndexModule : IIndexModule
         SaasProfile                                    profile)
     {
         var snapshots = allBeliefs
-            .Select(b => new BeliefSnapshot(b.Dimension.ToString(), b.Criterion, b.Value, b.Confidence))
+            .Select(b => new BeliefSnapshot(b.Dimension?.ToString() ?? "Financial", b.Criterion, b.Value, b.Confidence))
             .ToList();
 
         return new FingerprintInput(

@@ -1,0 +1,22 @@
+{
+  "dc37ef12e680d4a4c963c1345149449c3a4534f53e0ea03c3e824461faecc8b2": {
+    "answerJson": "{\u0022claims\u0022:[]}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "4075067c8cd6e9412e446dcbfc0ab52f630ee0e926d9816a26ce2d77864f13cc": {
+    "answerJson": "{\u0022claims\u0022:[{\u0022claim_key\u0022:\u0022notice_period\u0022,\u0022raw_value\u0022:180,\u0022confidence\u0022:0.0,\u0022quoted_span\u0022:\u0022one hundred eighty (180) days prior to the expiration of the then current Term\u0022,\u0022page\u0022:8,\u0022clause\u0022:\u0022\\u00A78.1\u0022},{\u0022claim_key\u0022:\u0022payment_terms\u0022,\u0022raw_value\u0022:30,\u0022confidence\u0022:0.0,\u0022quoted_span\u0022:\u0022within thirty (30) days of invoice date\u0022,\u0022page\u0022:6,\u0022clause\u0022:\u0022\\u00A76.1\u0022},{\u0022claim_key\u0022:\u0022liability_cap\u0022,\u0022raw_value\u0022:0,\u0022confidence\u0022:0.0,\u0022quoted_span\u0022:\u0022not exceed the amount of fees actually paid by Customer during the six (6) month period preceding the date the cause of action giving rise to the liability arose\u0022,\u0022page\u0022:7,\u0022clause\u0022:\u0022\\u00A712\u0022}]}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "ab553872d78f1c2e559b6f162b44cdf241e9cd0794e8ff2ca0ba8ce8eef55921": {
+    "answerJson": "{\u0022claims\u0022:[{\u0022claim_key\u0022:\u0022auto_renewal\u0022,\u0022raw_value\u0022:1,\u0022quoted_span\u0022:\u0022automatically renew for successive twelve (12) month periods\u0022,\u0022page\u0022:5,\u0022clause\u0022:\u0022\\u00A78.1\u0022},{\u0022claim_key\u0022:\u0022notice_period\u0022,\u0022raw_value\u0022:180,\u0022quoted_span\u0022:\u0022at least one hundred eighty (180) days prior to the expiration of the then current Term\u0022,\u0022page\u0022:5,\u0022clause\u0022:\u0022\\u00A78.1\u0022},{\u0022claim_key\u0022:\u0022payment_terms\u0022,\u0022raw_value\u0022:30,\u0022quoted_span\u0022:\u0022pay such invoices within thirty (30) days of invoice date\u0022,\u0022page\u0022:4,\u0022clause\u0022:\u0022\\u00A76.1\u0022},{\u0022claim_key\u0022:\u0022payment_terms\u0022,\u0022raw_value\u0022:30,\u0022quoted_span\u0022:\u0022Customer shall provide not less than thirty (30) days prior written notice of cancellation to any herein required policy\u0022,\u0022page\u0022:10,\u0022clause\u0022:\u0022\\u00A715.10\u0022},{\u0022claim_key\u0022:\u0022liability_cap\u0022,\u0022raw_value\u0022:0,\u0022quoted_span\u0022:\u0022not exceed the amount of fees actually paid by Customer during the six (6) month period preceding the date the cause of action giving rise to the liability arose\u0022,\u0022page\u0022:7,\u0022clause\u0022:\u0022\\u00A712\u0022}]}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "e7d8e0e507f68501cdd608e74c05797ffb9bd342b3477650c40761f6936a36e4": {
+    "answerJson": "{\u0022claims\u0022:[{\u0022claim_key\u0022:\u0022auto_renewal\u0022,\u0022raw_value\u0022:1,\u0022quoted_span\u0022:\u0022automatically renew for successive twelve (12) month periods\u0022,\u0022page\u0022:4,\u0022clause\u0022:\u0022\\u00A78.1\u0022},{\u0022claim_key\u0022:\u0022payment_terms\u0022,\u0022raw_value\u0022:30,\u0022quoted_span\u0022:\u0022invoices are due within thirty (30) days of invoice date\u0022,\u0022page\u0022:6,\u0022clause\u0022:\u0022\\u00A76.1\u0022},{\u0022claim_key\u0022:\u0022notice_period\u0022,\u0022raw_value\u0022:180,\u0022quoted_span\u0022:\u0022at least one hundred eighty (180) days prior to the expiration of the then current Term\u0022,\u0022page\u0022:4,\u0022clause\u0022:\u0022\\u00A78.1\u0022}]}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  }
+}

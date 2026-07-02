@@ -7,9 +7,14 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\subsystems\interpretation-inference\dotnet\Ii.Spine\Ii.Spine.csproj" />
+    <ProjectReference Include="..\..\..\subsystems\interpretation-inference\dotnet\Ii.Intake\Ii.Intake.csproj" />
     <ProjectReference Include="..\..\..\subsystems\knowledge-memory\dotnet\Km.Store\Km.Store.csproj" />
     <ProjectReference Include="..\..\..\libs\Kozmo.Llm\Kozmo.Llm.csproj" />
     <ProjectReference Include="..\..\..\libs\Kozmo.Llm.OpenAi\Kozmo.Llm.OpenAi.csproj" />
+    <ProjectReference Include="..\..\..\subsystems\workflow-coordination\dotnet\Wc.Contracts\Wc.Contracts.csproj" />
+    <ProjectReference Include="..\..\..\subsystems\workflow-coordination\dotnet\Wc.CheckIn\Wc.CheckIn.csproj" />
+    <ProjectReference Include="..\..\..\subsystems\identity-governance\dotnet\Ig.Contracts\Ig.Contracts.csproj" />
+    <ProjectReference Include="..\..\..\subsystems\identity-governance\dotnet\Ig.Resolution\Ig.Resolution.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.BannedApiAnalyzers" Version="3.3.4" PrivateAssets="all" />

@@ -87,8 +87,8 @@ public class OTests
         }
 
         // Golden pins must be back
-        Assert.StartsWith("e5d0e9b9", cw);
-        Assert.StartsWith("7e7cf005", cor);
-        Assert.StartsWith("72237da0", mer);
+        Assert.StartsWith("d977be9b", cw);
+        Assert.StartsWith("d81422d2", cor);
+        Assert.StartsWith("b2e03ff0", mer);
     }
 }

@@ -1,0 +1,21 @@
+{
+  "config_type": "expected_belief_sets",
+  "profile": "saas",
+  "version": "v1",
+  "vendor_classes": {
+    "saas_vendor": {
+      "expected_claim_keys": [
+        "sla_uptime",
+        "csat",
+        "usage_trend",
+        "invoice_accuracy",
+        "roadmap_alignment",
+        "renewal_intent",
+        "contract_on_file",
+        "renewal_date",
+        "annual_value"
+      ],
+      "description": "Standard SaaS vendor — 9 slots, 7 scored + 2 structural"
+    }
+  }
+}

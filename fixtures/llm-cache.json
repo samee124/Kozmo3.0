@@ -263,5 +263,35 @@
     "answerJson": "{\u0022dimension\u0022:\u0022Financial\u0022,\u0022criterion\u0022:\u0022payment_timeliness\u0022,\u0022value\u0022:0.2,\u0022confidence\u0022:0.8,\u0022reasoning\u0022:\u0022The significant outstanding balance indicates potential issues with payment timeliness.\u0022}",
     "confidence": 0.85,
     "reasoningSummary": ""
+  },
+  "aa60f869181c3f88e200f1a8a1672c7b7add05cc084115d4ffe34fcaffb0143f": {
+    "answerJson": "{\u0022dimension\u0022:\u0022Strategic\u0022,\u0022criterion\u0022:\u0022roadmap_fit_score\u0022,\u0022value\u0022:0.1,\u0022confidence\u0022:0.9,\u0022reasoning\u0022:\u0022The note indicates a significant misalignment in the vendor\\u0027s platform direction and the customer\\u0027s strategy, resulting in a low roadmap fit score.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "32f003d652513b3890e4d28e4eaee6ddb78e2b5f91e007428a618e3d37ef0d77": {
+    "answerJson": "{\u0022dimension\u0022:\u0022Operational\u0022,\u0022criterion\u0022:\u0022uptime_sla\u0022,\u0022value\u0022:1.0,\u0022confidence\u0022:0.9,\u0022reasoning\u0022:\u0022The uptime has been restored to 99.9% with zero incidents, indicating excellent performance and compliance with the SLA.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "6394d7a825178dddba74948a0acd2e476d9af6745b26e4ba609e5426743a4986": {
+    "answerJson": "{\u0022dimension\u0022:\u0022Financial\u0022,\u0022criterion\u0022:\u0022payment_timeliness\u0022,\u0022value\u0022:1.0,\u0022confidence\u0022:0.9,\u0022reasoning\u0022:\u0022The vendor has cleared all overdue invoices and is now current on payments, indicating excellent payment timeliness.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "2e04113c3d8c93578f6f9b0f27a9ba9863e8cfc7463e4f7fef708788942bae47": {
+    "answerJson": "{\u0022dimension\u0022:\u0022Financial\u0022,\u0022criterion\u0022:\u0022payment_timeliness\u0022,\u0022value\u0022:0.0,\u0022confidence\u0022:0.9,\u0022reasoning\u0022:\u0022The vendor has missed their payment deadline and is significantly overdue with no payment plan, indicating poor payment timeliness.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "ec9b35382f937686dd0dea03b42668673106f57827832384fa94ff8ad1e42563": {
+    "answerJson": "{\u0022dimension\u0022:\u0022Strategic\u0022,\u0022criterion\u0022:\u0022renewal_intent\u0022,\u0022value\u0022:1.0,\u0022confidence\u0022:0.9,\u0022reasoning\u0022:\u0022The confirmation of full strategic fit and the cancellation of the RFP process indicate a strong likelihood of renewal intent.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "e7d8e0e507f68501cdd608e74c05797ffb9bd342b3477650c40761f6936a36e4": {
+    "answerJson": "{\u0022claims\u0022:[{\u0022claim_key\u0022:\u0022auto_renewal\u0022,\u0022raw_value\u0022:1,\u0022quoted_span\u0022:\u0022automatically renew for successive twelve (12) month periods\u0022,\u0022page\u0022:4,\u0022clause\u0022:\u0022\\u00A78.1\u0022},{\u0022claim_key\u0022:\u0022payment_terms\u0022,\u0022raw_value\u0022:30,\u0022quoted_span\u0022:\u0022invoices are due within thirty (30) days of invoice date\u0022,\u0022page\u0022:6,\u0022clause\u0022:\u0022\\u00A76.1\u0022},{\u0022claim_key\u0022:\u0022notice_period\u0022,\u0022raw_value\u0022:180,\u0022quoted_span\u0022:\u0022at least one hundred eighty (180) days prior to the expiration of the then current Term\u0022,\u0022page\u0022:4,\u0022clause\u0022:\u0022\\u00A78.1\u0022}]}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
   }
 }

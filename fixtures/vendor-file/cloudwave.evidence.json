@@ -1,0 +1,72 @@
+[
+  {
+    "_proves": "worst-dimension-floor: critically low Strategic (roadmap_alignment PRIMARY=0.18) + renewal deadline future (2027-06-15 - 180d = 2026-12-17)",
+    "evidence": {
+      "evidence_id": "aa000001-0001-0000-0000-000000000001",
+      "vendor_id": "eeeeeeee-0001-0000-0000-000000000001",
+      "doc_type": "SignedContract",
+      "source_tier": "Primary",
+      "ref": "contracts/cloudwave-msa1.pdf",
+      "doc_version": 1,
+      "ingested_at": "2026-06-10T00:00:00Z"
+    },
+    "observed_at": "2026-06-05T00:00:00Z",
+    "claims": [
+      { "claim_key": "auto_renewal",      "raw_value": 1,    "locator": "page:4 §8.1",  "extractor_confidence": 0.90 },
+      { "claim_key": "notice_period",     "raw_value": 180,  "locator": "page:4 §8.1",  "extractor_confidence": 0.85 },
+      { "claim_key": "payment_terms",     "raw_value": 30,   "locator": "page:6 §6.1",  "extractor_confidence": 0.90 },
+      { "claim_key": "contract_on_file",  "raw_value": 1,    "locator": "page:1 cover", "extractor_confidence": 1.0  },
+      { "claim_key": "sla_uptime",        "raw_value": 0.90, "locator": "page:6 §7.2",  "extractor_confidence": 0.95 },
+      { "claim_key": "roadmap_alignment", "raw_value": 0.18, "locator": "page:7 §8.1",  "extractor_confidence": 1.0  }
+    ]
+  },
+  {
+    "evidence": {
+      "evidence_id": "aa000001-0002-0000-0000-000000000001",
+      "vendor_id": "eeeeeeee-0001-0000-0000-000000000001",
+      "doc_type": "UsageCsv",
+      "source_tier": "Verified",
+      "ref": "reports/cloudwave-usage-q3-2025.csv",
+      "doc_version": 1,
+      "ingested_at": "2026-06-10T00:00:00Z"
+    },
+    "observed_at": "2026-06-10T00:00:00Z",
+    "claims": [
+      { "claim_key": "annual_value",     "raw_value": 250000, "locator": "row:1", "extractor_confidence": 1.0 },
+      { "claim_key": "usage_trend",      "raw_value": 0.82,   "locator": "row:2", "extractor_confidence": 1.0 },
+      { "claim_key": "invoice_accuracy", "raw_value": 0.78,   "locator": "row:5", "extractor_confidence": 1.0 },
+      { "claim_key": "csat",             "raw_value": 0.72,   "locator": "row:8", "extractor_confidence": 1.0 }
+    ]
+  },
+  {
+    "_proves": "renewal_date computed from contract effectiveDate (2026-06-15) + 12-month auto-renewal term (§8.1); not explicitly stated in contract",
+    "evidence": {
+      "evidence_id": "aa000001-0003-0000-0000-000000000001",
+      "vendor_id": "eeeeeeee-0001-0000-0000-000000000001",
+      "doc_type": "ModelDerived",
+      "source_tier": "Inferred",
+      "ref": "computed:effectiveDate+12mo",
+      "doc_version": 1,
+      "ingested_at": "2026-06-15T00:00:00Z"
+    },
+    "observed_at": "2026-06-15T00:00:00Z",
+    "claims": [
+      { "claim_key": "renewal_date", "raw_value": 1813104000, "locator": "computed:2026-06-15+12mo §8.1", "extractor_confidence": 0.85 }
+    ]
+  },
+  {
+    "evidence": {
+      "evidence_id": "aa000001-0004-0000-0000-000000000001",
+      "vendor_id": "eeeeeeee-0001-0000-0000-000000000001",
+      "doc_type": "Email",
+      "source_tier": "Reported",
+      "ref": "email/cloudwave-csat-oct2025.eml",
+      "doc_version": 1,
+      "ingested_at": "2026-06-12T00:00:00Z"
+    },
+    "observed_at": "2026-06-12T00:00:00Z",
+    "claims": [
+      { "claim_key": "renewal_intent", "raw_value": 0.70, "locator": "field:intent_signal", "extractor_confidence": 0.75 }
+    ]
+  }
+]

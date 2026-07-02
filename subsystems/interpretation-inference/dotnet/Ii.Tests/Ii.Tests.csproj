@@ -18,6 +18,10 @@
     <ProjectReference Include="..\Ii.Spine\Ii.Spine.csproj" />
     <ProjectReference Include="..\Ii.Fakes\Ii.Fakes.csproj" />
     <ProjectReference Include="..\Ii.Contracts\Ii.Contracts.csproj" />
+    <ProjectReference Include="..\Ii.CandidateExtraction\Ii.CandidateExtraction.csproj" />
     <ProjectReference Include="..\..\..\..\libs\Kozmo.Llm\Kozmo.Llm.csproj" />
+    <ProjectReference Include="..\..\..\identity-governance\dotnet\Ig.Contracts\Ig.Contracts.csproj" />
+    <ProjectReference Include="..\..\..\identity-governance\dotnet\Ig.Resolution\Ig.Resolution.csproj" />
+    <ProjectReference Include="..\..\..\knowledge-memory\dotnet\Km.Store\Km.Store.csproj" />
   </ItemGroup>
 </Project>

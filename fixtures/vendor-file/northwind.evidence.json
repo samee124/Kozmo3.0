@@ -1,0 +1,20 @@
+[
+  {
+    "evidence": {
+      "evidence_id": "aa000005-0001-0000-0000-000000000001",
+      "vendor_id": "eeeeeeee-0005-0000-0000-000000000001",
+      "doc_type": "SignedContract",
+      "source_tier": "Primary",
+      "ref": "contracts/northwind-saas-v1.pdf",
+      "doc_version": 1,
+      "ingested_at": "2025-10-01T00:00:00Z"
+    },
+    "observed_at": "2025-08-01T00:00:00Z",
+    "claims": [
+      { "claim_key": "annual_value",    "raw_value": 180000, "locator": "page:2 §2.1", "extractor_confidence": 1.0 },
+      { "claim_key": "renewal_date",    "raw_value": 1780012800, "locator": "page:2 §2.2", "extractor_confidence": 1.0 },
+      { "claim_key": "notice_period",   "raw_value": 60,     "locator": "page:3 §3.1", "extractor_confidence": 1.0 },
+      { "claim_key": "contract_on_file","raw_value": 1,      "locator": "page:1 cover", "extractor_confidence": 1.0 }
+    ]
+  }
+]

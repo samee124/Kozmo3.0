@@ -31,9 +31,9 @@ public class NTests
     {
         var fps = await ResetAndExtractFingerprints();
 
-        Assert.StartsWith("e5d0e9b9", fps.Cloudwave);
-        Assert.StartsWith("7e7cf005", fps.Corvus);
-        Assert.StartsWith("72237da0", fps.Meridian);
+        Assert.StartsWith("d977be9b", fps.Cloudwave);
+        Assert.StartsWith("d81422d2", fps.Corvus);
+        Assert.StartsWith("b2e03ff0", fps.Meridian);
     }
 
     private async Task<(string Cloudwave, string Corvus, string Meridian)> ResetAndExtractFingerprints()

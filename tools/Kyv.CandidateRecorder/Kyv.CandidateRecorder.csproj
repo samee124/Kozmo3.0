@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>Kyv.CandidateRecorder</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- Tools are NOT the demo runtime — OpenAI client allowed here.
+         Ii.CandidateExtraction provides the extractor + filter (no OpenAI dependency).
+         Ii.Intake provides PdfTextExtractor. -->
+    <ProjectReference Include="..\..\subsystems\interpretation-inference\dotnet\Ii.CandidateExtraction\Ii.CandidateExtraction.csproj" />
+    <ProjectReference Include="..\..\subsystems\interpretation-inference\dotnet\Ii.Intake\Ii.Intake.csproj" />
+    <ProjectReference Include="..\..\libs\Kozmo.Llm\Kozmo.Llm.csproj" />
+    <ProjectReference Include="..\..\libs\Kozmo.Llm.OpenAi\Kozmo.Llm.OpenAi.csproj" />
+  </ItemGroup>
+</Project>

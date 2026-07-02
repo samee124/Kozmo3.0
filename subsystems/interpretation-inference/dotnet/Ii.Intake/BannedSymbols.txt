@@ -1,0 +1,5 @@
+T:System.DateTime;Do not use DateTime — use DateTimeOffset and receive 'now' as a parameter.
+M:System.DateTime.UtcNow;Do not use DateTime.UtcNow — inject clock.
+P:System.DateTimeOffset.UtcNow;Do not use DateTimeOffset.UtcNow — inject clock.
+T:System.Random;Do not use Random — deterministic only.
+T:System.Diagnostics.Stopwatch;Do not use Stopwatch.

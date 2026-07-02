@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <IsPackable>false</IsPackable>
+    <RootNamespace>Wc.Tests</RootNamespace>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk"    Version="17.11.1" />
+    <PackageReference Include="xunit"                     Version="2.9.2" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="coverlet.collector" Version="6.0.2">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Wc.Contracts\Wc.Contracts.csproj" />
+    <ProjectReference Include="..\Wc.CheckIn\Wc.CheckIn.csproj" />
+    <ProjectReference Include="..\..\..\identity-governance\dotnet\Ig.Contracts\Ig.Contracts.csproj" />
+    <ProjectReference Include="..\..\..\interpretation-inference\dotnet\Ii.Contracts\Ii.Contracts.csproj" />
+    <ProjectReference Include="..\..\..\..\libs\Kozmo.Contracts\Kozmo.Contracts.csproj" />
+    <ProjectReference Include="..\..\..\knowledge-memory\dotnet\Km.Store\Km.Store.csproj" />
+  </ItemGroup>
+</Project>

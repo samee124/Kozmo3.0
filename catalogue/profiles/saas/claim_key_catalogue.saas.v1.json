@@ -1,0 +1,119 @@
+{
+  "config_type": "claim_key_catalogue",
+  "profile": "saas",
+  "version": "v1",
+  "claim_keys": {
+    "sla_uptime": {
+      "class": "scored",
+      "value_type": "percent",
+      "dimension": "Operational",
+      "typical_tier": "VERIFIED",
+      "half_life_days": 30,
+      "dimension_weight": 0.25
+    },
+    "support_responsiveness": {
+      "class": "scored",
+      "value_type": "metric",
+      "dimension": "Operational",
+      "typical_tier": "VERIFIED",
+      "half_life_days": 30,
+      "dimension_weight": 0.25
+    },
+    "csat": {
+      "class": "scored",
+      "value_type": "rating",
+      "dimension": "Experiential",
+      "typical_tier": "REPORTED",
+      "half_life_days": 60,
+      "dimension_weight": 0.25
+    },
+    "usage_trend": {
+      "class": "scored",
+      "value_type": "percent",
+      "dimension": "Financial",
+      "typical_tier": "VERIFIED",
+      "half_life_days": 30,
+      "dimension_weight": 0.25
+    },
+    "invoice_accuracy": {
+      "class": "scored",
+      "value_type": "percent",
+      "dimension": "Financial",
+      "typical_tier": "VERIFIED",
+      "half_life_days": 90,
+      "dimension_weight": 0.25
+    },
+    "roadmap_alignment": {
+      "class": "scored",
+      "value_type": "score",
+      "dimension": "Strategic",
+      "typical_tier": "REPORTED",
+      "half_life_days": 90,
+      "dimension_weight": 0.25
+    },
+    "renewal_intent": {
+      "class": "scored",
+      "value_type": "enum",
+      "dimension": "Strategic",
+      "typical_tier": "REPORTED",
+      "half_life_days": 60,
+      "dimension_weight": 0.25
+    },
+    "annual_value": {
+      "class": "structural",
+      "value_type": "money",
+      "dimension": "Financial",
+      "typical_tier": "PRIMARY",
+      "half_life_days": null,
+      "dimension_weight": 0.0
+    },
+    "renewal_date": {
+      "class": "structural",
+      "value_type": "date",
+      "dimension": "",
+      "typical_tier": "PRIMARY",
+      "half_life_days": null,
+      "dimension_weight": 0.0
+    },
+    "notice_period": {
+      "class": "structural",
+      "value_type": "duration",
+      "dimension": "",
+      "typical_tier": "PRIMARY",
+      "half_life_days": null,
+      "dimension_weight": 0.0
+    },
+    "auto_renewal": {
+      "class": "structural",
+      "value_type": "bool",
+      "dimension": "",
+      "typical_tier": "PRIMARY",
+      "half_life_days": null,
+      "dimension_weight": 0.0
+    },
+    "payment_terms": {
+      "class": "structural",
+      "value_type": "enum",
+      "dimension": "Financial",
+      "typical_tier": "PRIMARY",
+      "half_life_days": null,
+      "dimension_weight": 0.0
+    },
+    "liability_cap": {
+      "class": "structural",
+      "value_type": "money",
+      "dimension": "",
+      "typical_tier": "PRIMARY",
+      "half_life_days": null,
+      "dimension_weight": 0.0
+    },
+    "contract_on_file": {
+      "class": "structural",
+      "value_type": "bool",
+      "dimension": "",
+      "typical_tier": "PRIMARY",
+      "half_life_days": null,
+      "dimension_weight": 0.0
+    }
+  }
+}
