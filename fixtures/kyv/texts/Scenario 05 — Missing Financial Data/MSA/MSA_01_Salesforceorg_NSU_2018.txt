@@ -1,0 +1,87 @@
+```
+salesforce.org
+
+                             MASTER SUBSCRIPTION AGREEMENT
+
+Customer Full Legal Name: Nova Southeastern University, Inc.
+
+Customer Address: 3301 College Avenue, Fort Lauderdale, Florida 33314
+
+This Master Subscription Agreement is between Salesforce.org, a California nonprofit public benefit corporation with its principal place of business at 50 Fremont Street, Suite 300, San Francisco, California 94105 ("Salesforce.org") and the party named above. Salesforce.org is an authorized reseller of salesforce.com, inc. ("SFDC"). This Agreement is effective as of the date of the last signature below (the "Effective Date").
+
+The parties agree as follows:
+
+1. DEFINITIONS
+
+"Affiliate" means any entity that directly or indirectly Controls, is Controlled by, or is under common Control with Salesforce.org. For avoidance of doubt, Salesforce.org and SFDC are not Affiliates.
+
+"Agreement" means this Master Subscription Agreement and any exhibits, schedules and addenda hereto.
+
+"Associate," means any entity that is under common governance or Control with, or that governs or Controls, or is governed or Controlled by, the party signing this Agreement as the Customer, and that meets the Eligibility Criteria stated in Exhibit A hereto.
+
+"Beta Services" means SFDC services or functionality that may be made available to Customer to try at its option at no additional charge which is clearly designated as beta, pilot, limited release, developer preview, non-production, evaluation, or by a similar description.
+
+"Content" means information obtained by SFDC from publicly available sources or its third party content providers and made available to Customer through the Services, Beta Services, or pursuant to an Order Form, as more fully described in the Documentation.
+
+"Control," for purposes of the definitions of Affiliate and Associate, means direct or indirect ownership or control of more than 50% of the voting interests of the subject entity.
+
+"Customer" means the customer named above together with its Associates which have signed Order Forms. For the avoidance of doubt, an Associate can only sign an Order Form and become a Customer if it meets the Eligibility Criteria set forth in Exhibit A hereto.
+
+"Customer Data" means electronic data and information submitted by or for Customer to the Services, excluding Content and Non-SFDC Applications.
+
+"Documentation" means the applicable Service's Trust and Compliance documentation, and its usage guides and policies, as updated from time to time, accessible via help.salesforce.com or login to the applicable Service.
+
+"Eligibility Criteria" means the eligibility criteria set forth in Exhibit A to this Agreement.
+
+"Malicious Code" means code, files, scripts, agents or programs intended to do harm, including, for example, viruses, worms, time bombs and Trojan horses.
+
+"Marketplace" means an online directory, catalog or marketplace of applications that interoperate with the Services, including, for example, the AppExchange located at http://www.salesforce.com/appexchange, ExactTarget's HubExchange located at https://hubexchange.exacttarget.com/, or the Heroku add-ons catalog located at https://addons.heroku.com/, and any successor websites.
+
+"Non-SFDC Application" means a Web-based, mobile, offline or other software application functionality that is provided by Customer or a third party and interoperates with a Service, including, for example, an application that is developed by or for Customer, is listed on a Marketplace, is identified as Salesforce Labs or by a similar designation, or is an open source software product including e.g. the technologies commonly referred to as Non Profit Starter Pack ("NPSP") and Higher Education Data Architecture ("HEDA") and that are subject to the terms stated during the installation process and/or located on the landing page during their use.
+
+{00063756.DOCX. 1}
+```
+```
+DocuSign Envelope ID: 520487F5-E26F-4659-AC82-48BD196BBE6
+
+“No Charge Services” means the ten (10) User subscriptions for certain Services offered in Salesforce.org’s sole discretion to organizations that meet the Eligibility Criteria at no charge and ordered by the Customer using Salesforce.org’s standard processes. These are sometimes referred to as “9-10s.”
+
+“Order Form” means an ordering document or online order specifying the Services to be provided hereunder that is entered into between Customer or any of its Associates, and Salesforce.org, including any addenda and supplements thereto. By entering into an Order Form hereunder, an Associate agrees to be bound by the terms of this Agreement as if it were an original party hereto.
+
+“SFDC Affiliate” means any entity that directly or indirectly Controls, is Controlled by, or is under common Control with salesforce.com. For the avoidance of doubt, Salesforce.org and SFDC are not SFDC Affiliates.
+
+“Services” means the products and services that are ordered by Customer under an Order Form and made available online by SFDC, including associated SFDC offline or mobile components, as described in the Documentation. “Services” exclude Content and Non-SFDC Applications.
+
+“User” means (subject to compliance with Section 3.4(b) of this Agreement) an individual who is authorized by Customer to use a Service, for whom Customer has purchased a subscription (or in the case of any Services provided by Salesforce.org without charge, for whom a Service has been provisioned), and to whom Customer (or, when applicable, SFDC or Salesforce.org at Customer’s request) has supplied a user identification and password (for Services utilizing authentication). Users may include, for example, employees, consultants, contractors and agents of Customer, and third parties with which Customer transacts business such as students, teachers and volunteers.
+
+2. SALESFORCE.ORG RESPONSIBILITIES
+2.1 No Charge Services. Except where a different initial term is stated in the applicable Order Form, Salesforce.org shall cause SFDC to provide No Charge Services to Customer for an initial term of twelve (12) months. Following the initial term, No Charge Services shall be eligible for renewal on a yearly basis under the same terms and conditions, provided the program continues to exist. Notwithstanding the foregoing or anything to the contrary herein, Salesforce.org offers No Charge Services at its sole discretion and may terminate such No Charge Services with written notice (typically 30 days where practicable to do so).
+
+2.2 Provision of Services. Salesforce.org shall cause SFDC to (a) make the Services and Content available to Customer pursuant to this Agreement and the applicable Order Forms, (b) provide applicable SFDC standard support for the Services to Customer at no additional charge, and/or upgraded support if purchased, (c) use commercially reasonable efforts to make the Services available 24 hours a day, 7 days a week, except for (i) planned downtime (of which SFDC shall provide advance notification as specified in the Documentation), or (ii) unavailability caused by circumstances beyond SFDC’s reasonable control, including, for example, an act of God, act of government, flood, fire, earthquake, civil unrest, act of terrorism, or other labor problem (other than one involving SFDC employees), Internet service provider failure or delay, Non-SFDC Application, or denial of service attack, and (d) provide the Services in accordance with laws and government regulations applicable to SFDC’s provision of its Services to its customers generally (i.e., without regard to Customer’s particular use of the Services), and subject to Customer’s use of the Services in accordance with this Agreement, the Documentation and the applicable Order Form.
+
+2.3 Protection of Customer Data. Salesforce.org shall cause SFDC to maintain administrative, physical, and technical safeguards for protection of the security, confidentiality, and integrity of Customer Data, as described in the Documentation. Those safeguards shall include, but shall not be limited to, measures for preventing access, use, modification or disclosure of Customer Data by Salesforce.org or its subcontractors or SFDC personnel or its subcontractors, except (a) to provide the Services and prevent or address service or technical problems, (b) as permitted by law in accordance with the “Confidentiality: Compelled Disclosure” section below, or (c) as expressly permitted in writing by Customer. Salesforce.org will also maintain appropriate safeguards for Customer Data that Salesforce.org processes. Salesforce.org will coordinate with Customer in the event that Salesforce.org will be transmitting Customer Data outside of SFDC’s system, and where in such case, once such Customer Data is transmitted outside of the SFDC system under this Agreement, and accordingly, SFDC shall not be responsible for the privacy, security or integrity of such transmitted data. Where Customer’s use of the Services includes the processing of personal data (as described in the Data Processing Addendum attached hereto as Exhibit B (“Data Processing Addendum”)) are hereby incorporated by reference and shall apply to the extent Customer Data includes Personal Data, as defined in the Data Processing Addendum. For the purposes of the Standard Contractual Clauses, Customer is the data exporter, and Customer’s execution of this Agreement shall be treated as its execution of the Standard Contractual Clauses and any associated
+
+2.4 Personnel. Salesforce.org shall cause SFDC to be responsible for the performance of SFDC’s personnel (including its employees and subcontractors) and their compliance with the applicable obligations under this Agreement, except as otherwise specified in this Agreement. Salesforce.org shall be responsible for the performance of its personnel and their compliance with this Agreement.
+
+2.5 Beta Services. From time to time, SFDC may make Beta Services available to Customer at no charge. Customer may choose to try such Beta Services or not in its sole discretion. Beta Services are not considered “Services” under this Agreement, 
+(60036736.DOCX. 1)
+```
+```
+however, all restrictions, SFDC reservation of rights and Customer obligations concerning the Services, and use of any related Non-SFDC Applications and Content, shall apply equally to Customer’s use of Beta Services. Unless otherwise stated, any Beta Services trial period will expire upon the earlier of one year from the trial start date or the date that a version of the Beta Services becomes generally available without the applicable Beta Services designation. SFDC may discontinue Beta Services at any time in its sole discretion and may never make them generally available. Neither SFDC nor Salesforce.org will have any liability for any harm or damage arising out of or in connection with a Beta Service.
+
+3. USE OF SERVICES AND CONTENT
+
+3.1 Subscriptions. Unless otherwise provided in the applicable Order Form or Documentation, (a) Services and access to Content are purchased as subscriptions, (b) subscriptions may be added during a subscription term at the same pricing as the underlying subscription pricing, prorated for the portion of that subscription term remaining at the time the subscriptions are added, and (c) any added subscriptions will terminate on the same date as the underlying subscriptions.
+
+3.2 Usage Limits. Services and Content are subject to usage limits specified in Order Forms and Documentation. Unless otherwise specified, (a) a quantity in an Order Form refers to Users, and the Service or Content may not be accessed by more than that number of Users, (b) a User’s password may not be shared with any other individual, and (c) except as set forth in an Order Form, a User identification may not be reassigned to a new individual replacing one who will no longer use the Service. If Customer exceeds a contractual usage limit, Salesforce.org may work with Customer to reduce Customer’s usage so that it conforms to that limit. If Customer is unable or unwilling to abide by a contractual usage limit, Customer shall execute an Order Form for additional quantities of the applicable services or Content promptly upon Salesforce.org’s request, or pay any invoice for excess usage in accordance with the “Invoicing and Payment” section below.
+
+3.3 Customer Responsibilities. Customer shall (a) be responsible for Users’ compliance with this Agreement, Documentation and Order Forms, (b) be responsible for the quality and legality of Customer Data and the means by which Customer acquired Customer Data, (c) use commercially reasonable efforts to prevent unauthorized access to or use of Services and Content, and notify Salesforce.org promptly of any such unauthorized access or use, (d) use Services and Content only in accordance with this Agreement, Documentation, Other Policies, and applicable laws and government regulations, (e) comply with terms of service of any Non-SFDC Applications with which Customer uses Services or Content, and (f) satisfy the Eligibility Criteria set forth in Exhibit A hereto as may be amended in the Agreement. Customer shall promptly notify Salesforce.org if it any time it fails to satisfy such criteria.
+
+3.4 Usage restrictions. Customer shall not (a) make any Service or Content available to, or use any Service or Content for the benefit of, anyone other than Customer or its Users, (b) sell, resell, license, sublicense, distribute, make available, re-lease any Service or Content in a service bureau or outsourcing offering, (c) use a Service or Non-SFDC Application to store or transmit infringing, libelous, or otherwise unlawful or tortious material, or to store or transmit Malicious Code, (e) interfere with or disrupt the integrity or performance of any Service or other party data contained therein, (f) attempt to gain unauthorized access to any Service or Content or its related systems or networks, (g) permit direct or indirect access to or use of any Service or Content in a way that circumvents a contractual usage limit, or (h) use any of the Services or access or use any of Salesforce.org’s intellectual property except as permitted under this Agreement, and Order Form, or the Documentation, (i) copy a Service or the Documentation, (j) form or mirror any part of any Service or Content, other than for internal business purposes or as permitted in the Documentation, (k) access any Service or Content in order to build a competitive product or service or to benchmark with a non-SFDC product or service, or (l) reverse engineer any Service (to the extent such restriction is permitted by law). Customer’s or a User’s intentional violation of the foregoing, or any use of the Services in breach of this Agreement, Documentation or Order Forms, by Customer or Users that in Salesforce.org’s or as applicable, SFDC’s, judgment imminently threatens the security, integrity or availability of SFDC’s services, may result in Salesforce.org’s or as applicable, SFDC’s, immediate suspension of the Services. Salesforce.org will commercially reasonable efforts under the circumstances to provide Customer with an opportunity to remedy such violation or threat prior to any such suspension.
+
+3.5 External-Facing Services. If Customer subscribes to a Service for sending electronic messages for the creation and hosting of, or for posting content on, external-facing websites, such use is subject to SFDC’s External-Facing Services Policy at http://www.salesforce.com/company/legal/agreements/, as may be applicable to a Service, and Customer is solely responsible for complying with applicable law in its use of any cookies or tracking technologies.
+
+3.6 Removal of Content and Non-SFDC Applications. If SFDC is required by third party rights holders to remove Content, or receives information that Content provided to Customer may violate applicable law or third-party rights, SFDC may, or Salesforce.org may, act as SFDC, to discontinue Customer’s access to such Content through the Services, and/or may so notify Customer that it must discontinue all use of such Content, and to the extent not prohibited by law, Salesforce.org will do so, and promptly remove such Content from its systems. If SFDC or Salesforce.org receives information that a Non-SFDC Application used with a Service by Customer may violate SFDC’s External-Facing Services Policy or applicable law or third-party rights, SFDC may, or Salesforce.org may ask SFDC to notify Customer and in such event Customer shall promptly disable such Non-SFDC Application or modify the Non-SFDC Application to resolve the potential violation. If Customer does not take required action in accordance with the above, SFDC may, or Salesforce.org may cause SFDC to, disable the applicable Content, Service and/or Non-
+
+{00063756.DOCX. 1 }
+```

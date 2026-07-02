@@ -22,6 +22,7 @@ using Ig.Contracts;
 using Kozmo.Contracts;
 using Kozmo.Llm;
 using Kozmo.Llm.OpenAi;
+using System.Text.Json;
 
 var flags = ParseFlags(args);
 if (flags.Workspace is null)
@@ -105,8 +106,10 @@ else
     baseLlm = new LoggingLlm(cachingLlm); // prints raw JSON before filter
 }
 
-var extractor    = new DocumentCandidateExtractor(baseLlm);
-var pdfReader    = new PdfTextExtractor();
+var extractor       = new DocumentCandidateExtractor(baseLlm);
+var pdfReader       = new PdfTextExtractor();
+var imageExtractor  = new PdfPageImageExtractor();
+var ocrExtractor    = new OcrExtractor(baseLlm);
 
 // Per-scenario accumulator for the end summary.
 var scenarioSummary = new Dictionary<string, ScenarioResult>();
@@ -134,9 +137,10 @@ foreach (var group in byScenario)
 
         // ── Text extraction ──────────────────────────────────────────────────
         string text;
+        byte[] bytes;
         try
         {
-            var bytes = File.ReadAllBytes(pdfPath);
+            bytes = File.ReadAllBytes(pdfPath);
             var pages = pdfReader.ExtractPageTexts(bytes);
             text = string.Join("\n", pages.OrderBy(kv => kv.Key).Select(kv => kv.Value));
         }
@@ -151,11 +155,34 @@ foreach (var group in byScenario)
 
         if (string.IsNullOrWhiteSpace(text))
         {
-            var msg = $"[ERROR] empty text after extraction  →  {relPath}";
-            Console.Error.WriteLine($"  {msg}");
-            errorLog.Add(msg);
-            Console.WriteLine();
-            continue;
+            // Attempt OCR on image-only PDFs to generate cassette entries for them.
+            Console.WriteLine("  [no text layer — attempting OCR]");
+            try
+            {
+                var pageImages = imageExtractor.ExtractPageImages(bytes);
+                if (pageImages.Count > 0)
+                {
+                    var ocrResult = await ocrExtractor.ExtractTextAsync(pageImages);
+                    if (!string.IsNullOrWhiteSpace(ocrResult))
+                    {
+                        text = ocrResult;
+                        Console.WriteLine($"  [OCR succeeded: {text.Length:N0} chars from {pageImages.Count} page image(s)]");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"  [OCR error: {ex.Message}]");
+            }
+
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                var msg = $"[ERROR] empty text after extraction and OCR  →  {relPath}";
+                Console.Error.WriteLine($"  {msg}");
+                errorLog.Add(msg);
+                Console.WriteLine();
+                continue;
+            }
         }
 
         Console.WriteLine($"  text: {text.Length:N0} chars");
@@ -318,6 +345,11 @@ sealed class LoggingLlm(IKozmoLlm inner) : IKozmoLlm
         Console.WriteLine();
         return result;
     }
+
+    // Delegate vision calls so OCR recording works — the DIM throws NotSupportedException.
+    public Task<LlmResult> CompleteVisionAsync(
+        string system, byte[] imageBytes, int maxTokens = 500, CancellationToken ct = default)
+        => inner.CompleteVisionAsync(system, imageBytes, maxTokens, ct);
 }
 
 record ScenarioResult(string Scenario, List<CandidateIdentityBelief> Beliefs);

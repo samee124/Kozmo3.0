@@ -1,6 +1,7 @@
 using Ig.Contracts;
 using Ig.Resolution;
 using Ii.CandidateExtraction;
+using Ii.Completeness;
 using Ii.Intake;
 using Kozmo.Llm;
 using Wc.CheckIn;
@@ -33,28 +34,35 @@ public sealed class KyvProgramRunner
     private readonly ICheckInStore                 _checkInStore;
     private readonly string                        _owner;
     private readonly PdfTextExtractor              _pdfReader;
+    private readonly PdfPageImageExtractor         _imageExtractor;
+    private readonly OcrExtractor                  _ocrExtractor;
+    private readonly CompletenessOrchestrator?     _completeness;
 
     // Declared stage sequence — names match the KYV program specification.
     private static readonly string[] DeclaredStages =
-        ["ingest", "classify", "extract", "filter", "resolve", "raise_checkins"];
+        ["ingest", "classify", "extract", "filter", "resolve", "raise_checkins", "completeness_init"];
 
     public KyvProgramRunner(
-        IKozmoLlm             llm,
-        IEntityTypeClassifier entityClassifier,
-        IIdentityRegistry     registry,
-        ICheckInStore         checkInStore,
-        string                owner = "kyv@kozmo")
+        IKozmoLlm                  llm,
+        IEntityTypeClassifier      entityClassifier,
+        IIdentityRegistry          registry,
+        ICheckInStore              checkInStore,
+        string                     owner        = "kyv@kozmo",
+        CompletenessOrchestrator?  completeness = null)
     {
-        _llm          = llm;
-        _stageB       = new EntityTypeClassificationStage(entityClassifier);
-        _stageC       = new ClusteringStage();
-        _stageD       = new CollisionStage();
-        _stageE       = new IdentityGate();
-        _stageF       = new RegistryWriter(registry);
-        _raiseStage   = new RaiseCheckInsStage();
-        _checkInStore = checkInStore;
-        _owner        = owner;
-        _pdfReader    = new PdfTextExtractor();
+        _llm            = llm;
+        _stageB         = new EntityTypeClassificationStage(entityClassifier);
+        _stageC         = new ClusteringStage();
+        _stageD         = new CollisionStage();
+        _stageE         = new IdentityGate();
+        _stageF         = new RegistryWriter(registry);
+        _raiseStage     = new RaiseCheckInsStage();
+        _checkInStore   = checkInStore;
+        _owner          = owner;
+        _completeness   = completeness;
+        _pdfReader      = new PdfTextExtractor();
+        _imageExtractor = new PdfPageImageExtractor();
+        _ocrExtractor   = new OcrExtractor(llm);
     }
 
     public async Task<ProgramRun> RunAsync(
@@ -89,10 +97,39 @@ public sealed class KyvProgramRunner
             var text  = string.Join("\n", pages.OrderBy(kv => kv.Key).Select(kv => kv.Value));
             if (string.IsNullOrWhiteSpace(text))
             {
-                unreadable.Add(new UnreadableDocument(
-                    RelativePath: Path.GetRelativePath(workspacePath, pdfPath),
-                    Reason:       "empty text after extraction — image-only PDF, needs OCR"));
-                continue;
+                // OCR fallback for image-only PDFs. Failures surface as distinct Unreadable reasons
+                // rather than crashing the run — "empty" and "errored" are never conflated.
+                string? ocrFailReason = null;
+                try
+                {
+                    var pageImages = _imageExtractor.ExtractPageImages(bytes);
+                    if (pageImages.Count == 0)
+                    {
+                        ocrFailReason = "no extractable raster images — PDF may use a compression format unsupported by the image extractor";
+                    }
+                    else
+                    {
+                        text = await _ocrExtractor.ExtractTextAsync(pageImages, ct) ?? "";
+                        if (string.IsNullOrWhiteSpace(text))
+                            ocrFailReason = "OCR returned no text — vision model could not read the embedded image";
+                    }
+                }
+                catch (LlmCacheMissException)
+                {
+                    ocrFailReason = "OCR cassette miss — re-run recorder with OPENAI_API_KEY to populate vision entries";
+                }
+                catch (NotSupportedException)
+                {
+                    ocrFailReason = "LLM client does not support vision — use a CachingLlmClient backed by OpenAiLlmClient";
+                }
+
+                if (string.IsNullOrWhiteSpace(text))
+                {
+                    unreadable.Add(new UnreadableDocument(
+                        RelativePath: Path.GetRelativePath(workspacePath, pdfPath),
+                        Reason:       ocrFailReason ?? "unknown OCR failure"));
+                    continue;
+                }
             }
 
             var beliefs = await extractor.ExtractAsync(text, Path.GetFileName(pdfPath), tier, ct);
@@ -141,6 +178,28 @@ public sealed class KyvProgramRunner
         var checkIns = await _raiseStage.RaiseAsync(
             dispositions, gapRequests, _checkInStore, _owner, runId, now, ct);
         executions.Add(new(6, "raise_checkins", now, checkIns.Count));
+
+        // ── Stage 7: completeness_init — initial Q&A completeness per resolved vendor ──
+        // Runs once per vendor immediately after resolution. Beliefs are empty at this point
+        // (KYV writes identity to the registry, not dimension beliefs to the belief store).
+        // The completeness engine treats empty beliefs as UNKNOWN answers → all L1 questions
+        // become gaps → initial gap check-ins raised. Null when cassette is absent (legacy/demo).
+        var completenessCheckInCount = 0;
+        if (_completeness != null)
+        {
+            var resolvedVendorIds = dispositions
+                .Where(d => d.Disposition != Disposition.NonVendor)
+                .Select(d => d.ClusterId)
+                .Distinct()
+                .ToList();
+
+            foreach (var vid in resolvedVendorIds)
+            {
+                var profile = await _completeness.RunAsync(vid, [], now, ct);
+                completenessCheckInCount += profile.GapQuestionIds.Count;
+            }
+        }
+        executions.Add(new(7, "completeness_init", now, completenessCheckInCount));
 
         return new ProgramRun(
             RunId:               runId,

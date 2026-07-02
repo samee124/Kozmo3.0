@@ -7,6 +7,7 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\subsystems\interpretation-inference\dotnet\Ii.Spine\Ii.Spine.csproj" />
+    <ProjectReference Include="..\..\..\subsystems\interpretation-inference\dotnet\Ii.Completeness\Ii.Completeness.csproj" />
     <ProjectReference Include="..\..\..\subsystems\interpretation-inference\dotnet\Ii.Intake\Ii.Intake.csproj" />
     <ProjectReference Include="..\..\..\subsystems\knowledge-memory\dotnet\Km.Store\Km.Store.csproj" />
     <ProjectReference Include="..\..\..\libs\Kozmo.Llm\Kozmo.Llm.csproj" />

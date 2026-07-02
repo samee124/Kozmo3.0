@@ -1,6 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Channels;
+using Ii.Completeness;
 using Ii.Contracts;
 using Ii.Decay;
 using Ii.Index;
@@ -38,10 +39,11 @@ var dbPath        = Path.Combine(AppContext.BaseDirectory, "kozmo-demo.db");
 var store         = new SqliteEntityStore($"Data Source={dbPath}", profile);
 var registry      = BuildRegistry();
 await LoadPersistedVendorsAsync(store, registry);
-var liveCachePath = FindLlmCachePath(); // resolved once; used for both replay and live-classify
-var facade        = BuildFacade(store, profile, registry, liveCachePath);
-var sseHub        = new SseHub();
-var checkInRepo   = new CheckInRepository(store);
+var liveCachePath         = FindLlmCachePath();         // resolved once; used for both replay and live-classify
+var completenessCache     = FindCompletenessCachePath(); // separate cassette for Q&A answering
+var checkInRepo           = new CheckInRepository(store);
+var facade                = BuildKyvFacade(store, profile, registry, liveCachePath, checkInRepo, completenessCache);
+var sseHub                = new SseHub();
 
 // ── ASP.NET Core setup ────────────────────────────────────────────────────
 
@@ -566,16 +568,36 @@ static EntityRegistry BuildRegistry()
     return reg;
 }
 
-static IiFacade BuildFacade(IEntityStore store, SaasProfile profile, EntityRegistry registry, string? cachePath)
+// KYV facade: same as BuildFacade but with a real CompletenessOrchestrator wired in.
+// The completeness orchestrator fires inside RecomputeVendorAsync (the §5 synchronous hook),
+// which is called by ProcessCheckInService when a DIMENSION_GAP check-in is answered.
+// Legacy path (BuildFacade) stays null — signal submission and demo recomputes are LLM-free.
+static IiFacade BuildKyvFacade(
+    IEntityStore  store, SaasProfile profile, EntityRegistry registry,
+    string?       llmCachePath, ICheckInStore checkInStore, string? completenessCache)
 {
-    // Wire CachingLlmClient (replay) if llm-cache.json exists and is non-empty.
-    // Before seed-prep runs the cache is empty ({}) — LLM is null and free-text signals are silently skipped.
     IKozmoLlm? llm = null;
-    if (cachePath != null)
+    if (llmCachePath != null)
     {
-        var info = new FileInfo(cachePath);
-        if (info.Length > 4) // more than just "{}" or "{}\n"
-            llm = new CachingLlmClient(cachePath, recordMode: false);
+        var info = new FileInfo(llmCachePath);
+        if (info.Length > 4)
+            llm = new CachingLlmClient(llmCachePath, recordMode: false);
+    }
+
+    CompletenessOrchestrator? completeness = null;
+    if (completenessCache != null)
+    {
+        var info = new FileInfo(completenessCache);
+        if (info.Length > 4)
+        {
+            var answeringLlm = new CachingLlmClient(completenessCache, recordMode: false);
+            completeness = new CompletenessOrchestrator(
+                new QuestionAnsweringStage(answeringLlm),
+                new GapCheckInStage(),
+                checkInStore,
+                DepthLevel.L1,
+                "kyv@kozmo");
+        }
     }
 
     return new IiFacade(
@@ -587,7 +609,8 @@ static IiFacade BuildFacade(IEntityStore store, SaasProfile profile, EntityRegis
         store,
         profile,
         registry,
-        DemoClock.Fixed);
+        DemoClock.Fixed,
+        completeness);
 }
 
 static string? FindLlmCachePath()
@@ -596,6 +619,18 @@ static string? FindLlmCachePath()
     while (!string.IsNullOrEmpty(dir))
     {
         var candidate = Path.Combine(dir, "fixtures", "llm-cache.json");
+        if (File.Exists(candidate)) return candidate;
+        dir = Path.GetDirectoryName(dir);
+    }
+    return null;
+}
+
+static string? FindCompletenessCachePath()
+{
+    var dir = AppContext.BaseDirectory;
+    while (!string.IsNullOrEmpty(dir))
+    {
+        var candidate = Path.Combine(dir, "fixtures", "completeness", "answering.cassette.json");
         if (File.Exists(candidate)) return candidate;
         dir = Path.GetDirectoryName(dir);
     }

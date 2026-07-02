@@ -204,4 +204,14 @@ internal sealed class InMemoryCheckInStore : ICheckInStore
 
     public Task<CheckIn?> GetAsync(Guid checkInId, CancellationToken ct = default)
         => Task.FromResult(_store.TryGetValue(checkInId, out var c) ? c : null);
+
+    public Task<IReadOnlyList<CheckIn>> GetResolvedForVendorAsync(Guid vendorId, CancellationToken ct = default)
+    {
+        IReadOnlyList<CheckIn> result = _store.Values
+            .Where(c => c.VendorId == vendorId &&
+                        (c.Status == PendingStatus.PROCESSED || c.Status == PendingStatus.EXPIRED))
+            .OrderBy(c => c.RaisedAt)
+            .ToList();
+        return Task.FromResult(result);
+    }
 }

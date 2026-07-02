@@ -48,6 +48,12 @@ public sealed class CheckInRepository : ICheckInStore
         return row is null ? null : Map(row);
     }
 
+    public async Task<IReadOnlyList<CheckIn>> GetResolvedForVendorAsync(Guid vendorId, CancellationToken ct = default)
+    {
+        var rows = await _store.GetResolvedCheckInsForVendorAsync(vendorId, ct);
+        return rows.Select(Map).ToList();
+    }
+
     private static CheckIn Map(CheckInRow row) => new CheckIn(
         CheckInId:      row.CheckInId,
         VendorId:       row.VendorId,
