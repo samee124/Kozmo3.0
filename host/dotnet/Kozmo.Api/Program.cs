@@ -20,6 +20,8 @@ using Ig.Contracts;
 using Ig.Resolution;
 using Wc.CheckIn;
 using Wc.Contracts;
+using Kozmo.Connector.GoogleDrive;
+using Kyv.ProgramRunner;
 
 // ── JSON options (shared by SSE serialisation) ─────────────────────────────
 
@@ -42,6 +44,7 @@ var liveCachePath = FindLlmCachePath(); // resolved once; used for both replay a
 var facade        = BuildFacade(store, profile, registry, liveCachePath);
 var sseHub        = new SseHub();
 var checkInRepo   = new CheckInRepository(store);
+var kyvTracker    = new KyvVendorTracker();
 
 // ── ASP.NET Core setup ────────────────────────────────────────────────────
 
@@ -67,6 +70,7 @@ builder.Services.AddSingleton(store);
 builder.Services.AddSingleton<ICheckInRowStore>(store);
 builder.Services.AddSingleton<ICheckInStore>(checkInRepo);
 builder.Services.AddSingleton<ICheckInTransport>(new InAppCheckInTransport());
+builder.Services.AddSingleton(kyvTracker);
 
 // Live LLM factory: record-mode CachingLlmClient wrapping real OpenAiLlmClient.
 // Returns null when OPENAI_API_KEY is absent or fixture cache path unavailable → endpoint returns 503.
@@ -76,6 +80,14 @@ builder.Services.AddSingleton<Func<IKozmoLlm?>>(sp => () =>
     try { return new CachingLlmClient(liveCachePath, recordMode: true, inner: new OpenAiLlmClient()); }
     catch (InvalidOperationException) { return null; } // OPENAI_API_KEY not set
 });
+
+// ── Google Drive connector ─────────────────────────────────────────────────
+var googleClientId     = Environment.GetEnvironmentVariable("GOOGLE_CLIENT_ID")     ?? "";
+var googleClientSecret = Environment.GetEnvironmentVariable("GOOGLE_CLIENT_SECRET") ?? "";
+const string GoogleRedirectUri = "http://localhost:5000/auth/google/callback";
+
+builder.Services.AddSingleton(new GoogleOAuthService(googleClientId, googleClientSecret, GoogleRedirectUri));
+builder.Services.AddSingleton(new GoogleDriveDownloader(googleClientId, googleClientSecret));
 
 var app = builder.Build();
 app.UseStaticFiles();
@@ -529,6 +541,212 @@ app.MapPost("/checkins/{id}/answer", async (
     return Results.Ok(new { outcome = "Ok", checkInId = answer.Updated!.CheckInId });
 });
 
+// ── Google Drive OAuth2 endpoints ─────────────────────────────────────────
+
+// GET /auth/google — redirect browser to Google consent page
+app.MapGet("/auth/google", (GoogleOAuthService oauth) =>
+{
+    if (!oauth.IsConfigured)
+        return Results.Problem(
+            detail:     "GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET are not configured.",
+            statusCode: 503);
+    return Results.Redirect(oauth.BuildAuthorizationUrl());
+});
+
+// GET /auth/google/callback — Google redirects here after user approves
+app.MapGet("/auth/google/callback", async (
+    string?           code,
+    string?           error,
+    GoogleOAuthService oauth,
+    SqliteEntityStore  storeInst) =>
+{
+    if (!string.IsNullOrEmpty(error))
+        return Results.BadRequest(new { error });
+    if (string.IsNullOrEmpty(code))
+        return Results.BadRequest(new { error = "No authorization code returned by Google." });
+
+    try
+    {
+        var token = await oauth.ExchangeCodeAsync(code);
+        await storeInst.SaveOAuthTokenAsync(
+            "google", token.AccessToken, token.RefreshToken, token.ExpiresAt, token.UserEmail);
+
+        // Redirect to the workspace after successful authorization
+        return Results.Redirect("/workspace");
+    }
+    catch (Exception ex)
+    {
+        return Results.Problem(detail: ex.Message, statusCode: 502);
+    }
+});
+
+// GET /auth/google/status — check whether a Google account is connected
+app.MapGet("/auth/google/status", async (SqliteEntityStore storeInst) =>
+{
+    var t = await storeInst.GetOAuthTokenAsync("google");
+    if (t is null)
+        return Results.Ok(new { connected = false, email = (string?)null });
+
+    var expired = t.Value.ExpiresAt < DateTimeOffset.UtcNow;
+    return Results.Ok(new { connected = true, email = t.Value.UserEmail, tokenExpired = expired });
+});
+
+// POST /kyv/run — download files from Google Drive then run the KYV pipeline
+app.MapPost("/kyv/run", async (
+    KyvRunRequest          request,
+    SqliteEntityStore      storeInst,
+    GoogleOAuthService     oauth,
+    GoogleDriveDownloader  downloader,
+    ICheckInStore          checkInStore,
+    SseHub                 hub,
+    EntityRegistry         entityRegistry,
+    KyvVendorTracker       kyvTracker,
+    Func<IKozmoLlm?>       liveLlmFactory) =>
+{
+    if (string.IsNullOrWhiteSpace(request.DriveUrl))
+        return Results.BadRequest(new { error = "driveUrl must not be empty." });
+
+    // Load stored token; refresh if expired
+    var stored = await storeInst.GetOAuthTokenAsync("google");
+    if (stored is null)
+        return Results.Problem(
+            detail:     "Not connected to Google Drive. Visit /auth/google first.",
+            statusCode: 401);
+
+    var token = new OAuthToken(stored.Value.AccessToken, stored.Value.RefreshToken,
+                               stored.Value.ExpiresAt,   stored.Value.UserEmail);
+
+    if (token.ExpiresAt < DateTimeOffset.UtcNow.AddMinutes(2))
+    {
+        try
+        {
+            token = await oauth.RefreshAsync(token.RefreshToken);
+            await storeInst.SaveOAuthTokenAsync(
+                "google", token.AccessToken, token.RefreshToken, token.ExpiresAt, token.UserEmail);
+        }
+        catch (Exception ex)
+        {
+            return Results.Problem(
+                detail:     $"Token refresh failed — re-authorize at /auth/google. ({ex.Message})",
+                statusCode: 401);
+        }
+    }
+
+    // Live LLM required — KYV candidate extraction uses real GPT-4o-mini
+    var liveLlm = liveLlmFactory();
+    if (liveLlm is null)
+        return Results.Problem(
+            detail:     "OPENAI_API_KEY is not set or fixture cache path is unavailable.",
+            statusCode: 503);
+
+    // Broadcast: started
+    hub.Broadcast(JsonSerializer.Serialize(
+        new { type = "kyv-started", ts = DateTimeOffset.UtcNow,
+              data = new { driveUrl = request.DriveUrl } }, JsonOpts));
+
+    // Download Drive files to a local temp folder
+    string tempFolder;
+    try
+    {
+        hub.Broadcast(JsonSerializer.Serialize(
+            new { type = "kyv-downloading", ts = DateTimeOffset.UtcNow,
+                  data = new { driveUrl = request.DriveUrl } }, JsonOpts));
+
+        tempFolder = await downloader.DownloadToTempFolderAsync(token, request.DriveUrl);
+
+        var fileCount = Directory.GetFiles(tempFolder, "*.pdf", SearchOption.AllDirectories).Length;
+        hub.Broadcast(JsonSerializer.Serialize(
+            new { type = "kyv-downloading", ts = DateTimeOffset.UtcNow,
+                  data = new { fileCount } }, JsonOpts));
+    }
+    catch (Exception ex)
+    {
+        hub.Broadcast(JsonSerializer.Serialize(
+            new { type = "kyv-error", ts = DateTimeOffset.UtcNow,
+                  data = new { error = ex.Message } }, JsonOpts));
+        return Results.Problem(detail: $"Drive download failed: {ex.Message}", statusCode: 502);
+    }
+
+    try
+    {
+        // Run the KYV pipeline — inputs: temp folder of .pdf files
+        // entity-type classifier defaults to Company for ambiguous names (same as offline tests)
+        var runner = new KyvProgramRunner(
+            llm:              liveLlm,
+            entityClassifier: new AlwaysCompanyClassifier(),
+            registry:         new IdentityRegistry(storeInst),
+            checkInStore:     checkInStore);
+
+        var run = await runner.RunAsync(tempFolder, DateTimeOffset.UtcNow);
+
+        // Replay stages over SSE for live UI feedback
+        foreach (var stage in run.Stages)
+        {
+            await Task.Delay(250);
+            hub.Broadcast(JsonSerializer.Serialize(
+                new { type = "kyv-stage", ts = DateTimeOffset.UtcNow,
+                      data = new { name = stage.StageName, order = stage.StageOrder,
+                                   itemsProcessed = stage.ItemsProcessed } }, JsonOpts));
+        }
+
+        hub.Broadcast(JsonSerializer.Serialize(
+            new { type = "kyv-complete", ts = DateTimeOffset.UtcNow,
+                  data = new { runId = run.RunId, status = run.Status.ToString() } }, JsonOpts));
+
+        // Sync EntityRegistry so /vendors immediately reflects KYV-discovered vendors
+        var allVendors = await storeInst.LoadVendorsAsync();
+        foreach (var (vid, vname, vren) in allVendors)
+            entityRegistry.Register(vid, vname, vren);
+
+        // Track which vendor IDs were discovered by KYV (exclude pre-seeded demo vendors)
+        var seededSet = new HashSet<Guid>(SeedData.VendorIds);
+        kyvTracker.RecordDiscovered(allVendors.Select(v => v.Item1).Where(id => !seededSet.Contains(id)));
+
+        return Results.Ok(new
+        {
+            runId              = run.RunId,
+            programName        = run.ProgramName,
+            sourceFolder       = run.SourceFolder,
+            status             = run.Status.ToString(),
+            startedAt          = run.StartedAt,
+            finishedAt         = run.FinishedAt,
+            stages             = run.Stages.Select(s => new
+            {
+                order          = s.StageOrder,
+                name           = s.StageName,
+                itemsProcessed = s.ItemsProcessed
+            }),
+            unreadableDocuments = run.UnreadableDocuments.Select(u => new
+            {
+                path   = u.RelativePath,
+                reason = u.Reason
+            })
+        });
+    }
+    finally
+    {
+        // Best-effort cleanup of temp folder
+        try { Directory.Delete(tempFolder, recursive: true); } catch { /* ignore */ }
+    }
+});
+
+// GET /kyv/vendors — vendors discovered through KYV ingestion (excludes seeded demo data)
+app.MapGet("/kyv/vendors", async (IIiFacade f, EntityRegistry reg, SaasProfile prof, KyvVendorTracker tracker) =>
+{
+    if (!tracker.HasRun) return Results.Ok(Array.Empty<VendorSummaryDto>());
+    var now     = DemoClock.AsOf;
+    var vendors = new List<VendorSummaryDto>();
+    foreach (var id in tracker.DiscoveredIds)
+    {
+        var entity = reg.GetEntity(id);
+        if (entity is null) continue;
+        var idx = await f.GetIndexAsync(id);
+        var pos = await f.GetPostureAsync(id);
+        vendors.Add(DtoMapper.ToSummary(id, entity, idx, pos, now));
+    }
+    return Results.Ok(vendors);
+});
+
 app.Run();
 
 // ── Local helpers ─────────────────────────────────────────────────────────
@@ -658,4 +876,32 @@ public sealed class SseHub
 // Required for WebApplicationFactory<Program> in Kozmo.Api.Tests
 public partial class Program { }
 
+/// <summary>
+/// Tracks vendor IDs discovered via KYV ingestion runs (excludes pre-seeded demo vendors).
+/// </summary>
+public sealed class KyvVendorTracker
+{
+    private readonly HashSet<Guid> _discovered = [];
+
+    public bool HasRun { get; private set; }
+    public IReadOnlyCollection<Guid> DiscoveredIds => _discovered;
+
+    public void RecordDiscovered(IEnumerable<Guid> ids)
+    {
+        HasRun = true;
+        foreach (var id in ids) _discovered.Add(id);
+    }
+}
+
 record CheckInAnswerRequest(string? ResponseValue);
+record KyvRunRequest(string DriveUrl);
+
+// Fallback entity-type classifier: defaults ambiguous names to Company.
+// Deterministic rules in EntityTypeClassificationStage handle most cases;
+// this only fires for names that survive all rule checks as Unknown.
+file sealed class AlwaysCompanyClassifier : IEntityTypeClassifier
+{
+    public Task<EntityType> ClassifyAsync(
+        string effectiveName, string comparisonKey, CancellationToken ct = default)
+        => Task.FromResult(EntityType.Company);
+}
