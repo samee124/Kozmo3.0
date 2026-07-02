@@ -449,6 +449,7 @@ public sealed class SqliteEntityStore : IEntityStore, IRegistryStore, ICheckInRo
         MigrateBeliefColumns();
         MigrateRegistryColumns();
         MigrateCheckInColumns();
+        MigrateOAuthTokenTable();
     }
 
     /// <summary>Adds identity-resolution columns to the vendors table and creates vendor_aliases if absent.</summary>
@@ -742,6 +743,68 @@ public sealed class SqliteEntityStore : IEntityStore, IRegistryStore, ICheckInRo
     private void MigrateCheckInColumns()
     {
         TryAddColumn("checkins", "paired_vendor_id", "TEXT");
+    }
+
+    private void MigrateOAuthTokenTable()
+    {
+        // CREATE TABLE IF NOT EXISTS is in the DDL, but older DBs that existed before
+        // this table was added need it created via migration.
+        using var cmd = _conn.CreateCommand();
+        cmd.CommandText = """
+            CREATE TABLE IF NOT EXISTS oauth_tokens (
+                provider       TEXT NOT NULL PRIMARY KEY,
+                access_token   TEXT NOT NULL,
+                refresh_token  TEXT NOT NULL,
+                expires_at     TEXT NOT NULL,
+                user_email     TEXT NOT NULL
+            )
+            """;
+        cmd.ExecuteNonQuery();
+    }
+
+    // ── OAuth token persistence ───────────────────────────────────────────────
+
+    public Task SaveOAuthTokenAsync(
+        string provider, string accessToken, string refreshToken,
+        DateTimeOffset expiresAt, string userEmail,
+        CancellationToken ct = default)
+    {
+        using var cmd = _conn.CreateCommand();
+        cmd.CommandText = """
+            INSERT OR REPLACE INTO oauth_tokens
+              (provider, access_token, refresh_token, expires_at, user_email)
+            VALUES
+              (@provider, @access_token, @refresh_token, @expires_at, @user_email)
+            """;
+        cmd.Parameters.AddWithValue("@provider",      provider);
+        cmd.Parameters.AddWithValue("@access_token",  accessToken);
+        cmd.Parameters.AddWithValue("@refresh_token", refreshToken);
+        cmd.Parameters.AddWithValue("@expires_at",    expiresAt.ToString("O"));
+        cmd.Parameters.AddWithValue("@user_email",    userEmail);
+        cmd.ExecuteNonQuery();
+        return Task.CompletedTask;
+    }
+
+    /// <summary>
+    /// Returns (accessToken, refreshToken, expiresAt, userEmail) or null if not found.
+    /// </summary>
+    public Task<(string AccessToken, string RefreshToken, DateTimeOffset ExpiresAt, string UserEmail)?>
+        GetOAuthTokenAsync(string provider, CancellationToken ct = default)
+    {
+        using var cmd = _conn.CreateCommand();
+        cmd.CommandText =
+            "SELECT access_token, refresh_token, expires_at, user_email " +
+            "FROM oauth_tokens WHERE provider = @provider";
+        cmd.Parameters.AddWithValue("@provider", provider);
+        using var reader = cmd.ExecuteReader();
+        if (!reader.Read())
+            return Task.FromResult<(string, string, DateTimeOffset, string)?>(null);
+
+        return Task.FromResult<(string, string, DateTimeOffset, string)?>(
+            (reader.GetString(0),
+             reader.GetString(1),
+             DateTimeOffset.Parse(reader.GetString(2)),
+             reader.GetString(3)));
     }
 
     public void Dispose() => _conn.Dispose();

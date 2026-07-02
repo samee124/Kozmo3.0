@@ -293,5 +293,750 @@
     "answerJson": "{\u0022claims\u0022:[{\u0022claim_key\u0022:\u0022auto_renewal\u0022,\u0022raw_value\u0022:1,\u0022quoted_span\u0022:\u0022automatically renew for successive twelve (12) month periods\u0022,\u0022page\u0022:4,\u0022clause\u0022:\u0022\\u00A78.1\u0022},{\u0022claim_key\u0022:\u0022payment_terms\u0022,\u0022raw_value\u0022:30,\u0022quoted_span\u0022:\u0022invoices are due within thirty (30) days of invoice date\u0022,\u0022page\u0022:6,\u0022clause\u0022:\u0022\\u00A76.1\u0022},{\u0022claim_key\u0022:\u0022notice_period\u0022,\u0022raw_value\u0022:180,\u0022quoted_span\u0022:\u0022at least one hundred eighty (180) days prior to the expiration of the then current Term\u0022,\u0022page\u0022:4,\u0022clause\u0022:\u0022\\u00A78.1\u0022}]}",
     "confidence": 0.85,
     "reasoningSummary": ""
+  },
+  "8c3846883c455c280bc14e9c767a0f16003826a59d0e93f7a59c0a27e595a447": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Revolution Medicines, Inc.\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022700 Saginaw Drive, Redwood City, California 94063\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Institute for In Vitro Sciences, Inc.\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u002230 W. Watkins Mill Road, Suite 100, Gaithersburg, Maryland 20878\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Revolution Medicines, Inc. as the customer and Institute for In Vitro Sciences, Inc. as the vendor in the context of a service agreement.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "19c78e2c3928df46fa45623f0d63ecf002bc52a8abcd56815a0d58e038f13e4b": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Aequitas, Inc.\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u002212626 High Bluff Drive, Suite 250, San Diego, CA 92130\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Biogen Idec U.S. West Corporation\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u00223030 Callan Road, San Diego, CA 92121\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Aequitas, Inc. as the vendor providing services and Biogen Idec U.S. West Corporation as the customer receiving those services.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "5a715af99d69839f702f11631af9d6ce6a125299cf04cff8583b6c6d5a407f02": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Aequitas, Inc.\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022aequitashealth.com\u0022,\u0022address\u0022:\u002212626 High Bluff Drive, Suite 250, San Diego, CA 92130\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022Aequitas, Inc. is clearly identified as a consulting firm providing services to biopharmaceutical and medical technology companies, establishing it as a vendor.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "d9923de295ef92f3746613d0bccd3c182d49db31c6fb9f1327b87cc759371513": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022ABC Technologies LLC\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u00224200 Commerce Blvd, Austin, Texas 78701\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Meridian Health Systems, Inc.\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:null,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022JPMorgan Chase Bank, N.A.\u0022,\u0022role\u0022:\u0022unknown\u0022,\u0022domain\u0022:null,\u0022address\u0022:null,\u0022tax_id\u0022:null}],\u0022confidence\u0022:0.9,\u0022reasoning\u0022:\u0022The document clearly identifies ABC Technologies LLC as the vendor and Meridian Health Systems, Inc. as the customer, while JPMorgan Chase Bank, N.A. is mentioned but its role is unclear.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "0537360682cdc3f47bdbedc7d600f81d8ab366008b2bee6e04c3019c845886cc": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022ABC Technologies Limited\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u00224200 Commerce Blvd, Austin, Texas 78701\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Meridian Health Systems, Inc.\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:null,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Wells Fargo Bank, N.A.\u0022,\u0022role\u0022:\u0022unknown\u0022,\u0022domain\u0022:null,\u0022address\u0022:null,\u0022tax_id\u0022:null}],\u0022confidence\u0022:0.9,\u0022reasoning\u0022:\u0022The document clearly identifies ABC Technologies Limited as the vendor and Meridian Health Systems, Inc. as the customer, while Wells Fargo Bank, N.A. is mentioned in a banking context but its role is unclear.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "fc94cc49a977f96877eab99622cd9346deda6bb64c3e510932b09fcd2af34007": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022ABC Technologies Limited\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022888 Capital Drive, Dallas, TX 75201\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Meridian Health Systems, Inc.\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:null,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Citibank, N.A.\u0022,\u0022role\u0022:\u0022unknown\u0022,\u0022domain\u0022:null,\u0022address\u0022:null,\u0022tax_id\u0022:null}],\u0022confidence\u0022:0.9,\u0022reasoning\u0022:\u0022The document clearly identifies ABC Technologies Limited as the vendor and Meridian Health Systems, Inc. as the customer, while Citibank, N.A. is mentioned in a banking context but its role is unclear.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "21f19d1121cb8236886ec62ae4ad52b65f2ae541dd25d014f208c87829954825": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Regulus Group, LLC\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:null,\u0022address\u0022:null,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022The Prudential Insurance Company of America\u0022,\u0022role\u0022:\u0022issuer\u0022,\u0022domain\u0022:null,\u0022address\u0022:null,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022TD Bank, N.A.\u0022,\u0022role\u0022:\u0022unknown\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022One TD Bank Plaza, Cherry Hill, NJ 08002\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:0.9,\u0022reasoning\u0022:\u0022The document identifies Regulus Group, LLC as the vendor and The Prudential Insurance Company of America as the issuer, while TD Bank, N.A. is mentioned in a banking context but its role is unclear.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "b267cba92c68bc6ff3610e60bae2f9337185c3f1b919ade329d77b016a84180a": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Institute for In Vitro Sciences, Inc.\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u002230 W. Watkins Mill Road, Suite 100, Gaithersburg, Maryland 20878\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Revolution Medicines, Inc.\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022Redwood City, California 94063\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies \\u0027Institute for In Vitro Sciences, Inc.\\u0027 as the vendor providing services and \\u0027Revolution Medicines, Inc.\\u0027 as the customer receiving those services.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "de71b5cc45ca51c6670b94137056fdd4dd19aeed01fcc4767a4c50db8d52cc19": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Salesforce, Inc.\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022salesforce.com\u0022,\u0022address\u0022:\u0022415 Mission Street, San Francisco, CA 94105\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022NOVA SOUTHEASTERN UNIVERSITY, INC.\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u00223301 College Avenue, Fort Lauderdale, FL 33314\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly names Salesforce, Inc. as the vendor and NOVA SOUTHEASTERN UNIVERSITY, INC. as the customer, with clear addresses provided.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "cccdbe5ce31efc687dc9276dab3845eb151105f7bcebeba9a3f228c32bdf3f76": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Salesforce, Inc.\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022salesforce.com\u0022,\u0022address\u0022:null,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Nova Southeastern University, Inc.\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:null,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Salesforce, Inc. as the vendor providing services and Nova Southeastern University, Inc. as the customer receiving those services.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "f4e91f3869df5e609b31ebf9ff5946c77753ce45c5669ec2481f9a7b87e3eed6": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022ABC Technologies LLC\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022abctechnologies.com\u0022,\u0022address\u0022:\u00224200 Commerce Blvd, Austin, Texas 78701\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Meridian Health Systems, Inc.\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:\u0022meridianhealth.com\u0022,\u0022address\u0022:\u00222100 Meridian Parkway, Durham, North Carolina 27713\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies ABC Technologies LLC as the vendor and Meridian Health Systems, Inc. as the client, along with their respective contact details.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "35266a60ecf4e6d70ce446bd164771774c32193a9a24e7cb4b287c8ee38324b6": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Workday, Inc.\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022workday.com\u0022,\u0022address\u0022:\u00226230 Stoneridge Mall Road, Pleasanton, CA 94588\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Workday, Inc. as the vendor providing services and Brookfield Corporate Operations LLC as the customer receiving the credit memo.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "2241db3c3988cad38fdb69a9b16c7f8592785fe4b141b56cd682761eb18c4101": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Institute for In Vitro Sciences, Inc.\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022iivs.org\u0022,\u0022address\u0022:\u002230 W. Watkins Mill Road, Suite 100, Gaithersburg, Maryland 20878\u0022,\u0022tax_id\u0022:\u002252-2015457\u0022},{\u0022name\u0022:\u0022Revolution Medicines, Inc.\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:null,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies \\u0027Institute for In Vitro Sciences, Inc.\\u0027 as the vendor providing services and \\u0027Revolution Medicines, Inc.\\u0027 as the customer receiving those services.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "ab85fda43be0b4751b14ad0120fbb0fc23c66d65d79d5a6cfa60a73b9f92c12b": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Institute for In Vitro Sciences, Inc.\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u002230 W. Watkins Mill Road, Suite 100 \\u00B7 Gaithersburg, Maryland 20878\u0022,\u0022tax_id\u0022:\u002252-2015457\u0022},{\u0022name\u0022:\u0022Travelers Property Casualty Company of America\u0022,\u0022role\u0022:\u0022issuer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022One Tower Square, Hartford, CT 06183\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Revolution Medicines, Inc.\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022700 Saginaw Drive, Redwood City, California 94063\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies three distinct organizations with their roles and relevant details.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "c1aa6bb9c59f85d225a6190801420629b2c885d26a84d18bd4b0fe1810dac3f0": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Institute for In Vitro Sciences, Inc.\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022iivs.org\u0022,\u0022address\u0022:\u002230 W. Watkins Mill Road, Suite 100, Gaithersburg, Maryland 20878\u0022,\u0022tax_id\u0022:\u002252-2015457\u0022},{\u0022name\u0022:\u0022Revolution Medicines, Inc.\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:null,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Travelers Property Casualty Co. of America\u0022,\u0022role\u0022:\u0022issuer\u0022,\u0022domain\u0022:null,\u0022address\u0022:null,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022First National Bank of Maryland\u0022,\u0022role\u0022:\u0022unknown\u0022,\u0022domain\u0022:null,\u0022address\u0022:null,\u0022tax_id\u0022:null}],\u0022confidence\u0022:0.9,\u0022reasoning\u0022:\u0022The document clearly identifies \\u0027Institute for In Vitro Sciences, Inc.\\u0027 as a vendor and \\u0027Revolution Medicines, Inc.\\u0027 as a customer, while also mentioning \\u0027Travelers Property Casualty Co. of America\\u0027 as an insurer and \\u0027First National Bank of Maryland\\u0027 in a banking context, though its role is unclear.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "c9551309d376adaaa9f61dbc2566af44e3417081717ed4031d51ad266dcd3b31": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Institute for In Vitro Sciences, Inc.\u0022,\u0022role\u0022:\u0022unknown\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u002230 W. Watkins Mill Road, Suite 100, Gaithersburg, Maryland 20878\u0022,\u0022tax_id\u0022:\u002252-2015457\u0022}],\u0022confidence\u0022:0.9,\u0022reasoning\u0022:\u0022The document clearly identifies \\u0027Institute for In Vitro Sciences, Inc.\\u0027 as an organization with a specific address and tax ID, but the role is unclear from the context provided.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "6c8507278ecd628c1f98ba9a2ed3560841dee2fd585a13271a77db73e14043ee": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Workday, Inc.\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022workday.com\u0022,\u0022address\u0022:\u00226230 Stoneridge Mall Road, Pleasanton, CA 94588\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Workday, Inc. as the vendor providing services and Brookfield Corporate Operations LLC as the customer receiving those services.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "23b97fc46438c837f0f4a023752cfe3a8036ce3280692ed835663701f19c8097": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Workday, Inc.\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022workday.com\u0022,\u0022address\u0022:\u00226230 Stoneridge Mall Rd, Pleasanton, CA 94588\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Workday, Inc. as the vendor providing services and Brookfield Corporate Operations LLC as the customer being billed.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "ac58bea3b6ef62155643a7bf468282571742fcca6633ce335476d49d1503a57b": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Workday Inc\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022workday.com\u0022,\u0022address\u0022:\u00226230 Stoneridge Mall Road, Pleasanton, California 94588\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Workday Inc as the vendor and Brookfield Corporate Operations LLC as the customer based on the billing context.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "577c6e7ab7908d1c9f17baf6a6042e91fe45b1413366f47a21391d82a9a6fb72": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Workday, Inc.\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022workday.com\u0022,\u0022address\u0022:\u00226230 Stoneridge Mall Road, Pleasanton, CA 94588\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Workday, Inc. as the vendor providing services and Brookfield Corporate Operations LLC as the customer being billed.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "41b9937a04c7e3d666b78cab702e371c0ada3dff5a7a0324ad216c2559b0aeb5": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Workday, Inc.\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022workday.com\u0022,\u0022address\u0022:\u00226230 Stoneridge Mall Rd, Pleasanton, CA 94588\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Workday, Inc. as the vendor providing services and Brookfield Corporate Operations LLC as the customer being billed.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "b8510a4e31fe1af9b0968116f38862cc5fa2100a7d98616ae05a51018ed8b0be": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Workday Inc\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022workday.com\u0022,\u0022address\u0022:\u00226230 Stoneridge Mall Road, Pleasanton, California 94588\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Workday Inc as the vendor providing services and Brookfield Corporate Operations LLC as the customer being billed.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "c389b90fa7da50470f9128f96909a5ef008068ea693fb898e9a3d2cb2c9f55a7": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Workday, Inc.\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022workday.com\u0022,\u0022address\u0022:\u00226230 Stoneridge Mall Road, Pleasanton, CA 94588\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Workday, Inc. as the vendor providing services and Brookfield Corporate Operations LLC as the customer being billed.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "4ed01e61d8e72b2226c0341b6784ed5f57e22630d8c5ccddebd8ff0ca4ee7ba5": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Workday, Inc.\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022workday.com\u0022,\u0022address\u0022:\u00226230 Stoneridge Mall Rd, Pleasanton, CA 94588\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Workday, Inc. as the vendor providing services and Brookfield Corporate Operations LLC as the customer being billed.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "c318b027d6f66c8e12467ba1aae1f19030345d029c9f802eeb443dd94bdb0b59": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Workday Inc\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022workday.com\u0022,\u0022address\u0022:\u00226230 Stoneridge Mall Road, Pleasanton, California 94588\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Workday Inc as the vendor providing services and Brookfield Corporate Operations LLC as the customer being billed.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "8f530fbea2607a7070ea6d05faac1cfbfd6a849108a90b105644c28af6a408e8": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Workday, Inc.\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022workday.com\u0022,\u0022address\u0022:\u00226230 Stoneridge Mall Road, Pleasanton, CA 94588\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Workday, Inc. as the vendor providing services and Brookfield Corporate Operations LLC as the customer receiving those services.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "6509da90a64ca56fafef1a5c8a097a09a4a79c845725dfc85fbeb2a426263f12": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Workday, Inc.\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022workday.com\u0022,\u0022address\u0022:\u00226230 Stoneridge Mall Rd, Pleasanton, CA 94588\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Workday, Inc. as the vendor providing services and Brookfield Corporate Operations LLC as the customer receiving those services.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "15326c919292a748ca33772c2144d2d18ac10fdec24bcbf1b8227ce2995d4fd2": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Workday Inc\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022workday.com\u0022,\u0022address\u0022:\u00226230 Stoneridge Mall Road, Pleasanton, California 94588\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Workday Inc as the vendor providing services and Brookfield Corporate Operations LLC as the customer receiving those services.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "5ea42fd6ee6b6a48b530870b6e85de55ac02377e493e9be0372a969ff99fff5d": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Workday, Inc.\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022workday.com\u0022,\u0022address\u0022:\u00226230 Stoneridge Mall Road, Pleasanton, CA 94588\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Workday, Inc. as the vendor providing services and Brookfield Corporate Operations LLC as the customer being billed.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "32669c3c131409e173f85fef43532f9b9b10b2a8b24b4451eecd5ae1d6d47ad1": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Workday, Inc.\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022workday.com\u0022,\u0022address\u0022:\u00226230 Stoneridge Mall Rd, Pleasanton, CA 94588\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Workday, Inc. as the vendor providing services and Brookfield Corporate Operations LLC as the customer being billed.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "21b8a86d29e5539ad7be08a6fb148420fc1220686e11be34c630741ea0884857": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Workday Inc\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022workday.com\u0022,\u0022address\u0022:\u00226230 Stoneridge Mall Road, Pleasanton, California 94588\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Workday Inc as the vendor providing services and Brookfield Corporate Operations LLC as the customer being billed.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "a17f0b9212790b83abd9d132310d8c7f86a30364f279f697ab9662c01e2ff172": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Workday, Inc.\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022workday.com\u0022,\u0022address\u0022:\u00226230 Stoneridge Mall Road, Pleasanton, CA 94588\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Workday, Inc. as the vendor providing services and Brookfield Corporate Operations LLC as the customer receiving those services.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "a314acc53362e2a9826f64d05f7d4419bd38309bb18793a266372150106a7e89": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Workday, Inc.\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022workday.com\u0022,\u0022address\u0022:\u00226230 Stoneridge Mall Rd, Pleasanton, CA 94588\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Workday, Inc. as the vendor providing services and Brookfield Corporate Operations LLC as the customer being billed.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "5eea3e6ea4afb24b3c584961094a135350bc5e64ce9c4b4d23310a4d513c6c72": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Workday Inc\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022workday.com\u0022,\u0022address\u0022:\u00226230 Stoneridge Mall Road, Pleasanton, California 94588\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Workday Inc as the vendor providing services and Brookfield Corporate Operations LLC as the customer receiving those services.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "b1604e1f12b7de403ac6e0260a7cc8e025dc05ce05b6b41cf24f88959ed3243f": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Workday, Inc.\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022workday.com\u0022,\u0022address\u0022:\u00226230 Stoneridge Mall Road, Pleasanton, CA 94588\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Workday, Inc. as the vendor providing services and Brookfield Corporate Operations LLC as the customer receiving those services.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "26aafd7292824983c0fc568d16aff755041b2b0c9d19d4877ea682702bce84b5": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Workday, Inc.\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022workday.com\u0022,\u0022address\u0022:\u00226230 Stoneridge Mall Rd, Pleasanton, CA 94588\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Workday, Inc. as the vendor providing services and Brookfield Corporate Operations LLC as the customer being billed.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "a1816227d507967351973f055455afd36b242bd73d27c1e4d71f5684fbc20047": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Workday Inc\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022workday.com\u0022,\u0022address\u0022:\u00226230 Stoneridge Mall Road, Pleasanton, California 94588\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Workday Inc as the vendor providing services and Brookfield Corporate Operations LLC as the customer being billed.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "678b779a0f249a2afa5540e6200c33b7b396fa51197ebe00d8ea12bd4b6b3abc": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Workday, Inc.\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022workday.com\u0022,\u0022address\u0022:\u00226230 Stoneridge Mall Road, Pleasanton, CA 94588\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Workday, Inc. as the vendor providing services and Brookfield Corporate Operations LLC as the customer receiving those services.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "2984c3916f217a3451d73f60dd4eddb28a83bbcc505979967f319337534ad82e": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Workday, Inc.\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022workday.com\u0022,\u0022address\u0022:\u00226230 Stoneridge Mall Rd, Pleasanton, CA 94588\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Workday, Inc. as the vendor providing services and Brookfield Corporate Operations LLC as the customer receiving those services.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "1065e1c704ec1c548d71abf1105a7260970651f3587643278b3cffb43b0b1380": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Workday Inc\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022workday.com\u0022,\u0022address\u0022:\u00226230 Stoneridge Mall Road, Pleasanton, California 94588\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Workday Inc as the vendor providing services and Brookfield Corporate Operations LLC as the customer being billed.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "d05a8c99ab6d58d1be9a209877273ae4764ff07bf56a6344c4c9c8793b54365a": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Workday, Inc.\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022workday.com\u0022,\u0022address\u0022:\u00226230 Stoneridge Mall Road, Pleasanton, CA 94588\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Workday, Inc. as the vendor providing services and Brookfield Corporate Operations LLC as the customer receiving those services.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "bc9ccf99f3c1297cf8acf187d58747c412a9809692fcc433d845369f1213f1fa": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Workday, Inc.\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022workday.com\u0022,\u0022address\u0022:\u00226230 Stoneridge Mall Rd, Pleasanton, CA 94588\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Workday, Inc. as the vendor providing services and Brookfield Corporate Operations LLC as the customer being billed.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "7fb6eb63c781ea74e2e1ca4fdd418108bd9684d603b49067b59fab65c971e386": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Workday Inc\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022workday.com\u0022,\u0022address\u0022:\u00226230 Stoneridge Mall Road, Pleasanton, California 94588\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Workday Inc as the vendor providing services and Brookfield Corporate Operations LLC as the customer being billed.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "ab000a00bb1f2874ca1c7e3226e2dc64257313838215ec6adad7547cc80fced9": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Workday, Inc.\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022workday.com\u0022,\u0022address\u0022:\u00226230 Stoneridge Mall Road, Pleasanton, CA 94588\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Workday, Inc. as the vendor providing services and Brookfield Corporate Operations LLC as the customer being billed.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "8c88e7c6085bdb0f097a02a0c44e0f43241bde5e8f3360e1240338a178f7d9ce": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Workday, Inc.\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022workday.com\u0022,\u0022address\u0022:\u00226230 Stoneridge Mall Rd, Pleasanton, CA 94588\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Workday, Inc. as the vendor providing services and Brookfield Corporate Operations LLC as the customer being billed.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "a2158967fafa3bb18b5259dc009434ec37219a5443c9c83e9e6c1850c74f5a60": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Workday Inc\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022workday.com\u0022,\u0022address\u0022:\u00226230 Stoneridge Mall Road, Pleasanton, California 94588\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Workday Inc as the vendor providing services and Brookfield Corporate Operations LLC as the customer being billed.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "9d1ef4b5d34aa62a65a0b9c7eaa0ac82c9d78c704a244a35e149522ca53aaacd": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Workday, Inc.\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022workday.com\u0022,\u0022address\u0022:\u00226230 Stoneridge Mall Road, Pleasanton, CA 94588\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Workday, Inc. as the vendor providing services and Brookfield Corporate Operations LLC as the customer receiving those services.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "9f5cd7dfee4f4a291e5921374cb035dfa3946e190804c6b7ee1cc58c44dc2c1e": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Workday, Inc.\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022workday.com\u0022,\u0022address\u0022:\u00226230 Stoneridge Mall Rd, Pleasanton, CA 94588\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Workday, Inc. as the vendor and Brookfield Corporate Operations LLC as the customer based on the billing context.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "3e5a1b5dbd9ceb259f25ae7d5db94be4acff851cb248873fa54bdf5896a7324d": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Workday Inc\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022workday.com\u0022,\u0022address\u0022:\u00226230 Stoneridge Mall Road, Pleasanton, California 94588\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Workday Inc as the vendor providing services and Brookfield Corporate Operations LLC as the customer being billed.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "9cc0dcdd0a4293a7661c003666e1776f47a8837f76f91a55a6c67e65c6031064": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Workday, Inc.\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022workday.com\u0022,\u0022address\u0022:\u00226230 Stoneridge Mall Road, Pleasanton, CA 94588\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Workday, Inc. as the vendor providing services and Brookfield Corporate Operations LLC as the customer being billed.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "939ee80e9b34382be484d1c9bcb7590f93aaddbee0c5837beda55d46e24038ee": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Workday, Inc.\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022workday.com\u0022,\u0022address\u0022:\u00226230 Stoneridge Mall Rd, Pleasanton, CA 94588\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Workday, Inc. as the vendor providing services and Brookfield Corporate Operations LLC as the customer receiving those services.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "6300dbf7f16c7ae9fae8058bf9be528d85dbe74ba4711fc2f33802f94237d65c": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Workday Inc\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022workday.com\u0022,\u0022address\u0022:\u00226230 Stoneridge Mall Road, Pleasanton, California 94588\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Workday Inc as the vendor providing services and Brookfield Corporate Operations LLC as the customer being billed.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "637aa11868aa466933916409b57136ac74b7f218b87fcd889838f1d986c2812f": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Workday, Inc.\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022workday.com\u0022,\u0022address\u0022:\u00226230 Stoneridge Mall Road, Pleasanton, CA 94588\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Workday, Inc. as the vendor providing services and Brookfield Corporate Operations LLC as the customer being billed.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "527b37697b85a74c0fac5d601a0d626f9623f715b8f86eb4c0fe36ea4559bc9e": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Workday, Inc.\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022workday.com\u0022,\u0022address\u0022:\u00226230 Stoneridge Mall Rd, Pleasanton, CA 94588\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Workday, Inc. as the vendor providing services and Brookfield Corporate Operations LLC as the customer being billed.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "eefa19ece091c233724eca24c3859f700c228b6c5f47d6818e25e290e343e64a": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Workday Inc\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022workday.com\u0022,\u0022address\u0022:\u00226230 Stoneridge Mall Road, Pleasanton, California 94588\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Workday Inc as the vendor and Brookfield Corporate Operations LLC as the customer based on the billing context.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "ade12d0a8097f100608e33f61849e8d5ef28e1eda8c1e462f1ca755ecf1a4ea4": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Workday, Inc.\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022workday.com\u0022,\u0022address\u0022:\u00226230 Stoneridge Mall Road, Pleasanton, CA 94588\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Workday, Inc. as the vendor and Brookfield Corporate Operations LLC as the customer based on the billing context.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "9c01b78d46afba53fd6a11f8f74cdd3eed66e492b72dd756e2ff312729122e08": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Workday, Inc.\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022workday.com\u0022,\u0022address\u0022:\u00226230 Stoneridge Mall Rd, Pleasanton, CA 94588\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Workday, Inc. as the vendor providing services and Brookfield Corporate Operations LLC as the customer receiving those services.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "ff1fbedfe328c5ca0ee086e09b4beb18e3b43c86e0074dda4d86cf08663b420b": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Workday Inc\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022workday.com\u0022,\u0022address\u0022:\u00226230 Stoneridge Mall Road, Pleasanton, California 94588\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Workday Inc as the vendor and Brookfield Corporate Operations LLC as the customer based on the billing context.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "27938af855101f0abdb7599f764134651968b56d64f599c63bf9a7c1c5af04b9": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Workday, Inc.\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022workday.com\u0022,\u0022address\u0022:\u00226230 Stoneridge Mall Road, Pleasanton, CA 94588\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Workday, Inc. as the vendor providing services and Brookfield Corporate Operations LLC as the customer being billed.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "f2ca5a2b2f39d9d224456686c5861fcc9946a3f0f08c075b23126b49cf997fa7": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Workday, Inc.\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022workday.com\u0022,\u0022address\u0022:\u00226230 Stoneridge Mall Rd, Pleasanton, CA 94588\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Workday, Inc. as the vendor providing services and Brookfield Corporate Operations LLC as the customer receiving those services.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "ef32a86a4c07060f3312446b1282cb997f843304f62cf7cc74c1dabadf144bd3": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Workday Inc\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022workday.com\u0022,\u0022address\u0022:\u00226230 Stoneridge Mall Road, Pleasanton, California 94588\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Workday Inc as the vendor and Brookfield Corporate Operations LLC as the customer based on the billing context.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "0e7c109c97bf6371f6e0b1d39b2c0617e6b000d8316e12d9b97701278755c71c": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Workday, Inc.\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022workday.com\u0022,\u0022address\u0022:\u00226230 Stoneridge Mall Road, Pleasanton, CA 94588\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Workday, Inc. as the vendor providing services and Brookfield Corporate Operations LLC as the customer being billed.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "cd89c44d61ee1dae4937f00c8415c2bc6d9e22f7ce7a56a48f8b8c98bffc8d29": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Workday, Inc.\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022workday.com\u0022,\u0022address\u0022:\u00226230 Stoneridge Mall Rd, Pleasanton, CA 94588\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Workday, Inc. as the vendor providing services and Brookfield Corporate Operations LLC as the customer receiving those services.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "7608bd359aa50a6bef67559ec9672f323fbbc12cce88752fec13ce045698edb8": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Workday Inc\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022workday.com\u0022,\u0022address\u0022:\u00226230 Stoneridge Mall Road, Pleasanton, California 94588\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Workday Inc as the vendor providing services and Brookfield Corporate Operations LLC as the customer being billed.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "5f10f80ad35e72b8f667a6045b8ffd21d458880c763d86c3e858e1da25952196": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Workday, Inc.\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022workday.com\u0022,\u0022address\u0022:\u00226230 Stoneridge Mall Road, Pleasanton, CA 94588\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Workday, Inc. as the vendor and Brookfield Corporate Operations LLC as the customer based on the billing context.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "ccb34c124b57b07c218603ac015daec4dc72bc85e603079d572aefa21facd419": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Workday, Inc.\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022workday.com\u0022,\u0022address\u0022:\u00226230 Stoneridge Mall Rd, Pleasanton, CA 94588\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Workday, Inc. as the vendor and Brookfield Corporate Operations LLC as the customer based on the billing context.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "9add569e62b52cca5ab21b61877ef2f2c61dd73824d855df8a8cb5415ed7ea78": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Workday Inc\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022workday.com\u0022,\u0022address\u0022:\u00226230 Stoneridge Mall Road, Pleasanton, California 94588\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Workday Inc as the vendor and Brookfield Corporate Operations LLC as the customer based on the billing context.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "553d95b536c9e69d74beaac2a929639444171e81adaa47a7838bfc306c5bfaa2": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Workday, Inc.\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022workday.com\u0022,\u0022address\u0022:\u00226230 Stoneridge Mall Road, Pleasanton, CA 94588\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Workday, Inc. as the vendor providing services and Brookfield Corporate Operations LLC as the customer receiving those services.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "a8f7835e8db3932f6af0d5dae3fb08dcecbd01dfb6b20a3d0186f9e948878632": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Workday, Inc.\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022workday.com\u0022,\u0022address\u0022:\u00226230 Stoneridge Mall Rd, Pleasanton, CA 94588\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Workday, Inc. as the vendor providing services and Brookfield Corporate Operations LLC as the customer being billed.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "c4c078a45a9087cbfdec5a22b0cc976cadeef9ba686684ce938ccb364de1ba0f": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Workday Inc\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022workday.com\u0022,\u0022address\u0022:\u00226230 Stoneridge Mall Road, Pleasanton, California 94588\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Workday Inc as the vendor and Brookfield Corporate Operations LLC as the customer based on the billing context.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "f9e189f443ce2059c0dc4e1b62abc194b9b024c974fa13e29ac24447d3ec0f5c": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Workday, Inc.\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022workday.com\u0022,\u0022address\u0022:\u00226230 Stoneridge Mall Road, Pleasanton, CA 94588\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Workday, Inc. as the vendor and Brookfield Corporate Operations LLC as the customer based on the billing context.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "ba9cce042f5d1515f7467e48c3378fc6b9b75d5ac37da80d4c9cbcade7adf5aa": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Workday, Inc.\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022workday.com\u0022,\u0022address\u0022:\u00226230 Stoneridge Mall Rd, Pleasanton, CA 94588\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Workday, Inc. as the vendor providing services and Brookfield Corporate Operations LLC as the customer receiving those services.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "833ef168819570d875629350305fef8cdb516ae6f264aa4ca5c7a2969f3d534a": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Workday Inc\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022workday.com\u0022,\u0022address\u0022:\u00226230 Stoneridge Mall Road, Pleasanton, California 94588\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Workday Inc as the vendor providing services and Brookfield Corporate Operations LLC as the customer receiving those services.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "87210b24ca2b0d63ac48fcd305972ba63c8feb21be89799e4d883a86b891e98a": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Workday, Inc.\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022workday.com\u0022,\u0022address\u0022:\u00226230 Stoneridge Mall Road, Pleasanton, CA 94588\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Workday, Inc. as the vendor providing services and Brookfield Corporate Operations LLC as the customer receiving those services.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "cdfcec260ccea2d19cee031e261678a5a64db20912ff41354b4ee1070147d529": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Workday, Inc.\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022workday.com\u0022,\u0022address\u0022:\u00226230 Stoneridge Mall Rd, Pleasanton, CA 94588\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Workday, Inc. as the vendor providing services and Brookfield Corporate Operations LLC as the customer being billed.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "1a965892e6a9d32ee818e469ced7ebe1828dd066d4c2c7d1d6b85627b10474ac": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Workday Inc\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022workday.com\u0022,\u0022address\u0022:\u00226230 Stoneridge Mall Road, Pleasanton, California 94588\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Workday Inc as the vendor providing services and Brookfield Corporate Operations LLC as the customer being billed.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "1d85e0f6a238c6dad327a7c0d689cbc21eb701693271899ae1c06ca9308bdbf4": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Workday, Inc.\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022workday.com\u0022,\u0022address\u0022:\u00226230 Stoneridge Mall Road, Pleasanton, CA 94588\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Workday, Inc. as the vendor providing services and Brookfield Corporate Operations LLC as the customer receiving those services.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "2fb459a05bc35bdf097b6ebd2d9387bbaf3737ae3bf7e54b9dfe680362165e4d": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Workday, Inc.\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022workday.com\u0022,\u0022address\u0022:\u00226230 Stoneridge Mall Rd, Pleasanton, CA 94588\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Workday, Inc. as the vendor providing services and Brookfield Corporate Operations LLC as the customer receiving those services.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "8ee368a7fd167a1040fc758fa436eaa84ca959c11eccd516961e5d0516b5d696": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Workday Inc\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022workday.com\u0022,\u0022address\u0022:\u00226230 Stoneridge Mall Road, Pleasanton, California 94588\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Workday Inc as the vendor providing services and Brookfield Corporate Operations LLC as the customer being billed.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "78ce0bc074ffa6d84061fa9617052c90ca85d383f962928ca7877f44b04c72d8": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Workday, Inc.\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022workday.com\u0022,\u0022address\u0022:\u00226230 Stoneridge Mall Road, Pleasanton, CA 94588\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Workday, Inc. as the vendor providing services and Brookfield Corporate Operations LLC as the customer receiving those services.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "87933102cfbf3796ecc9e20c82f4265689242d64a40adbd101d1b3f816a218ea": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Workday, Inc.\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022workday.com\u0022,\u0022address\u0022:\u00226230 Stoneridge Mall Rd, Pleasanton, CA 94588\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Workday, Inc. as the vendor providing services and Brookfield Corporate Operations LLC as the customer being billed.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "3d3c5d7e0e5b815a5cb6690ebd64ed07469ae8e29e920e16b72e8743712233f9": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Workday Inc\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022workday.com\u0022,\u0022address\u0022:\u00226230 Stoneridge Mall Road, Pleasanton, California 94588\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Workday Inc as the vendor providing services and Brookfield Corporate Operations LLC as the customer being billed.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "c425419b8825eacc512f3c2c7f4ce98eeb936dd08df5a5a17fe62ab9b9c33055": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Workday, Inc.\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022workday.com\u0022,\u0022address\u0022:\u00226230 Stoneridge Mall Road, Pleasanton, CA 94588\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Workday, Inc. as the vendor providing services and Brookfield Corporate Operations LLC as the customer receiving those services.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "6003b6488a9627696069d0dea307d75f38a5df016fe8fc67b280459373d1e558": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Workday, Inc.\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022workday.com\u0022,\u0022address\u0022:\u00226230 Stoneridge Mall Rd, Pleasanton, CA 94588\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Workday, Inc. as the vendor and Brookfield Corporate Operations LLC as the customer based on the billing context.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "053b8aa67b13c968370a511d796bfb57f629268003e846d092e218f28c4df964": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Workday Inc\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022workday.com\u0022,\u0022address\u0022:\u00226230 Stoneridge Mall Road, Pleasanton, California 94588\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Workday Inc as the vendor providing services and Brookfield Corporate Operations LLC as the customer being billed.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "4f69ac974e4d3927ff0123c978f5d3c8bfd8fa75429ebce4a0d321af6c9a6c74": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Workday, Inc.\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022workday.com\u0022,\u0022address\u0022:\u00226230 Stoneridge Mall Road, Pleasanton, CA 94588\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Workday, Inc. as the vendor providing services and Brookfield Corporate Operations LLC as the customer receiving those services.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "2c2488a828c93057f21b54611dd30019ab4a6160990e6babc6a3987bf40d8fe8": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Workday, Inc.\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022workday.com\u0022,\u0022address\u0022:\u00226230 Stoneridge Mall Rd, Pleasanton, CA 94588\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Workday, Inc. as the vendor providing services and Brookfield Corporate Operations LLC as the customer receiving those services.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "e76f3a3e9036ae4d2f3dbefccd304c5844d32cbaa137da15aae2b25f118de8c9": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Workday Inc\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022workday.com\u0022,\u0022address\u0022:\u00226230 Stoneridge Mall Road, Pleasanton, California 94588\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Workday Inc as the vendor providing services and Brookfield Corporate Operations LLC as the customer being billed.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "0eda62e223b8b6a19afc4c15e851b3377b38abcfe0d9ef71edb18ee082da205c": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Workday, Inc.\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022workday.com\u0022,\u0022address\u0022:\u00226230 Stoneridge Mall Road, Pleasanton, CA 94588\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Workday, Inc. as the vendor and Brookfield Corporate Operations LLC as the customer based on the billing context.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "d2234cb21f5f80e95ad63d9ddc9fd0a8fdab3de4754a3e49eb6ba41ef8ba740a": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Workday, Inc.\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022workday.com\u0022,\u0022address\u0022:\u00226230 Stoneridge Mall Rd, Pleasanton, CA 94588\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Workday, Inc. as the vendor and Brookfield Corporate Operations LLC as the customer based on the billing context.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "8bc508e1f18d011e71650bd92211881866d6eea2c1203c352973c14bfad386b3": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Workday Inc\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022workday.com\u0022,\u0022address\u0022:\u00226230 Stoneridge Mall Road, Pleasanton, California 94588\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Workday Inc as the vendor providing services and Brookfield Corporate Operations LLC as the customer being billed.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "6a29e726b594694202fd0a4f776e602e66bdb8f437488ba1297173dfd98756c2": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Workday, Inc.\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022workday.com\u0022,\u0022address\u0022:\u00226230 Stoneridge Mall Road, Pleasanton, CA 94588\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Workday, Inc. as the vendor and Brookfield Corporate Operations LLC as the customer based on the billing context.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "3abddefff683b027d4ded28640a33bbc4a9477bc88c872da64ab2c628f7e5183": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Workday, Inc.\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022workday.com\u0022,\u0022address\u0022:\u00226230 Stoneridge Mall Rd, Pleasanton, CA 94588\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Workday, Inc. as the vendor and Brookfield Corporate Operations LLC as the customer based on the billing context.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "2cb5206ff9248fb01d045ed64c456fb4baa11c0d3928cdddceaada0125d5ee1f": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Workday Inc\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022workday.com\u0022,\u0022address\u0022:\u00226230 Stoneridge Mall Road, Pleasanton, California 94588\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Workday Inc as the vendor providing services and Brookfield Corporate Operations LLC as the customer receiving those services.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "0ae7ab1ff395d4828d835158181f98debd438ed2a464ad1a243377b527cd31f5": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Workday, Inc.\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022workday.com\u0022,\u0022address\u0022:\u00226230 Stoneridge Mall Road, Pleasanton, CA 94588\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Workday, Inc. as the vendor providing services and Brookfield Corporate Operations LLC as the customer receiving those services.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "f6a55c9d085638bc128ae15f801545754fc6f78cac15468b89b77125d7f83288": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Workday, Inc.\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022workday.com\u0022,\u0022address\u0022:\u00226230 Stoneridge Mall Rd, Pleasanton, CA 94588\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Workday, Inc. as the vendor providing services and Brookfield Corporate Operations LLC as the customer receiving those services.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "c589729c7181f61972277458d19d017c50bd204b634b40b5c73d30dd868fb744": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Workday Inc\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022workday.com\u0022,\u0022address\u0022:\u00226230 Stoneridge Mall Road, Pleasanton, California 94588\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Workday Inc as the vendor and Brookfield Corporate Operations LLC as the customer based on the billing context.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "4d756eb6b33446022f649dcb84ba0ecbde1f0073158bf16e9ccf8311643fb229": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Workday, Inc.\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022workday.com\u0022,\u0022address\u0022:\u00226230 Stoneridge Mall Road, Pleasanton, CA 94588\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Workday, Inc. as the vendor and Brookfield Corporate Operations LLC as the customer based on the billing context.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "b1d0ab640a66fff5902ebdb1dabe53699e672440b987a6669bc9b2b07be89d5a": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Workday, Inc.\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022workday.com\u0022,\u0022address\u0022:\u00226230 Stoneridge Mall Rd, Pleasanton, CA 94588\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Workday, Inc. as the vendor and Brookfield Corporate Operations LLC as the customer based on the billing context.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "b7bcc6621cff8ddc25032f5b944e559cd281b3a61a3a89be650a20ee5a3d8acd": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Workday Inc\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022workday.com\u0022,\u0022address\u0022:\u00226230 Stoneridge Mall Road, Pleasanton, California 94588\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Workday Inc as the vendor providing services and Brookfield Corporate Operations LLC as the customer being billed.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "8cbe767264eb5b7906df62e94f3f0b8259f12d72c0cedb7b048ba74416bbdf9e": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Workday, Inc.\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022workday.com\u0022,\u0022address\u0022:\u00226230 Stoneridge Mall Road, Pleasanton, CA 94588\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Workday, Inc. as the vendor providing services and Brookfield Corporate Operations LLC as the customer being billed.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "8426139488ea802e9705a0ced0266d0106996e53e6505cf13d71fd59acc54c93": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Workday, Inc.\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022workday.com\u0022,\u0022address\u0022:\u00226230 Stoneridge Mall Rd, Pleasanton, CA 94588\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Workday, Inc. as the vendor providing services and Brookfield Corporate Operations LLC as the customer being billed.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "0fcf41f201ffd6e5357d5f30373f8301526e6d3d0234f196a7402e9909a283a5": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Workday Inc\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022workday.com\u0022,\u0022address\u0022:\u00226230 Stoneridge Mall Road, Pleasanton, California 94588\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Workday Inc as the vendor and Brookfield Corporate Operations LLC as the customer based on the billing context.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "3f5cd64273ee047b547ef3c1cd3af87edbd442790eb6091dbaffc92e96ba5f2d": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Workday, Inc.\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022workday.com\u0022,\u0022address\u0022:\u00226230 Stoneridge Mall Road, Pleasanton, CA 94588\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Workday, Inc. as the vendor providing services and Brookfield Corporate Operations LLC as the customer receiving those services.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "4faf60c85dedff35df322d6c0440794bcdddec07531dd83a958623ed7481f928": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Workday, Inc.\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022workday.com\u0022,\u0022address\u0022:\u00226230 Stoneridge Mall Rd, Pleasanton, CA 94588\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Workday, Inc. as the vendor providing services and Brookfield Corporate Operations LLC as the customer being billed.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "3790f15ac8179fa22325b8b6fbbec2c98f1bf6f83be41a83d05b27a89e04146f": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Workday Inc\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022workday.com\u0022,\u0022address\u0022:\u00226230 Stoneridge Mall Road, Pleasanton, California 94588\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Workday Inc as the vendor providing services and Brookfield Corporate Operations LLC as the customer being billed.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "7748168e0d5dd2c6f31a01f7d97d0428f445aeb371d6f60effd4cde5a83c9fd1": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022ABC Tech Inc.\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022abctech.com\u0022,\u0022address\u0022:\u00224200 Commerce Blvd, Suite 300 Austin, Texas 78701\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Meridian Health Systems, Inc.\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u00222100 Meridian Parkway, Durham, North Carolina 27713\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies ABC Tech Inc. as the vendor providing services and Meridian Health Systems, Inc. as the customer receiving those services.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "1897f01944c592b252e7634b4b2f9f4cfb3951c27e8364907c3aff0316d173cf": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022ABC Tech Inc.\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022abctech.com\u0022,\u0022address\u0022:\u00224200 Commerce Blvd, Suite 300 Austin, Texas 78701\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Meridian Health Systems, Inc.\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u00222100 Meridian Parkway, Durham, North Carolina 27713\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies ABC Tech Inc. as the vendor providing services and Meridian Health Systems, Inc. as the customer receiving those services.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "e308e3862140459aac06bb0e476cc6fa7c893918864c82b035a3f7602487092b": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022ABC Tech Inc.\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022abctech.com\u0022,\u0022address\u0022:\u00224200 Commerce Blvd, Suite 300 Austin, Texas 78701\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Meridian Health Systems, Inc.\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u00222100 Meridian Parkway, Durham, North Carolina 27713\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies ABC Tech Inc. as the vendor providing services and Meridian Health Systems, Inc. as the customer receiving those services.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "d338e0243450af77cc4ba91e1175ded37110c30642d2414a3756803f2cf1697a": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Institute for In Vitro Sciences, Inc.\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022iivs.org\u0022,\u0022address\u0022:\u002230 W. Watkins Mill Road, Suite 100, Gaithersburg, Maryland 20878\u0022,\u0022tax_id\u0022:\u002252-2015457\u0022},{\u0022name\u0022:\u0022Revolution Medicines, Inc.\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:\u0022revmed.com\u0022,\u0022address\u0022:\u0022700 Saginaw Drive, Redwood City, California 94063\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies \\u0027Institute for In Vitro Sciences, Inc.\\u0027 as the vendor providing services and \\u0027Revolution Medicines, Inc.\\u0027 as the customer receiving those services.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "41255770ab5921a35602b1135941104a40a901a253e8814909e2c2ad6248010a": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Institute for In Vitro Sciences, Inc.\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022iivs.org\u0022,\u0022address\u0022:\u002230 W. Watkins Mill Road, Suite 100, Gaithersburg, Maryland 20878\u0022,\u0022tax_id\u0022:\u002252-2015457\u0022},{\u0022name\u0022:\u0022Revolution Medicines, Inc.\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:\u0022revmed.com\u0022,\u0022address\u0022:\u0022700 Saginaw Drive, Redwood City, California 94063\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies \\u0027Institute for In Vitro Sciences, Inc.\\u0027 as the vendor providing services and \\u0027Revolution Medicines, Inc.\\u0027 as the customer receiving those services.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "f1dd8fcc170252f920752d7f76bb7891af3c729dfa0dc361820a44619d3009f3": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Institute for In Vitro Sciences, Inc.\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022iivs.org\u0022,\u0022address\u0022:\u002230 W. Watkins Mill Road, Suite 100, Gaithersburg, Maryland 20878\u0022,\u0022tax_id\u0022:\u002252-2015457\u0022},{\u0022name\u0022:\u0022Revolution Medicines, Inc.\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:\u0022revmed.com\u0022,\u0022address\u0022:\u0022700 Saginaw Drive, Redwood City, California 94063\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies two organizations with distinct roles, one as a vendor providing services and the other as a customer receiving those services.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "f94c524b02c0d50966f56ac9a6c63a82aa438ab1e2e7aa8519c7261163c93bf3": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Institute for In Vitro Sciences, Inc.\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022iivs.org\u0022,\u0022address\u0022:\u002230 W. Watkins Mill Road, Suite 100, Gaithersburg, Maryland 20878\u0022,\u0022tax_id\u0022:\u002252-2015457\u0022},{\u0022name\u0022:\u0022Revolution Medicines, Inc.\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:\u0022revmed.com\u0022,\u0022address\u0022:\u0022700 Saginaw Drive, Redwood City, California 94063\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies two organizations with distinct roles, one as a vendor providing services and the other as a customer receiving those services.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "b00479f230fd2b4f381433430fee8d36e79427bdc19021b72e7e4677d6a70c2c": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Institute for In Vitro Sciences, Inc.\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022iivs.org\u0022,\u0022address\u0022:\u002230 W. Watkins Mill Road, Suite 100, Gaithersburg, Maryland 20878\u0022,\u0022tax_id\u0022:\u002252-2015457\u0022},{\u0022name\u0022:\u0022Revolution Medicines, Inc.\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:\u0022revmed.com\u0022,\u0022address\u0022:\u0022700 Saginaw Drive, Redwood City, California 94063\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies two organizations with distinct roles, one as a vendor and the other as a customer.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "ddc08302744f6064712717dc9c3e9b7fb99730ac89eb8705b4cf73a2a6765ce6": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Institute for In Vitro Sciences, Inc.\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022iivs.org\u0022,\u0022address\u0022:\u002230 W. Watkins Mill Road, Suite 100, Gaithersburg, Maryland 20878\u0022,\u0022tax_id\u0022:\u002252-2015457\u0022},{\u0022name\u0022:\u0022Revolution Medicines, Inc.\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:\u0022revmed.com\u0022,\u0022address\u0022:\u0022700 Saginaw Drive, Redwood City, California 94063\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies \\u0027Institute for In Vitro Sciences, Inc.\\u0027 as the vendor providing services and \\u0027Revolution Medicines, Inc.\\u0027 as the customer receiving those services.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "cfbfcf14d74e6fd6c52623f2935bbfb5fe3e04d83d64bb8c750a9ae5cb97dc2e": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Regulus Group, LLC\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022450 Raritan Center Parkway, Suite B, Edison, NJ 08837\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022The Prudential Insurance Company of America\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u002255 Livingston Avenue, Roseland, New Jersey 07068\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Regulus Group, LLC as the vendor providing services and The Prudential Insurance Company of America as the customer receiving those services.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "6a3256810777f6b913b6cce9e55f2f014f69694e8bcebe4faf7ce09a99a8f0aa": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Regulus Group, LLC\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022450 Raritan Center Parkway, Suite B, Edison, NJ 08837\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022The Prudential Insurance Company of America\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u002255 Livingston Avenue, Roseland, New Jersey 07068\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Regulus Group, LLC as the vendor providing services and The Prudential Insurance Company of America as the customer receiving those services.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "f5a532246afcdd7126eaeccbc65ad7b4fabbf8e39717f708ca363a50ae369522": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Regulus Group, LLC\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022450 Raritan Center Parkway, Suite B, Edison, NJ 08837\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022The Prudential Insurance Company of America\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u002255 Livingston Avenue, Roseland, New Jersey 07068\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Regulus Group, LLC as the vendor providing services and The Prudential Insurance Company of America as the customer receiving those services.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "96b81a832d675ddd0e302a2f1256b83f846327a2c9cf703ee5594527f75dd242": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Regulus Group, LLC\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:null,\u0022address\u0022:null,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022The Prudential Insurance Company of America\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:null,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Regulus Group, LLC as the vendor providing services and The Prudential Insurance Company of America as the customer receiving those services.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "9fa6f1631ba5b455a742296aa3fc2030acdc8c0a3c41990e8bdd94fd32ab9a01": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022The Prudential Insurance Company of America\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:\u0022prudential.com\u0022,\u0022address\u0022:\u002255 Livingston Avenue, Roseland, New Jersey 07068\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Regulus Group, LLC\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:null,\u0022address\u0022:null,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies The Prudential Insurance Company of America as the customer and Regulus Group, LLC as the vendor in a service agreement context.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "59cf00193ceb726218060b69a4525bf54e362959be6a1f5bf47508bb6975616d": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Brookfield Corporate Operations LLC as the vendor providing services, with a specific address mentioned.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "b8db204a0ab01143dae9871021ada879d27ce9e15d876e6194ab0e52656edc4b": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Brookfield Corporate Operations LLC as the vendor providing services, with a specific address mentioned.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "59f9b6b53f027e7e5e20553bac0e845dae6581519fd8c37219ac65272b1a194d": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Brookfield Corporate Operations LLC as the vendor providing services, with a specific address mentioned.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "c7088a8a7b181d36817ad7336e4a4f6e3aacd906ba0696ea80886a372139856c": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Brookfield Corporate Operations LLC as the vendor issuing the purchase order.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "bef6c2335a4f0018b51b6eedda70884e42c4f4fce072525782a820005e37b9d5": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Brookfield Corporate Operations LLC as the vendor providing services, with a specific address mentioned.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "58eaa97b9db5da7e2ad553b84b6d8a76da148023c251fb44998a7b99a42acbf8": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Brookfield Corporate Operations LLC as the vendor providing services, with a specific address mentioned.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "1aa24fd4aade7c5ee255df6a01effeed13db9f028b43f5dec607325c58cee06d": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Brookfield Corporate Operations LLC as the vendor providing services, with a specific address mentioned.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "b2e2ec8b3f01e2c95172a0c3e8d956dd36a655c22df1dc7b71826397c30427de": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Brookfield Corporate Operations LLC as the vendor providing services related to the purchase order.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "03e55693133a74e0982654ae4ed62064130b66aaa653cf96c149ca88dbbb0cb7": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Brookfield Corporate Operations LLC as the vendor providing training services.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "ff287bbd587c0169cc58c78100c3215c7ad539dc602864152dc3b4d1a319ac1e": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Brookfield Corporate Operations LLC as the vendor providing services, with a specific address mentioned.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "5f9561c9e3bc6aa4dfb2134045ca7c4322a70c6e4e905e968f28223cc2a36726": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Brookfield Corporate Operations LLC as the vendor providing services, with a specific address mentioned.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "cbac7b64ca41b9b2356208b0ff5f4cd886c64be7f2e542affeb94da8c41c379d": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Brookfield Corporate Operations LLC as the vendor providing services, with a specific address mentioned.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "ff6f66f5bc99609972aea17fdf8d6c633d85ee33e439e0c120d99e0c0fd4b53e": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Brookfield Corporate Operations LLC as the vendor providing services, with a specific address mentioned.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "13483c9e4621ae010a77c3d0b9c632db18c8da85326d09e4e4175217769d49a3": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Brookfield Corporate Operations LLC as the vendor issuing the purchase order.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "18df82d938198cbfc0b3b50a7a03dce976cda654e985da1dfe1453be56000ebb": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Brookfield Corporate Operations LLC as the vendor providing services for the Data Integration Project.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "0cb316314d57e2a69cf6edbb5e1bb92537d3f126e904a0e507931af91e1c6261": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Brookfield Corporate Operations LLC as the vendor providing services, with a specific address mentioned.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "4c3e8f26d8fe0388eec625e67dc534fbd2b821b907e6992466f817638312247c": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Brookfield Corporate Operations LLC as the vendor providing services, with a specific address mentioned.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "45dc8f66bddf45da7f0fb1731591e9eb5654f9c48ff0989be29a34b133ca960b": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Brookfield Corporate Operations LLC as the vendor providing services, with a specific address mentioned.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "a72c2d5453eb2c4d99d2de51fb81158c06594630d365694860ad55c56ab2f5d1": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022The Prudential Insurance Company of America\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u002255 Livingston Avenue, Roseland, NJ 07068\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Regulus Group, LLC\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:null,\u0022address\u0022:null,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies The Prudential Insurance Company of America as the customer and Regulus Group, LLC as the vendor in the context of a purchase order.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "b1208ed52d8a69ad1ee3e5e4b94a9bb33f5366eb7d47044634e1319b3c112e93": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Regulus Group, LLC\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:null,\u0022address\u0022:null,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022The Prudential Insurance Company of America\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:null,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Regulus Group, LLC as the vendor providing services and The Prudential Insurance Company of America as the customer receiving those services.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "081d879fca833aab58c5be3633e4843ec43ef91aee74ac33947ac73a92243572": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Institute for In Vitro Sciences, Inc.\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022iivs.org\u0022,\u0022address\u0022:\u002230 W. Watkins Mill Road, Suite 100 \\u00B7 Gaithersburg, Maryland 20878\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Revolution Medicines, Inc.\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:null,\u0022tax_id\u0022:null}],\u0022confidence\u0022:0.9,\u0022reasoning\u0022:\u0022The document clearly identifies \\u0027Institute for In Vitro Sciences, Inc.\\u0027 as the vendor providing services and \\u0027Revolution Medicines, Inc.\\u0027 as the customer receiving those services.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "50a7b2719a7dddbdc3f41008716dfdbab2d4d731788d317bbd5c0f80aeba027e": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Marsh USA Inc.\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022marsh.com\u0022,\u0022address\u0022:\u00221166 Avenue of the Americas, New York, NY 10036\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Salesforce, Inc.\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:\u0022salesforce.com\u0022,\u0022address\u0022:\u0022415 Mission Street, San Francisco, CA 94105\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Nova Southeastern University, Inc.\u0022,\u0022role\u0022:\u0022unknown\u0022,\u0022domain\u0022:\u0022nova.edu\u0022,\u0022address\u0022:\u00223301 College Avenue, Fort Lauderdale, FL 33314\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:0.9,\u0022reasoning\u0022:\u0022The document contains clear references to Marsh USA Inc. as the producer, Salesforce, Inc. as the insured customer, and Nova Southeastern University, Inc. as the certificate holder.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "da8f8b52158b65086a6ac9ad822321968542ab7bf0bf8627186f915038ea90d8": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Salesforce, Inc.\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022salesforce.com\u0022,\u0022address\u0022:\u0022415 Mission Street, San Francisco, CA 94105, United States\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022BSI Group America Inc.\u0022,\u0022role\u0022:\u0022issuer\u0022,\u0022domain\u0022:\u0022bsigroup.com\u0022,\u0022address\u0022:null,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly names Salesforce, Inc. as the provider of services and BSI Group America Inc. as the issuer of the certificate.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "fe0b9377a6ee95cab0a43154f10ea33b3a532f013a90fe829cf209d815a924bb": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Brookfield Corporate Operations LLC\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u0022200 Vesey Street, New York, NY 10281\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Workday, Inc.\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:null,\u0022address\u0022:null,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Brookfield Corporate Operations LLC as the purchaser and Workday, Inc. as the seller, establishing their roles as customer and vendor respectively.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "6001769be24dde5bb58e99e66b2339cd99f43864aa43dffc0a0fdf5161b93b1d": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Nova Southeastern University\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:null,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Salesforce, Inc.\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022salesforce.com\u0022,\u0022address\u0022:null,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Nova Southeastern University as the customer and Salesforce, Inc. as the vendor providing services.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "e9b6a1931a8929945383746037861e98385fda841a4dd673e57b1dedc1c673cd": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Nova Southeastern University, Inc.\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:null,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Salesforce, Inc.\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:null,\u0022address\u0022:null,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Nova Southeastern University, Inc. as the customer and Salesforce, Inc. as the vendor in the context of a service agreement.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "85659f2dd2e3b4bb91f0fc8c7caa2820d795a6a0f0344b67b627e2c4005df481": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Microsoft Corporation\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:null,\u0022address\u0022:null,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022CloudNova Technologies\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:null,\u0022address\u0022:null,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022GreenCore Manufacturing\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:null,\u0022address\u0022:null,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022ABC Technologies\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:null,\u0022address\u0022:null,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022BluePeak Consulting\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:null,\u0022address\u0022:null,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Zenith Office Supplies\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:null,\u0022address\u0022:null,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Apex Staffing Services\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:null,\u0022address\u0022:null,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022SecureNet Cybersecurity\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:null,\u0022address\u0022:null,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022All identified parties are explicitly named as vendors in the context of the document.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "18680454ef757ec819474968bf79ed7978d4b672945cfe9b71cb911090cc5e10": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Regulus Group, LLC\u0022,\u0022role\u0022:\u0022unknown\u0022,\u0022domain\u0022:null,\u0022address\u0022:null,\u0022tax_id\u0022:\u002222-3847561\u0022}],\u0022confidence\u0022:0.9,\u0022reasoning\u0022:\u0022Regulus Group, LLC is identified as a named party in the document with a tax ID, but its role is unclear from the provided text.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "62f3bcbf3a98e08efdb6a1d45d99da7bccce9d091227e97d58c93d936afe4056": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Workday, Inc.\u0022,\u0022role\u0022:\u0022unknown\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u00226230 Stoneridge Mall Road, Pleasanton, CA 94588\u0022,\u0022tax_id\u0022:\u002220-2480725\u0022}],\u0022confidence\u0022:0.9,\u0022reasoning\u0022:\u0022Workday, Inc. is identified in the document as a business entity with a specific address and tax ID, but the role is unclear from the context provided.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
   }
 }
