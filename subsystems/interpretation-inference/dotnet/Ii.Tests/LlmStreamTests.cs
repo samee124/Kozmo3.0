@@ -139,7 +139,7 @@ public sealed class LlmStreamTests
     [Trait("Golden", "true")]
     public void L5_Cloudwave_WithLlmBelief_FingerprintPin()
     {
-        const string Pin = "e0440aa93b02986144ba143d23373263550f345152b5854ece9fcb5bd5573efd";
+        const string Pin = "7ff006ee16eeb40a2d2dfe3bc5f265e5653867d654ba7e9c2105f60bd6660464";
 
         using var h = TestHarness.FreshEngineWithSeed(clock: DemoClock.Fixed, llm: MakeReplayClient());
         h.ReplayAllSignals("cloudwave");

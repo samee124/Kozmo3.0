@@ -1,0 +1,39 @@
+[
+  {
+    "_proves": "supersession: Quote REPORTED annual_value=145000 and sla_uptime=0.82 superseded by contract PRIMARY annual_value=155000 and sla_uptime=0.91; superseded quote beliefs appear in belief_history table",
+    "evidence": {
+      "evidence_id": "aa000008-0001-0000-0000-000000000001",
+      "vendor_id": "eeeeeeee-0008-0000-0000-000000000001",
+      "doc_type": "Quote",
+      "source_tier": "Reported",
+      "ref": "quotes/borealis-q1-2025.pdf",
+      "doc_version": 1,
+      "ingested_at": "2025-04-01T00:00:00Z"
+    },
+    "observed_at": "2025-03-15T00:00:00Z",
+    "claims": [
+      { "claim_key": "sla_uptime",   "raw_value": 0.82, "locator": "page:2 §3.1",   "extractor_confidence": 0.90 },
+      { "claim_key": "annual_value", "raw_value": 145000, "locator": "page:1 header", "extractor_confidence": 1.0 }
+    ]
+  },
+  {
+    "evidence": {
+      "evidence_id": "aa000008-0002-0000-0000-000000000001",
+      "vendor_id": "eeeeeeee-0008-0000-0000-000000000001",
+      "doc_type": "SignedContract",
+      "source_tier": "Primary",
+      "ref": "contracts/borealis-msa-v1.pdf",
+      "doc_version": 1,
+      "ingested_at": "2025-10-01T00:00:00Z"
+    },
+    "observed_at": "2025-09-10T00:00:00Z",
+    "claims": [
+      { "claim_key": "sla_uptime",       "raw_value": 0.91,       "locator": "page:4 §5.1",  "extractor_confidence": 1.0 },
+      { "claim_key": "annual_value",     "raw_value": 155000,     "locator": "page:2 §2.1",  "extractor_confidence": 1.0 },
+      { "claim_key": "renewal_date",     "raw_value": 1790726400, "locator": "page:2 §2.3",  "extractor_confidence": 1.0 },
+      { "claim_key": "notice_period",    "raw_value": 60,         "locator": "page:3 §3.2",  "extractor_confidence": 1.0 },
+      { "claim_key": "auto_renewal",     "raw_value": 1,          "locator": "page:3 §3.3",  "extractor_confidence": 1.0 },
+      { "claim_key": "contract_on_file", "raw_value": 1,          "locator": "page:1 cover", "extractor_confidence": 1.0 }
+    ]
+  }
+]

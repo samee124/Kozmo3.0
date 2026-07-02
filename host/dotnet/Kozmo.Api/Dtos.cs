@@ -111,6 +111,16 @@ public sealed record TrajectoryPointDto(
     string         Stance,
     string         Fingerprint);
 
+// ── Vendor file ───────────────────────────────────────────────────────────────
+
+public sealed record VendorFileIngestRequest(string FixturePath);
+
+// ── Vendor name resolution (identity upsert) ──────────────────────────────────
+
+public sealed record NameResolveRequest(string VendorName);
+
+public sealed record NameResolveResponse(string VendorId, bool IsNew, string CanonicalName);
+
 // ── Live signal injection ──────────────────────────────────────────────────────
 
 public sealed record LiveSignalRequest(string Body);

@@ -53,7 +53,7 @@ public sealed class GoldenPathTests : IDisposable
         var beliefs = await _facade.GetBeliefsAsync(CwId);
         Assert.Equal(4, beliefs.Count);
 
-        var byDim = beliefs.ToDictionary(b => b.Dimension);
+        var byDim = beliefs.ToDictionary(b => b.Dimension!.Value);
         Assert.Equal(0.45, byDim[Dimension.Operational].Value,  precision: 6);
         Assert.Equal(0.40, byDim[Dimension.Experiential].Value, precision: 6);
         Assert.Equal(0.55, byDim[Dimension.Financial].Value,    precision: 6);

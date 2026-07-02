@@ -1,0 +1,36 @@
+[
+  {
+    "_proves": "freshness decay: VERIFIED CSV observed 5 months before DemoClock (2026-01-15 vs 2026-06-15); half-life=30d for usage_trend collapses effective confidence from 0.80 ceiling to ~0.024 — visibly below tier ceiling",
+    "evidence": {
+      "evidence_id": "aa000007-0001-0000-0000-000000000001",
+      "vendor_id": "eeeeeeee-0007-0000-0000-000000000001",
+      "doc_type": "SignedContract",
+      "source_tier": "Primary",
+      "ref": "contracts/aster-saas-v1.pdf",
+      "doc_version": 1,
+      "ingested_at": "2025-10-15T00:00:00Z"
+    },
+    "observed_at": "2025-10-15T00:00:00Z",
+    "claims": [
+      { "claim_key": "annual_value",     "raw_value": 95000,      "locator": "page:2 §2.1", "extractor_confidence": 1.0 },
+      { "claim_key": "renewal_date",     "raw_value": 1759276800, "locator": "page:2 §2.2", "extractor_confidence": 1.0 },
+      { "claim_key": "contract_on_file", "raw_value": 1,          "locator": "page:1 cover", "extractor_confidence": 1.0 }
+    ]
+  },
+  {
+    "evidence": {
+      "evidence_id": "aa000007-0002-0000-0000-000000000001",
+      "vendor_id": "eeeeeeee-0007-0000-0000-000000000001",
+      "doc_type": "UsageCsv",
+      "source_tier": "Verified",
+      "ref": "reports/aster-usage-jan-2026.csv",
+      "doc_version": 1,
+      "ingested_at": "2026-01-20T00:00:00Z"
+    },
+    "observed_at": "2026-01-15T00:00:00Z",
+    "claims": [
+      { "claim_key": "usage_trend",      "raw_value": 0.78, "locator": "row:2", "extractor_confidence": 1.0 },
+      { "claim_key": "invoice_accuracy", "raw_value": 0.87, "locator": "row:4", "extractor_confidence": 1.0 }
+    ]
+  }
+]

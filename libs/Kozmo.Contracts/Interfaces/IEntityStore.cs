@@ -29,6 +29,11 @@ public interface IEntityStore
     // Signal history for entity — ordered by received_at; used to correlate index versions
     Task<IReadOnlyList<Signal>> GetSignalsForEntityAsync(Guid entityId, CancellationToken ct = default);
 
+    // Evidence — vendor file only; append only
+    Task AppendEvidenceAsync(Evidence evidence, CancellationToken ct = default);
+    Task<Evidence?> GetEvidenceAsync(Guid evidenceId, CancellationToken ct = default);
+    Task<IReadOnlyList<Evidence>> GetEvidenceForVendorAsync(Guid vendorId, CancellationToken ct = default);
+
     // Reset — test/demo harness only
     Task ResetAsync(CancellationToken ct = default);
 }

@@ -478,3 +478,37 @@ body {
 .detail-upload-status.upload-ok   { color: #16a34a; }
 .detail-upload-status.upload-err  { color: #dc2626; }
 .detail-upload-status.upload-busy { color: #ca8a04; }
+
+/* ── Vendor File tab — view toggle ───────────────────────────────────────── */
+
+.vf-view-toggle {
+  display: flex; gap: 4px;
+  padding: 10px 24px;
+  border-bottom: 1px solid var(--border);
+  background: white;
+}
+
+.vf-toggle-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 30px; height: 30px;
+  border: 1px solid var(--border); border-radius: 5px;
+  background: var(--surface); color: var(--muted);
+  cursor: pointer; transition: background .12s, color .12s;
+}
+.vf-toggle-btn:hover             { background: #f1f5f9; color: var(--text); }
+.vf-toggle-btn.vf-toggle-active  { background: #eff6ff; color: #2563eb; border-color: #bfdbfe; }
+
+.vf-md-pre {
+  margin: 0;
+  padding: 24px;
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  word-break: break-word;
+  background: #f8fafc;
+  color: var(--text);
+  min-height: 600px;
+  border: none;
+  overflow-x: auto;
+}

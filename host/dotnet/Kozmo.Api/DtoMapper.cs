@@ -90,7 +90,7 @@ internal static class DtoMapper
         SaasProfile profile, DateTimeOffset asOf)
     {
         var signalMap  = signals.ToDictionary(s => s.Id);
-        var byDim      = beliefs.GroupBy(b => b.Dimension).ToDictionary(g => g.Key, g => g.ToList());
+        var byDim      = beliefs.Where(b => b.Dimension.HasValue).GroupBy(b => b.Dimension!.Value).ToDictionary(g => g.Key, g => g.ToList());
 
         var bandView = new BandViewDto(
             Band: idx.Band.ToString(),
@@ -118,7 +118,7 @@ internal static class DtoMapper
 
                         return new BeliefViewDto(
                             BeliefId:             b.Id.ToString(),
-                            Dimension:            b.Dimension.ToString(),
+                            Dimension:            b.Dimension?.ToString() ?? "",
                             Criterion:            b.Criterion,
                             Value:                b.Value,
                             Confidence:           b.Confidence,

@@ -231,12 +231,12 @@
     <p class="sub">Vendor File &middot; as of @Model.AsOf.ToString("yyyy-MM-dd")</p>
 
     <div style="display:flex;align-items:center;flex-wrap:wrap;gap:10px;padding:8px 0 16px;">
-      <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--faint);">Re-upload Contract</span>
+      <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--faint);">Upload Document</span>
       <input type="hidden" id="vf-vendor-name" value="@Html.Encode(Model.VendorName)">
       <input type="file" id="vf-upload-file" accept=".pdf" style="font-size:11px;color:var(--muted);">
       <button id="vf-upload-btn" type="button"
               style="font-size:11px;font-weight:600;padding:5px 12px;border-radius:4px;border:none;cursor:pointer;background:#2563eb;color:#fff;">
-        Extract &amp; refresh →
+        Process →
       </button>
       <span id="vf-upload-status" style="font-size:11px;color:var(--muted);"></span>
     </div>

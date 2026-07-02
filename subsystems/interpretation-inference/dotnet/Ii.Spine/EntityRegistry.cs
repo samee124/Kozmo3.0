@@ -9,14 +9,33 @@ namespace Ii.Spine;
 public sealed class EntityRegistry
 {
     private readonly Dictionary<Guid, EntityRecord>   _byId    = [];
-    private readonly Dictionary<string, Guid>         _byRef   = [];  // canonical name → id
+    private readonly Dictionary<string, Guid>         _byRef   = new(StringComparer.OrdinalIgnoreCase);
 
     public void Register(Guid id, string canonicalName, DateTimeOffset? renewalDate = null)
     {
         var rec = new EntityRecord(id, canonicalName, renewalDate);
-        _byId[id]              = rec;
-        _byRef[canonicalName]  = id;
+        _byId[id]             = rec;
+        _byRef[canonicalName] = id;
     }
+
+    /// <summary>
+    /// Exact case-insensitive match against canonical names.
+    /// Match → returns existing id, isNew=false.
+    /// No match → mints a new GUID, registers it, returns isNew=true.
+    /// </summary>
+    public (Guid id, bool isNew) Upsert(string vendorName)
+    {
+        var name = vendorName.Trim();
+        if (_byRef.TryGetValue(name, out var existing))
+            return (existing, false);
+
+        var newId = Guid.NewGuid();
+        Register(newId, name);
+        return (newId, true);
+    }
+
+    /// <summary>Returns all registered entity IDs in insertion order.</summary>
+    public IReadOnlyList<Guid> GetAllIds() => [.. _byId.Keys];
 
     public Guid Resolve(Guid signalEntityId, IReadOnlyDictionary<string, object?> payload, SaasProfile profile)
     {

@@ -7,8 +7,10 @@
     <RootNamespace>Kozmo.SeedPrep</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <!-- Ii.Observation (with LLM path) and Kozmo.Llm.OpenAi (real client) are allowed here — seed-prep is NOT the demo runtime -->
+    <!-- Ii.Observation (with LLM path), Kozmo.Llm.OpenAi (real client), and Ii.Intake (PDF lane)
+         are all allowed here — seed-prep is NOT the demo runtime -->
     <ProjectReference Include="..\..\subsystems\interpretation-inference\dotnet\Ii.Observation\Ii.Observation.csproj" />
+    <ProjectReference Include="..\..\subsystems\interpretation-inference\dotnet\Ii.Intake\Ii.Intake.csproj" />
     <ProjectReference Include="..\..\libs\Kozmo.Llm.OpenAi\Kozmo.Llm.OpenAi.csproj" />
     <ProjectReference Include="..\..\libs\Kozmo.Llm\Kozmo.Llm.csproj" />
     <ProjectReference Include="..\..\subsystems\knowledge-memory\dotnet\Km.Store\Km.Store.csproj" />

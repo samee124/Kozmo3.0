@@ -1,0 +1,19 @@
+[
+  {
+    "_proves": "gate blocks Critical: UNVERIFIED tier ceiling=0.2 keeps ConfidenceFloor < 0.60; completeness ~0.22 (2/9) — honest blindness, no false confidence",
+    "evidence": {
+      "evidence_id": "aa000004-0001-0000-0000-000000000001",
+      "vendor_id": "eeeeeeee-0004-0000-0000-000000000001",
+      "doc_type": "WebProfile",
+      "source_tier": "Unverified",
+      "ref": "web/helix-public-profile-2025.html",
+      "doc_version": 1,
+      "ingested_at": "2025-10-01T00:00:00Z"
+    },
+    "observed_at": "2025-09-15T00:00:00Z",
+    "claims": [
+      { "claim_key": "sla_uptime", "raw_value": 0.75, "locator": "field:uptime_claim",  "extractor_confidence": 1.0 },
+      { "claim_key": "csat",       "raw_value": 0.60, "locator": "field:rating_summary", "extractor_confidence": 1.0 }
+    ]
+  }
+]

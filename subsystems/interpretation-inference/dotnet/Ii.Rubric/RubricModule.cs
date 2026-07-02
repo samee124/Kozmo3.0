@@ -17,17 +17,19 @@ public sealed class RubricModule : IRubricModule
         IReadOnlyList<Belief> beliefs,
         SaasProfile           profile)
     {
-        if (beliefs.Count == 0)
+        // Structural vendor-file beliefs carry Confidence=0 and do not feed dimension scoring.
+        var scoredBeliefs = beliefs.Where(b => b.Confidence > 0).ToList();
+        if (scoredBeliefs.Count == 0)
             return new DimensionScore(entityId, dimension, 0.5, 0.0, []);
 
-        var totalWeight = beliefs.Sum(b => b.Confidence);
+        var totalWeight = scoredBeliefs.Sum(b => b.Confidence);
 
         double score = totalWeight > 0
-            ? beliefs.Sum(b => b.Value * b.Confidence) / totalWeight
-            : beliefs.Average(b => b.Value);
+            ? scoredBeliefs.Sum(b => b.Value * b.Confidence) / totalWeight
+            : scoredBeliefs.Average(b => b.Value);
 
-        var confidence      = beliefs.Max(b => b.Confidence);
-        var contributingIds = beliefs.Select(b => b.Id).ToList();
+        var confidence      = scoredBeliefs.Max(b => b.Confidence);
+        var contributingIds = scoredBeliefs.Select(b => b.Id).ToList();
 
         return new DimensionScore(entityId, dimension, score, confidence, contributingIds);
     }

@@ -1,7 +1,9 @@
 using Ii.Contracts;
+using Km.Store;
 using Kozmo.Contracts;
 using Kozmo.Contracts.Config;
 using Kozmo.Contracts.Interfaces;
+using Kozmo.Platform.Analysis;
 
 namespace Ii.Spine;
 
@@ -175,6 +177,26 @@ public sealed class IiFacade : IIiFacade
 
     public Task ResetAsync(CancellationToken ct = default) => _store.ResetAsync(ct);
 
+    public async Task<VendorJudgement> RecomputeVendorAsync(Guid entityId, CancellationToken ct = default)
+    {
+        var now        = _clock.UtcNow;
+        var allBeliefs = await _store.GetCurrentBeliefsAsync(entityId, ct);
+        var allHistory = await _store.GetBeliefHistoryAsync(entityId, ct);
+
+        var decayed  = allBeliefs.Select(b => _decay.WithCurrentFreshness(b, _profile, now)).ToList();
+        var anchored = AnchorConfidences(decayed, allHistory, now);
+
+        var scores   = BuildAllDimensionScores(entityId, anchored);
+        var index    = _index.Aggregate(entityId, scores, anchored, null, _profile, now);
+
+        var entity   = _registry.GetEntity(entityId);
+        var meta     = ComputeMeta(entityId, decayed, anchored, allHistory, now);
+        var posture  = _posture.Assign(index, null, entity?.RenewalDate, _profile, now, meta);
+        var mgmt     = ComputeManagementBlock(entityId, decayed, allBeliefs, scores, meta);
+
+        return new VendorJudgement(index, posture, meta, mgmt);
+    }
+
     // ── Private ───────────────────────────────────────────────────────────────
 
     private async Task RecomputeIndexAsync(Guid entityId, Dimension dirtyDim, DateTimeOffset now, CancellationToken ct)
@@ -221,10 +243,12 @@ public sealed class IiFacade : IIiFacade
     }
 
     /// <summary>
-    /// For each current belief, check whether its direct predecessor (the belief it superseded)
-    /// had a higher decayed confidence. If so, raise the current belief's effective confidence
-    /// to that predecessor's level. When the anchor fires, sets AnchorRawConfidence,
-    /// AnchorPredecessorId, and AnchorPredecessorTier annotation fields for provenance.
+    /// For each current belief, find the strongest still-valid ancestor in the same
+    /// (Dimension, Criterion) slot by walking the FULL supersession chain (not just the
+    /// direct predecessor). If any ancestor has higher decayed confidence, raise the current
+    /// belief's effective confidence to that level.
+    /// When the anchor fires, sets AnchorRawConfidence, AnchorPredecessorId, and
+    /// AnchorPredecessorTier annotation fields for provenance.
     /// The stored belief is unchanged; this affects scoring and the reasoning trail only.
     /// </summary>
     private IReadOnlyList<Belief> AnchorConfidences(
@@ -235,21 +259,34 @@ public sealed class IiFacade : IIiFacade
         var result = new List<Belief>(decayed.Count);
         foreach (var b in decayed)
         {
-            // Find the best predecessor by decayed confidence in the same (Dimension, Criterion) slot.
-            var predecessors = allHistory
-                .Where(h => h.SupersededBy == b.Id
-                         && h.Dimension   == b.Dimension
-                         && h.Criterion   == b.Criterion)
-                .Select(h => (belief: h, conf: _decay.WithCurrentFreshness(h, _profile, now).Confidence))
-                .ToList();
+            // Walk the full supersession chain for this (Dimension, Criterion) slot.
+            // Stopping at the direct predecessor misses the Verified ancestor after a
+            // second consecutive Reported supersession, collapsing ConfidenceFloor
+            // below the 0.60 Critical gate incorrectly.
+            var ancestors = new List<(Belief belief, double conf)>();
+            var toExpand  = new Queue<Guid>();
+            toExpand.Enqueue(b.Id);
 
-            if (predecessors.Count == 0)
+            while (toExpand.Count > 0)
+            {
+                var parentId = toExpand.Dequeue();
+                foreach (var a in allHistory
+                    .Where(x => x.SupersededBy == parentId
+                             && x.Dimension    == b.Dimension
+                             && x.Criterion    == b.Criterion))
+                {
+                    ancestors.Add((a, _decay.WithCurrentFreshness(a, _profile, now).Confidence));
+                    toExpand.Enqueue(a.Id);
+                }
+            }
+
+            if (ancestors.Count == 0)
             {
                 result.Add(b);
                 continue;
             }
 
-            var best = predecessors.MaxBy(x => x.conf);
+            var best = ancestors.MaxBy(x => x.conf);
             if (b.Confidence < best.conf)
             {
                 result.Add(b with
@@ -281,39 +318,18 @@ public sealed class IiFacade : IIiFacade
         IReadOnlyList<Belief> allHistory,
         DateTimeOffset now)
     {
-        const double ContradictionThreshold = 0.30;
+        var contradictions = new List<Contradiction>(
+            ContradictionDetector.DetectSupersession(
+                entityId.ToString(), decayed, allHistory, _profile.ClaimKeyCatalogue));
+        contradictions.AddRange(
+            ContradictionDetector.DetectCrossSource(
+                entityId.ToString(), decayed, _profile.ClaimKeyCatalogue));
 
-        var contradictions = new List<Contradiction>();
-        var anchorNotes    = new List<string>();
-
-        // Contradiction detection: superseding belief value diverges from its predecessor
-        foreach (var b in decayed)
-        {
-            var predecessor = allHistory
-                .FirstOrDefault(h => h.SupersededBy == b.Id
-                                  && h.Dimension     == b.Dimension
-                                  && h.Criterion     == b.Criterion);
-            if (predecessor == null) continue;
-
-            var delta = Math.Abs(b.Value - predecessor.Value);
-            if (delta < ContradictionThreshold) continue;
-
-            var severity = delta >= 0.70 ? ContradictionSeverity.High
-                         : delta >= 0.50 ? ContradictionSeverity.Medium
-                         :                 ContradictionSeverity.Low;
-
-            contradictions.Add(new Contradiction(
-                EntityId:             entityId.ToString(),
-                Dimension:            b.Dimension.ToString(),
-                Description:          $"{b.Dimension}/{b.Criterion}: new value {b.Value:F2} diverges from prior {predecessor.Value:F2} (\u0394={delta:F2})",
-                Severity:             severity,
-                ConflictingBeliefIds: new List<Guid> { predecessor.Id, b.Id },
-                DetectedBy:           DetectionSource.Deterministic));
-        }
+        var anchorNotes = new List<string>();
 
         // Gap detection: dimensions with no current evidence
         var gaps        = new List<Gap>();
-        var coveredDims = decayed.Select(b => b.Dimension).ToHashSet();
+        var coveredDims = decayed.Where(b => b.Dimension.HasValue).Select(b => b.Dimension!.Value).ToHashSet();
         foreach (var dim in Enum.GetValues<Dimension>())
         {
             if (!coveredDims.Contains(dim))
@@ -348,9 +364,70 @@ public sealed class IiFacade : IIiFacade
     private IReadOnlyDictionary<Dimension, DimensionScore> BuildAllDimensionScores(
         Guid entityId, IReadOnlyList<Belief> decayed)
     {
-        var byDim = decayed.GroupBy(b => b.Dimension);
+        var byDim = decayed
+            .Where(b => b.Dimension.HasValue)
+            .GroupBy(b => b.Dimension!.Value);
         return byDim.ToDictionary(
             g => g.Key,
             g => _rubric.ScoreDimension(entityId, g.Key, g.ToList(), _profile));
+    }
+
+    private ManagementBlock ComputeManagementBlock(
+        Guid                                           entityId,
+        IReadOnlyList<Belief>                          decayed,
+        IReadOnlyList<Belief>                          allBeliefs,
+        IReadOnlyDictionary<Dimension, DimensionScore> dimScores,
+        MetaCognitionResult                            meta)
+    {
+        var compResult = new CompletenessService(_profile).Compute(entityId, allBeliefs);
+
+        var weakDims = dimScores
+            .Where(kv => kv.Value.ContributingBeliefIds.Count > 0
+                      && kv.Value.Score < _profile.Bands.AtRiskMin)
+            .Select(kv => kv.Key)
+            .OrderBy(d => d.ToString())
+            .ToList<Dimension>();
+
+        var renewalDateBelief  = allBeliefs.FirstOrDefault(b => b.ClaimKey == "renewal_date");
+        var noticePeriodBelief = allBeliefs.FirstOrDefault(b => b.ClaimKey == "notice_period");
+        DateTimeOffset? renewalDeadline = null;
+        if (renewalDateBelief != null && noticePeriodBelief != null)
+        {
+            var rd         = DateTimeOffset.FromUnixTimeSeconds((long)renewalDateBelief.Value);
+            var noticeDays = (int)Math.Round(noticePeriodBelief.Value);
+            renewalDeadline = rd.AddDays(-noticeDays);
+        }
+
+        var flags = new ManagementFlags(
+            RenewalDeadline:   renewalDeadline,
+            HasContradictions: meta.Contradictions.Count > 0);
+
+        var verState = decayed.Any(b => b.SourceTier is SourceTier.Verified
+                                                       or SourceTier.Reported
+                                                       or SourceTier.Primary)
+            ? VerificationState.PartiallyVerified
+            : VerificationState.Unverified;
+
+        var nextDue = decayed
+            .Where(b => b.ValidUntil.HasValue)
+            .OrderBy(b => b.ValidUntil!.Value)
+            .Select(b => b.ValidUntil)
+            .FirstOrDefault();
+
+        var filledStr = compResult.FilledKeys.Count > 0
+            ? string.Join(", ", compResult.FilledKeys) : "none";
+        var gapStr = compResult.GapKeys.Count > 0
+            ? string.Join(", ", compResult.GapKeys) : "none";
+
+        return new ManagementBlock(
+            Completeness:      compResult.Ratio,
+            FilledCount:       compResult.FilledKeys.Count,
+            ExpectedCount:     compResult.FilledKeys.Count + compResult.GapKeys.Count,
+            GapSlots:          compResult.GapKeys,
+            WeakDimensions:    weakDims,
+            Flags:             flags,
+            VerificationState: verState,
+            Refresh:           new RefreshInfo(nextDue),
+            CoverageStatement: $"Confident in: {filledStr}. Gaps: {gapStr}.");
     }
 }

@@ -15,7 +15,30 @@ public enum SourceTier
     Verified   = 0,
     Inferred   = 1,
     Reported   = 2,
-    Unverified = 3
+    Unverified = 3,
+    Primary    = 4   // of-record, executed — vendor file only
+}
+
+public enum DocType
+{
+    SignedContract,
+    ExecutedAgreement,
+    Amendment,
+    Addendum,
+    PurchaseOrder,
+    Invoice,
+    UsageCsv,
+    SpendCsv,
+    SystemExport,
+    Quote,
+    Proposal,
+    Email,
+    Communication,
+    OwnerNote,
+    Feedback,
+    WebProfile,
+    News,
+    ModelDerived
 }
 
 public enum Band

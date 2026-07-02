@@ -1,7 +1,7 @@
 namespace Kozmo.Contracts.Config;
 
 /// <summary>
-/// Merged view of the nine *.saas.v1.json catalogue configs.
+/// Merged view of the nine *.saas.v1.json catalogue configs plus vendor file extensions.
 /// Loaded once at startup by ICatalogue; immutable thereafter.
 /// </summary>
 public sealed record SaasProfile(
@@ -15,7 +15,18 @@ public sealed record SaasProfile(
     IReadOnlyList<ClassificationRule>                  ClassificationRules,
     IReadOnlyDictionary<string, int>                  HalfLifeDays,   // key = SourceTier name
     EntityResolutionConfig                             EntityResolution
-);
+)
+{
+    // Vendor file extensions — non-null when loaded from profiles containing the config files
+    public IReadOnlyDictionary<string, ClaimKeyDefinition> ClaimKeyCatalogue { get; init; } =
+        new Dictionary<string, ClaimKeyDefinition>();
+
+    public IReadOnlyDictionary<string, string> DocTypeTierMap { get; init; } =
+        new Dictionary<string, string>();
+
+    public IReadOnlyDictionary<string, IReadOnlyList<string>> ExpectedBeliefSets { get; init; } =
+        new Dictionary<string, IReadOnlyList<string>>();
+}
 
 public sealed record DimensionDefinition(
     string Description,
@@ -48,6 +59,23 @@ public sealed record PostureRule(
 public sealed record SourceTierConfig(
     double Weight,
     string Description
+)
+{
+    /// <summary>
+    /// Maximum confidence a vendor file extractor may assign for this tier.
+    /// confidence = min(extractor_confidence, Ceiling). Defaults to Weight if not set in catalogue.
+    /// </summary>
+    public double Ceiling { get; init; }
+}
+
+/// <summary>Vendor file: one row in the claim_key catalogue (§4 of the spec).</summary>
+public sealed record ClaimKeyDefinition(
+    string   ClaimClass,       // "scored" | "structural"
+    string   ValueType,        // "percent" | "rating" | "metric" | "score" | "enum" | "money" | "date" | "duration" | "bool"
+    string   Dimension,        // Operational | Experiential | Financial | Strategic | "" for structural
+    string   TypicalTier,      // e.g. "VERIFIED"
+    int?     HalfLifeDays,     // null = no decay (contractual)
+    double   DimensionWeight   // 0.25 for equal-weighted; 0 for structural
 );
 
 public sealed record ClassificationRule(

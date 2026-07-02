@@ -16,6 +16,10 @@ using Kozmo.Contracts.Interfaces;
 using Ii.Intake;
 using Kozmo.Llm;
 using Kozmo.Llm.OpenAi;
+using Ig.Contracts;
+using Ig.Resolution;
+using Wc.CheckIn;
+using Wc.Contracts;
 
 // ── JSON options (shared by SSE serialisation) ─────────────────────────────
 
@@ -37,6 +41,7 @@ await LoadPersistedVendorsAsync(store, registry);
 var liveCachePath = FindLlmCachePath(); // resolved once; used for both replay and live-classify
 var facade        = BuildFacade(store, profile, registry, liveCachePath);
 var sseHub        = new SseHub();
+var checkInRepo   = new CheckInRepository(store);
 
 // ── ASP.NET Core setup ────────────────────────────────────────────────────
 
@@ -59,6 +64,9 @@ builder.Services.AddSingleton(profile);
 builder.Services.AddSingleton(registry);
 builder.Services.AddSingleton(sseHub);
 builder.Services.AddSingleton(store);
+builder.Services.AddSingleton<ICheckInRowStore>(store);
+builder.Services.AddSingleton<ICheckInStore>(checkInRepo);
+builder.Services.AddSingleton<ICheckInTransport>(new InAppCheckInTransport());
 
 // Live LLM factory: record-mode CachingLlmClient wrapping real OpenAiLlmClient.
 // Returns null when OPENAI_API_KEY is absent or fixture cache path unavailable → endpoint returns 503.
@@ -413,6 +421,34 @@ app.MapPost("/vendors/vendor-file/upload-contract", async (
     return Results.Ok(new { vendorId = vendorId.ToString() });
 });
 
+// GET /vendors/{id}/vendor-file/markdown — render the vendor file as raw markdown text
+app.MapGet("/vendors/{id}/vendor-file/markdown", async (
+    string            id,
+    IIiFacade         f,
+    EntityRegistry    reg,
+    SqliteEntityStore storeInst) =>
+{
+    if (!Guid.TryParse(id, out var guid)) return Results.BadRequest("Invalid GUID");
+    var entity = reg.GetEntity(guid);
+    if (entity is null) return Results.NotFound();
+
+    var judgement     = await f.RecomputeVendorAsync(guid);
+    var activeBeliefs = await storeInst.GetCurrentBeliefsAsync(guid);
+    var allBeliefs    = await storeInst.GetBeliefHistoryAsync(guid);
+    var evidence      = await storeInst.GetEvidenceForVendorAsync(guid);
+
+    var markdown = VendorFileRenderer.Render(
+        vendorId:      guid,
+        vendorName:    entity.CanonicalName,
+        asOf:          DemoClock.AsOf,
+        judgement:     judgement,
+        activeBeliefs: activeBeliefs,
+        allBeliefs:    allBeliefs,
+        evidence:      evidence);
+
+    return Results.Content(markdown, "text/plain; charset=utf-8");
+});
+
 // GET /vendors/{id}/vendor-file — summary of vendor file state
 app.MapGet("/vendors/{id}/vendor-file", async (
     string            id,
@@ -436,6 +472,61 @@ app.MapGet("/vendors/{id}/vendor-file", async (
         evidenceCount = evidence.Count,
         claimsCount   = vfBeliefs.Count
     });
+});
+
+// GET /checkins — list all OPEN check-ins for the in-app pending view
+app.MapGet("/checkins", async (ICheckInStore checkInStore) =>
+{
+    var open = await checkInStore.GetOpenAsync();
+    return Results.Ok(open.Select(ci => new
+    {
+        checkInId     = ci.CheckInId,
+        vendorId      = ci.VendorId,
+        kind          = ci.Kind.ToString(),
+        question      = ci.Question,
+        responseShape = ci.ResponseShape.ToString(),
+        targetField   = ci.TargetField,
+        raisedAt      = ci.RaisedAt
+    }).ToList());
+});
+
+// POST /checkins/{id}/answer — record a structured human response then process inline (Commit 3)
+app.MapPost("/checkins/{id}/answer", async (
+    string               id,
+    CheckInAnswerRequest req,
+    ICheckInStore        checkInStore,
+    IIiFacade            f,
+    SaasProfile          profile,
+    SqliteEntityStore    storeInst) =>
+{
+    if (!Guid.TryParse(id, out var guid))
+        return Results.BadRequest(new { error = "Invalid check-in ID." });
+
+    var answerSvc = new AnswerCheckInService();
+    var answer    = await answerSvc.AnswerAsync(guid, req.ResponseValue ?? string.Empty, DateTimeOffset.UtcNow, checkInStore);
+
+    if (answer.Outcome != AnswerOutcome.Ok)
+        return answer.Outcome switch
+        {
+            AnswerOutcome.NotFound        => Results.NotFound(new { error = "Check-in not found." }),
+            AnswerOutcome.AlreadyAnswered => Results.Conflict(new { error = "Check-in is already answered." }),
+            AnswerOutcome.ShapeMismatch   => Results.BadRequest(new { error = "Response value does not match the expected shape." }),
+            _                             => Results.Problem("Unexpected outcome.")
+        };
+
+    // Process the now-ANSWERED check-in inline.
+    // Real IdentityRegistry backed by SqliteEntityStore (which implements IRegistryStore).
+    // IDENTITY_CONFIRM merge is correct in unit tests (registry pre-populated by the test).
+    // Live path: end-to-end-inert pending Phase 4 — the KYV resolution pipeline (Stage F)
+    // must persist CanonicalVendor rows into registry_vendors before a merge fires in production.
+    // DIMENSION_GAP and the wrong-match guard are unaffected by this gap.
+    var processSvc = new ProcessCheckInService();
+    var writeSvc   = new VendorFileWriteService(storeInst, profile);
+    await processSvc.ProcessAsync(
+        guid, checkInStore, new IdentityRegistry(storeInst), writeSvc, f, profile,
+        DateTimeOffset.UtcNow);
+
+    return Results.Ok(new { outcome = "Ok", checkInId = answer.Updated!.CheckInId });
 });
 
 app.Run();
@@ -566,3 +657,5 @@ public sealed class SseHub
 
 // Required for WebApplicationFactory<Program> in Kozmo.Api.Tests
 public partial class Program { }
+
+record CheckInAnswerRequest(string? ResponseValue);

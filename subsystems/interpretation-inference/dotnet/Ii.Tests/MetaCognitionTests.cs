@@ -1,5 +1,11 @@
 using Ii.Contracts;
+using Ii.Decay;
+using Ii.Index;
+using Ii.Observation;
+using Ii.Posture;
+using Ii.Rubric;
 using Ii.Spine;
+using Km.Store;
 using Kozmo.Contracts;
 using Kozmo.Llm;
 using Xunit;
@@ -293,5 +299,300 @@ public sealed class MetaCognitionTests
         Assert.NotNull(anchored.AnchorPredecessorId);
         Assert.NotNull(anchored.AnchorPredecessorTier);
         Assert.Equal(SourceTier.Verified, anchored.AnchorPredecessorTier!.Value);
+    }
+
+    // ── T11: Cross-source contradiction — PRIMARY wins over REPORTED ──────────
+
+    [Fact]
+    [Trait("Class", "T")]
+    public async Task T11_Contradiction_CrossSource_PrimaryWinsEmail()
+    {
+        // Vertex has payment_terms = Net 45 (PRIMARY, contract) and
+        // payment_terms = Net 30 (REPORTED, email). REPORTED rank < PRIMARY rank
+        // so no supersession → both beliefs are active → cross-source contradiction.
+        var entityId = Guid.NewGuid();
+        var profile  = TestHelpers.LoadProfile();
+
+        using var store = new SqliteEntityStore("Data Source=:memory:", profile);
+        var registry    = new EntityRegistry();
+        registry.Register(entityId, "Vertex", renewalDate: null);
+
+        var facade = new IiFacade(
+            new ObservationModule(), new RubricModule(), new IndexModule(),
+            new PostureModule(), new DecayEngine(), store, profile, registry, DemoClock.Fixed);
+
+        var svc = new VendorFileWriteService(store, profile);
+
+        var ts         = DemoClock.AsOf.AddMonths(-1);
+        var primaryEvId = Guid.NewGuid();
+        var emailEvId   = Guid.NewGuid();
+
+        // PRIMARY: Net 45 from the signed contract
+        var primaryBelief = await svc.WriteBeliefAsync(
+            vendorId:            entityId,
+            claimKey:            "payment_terms",
+            dimension:           Dimension.Financial,
+            criterion:           "payment_terms",
+            rawValue:            45.0,
+            tier:                SourceTier.Primary,
+            extractorConfidence: 0.95,
+            observedAt:          ts,
+            provenance:          new BeliefProvenance(primaryEvId, "page:3 §8.1"),
+            ingestedAt:          ts);
+
+        // REPORTED: Net 30 from an email — lower rank, must NOT supersede PRIMARY
+        var reportedBelief = await svc.WriteBeliefAsync(
+            vendorId:            entityId,
+            claimKey:            "payment_terms",
+            dimension:           Dimension.Financial,
+            criterion:           "payment_terms",
+            rawValue:            30.0,
+            tier:                SourceTier.Reported,
+            extractorConfidence: 0.50,
+            observedAt:          ts.AddDays(7),
+            provenance:          new BeliefProvenance(emailEvId, "message_ref:email-vendor-pm"),
+            ingestedAt:          ts.AddDays(7));
+
+        // Both beliefs must be active — neither supersedes the other
+        var active = await store.GetCurrentBeliefsAsync(entityId);
+        var ptBeliefs = active.Where(b => b.ClaimKey == "payment_terms").ToList();
+        Assert.Equal(2, ptBeliefs.Count);
+        Assert.All(ptBeliefs, b => Assert.Null(b.SupersededBy));
+
+        // PRIMARY value is still 45.0
+        var primary = ptBeliefs.Single(b => b.SourceTier == SourceTier.Primary);
+        Assert.Equal(45.0, primary.Value);
+
+        // GetReasoningTrailAsync triggers ComputeMeta → cross-source contradiction must fire
+        var trail = await facade.GetReasoningTrailAsync(entityId);
+
+        Assert.NotNull(trail);
+        Assert.True(trail!.Meta.HasValue, "Expected Meta to be populated after vendor-file writes");
+
+        var meta = trail.Meta!.Value;
+
+        Assert.True(
+            meta.Contradictions.Any(c => c.Description.Contains("payment_terms", StringComparison.OrdinalIgnoreCase)),
+            "Expected a cross-source contradiction for claim_key payment_terms");
+
+        var xsContra = meta.Contradictions
+            .First(c => c.Description.Contains("payment_terms", StringComparison.OrdinalIgnoreCase));
+
+        // Description must name both tiers
+        Assert.Contains("Primary",  xsContra.Description, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("Reported", xsContra.Description, StringComparison.OrdinalIgnoreCase);
+
+        // Both belief IDs must be referenced
+        Assert.Equal(2, xsContra.ConflictingBeliefIds.Count);
+        Assert.Contains(primaryBelief.Id,  xsContra.ConflictingBeliefIds);
+        Assert.Contains(reportedBelief.Id, xsContra.ConflictingBeliefIds);
+
+        // The PRIMARY belief remains fully active (not marked superseded)
+        var allHistory = await store.GetBeliefHistoryAsync(entityId);
+        var storedPrimary = allHistory.Single(b => b.Id == primaryBelief.Id);
+        Assert.Null(storedPrimary.SupersededBy);
+    }
+
+    // ── T12: Scored multi-source must NOT raise a cross-source contradiction ──
+
+    [Fact]
+    [Trait("Class", "T")]
+    public async Task T12_Contradiction_NotRaised_OnScoredMultiSource()
+    {
+        // Scored claim_keys (csat, sla_uptime, …) are fused by the Rubric; two beliefs
+        // from different tiers representing different measurements is normal aggregation.
+        // Only structural claim_keys (payment_terms, renewal_date, …) are discrete facts
+        // where two conflicting values cannot both be correct.
+
+        var profile  = TestHelpers.LoadProfile();
+        using var store = new SqliteEntityStore("Data Source=:memory:", profile);
+        var registry    = new EntityRegistry();
+        var svc         = new VendorFileWriteService(store, profile);
+
+        var scoredId     = Guid.NewGuid();  // receives csat VERIFIED + csat REPORTED
+        var structuralId = Guid.NewGuid();  // receives payment_terms PRIMARY + REPORTED
+
+        registry.Register(scoredId,     "Scored entity",     renewalDate: null);
+        registry.Register(structuralId, "Structural entity", renewalDate: null);
+
+        var facade = new IiFacade(
+            new ObservationModule(), new RubricModule(), new IndexModule(),
+            new PostureModule(), new DecayEngine(), store, profile, registry, DemoClock.Fixed);
+
+        var ts = DemoClock.AsOf.AddMonths(-1);
+
+        // ── Part 1: scored claim_key — VERIFIED csat from CSV + REPORTED from email ──
+        // REPORTED rank (2) < VERIFIED rank (3) → no supersession → both beliefs active.
+        await svc.WriteBeliefAsync(
+            scoredId, "csat", Dimension.Experiential, "csat",
+            0.80, SourceTier.Verified, 1.0, ts,
+            new BeliefProvenance(Guid.NewGuid(), "csv:row2"), ts);
+
+        await svc.WriteBeliefAsync(
+            scoredId, "csat", Dimension.Experiential, "csat",
+            0.55, SourceTier.Reported, 1.0, ts.AddDays(7),
+            new BeliefProvenance(Guid.NewGuid(), "message_ref:email-csat-001"), ts.AddDays(7));
+
+        // Confirm both csat beliefs are active (neither superseded the other)
+        var activeScored = (await store.GetCurrentBeliefsAsync(scoredId))
+            .Where(b => b.ClaimKey == "csat").ToList();
+        Assert.Equal(2, activeScored.Count);
+
+        var scoredTrail = await facade.GetReasoningTrailAsync(scoredId);
+        Assert.NotNull(scoredTrail);
+        Assert.True(scoredTrail!.Meta.HasValue);
+
+        // Zero contradictions — scored multi-source is Rubric fusion, not a conflict
+        Assert.Empty(scoredTrail.Meta!.Value.Contradictions);
+
+        // ── Part 2: structural claim_key — PRIMARY payment_terms + REPORTED still fires ──
+        await svc.WriteBeliefAsync(
+            structuralId, "payment_terms", Dimension.Financial, "payment_terms",
+            45.0, SourceTier.Primary, 0.95, ts,
+            new BeliefProvenance(Guid.NewGuid(), "page:3 §8.1"), ts);
+
+        await svc.WriteBeliefAsync(
+            structuralId, "payment_terms", Dimension.Financial, "payment_terms",
+            30.0, SourceTier.Reported, 0.50, ts.AddDays(7),
+            new BeliefProvenance(Guid.NewGuid(), "message_ref:email-pm"), ts.AddDays(7));
+
+        var structuralTrail = await facade.GetReasoningTrailAsync(structuralId);
+        Assert.NotNull(structuralTrail);
+        Assert.True(structuralTrail!.Meta.HasValue);
+
+        Assert.True(
+            structuralTrail.Meta!.Value.Contradictions.Any(c =>
+                c.Description.Contains("payment_terms", StringComparison.OrdinalIgnoreCase)),
+            "Expected a cross-source contradiction for structural claim_key payment_terms");
+    }
+
+    // ── T13: Structural supersession must NOT raise a delta-threshold contradiction ──
+
+    [Fact]
+    [Trait("Class", "T")]
+    public async Task T13_StructuralSupersession_NoDeltaContradiction()
+    {
+        // A Quote (REPORTED) annual_value=145000 is superseded by a Contract (PRIMARY)
+        // annual_value=155000.  Delta=10000 >> 0.30 threshold, but annual_value is a
+        // structural claim; the threshold is designed for [0,1] scores only.
+        // Supersession by a higher tier is correct versioning — zero contradictions expected.
+        var entityId = Guid.NewGuid();
+        var profile  = TestHelpers.LoadProfile();
+
+        using var store = new SqliteEntityStore("Data Source=:memory:", profile);
+        var registry    = new EntityRegistry();
+        registry.Register(entityId, "Borealis-T13", renewalDate: null);
+
+        var facade = new IiFacade(
+            new ObservationModule(), new RubricModule(), new IndexModule(),
+            new PostureModule(), new DecayEngine(), store, profile, registry, DemoClock.Fixed);
+
+        var svc = new VendorFileWriteService(store, profile);
+        var ts  = DemoClock.AsOf.AddMonths(-3);
+
+        // Quote REPORTED: annual_value = 145,000 (lower tier, written first)
+        await svc.WriteBeliefAsync(
+            vendorId:            entityId,
+            claimKey:            "annual_value",
+            dimension:           Dimension.Financial,
+            criterion:           "annual_value",
+            rawValue:            145000.0,
+            tier:                SourceTier.Reported,
+            extractorConfidence: 1.0,
+            observedAt:          ts,
+            provenance:          new BeliefProvenance(Guid.NewGuid(), "page:1 header"),
+            ingestedAt:          ts);
+
+        // Contract PRIMARY: annual_value = 155,000 — supersedes the Quote (rank 4 > rank 2)
+        await svc.WriteBeliefAsync(
+            vendorId:            entityId,
+            claimKey:            "annual_value",
+            dimension:           Dimension.Financial,
+            criterion:           "annual_value",
+            rawValue:            155000.0,
+            tier:                SourceTier.Primary,
+            extractorConfidence: 1.0,
+            observedAt:          ts.AddMonths(6),
+            provenance:          new BeliefProvenance(Guid.NewGuid(), "page:2 §2.1"),
+            ingestedAt:          ts.AddMonths(6));
+
+        // Only the PRIMARY belief should be active; the Reported one is superseded
+        var active = await store.GetCurrentBeliefsAsync(entityId);
+        var avBeliefs = active.Where(b => b.ClaimKey == "annual_value").ToList();
+        Assert.Single(avBeliefs);
+        Assert.Equal(SourceTier.Primary, avBeliefs[0].SourceTier);
+
+        var trail = await facade.GetReasoningTrailAsync(entityId);
+        Assert.NotNull(trail);
+        Assert.True(trail!.Meta.HasValue);
+
+        Assert.Empty(trail.Meta!.Value.Contradictions);
+    }
+
+    // ── T14: Scored supersession with large delta DOES raise a contradiction ─────
+
+    [Fact]
+    [Trait("Class", "T")]
+    public async Task T14_ScoredSupersession_LargeDeltaRaisesContradiction()
+    {
+        // A VERIFIED sla_uptime=0.95 is superseded by a PRIMARY sla_uptime=0.10.
+        // sla_uptime is a scored claim_key; delta=0.85 >= 0.30 → contradiction must fire.
+        var entityId = Guid.NewGuid();
+        var profile  = TestHelpers.LoadProfile();
+
+        using var store = new SqliteEntityStore("Data Source=:memory:", profile);
+        var registry    = new EntityRegistry();
+        registry.Register(entityId, "Scored-T14", renewalDate: null);
+
+        var facade = new IiFacade(
+            new ObservationModule(), new RubricModule(), new IndexModule(),
+            new PostureModule(), new DecayEngine(), store, profile, registry, DemoClock.Fixed);
+
+        var svc = new VendorFileWriteService(store, profile);
+        var ts  = DemoClock.AsOf.AddDays(-5);
+
+        // VERIFIED sla_uptime = 0.95 (healthy), written first
+        await svc.WriteBeliefAsync(
+            vendorId:            entityId,
+            claimKey:            "sla_uptime",
+            dimension:           Dimension.Operational,
+            criterion:           "uptime_sla",
+            rawValue:            0.95,
+            tier:                SourceTier.Verified,
+            extractorConfidence: 1.0,
+            observedAt:          ts,
+            provenance:          new BeliefProvenance(Guid.NewGuid(), "csv:row1"),
+            ingestedAt:          ts);
+
+        // PRIMARY sla_uptime = 0.10 (critical incident) — supersedes VERIFIED (rank 4 > rank 3)
+        // delta = |0.10 - 0.95| = 0.85 >= 0.30 → contradiction
+        await svc.WriteBeliefAsync(
+            vendorId:            entityId,
+            claimKey:            "sla_uptime",
+            dimension:           Dimension.Operational,
+            criterion:           "uptime_sla",
+            rawValue:            0.10,
+            tier:                SourceTier.Primary,
+            extractorConfidence: 1.0,
+            observedAt:          ts.AddDays(1),
+            provenance:          new BeliefProvenance(Guid.NewGuid(), "page:4 §5.1"),
+            ingestedAt:          ts.AddDays(1));
+
+        // PRIMARY must be the only active belief
+        var active = await store.GetCurrentBeliefsAsync(entityId);
+        var uptimeBeliefs = active.Where(b => b.ClaimKey == "sla_uptime").ToList();
+        Assert.Single(uptimeBeliefs);
+        Assert.Equal(SourceTier.Primary, uptimeBeliefs[0].SourceTier);
+
+        var trail = await facade.GetReasoningTrailAsync(entityId);
+        Assert.NotNull(trail);
+        Assert.True(trail!.Meta.HasValue);
+
+        // Scored supersession with delta=0.85 must raise a contradiction
+        Assert.True(
+            trail.Meta!.Value.Contradictions.Any(c =>
+                c.Description.Contains("uptime_sla", StringComparison.OrdinalIgnoreCase)
+                || c.Description.Contains("sla_uptime", StringComparison.OrdinalIgnoreCase)),
+            "Expected a contradiction for scored sla_uptime supersession with delta=0.85");
     }
 }

@@ -21,6 +21,7 @@ const API = {
     method: 'POST',
     body:   form,
   }),
+  vendorFileMd: (id) => fetch(`/vendors/${id}/vendor-file/markdown`),
 };
 
 async function assertOk(res) {
@@ -70,7 +71,6 @@ function renderVendorList() {
         <span class="badge stance-badge">${esc(v.stance)}</span>
       </div>
       <div class="vendor-confidence">conf ${pct(v.confidence)}</div>
-      <a class="vf-link" href="/vendor-file/${v.entityId}" onclick="event.stopPropagation()" tabindex="-1">Vendor File →</a>
     </div>`).join('');
 
   el.querySelectorAll('.vendor-card').forEach(card =>
@@ -123,20 +123,28 @@ function renderDetailView(fingerprintMatch) {
       </div>
     </div>
     <div class="detail-upload">
-      <span class="detail-upload-label">Upload Contract</span>
+      <span class="detail-upload-label">Upload Document</span>
       <div class="detail-upload-row">
         <input type="file" id="duf-file" accept=".pdf" class="detail-upload-file">
-        <button id="duf-btn" type="button" class="btn-upload">Extract &amp; open Vendor File →</button>
+        <button id="duf-btn" type="button" class="btn-upload">Process →</button>
       </div>
       <span id="duf-status" class="detail-upload-status"></span>
     </div>
     ${renderMetaCaveats(trail.posture)}
     <div class="tabs">
-      <button class="tab-btn active" data-tab="trail"      type="button">Trail</button>
-      <button class="tab-btn"        data-tab="trajectory" type="button">Trajectory</button>
+      <button class="tab-btn active" data-tab="overview"    type="button">Overview</button>
+      <button class="tab-btn"        data-tab="file"        type="button">File</button>
+      <button class="tab-btn"        data-tab="reality"     type="button">Reality</button>
+      <button class="tab-btn"        data-tab="trajectory"  type="button">Trajectory</button>
     </div>
-    <div id="tab-trail"      class="tab-panel">${renderTrailPanel(trail)}</div>
-    <div id="tab-trajectory" class="tab-panel hidden">${renderTrajectoryPanel(state.trajectory, trail.band.thresholds)}</div>`;
+    <div id="tab-overview"    class="tab-panel">
+      <iframe id="vf-frame" src="about:blank" style="width:100%;border:none;display:block;min-height:1200px;"></iframe>
+    </div>
+    <div id="tab-file"        class="tab-panel hidden">
+      <pre id="vf-md-pre" class="vf-md-pre">Loading…</pre>
+    </div>
+    <div id="tab-reality"     class="tab-panel hidden">${renderTrailPanel(trail)}</div>
+    <div id="tab-trajectory"  class="tab-panel hidden">${renderTrajectoryPanel(state.trajectory, trail.band.thresholds)}</div>`;
 
   el.querySelectorAll('.tab-btn').forEach(btn =>
     btn.addEventListener('click', () => switchTab(btn.dataset.tab)));
@@ -150,6 +158,8 @@ function renderDetailView(fingerprintMatch) {
     dufBtn.addEventListener('click', () =>
       onUploadContract('duf-file', 'duf-status', 'duf-btn', vendorName));
   }
+
+  loadOverviewTab();
 }
 
 function switchTab(tab) {
@@ -159,6 +169,39 @@ function switchTab(tab) {
     const match = p.id === `tab-${tab}`;
     p.classList.toggle('hidden', !match);
   });
+  if (tab === 'overview') loadOverviewTab();
+  if (tab === 'file')     loadFileTab();
+}
+
+// ── Overview / File tab loaders ───────────────────────────────────────────────
+
+function loadOverviewTab() {
+  const frame = document.getElementById('vf-frame');
+  if (!frame || frame.dataset.loaded === '1') return;
+  frame.src = `/vendor-file/${state.selectedId}`;
+  frame.dataset.loaded = '1';
+  frame.addEventListener('load', () => {
+    try {
+      const h = Math.max(
+        frame.contentDocument.body.scrollHeight,
+        frame.contentDocument.documentElement.scrollHeight);
+      if (h > 200) frame.style.height = h + 32 + 'px';
+    } catch {}
+  }, { once: true });
+}
+
+async function loadFileTab() {
+  const pre = document.getElementById('vf-md-pre');
+  if (!pre || pre.dataset.loaded === '1') return;
+  pre.textContent = 'Loading…';
+  try {
+    const res = await API.vendorFileMd(state.selectedId);
+    if (!res.ok) { pre.textContent = 'No vendor file available yet.'; return; }
+    pre.textContent = await res.text();
+    pre.dataset.loaded = '1';
+  } catch (err) {
+    pre.textContent = 'Error: ' + err.message;
+  }
 }
 
 // ── Trail panel ───────────────────────────────────────────────────────────────
@@ -821,8 +864,11 @@ async function onUploadContract(fileInputId, statusId, btnId, vendorName) {
       return;
     }
     const data = await res.json();
-    setUploadStatus(statusEl, 'Done — opening vendor file…', 'upload-ok');
-    window.location.href = `/vendor-file/${data.vendorId}`;
+    setUploadStatus(statusEl, 'Done — opening Overview…', 'upload-ok');
+    try { state.vendors = await API.vendors(); } catch {}
+    renderVendorList();
+    await selectVendor(data.vendorId);
+    switchTab('overview');
   } catch (err) {
     setUploadStatus(statusEl, `Failed: ${err.message}`, 'upload-err');
   } finally {

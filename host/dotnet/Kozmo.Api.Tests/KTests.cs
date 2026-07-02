@@ -20,32 +20,38 @@ public class KTests
     private const string CloudwaveId = "eeeeeeee-0001-0000-0000-000000000001";
     private const string CorvusId    = "eeeeeeee-0002-0000-0000-000000000001";
     private const string MeridianId  = "eeeeeeee-0003-0000-0000-000000000001";
+    private const string HelixId     = "eeeeeeee-0004-0000-0000-000000000001";
 
     public KTests(ApiFixture fixture) => _client = fixture.CreateClient();
 
     [Fact] [Trait("Class", "K")]
-    public async Task K1_GetVendors_ReturnsThreeGoldenSummaries()
+    public async Task K1_GetVendors_ReturnsFourGoldenSummaries()
     {
         var summaries = await _client.GetFromJsonAsync<VendorSummaryDto[]>("/vendors", JsonOpts);
 
         Assert.NotNull(summaries);
-        Assert.Equal(3, summaries!.Length);
+        Assert.True(summaries!.Length >= 4, $"Expected at least 4 vendors, got {summaries.Length}");
 
         var cw  = summaries.Single(v => v.EntityId == CloudwaveId);
         var cor = summaries.Single(v => v.EntityId == CorvusId);
         var mer = summaries.Single(v => v.EntityId == MeridianId);
+        var hx  = summaries.Single(v => v.EntityId == HelixId);
 
         Assert.Equal("AtRisk",     cw.Band);
         Assert.Equal("Renegotiate", cw.Stance);
-        Assert.StartsWith("e5d0e9b9", cw.Fingerprint);
+        Assert.StartsWith("d977be9b", cw.Fingerprint);
 
         Assert.Equal("Critical", cor.Band);
         Assert.Equal("Escalate", cor.Stance);
-        Assert.StartsWith("7e7cf005", cor.Fingerprint);
+        Assert.StartsWith("d81422d2", cor.Fingerprint);
 
         Assert.Equal("Healthy",  mer.Band);
         Assert.Equal("Maintain", mer.Stance);
-        Assert.StartsWith("72237da0", mer.Fingerprint);
+        Assert.StartsWith("b2e03ff0", mer.Fingerprint);
+
+        Assert.Equal("Healthy",  hx.Band);
+        Assert.Equal("Maintain", hx.Stance);
+        Assert.StartsWith("987508de", hx.Fingerprint);
     }
 
     [Fact] [Trait("Class", "K")]
@@ -56,7 +62,7 @@ public class KTests
         Assert.NotNull(detail);
         Assert.Equal("AtRisk",      detail!.Index.Band);
         Assert.Equal("Renegotiate", detail.Posture.Stance);
-        Assert.StartsWith("e5d0e9b9", detail.Index.Fingerprint);
+        Assert.StartsWith("d977be9b", detail.Index.Fingerprint);
 
         Assert.Equal(4, detail.Index.Dimensions.Count);
 
@@ -84,7 +90,7 @@ public class KTests
         Assert.NotNull(detail);
         Assert.Equal("Critical",  detail!.Index.Band);
         Assert.Equal("Escalate",  detail.Posture.Stance);
-        Assert.StartsWith("7e7cf005", detail.Index.Fingerprint);
+        Assert.StartsWith("d81422d2", detail.Index.Fingerprint);
         Assert.Equal(4, detail.Index.Dimensions.Count);
         Assert.True(detail.Index.ConfidenceFloor >= 0.60,
             $"Expected confidence_floor >= 0.60, got {detail.Index.ConfidenceFloor}");
@@ -98,7 +104,8 @@ public class KTests
         Assert.NotNull(detail);
         Assert.Equal("Healthy",  detail!.Index.Band);
         Assert.Equal("Maintain", detail.Posture.Stance);
-        Assert.StartsWith("72237da0", detail.Index.Fingerprint);
+        Assert.StartsWith("b2e03ff0", detail.Index.Fingerprint);
         Assert.Equal(4, detail.Index.Dimensions.Count);
     }
+
 }

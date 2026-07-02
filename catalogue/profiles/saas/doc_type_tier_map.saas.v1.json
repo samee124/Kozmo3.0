@@ -1,0 +1,25 @@
+{
+  "config_type": "doc_type_tier_map",
+  "profile": "saas",
+  "version": "v1",
+  "map": {
+    "SignedContract":      "Primary",
+    "ExecutedAgreement":  "Primary",
+    "Amendment":          "Primary",
+    "Addendum":           "Primary",
+    "PurchaseOrder":      "Verified",
+    "Invoice":            "Verified",
+    "UsageCsv":           "Verified",
+    "SpendCsv":           "Verified",
+    "SystemExport":       "Verified",
+    "Quote":              "Reported",
+    "Proposal":           "Reported",
+    "Email":              "Reported",
+    "Communication":      "Reported",
+    "OwnerNote":          "Reported",
+    "Feedback":           "Reported",
+    "WebProfile":         "Unverified",
+    "News":               "Unverified",
+    "ModelDerived":       "Inferred"
+  }
+}

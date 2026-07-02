@@ -145,7 +145,7 @@ public sealed class DeterminismSpikeTests
         Guid entityId, IReadOnlyList<Belief> beliefs, DateTimeOffset now)
     {
         var decayed = beliefs.Select(b => _decay.WithCurrentFreshness(b, _profile, now)).ToList();
-        var byDim   = decayed.GroupBy(b => b.Dimension).ToDictionary(g => g.Key, g => g.ToList());
+        var byDim   = decayed.Where(b => b.Dimension.HasValue).GroupBy(b => b.Dimension!.Value).ToDictionary(g => g.Key, g => g.ToList());
 
         var allDims = new[] { Dimension.Operational, Dimension.Experiential, Dimension.Financial, Dimension.Strategic };
         return allDims.ToDictionary(d => d, d =>
