@@ -1,0 +1,1190 @@
+@page "/workspace"
+@{
+    Layout = null;
+}
+<!doctype html>
+<html lang="en" data-accent="coral" data-density="regular">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Kozmo · Workspace</title>
+<style>
+/* ═══════════════════════════════════════════════════════
+   KOZMO WORKSPACE  —  based on Kozmo Workspace v3 design
+   No external CDN — system fonts only (CI Lane 6 safe)
+═══════════════════════════════════════════════════════ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+button{font:inherit;cursor:pointer;border:0;background:transparent;color:inherit;padding:0}
+ul,ol{list-style:none}
+a{color:inherit;text-decoration:none}
+
+/* ── TOKENS ── */
+:root{
+  --accent:#F06A6A; --accent-hover:#E15555; --accent-soft:#FDECEC;
+  --accent-soft-2:#FEF5F5; --accent-ink:#C73E3E; --accent-border:#F8D2D2;
+
+  --canvas:#F9F9FA; --surface:#FFFFFF;
+  --surface-soft:#F6F6F7; --surface-hover:#F4F4F5;
+
+  --ink-0:#1E1F21; --ink-1:#323237; --ink-2:#54545A;
+  --ink-3:#6D6E72; --ink-4:#9C9CA0; --ink-5:#C2C2C5;
+
+  --line-1:#EDEAE9; --line-2:#F1EEED; --line-3:#E5E5E7;
+
+  --affirm:#14A085; --affirm-soft:#E6F4F0;
+  --affirm-ink:#0C7860; --affirm-border:#C8E8DE;
+
+  --caution:#C97B17; --caution-soft:#FDF1DE;
+  --caution-ink:#A06212; --caution-border:#F4D9A8;
+
+  --urgent:#E8384F; --urgent-soft:#FCE6E9;
+  --urgent-ink:#B81B33; --urgent-border:#F4C2C9;
+
+  --watch:#4573D2; --watch-soft:#E5EDFA;
+  --watch-ink:#2A56B5; --watch-border:#C3D5F1;
+
+  --info:#4573D2; --info-soft:#E5EDFA;
+  --info-ink:#2A56B5; --info-border:#C3D5F1;
+
+  --font-ui:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  --font-display:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  --font-mono:ui-monospace,"Cascadia Code","Fira Mono",monospace;
+
+  --t-display:32px; --t-title:22px; --t-h3:16px;
+  --t-h4:15px; --t-body:14px; --t-small:13px; --t-micro:11px;
+
+  --s1:4px; --s2:8px; --s3:12px; --s4:16px;
+  --s5:20px; --s6:24px; --s7:32px; --s8:48px;
+
+  --pad-card:24px; --pad-card-y:20px;
+  --topbar-h:52px; --rail-w:240px;
+
+  --r-sm:4px; --r-md:6px; --r-lg:8px; --r-pill:999px;
+  --tr:180ms ease; --tr-fast:120ms ease;
+
+  --shadow-sm:0 1px 2px rgba(0,0,0,.04);
+  --shadow-md:0 2px 4px rgba(0,0,0,.04),0 1px 2px rgba(0,0,0,.02);
+  --shadow-lg:0 4px 12px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.03);
+}
+
+/* Accent overrides */
+:root[data-accent="indigo"]{--accent:#4573D2;--accent-hover:#3661BC;--accent-soft:#E5EDFA;--accent-soft-2:#F0F5FC;--accent-ink:#2A56B5;--accent-border:#C3D5F1}
+:root[data-accent="emerald"]{--accent:#14A085;--accent-hover:#0F8A72;--accent-soft:#E6F4F0;--accent-soft-2:#F0F8F5;--accent-ink:#0C7860;--accent-border:#C8E8DE}
+:root[data-accent="violet"]{--accent:#6F58D9;--accent-hover:#5C46C2;--accent-soft:#ECE8F9;--accent-soft-2:#F4F1FB;--accent-ink:#4F3CB0;--accent-border:#D5CCF1}
+
+body{
+  font-family:var(--font-ui);font-size:var(--t-body);
+  font-weight:400;line-height:1.5;color:var(--ink-1);
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+  background:var(--canvas);overflow:hidden;
+}
+
+@@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+@@keyframes spin{to{transform:rotate(360deg)}}
+@@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+
+/* ══════════════════════════════════════
+   SCREENS
+══════════════════════════════════════ */
+.screen{position:fixed;inset:0;z-index:80;display:flex;flex-direction:column;background:var(--canvas);overflow:hidden;animation:fadeIn .25s ease}
+.screen.hidden{display:none!important}
+
+/* ── LOGIN ── */
+#screen-login{
+  align-items:center;justify-content:center;
+  background:linear-gradient(145deg,#FFF8F8 0%,#F3F0FF 55%,#EFF8FF 100%);
+}
+.login-card{
+  background:var(--surface);
+  border:1px solid var(--line-1);
+  border-radius:16px;
+  padding:52px 60px 44px;
+  text-align:center;
+  width:420px;
+  box-shadow:var(--shadow-lg),0 0 0 1px rgba(0,0,0,.02);
+  animation:slideUp .35s ease;
+}
+.login-logo{
+  width:60px;height:60px;border-radius:14px;
+  background:var(--accent);color:#fff;
+  font-size:26px;font-weight:700;letter-spacing:-.02em;
+  display:flex;align-items:center;justify-content:center;
+  margin:0 auto var(--s5);
+}
+.login-title{
+  font-family:var(--font-display);font-size:26px;font-weight:700;
+  color:var(--ink-0);letter-spacing:-.02em;margin-bottom:var(--s2);
+}
+.login-sub{
+  font-size:var(--t-small);color:var(--ink-3);line-height:1.6;
+  margin-bottom:var(--s7);
+}
+.btn-google{
+  display:flex;align-items:center;justify-content:center;gap:var(--s3);
+  width:100%;padding:11px var(--s6);
+  border-radius:var(--r-md);border:1px solid var(--line-1);
+  background:var(--surface);font-size:var(--t-small);font-weight:600;
+  color:var(--ink-0);cursor:pointer;
+  transition:background var(--tr),border-color var(--tr),box-shadow var(--tr);
+  box-shadow:var(--shadow-sm);
+}
+.btn-google:hover{background:var(--surface-hover);border-color:var(--line-3);box-shadow:var(--shadow-md)}
+.g-icon{width:18px;height:18px;flex-shrink:0}
+.login-footer{font-size:var(--t-micro);color:var(--ink-4);margin-top:var(--s5);line-height:1.55}
+
+/* ── HOME ── */
+#screen-home{background:var(--canvas)}
+.h-topbar{
+  height:var(--topbar-h);background:var(--surface);
+  border-bottom:1px solid var(--line-1);
+  display:flex;align-items:center;padding:0 var(--s6);gap:var(--s3);
+  flex-shrink:0;
+}
+.h-bmark{
+  width:28px;height:28px;border-radius:var(--r-md);
+  background:var(--accent);color:#fff;font-size:13px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;
+}
+.h-bname{font-size:15px;font-weight:700;color:var(--ink-0);letter-spacing:-.01em}
+.h-user{margin-left:auto;display:flex;align-items:center;gap:var(--s3)}
+.h-email{font-size:var(--t-small);color:var(--ink-3)}
+.h-av{
+  width:30px;height:30px;border-radius:50%;
+  background:var(--accent);color:#fff;font-size:11px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;
+  transition:background var(--tr);
+}
+.h-av:hover{background:var(--accent-hover)}
+
+.h-body{flex:1;overflow-y:auto;padding:var(--s8) var(--s8)}
+.h-hdr{margin-bottom:var(--s7)}
+.h-eyebrow{font-size:var(--t-micro);font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);margin-bottom:var(--s2)}
+.h-title{font-family:var(--font-display);font-size:28px;font-weight:700;color:var(--ink-0);letter-spacing:-.02em;line-height:1.2;margin-bottom:var(--s2)}
+.h-sub{font-size:var(--t-body);color:var(--ink-3)}
+
+.prog-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:var(--s5);max-width:720px}
+.prog-tile{
+  background:var(--surface);border:1px solid var(--line-1);border-radius:var(--r-lg);
+  padding:var(--pad-card);cursor:pointer;
+  transition:border-color var(--tr),box-shadow var(--tr),transform var(--tr);
+  position:relative;overflow:hidden;animation:fadeIn .3s ease;
+}
+.prog-tile::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--accent);opacity:.5}
+.prog-tile:hover{border-color:var(--accent-border);box-shadow:var(--shadow-md);transform:translateY(-1px)}
+.prog-tile:hover::before{opacity:1}
+.prog-tile.inactive{cursor:default;opacity:.55}
+.prog-tile.inactive::before{background:var(--ink-5)}
+.prog-tile:hover.inactive{transform:none;box-shadow:none;border-color:var(--line-1)}
+.prog-ico{
+  width:40px;height:40px;border-radius:var(--r-md);
+  background:var(--accent-soft);color:var(--accent-ink);
+  display:flex;align-items:center;justify-content:center;margin-bottom:var(--s4);
+}
+.prog-tile.inactive .prog-ico{background:var(--surface-soft);color:var(--ink-3)}
+.prog-name{font-size:var(--t-h3);font-weight:700;color:var(--ink-0);letter-spacing:-.01em;margin-bottom:var(--s2)}
+.prog-desc{font-size:var(--t-small);color:var(--ink-3);line-height:1.6;margin-bottom:var(--s5)}
+.prog-foot{display:flex;align-items:center;justify-content:space-between}
+.prog-badge{
+  font-size:var(--t-micro);font-weight:600;padding:3px 10px;
+  border-radius:var(--r-pill);letter-spacing:.02em;
+}
+.prog-badge.active{background:var(--affirm-soft);color:var(--affirm-ink)}
+.prog-badge.soon{background:var(--surface-soft);color:var(--ink-3)}
+.prog-arrow{color:var(--accent)}
+
+/* ══════════════════════════════════════
+   APP WORKSPACE
+══════════════════════════════════════ */
+.app{display:flex;height:100vh;overflow:hidden;background:var(--canvas)}
+
+/* Sidebar */
+.sidebar{
+  width:var(--rail-w);min-width:var(--rail-w);
+  display:flex;flex-direction:column;
+  background:var(--canvas);border-right:1px solid var(--line-1);
+  overflow:hidden;position:relative;z-index:20;flex-shrink:0;
+  transition:width var(--tr),min-width var(--tr);
+}
+.sidebar.col{width:60px;min-width:60px}
+.sb-top{
+  height:var(--topbar-h);display:flex;align-items:center;
+  padding:0 var(--s5);gap:var(--s3);
+  border-bottom:1px solid var(--line-1);flex-shrink:0;
+}
+.bmark{
+  width:28px;height:28px;border-radius:var(--r-md);
+  background:var(--accent);color:#fff;font-size:13px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:background var(--tr);flex-shrink:0;
+}
+.bmark:hover{background:var(--accent-hover)}
+.bname{font-size:15px;font-weight:700;letter-spacing:-.01em;color:var(--ink-0);white-space:nowrap;cursor:pointer;transition:opacity var(--tr)}
+.sidebar.col .bname{opacity:0;pointer-events:none}
+
+.sb-prog{padding:var(--s4) var(--s3) var(--s3);flex-shrink:0;border-bottom:1px solid var(--line-1)}
+.sb-prog-btn{
+  display:flex;align-items:center;gap:var(--s3);width:100%;
+  padding:8px var(--s3);border-radius:var(--r-md);transition:background var(--tr);overflow:hidden;
+}
+.sb-prog-btn:hover{background:var(--surface-hover)}
+.sb-prog-ico{
+  width:22px;height:22px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--accent-soft);color:var(--accent-ink);border-radius:var(--r-sm);font-size:11px;
+}
+.sb-prog-lbl{flex:1;font-size:var(--t-small);font-weight:500;color:var(--ink-0);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:opacity var(--tr);text-align:left}
+.sidebar.col .sb-prog-lbl{opacity:0}
+
+.nav-list{flex:1;padding:var(--s3);display:flex;flex-direction:column;gap:2px;overflow-y:auto}
+.nv{
+  display:flex;align-items:center;gap:var(--s3);
+  padding:8px 10px;border-radius:var(--r-md);cursor:pointer;
+  transition:background var(--tr),color var(--tr);
+  white-space:nowrap;overflow:hidden;
+}
+.nv:hover{background:var(--surface-hover)}
+.nv:hover .ni{color:var(--accent)}
+.nv.on{background:var(--accent-soft)}
+.nv.on .nl{color:var(--accent-ink);font-weight:600}
+.nv.on .ni{color:var(--accent-ink)}
+.ni{width:20px;height:20px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:var(--ink-3);transition:color var(--tr)}
+.nl{font-size:var(--t-small);color:var(--ink-1);font-weight:500;transition:opacity var(--tr)}
+.sidebar.col .nl{opacity:0}
+
+.sb-bot{padding:var(--s3);border-top:1px solid var(--line-1);flex-shrink:0}
+.sb-user{
+  display:flex;align-items:center;gap:var(--s3);padding:8px 10px;
+  border-radius:var(--r-md);transition:background var(--tr);cursor:pointer;overflow:hidden;
+}
+.sb-user:hover{background:var(--surface-hover)}
+.sb-av{
+  width:26px;height:26px;border-radius:50%;background:var(--accent);color:#fff;
+  font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.sb-uname{font-size:var(--t-small);color:var(--ink-1);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:opacity var(--tr)}
+.sidebar.col .sb-uname{opacity:0}
+.col-btn{
+  display:flex;align-items:center;gap:var(--s3);width:100%;padding:8px 10px;
+  border-radius:var(--r-md);color:var(--ink-3);transition:background var(--tr),color var(--tr);
+  white-space:nowrap;overflow:hidden;margin-bottom:4px;
+}
+.col-btn:hover{background:var(--surface-hover);color:var(--ink-1)}
+.col-ico{width:20px;height:20px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.col-lbl{font-size:var(--t-small);transition:opacity var(--tr)}
+.sidebar.col .col-lbl{opacity:0}
+
+[data-tip]{position:relative}
+.sidebar.col [data-tip]:hover::after{
+  content:attr(data-tip);
+  position:absolute;left:calc(100% + 10px);top:50%;transform:translateY(-50%);
+  background:var(--ink-0);color:#fff;font-size:var(--t-micro);font-weight:500;
+  padding:5px 10px;border-radius:var(--r-sm);white-space:nowrap;pointer-events:none;z-index:200;
+}
+
+/* Main */
+.main{flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden;background:var(--canvas)}
+
+/* Topbar */
+.topbar{
+  height:var(--topbar-h);display:flex;align-items:center;gap:var(--s5);
+  padding:0 var(--s6);background:var(--surface);border-bottom:1px solid var(--line-1);
+  flex-shrink:0;z-index:19;
+}
+.breadcrumb{display:flex;align-items:center;gap:var(--s2);font-size:var(--t-small);color:var(--ink-3);font-weight:500}
+.bc-sep{color:var(--ink-4);font-size:11px}
+.bc-link{cursor:pointer;transition:color var(--tr)}
+.bc-link:hover{color:var(--ink-1)}
+.bc-cur{color:var(--ink-0);font-weight:600}
+.trr{display:flex;align-items:center;gap:var(--s2);margin-left:auto}
+.ibtn{
+  width:32px;height:32px;border-radius:var(--r-md);
+  display:flex;align-items:center;justify-content:center;
+  color:var(--ink-3);transition:background var(--tr),color var(--tr);
+}
+.ibtn:hover{background:var(--surface-hover);color:var(--ink-1)}
+.avbtn{
+  width:30px;height:30px;border-radius:50%;background:var(--accent);color:#fff;
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:700;cursor:pointer;transition:background var(--tr);
+}
+.avbtn:hover{background:var(--accent-hover)}
+
+/* Views */
+.view{display:none;flex:1;flex-direction:column;overflow:hidden}
+.view.on{display:flex}
+
+/* ── PROGRAM VIEW ── */
+.pv-content{flex:1;overflow:hidden;display:flex;flex-direction:column}
+.page-hdr{
+  padding:var(--s7) var(--s7) 0;background:var(--surface);
+  border-bottom:1px solid var(--line-1);flex-shrink:0;
+}
+.phdr-top{display:flex;align-items:flex-start;justify-content:space-between;gap:var(--s7)}
+.phdr-eyebrow{font-size:var(--t-micro);font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);margin-bottom:var(--s2)}
+.phdr-title{font-family:var(--font-display);font-size:var(--t-display);font-weight:700;color:var(--ink-0);letter-spacing:-.02em;line-height:1.15;margin-bottom:var(--s2)}
+.phdr-sub{font-size:var(--t-h3);color:var(--ink-2);max-width:580px;line-height:1.55;margin-bottom:var(--s5)}
+.phdr-right{flex-shrink:0;padding-top:4px}
+.status-pill{
+  display:inline-flex;align-items:center;gap:7px;
+  font-size:var(--t-small);font-weight:500;padding:5px 12px;border-radius:var(--r-pill);
+}
+.status-pill.conn{background:var(--affirm-soft);color:var(--affirm-ink)}
+.status-pill.disc{background:var(--surface-soft);color:var(--ink-3)}
+.sp-dot{width:6px;height:6px;border-radius:50%}
+.status-pill.conn .sp-dot{background:var(--affirm);animation:pulse 2.4s ease infinite}
+.status-pill.disc .sp-dot{background:var(--ink-5)}
+.tab-bar{display:flex;align-items:center;padding:0 var(--s7);gap:0;margin-top:var(--s3)}
+.tab-btn{
+  font-size:var(--t-small);font-weight:500;color:var(--ink-3);
+  padding:var(--s3) var(--s2);margin-right:var(--s5);
+  border-bottom:2px solid transparent;cursor:pointer;
+  transition:color var(--tr),border-color var(--tr);background:none;margin-bottom:-1px;
+}
+.tab-btn:hover{color:var(--ink-1)}
+.tab-btn.on{color:var(--accent);font-weight:600;border-bottom-color:var(--accent)}
+.tab-panels{flex:1;overflow:hidden;background:var(--canvas)}
+.tab-panel{display:none;height:100%;overflow-y:auto}
+.tab-panel.on{display:block}
+
+/* ── INGESTION PANEL ── */
+.ingest-panel{padding:var(--s7);max-width:800px}
+
+/* Drive connection card */
+.drive-card{
+  background:var(--surface);border:1px solid var(--line-1);border-radius:var(--r-lg);
+  padding:var(--s5) var(--s6);margin-bottom:var(--s6);
+  transition:border-color var(--tr);
+}
+.drive-card.conn{border-left:3px solid var(--affirm)}
+.drive-card.disc{border-left:3px solid var(--ink-5)}
+.drive-card-hdr{display:flex;align-items:center;gap:var(--s4)}
+.drive-card-ico{
+  width:38px;height:38px;border-radius:var(--r-md);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.drive-card-ico.conn{background:var(--affirm-soft);color:var(--affirm-ink)}
+.drive-card-ico.disc{background:var(--surface-soft);color:var(--ink-3)}
+.drive-card-info{flex:1}
+.drive-card-title{font-size:var(--t-h3);font-weight:600;color:var(--ink-0);letter-spacing:-.01em}
+.drive-card-email{font-size:var(--t-small);color:var(--ink-3);margin-top:2px}
+.drive-card-actions{display:flex;gap:var(--s2);align-items:center;flex-shrink:0}
+
+/* Ingestion form */
+.ingest-form{
+  background:var(--surface);border:1px solid var(--line-1);border-radius:var(--r-lg);
+  padding:var(--s5) var(--s6);margin-bottom:var(--s6);
+}
+.if-title{font-size:var(--t-h3);font-weight:600;color:var(--ink-0);letter-spacing:-.01em;margin-bottom:var(--s2)}
+.if-sub{font-size:var(--t-small);color:var(--ink-3);line-height:1.55;margin-bottom:var(--s5)}
+.if-row{display:flex;gap:var(--s3);align-items:center}
+.if-input{
+  flex:1;background:var(--canvas);border:1px solid var(--line-1);
+  border-radius:var(--r-md);padding:9px var(--s4);
+  font-size:var(--t-small);color:var(--ink-1);font-family:inherit;outline:none;
+  transition:border-color var(--tr),background var(--tr);
+}
+.if-input::placeholder{color:var(--ink-4)}
+.if-input:focus{border-color:var(--accent);background:var(--surface)}
+
+/* Buttons */
+.btn-s{
+  font-size:var(--t-small);font-weight:500;padding:6px var(--s4);height:32px;
+  display:inline-flex;align-items:center;gap:6px;
+  border-radius:var(--r-md);background:var(--surface);border:1px solid var(--line-1);
+  color:var(--ink-1);transition:background var(--tr),border-color var(--tr);white-space:nowrap;
+}
+.btn-s:hover{background:var(--surface-hover);border-color:var(--line-3)}
+.btn-s.p{background:var(--accent);color:#fff;border-color:var(--accent)}
+.btn-s.p:hover{background:var(--accent-hover);border-color:var(--accent-hover)}
+.btn-s:disabled{opacity:.45;cursor:not-allowed;pointer-events:none}
+.btn-s.danger{color:var(--urgent-ink);border-color:var(--urgent-border)}
+.btn-s.danger:hover{background:var(--urgent-soft)}
+
+/* Live log */
+.log-card{
+  background:var(--surface);border:1px solid var(--line-1);border-radius:var(--r-lg);overflow:hidden;
+}
+.log-hdr{
+  display:flex;align-items:center;gap:var(--s3);
+  padding:var(--s4) var(--s5);border-bottom:1px solid var(--line-1);background:var(--surface-soft);
+}
+.log-hdr-title{font-size:var(--t-small);font-weight:600;color:var(--ink-0)}
+.log-status{
+  margin-left:auto;display:flex;align-items:center;gap:6px;
+  font-size:var(--t-micro);font-weight:600;letter-spacing:.02em;
+}
+.log-status.idle{color:var(--ink-4)}
+.log-status.running{color:var(--caution-ink)}
+.log-status.done{color:var(--affirm-ink)}
+.log-status.error{color:var(--urgent-ink)}
+.ls-dot{width:6px;height:6px;border-radius:50%;background:currentColor}
+.log-status.running .ls-dot{animation:pulse 2.4s ease infinite}
+.log-body{
+  padding:var(--s3) var(--s4);
+  min-height:220px;max-height:400px;overflow-y:auto;
+  font-family:var(--font-mono);font-size:var(--t-micro);line-height:1.75;
+  background:#161B22;color:#C9D1D9;
+}
+.log-line{display:flex;align-items:flex-start;gap:var(--s3);animation:fadeIn .15s ease}
+.log-ts{color:#3D444D;flex-shrink:0;min-width:64px;user-select:none}
+.log-msg{flex:1;word-break:break-word}
+.log-msg.ok{color:#3FB950}
+.log-msg.warn{color:#D29922}
+.log-msg.err{color:#F85149}
+.log-msg.info{color:#79C0FF}
+.log-msg.stage{color:#D2A8FF}
+.log-msg.dl{color:#58A6FF}
+.log-idle{color:#3D444D;font-style:italic;padding:var(--s2) 0}
+
+/* ── VENDORS TAB ── */
+.vendors-panel{padding:var(--s7);overflow-y:auto;height:100%}
+.v-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--s5)}
+.v-title{font-family:var(--font-display);font-size:var(--t-title);font-weight:700;color:var(--ink-0);letter-spacing:-.02em}
+.v-sub{font-size:var(--t-small);color:var(--ink-3);margin-top:var(--s1)}
+.vtbl-wrap{background:var(--surface);border:1px solid var(--line-1);border-radius:var(--r-lg);overflow:hidden}
+.vtbl{width:100%;border-collapse:collapse}
+.vtbl th{font-size:var(--t-micro);font-weight:600;letter-spacing:.05em;color:var(--ink-3);text-transform:uppercase;padding:var(--s4) var(--s5);text-align:left;border-bottom:1px solid var(--line-1);background:var(--surface-soft)}
+.vtbl td{font-size:var(--t-small);color:var(--ink-1);padding:var(--s4) var(--s5);border-bottom:1px solid var(--line-2);vertical-align:middle}
+.vtbl tr:last-child td{border-bottom:none}
+.vtbl tbody tr{cursor:pointer;transition:background var(--tr)}
+.vtbl tbody tr:hover td{background:var(--surface-hover)}
+.vt-name{font-weight:600;color:var(--ink-0)}
+.vt-id{font-family:var(--font-mono);font-size:var(--t-micro);color:var(--ink-4);margin-top:2px}
+.score-val{font-family:var(--font-display);font-weight:700;font-size:15px;letter-spacing:-.01em}
+
+/* Badges */
+.bdg{display:inline-flex;align-items:center;font-size:var(--t-micro);font-weight:600;letter-spacing:.02em;padding:3px 10px;border-radius:var(--r-pill);line-height:1.55}
+.bdg-green{background:var(--affirm-soft);color:var(--affirm-ink)}
+.bdg-amber{background:var(--caution-soft);color:var(--caution-ink)}
+.bdg-red{background:var(--urgent-soft);color:var(--urgent-ink)}
+.bdg-grey{background:var(--surface-soft);color:var(--ink-2)}
+.bdg-blue{background:var(--watch-soft);color:var(--watch-ink)}
+
+/* Icons */
+.glyph{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;vertical-align:middle;display:inline-block}
+.glyph.sm{width:14px;height:14px}
+.glyph.xs{width:12px;height:12px}
+.glyph.lg{width:20px;height:20px}
+
+/* Tweaks panel */
+.tweaks{
+  position:fixed;bottom:var(--s6);right:var(--s6);z-index:500;
+  display:none;background:var(--surface);border:1px solid var(--line-1);
+  border-radius:var(--r-lg);box-shadow:var(--shadow-lg);min-width:220px;overflow:hidden;
+}
+.tweaks.open{display:block}
+.tw-h{display:flex;align-items:center;justify-content:space-between;padding:var(--s4) var(--s5);border-bottom:1px solid var(--line-1)}
+.tw-t{font-size:var(--t-small);font-weight:600;color:var(--ink-0)}
+.tw-x{color:var(--ink-3);cursor:pointer;display:flex}
+.tw-b{padding:var(--s3) var(--s5) var(--s5)}
+.tw-sec{margin-bottom:var(--s4)}
+.tw-sec:last-child{margin-bottom:0}
+.tw-l{font-size:var(--t-micro);font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);margin-bottom:var(--s2)}
+.tw-row{display:flex;gap:var(--s1);flex-wrap:wrap}
+.tw-swatch{width:22px;height:22px;border-radius:50%;cursor:pointer;transition:transform var(--tr);border:2px solid transparent}
+.tw-swatch.on{border-color:var(--ink-0);transform:scale(1.15)}
+
+/* Float tweaks trigger */
+.float-settings{
+  position:fixed;bottom:var(--s6);right:var(--s6);z-index:50;
+  width:40px;height:40px;border-radius:50%;
+  background:var(--surface);border:1px solid var(--line-1);
+  box-shadow:var(--shadow-md);
+  display:flex;align-items:center;justify-content:center;
+  color:var(--ink-3);cursor:pointer;
+  transition:background var(--tr),color var(--tr),box-shadow var(--tr);
+}
+.float-settings:hover{background:var(--surface-hover);color:var(--ink-1);box-shadow:var(--shadow-lg)}
+
+.slbl{font-size:var(--t-micro);font-weight:600;letter-spacing:.08em;color:var(--ink-3);text-transform:uppercase;margin-bottom:var(--s4)}
+</style>
+</head>
+<body>
+
+<!-- ── SVG ICON SPRITE ── -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+<defs>
+  <symbol id="g-home" viewBox="0 0 24 24"><path d="M3 11.5L12 4l9 7.5V20a1 1 0 0 1-1 1h-5v-7h-6v7H4a1 1 0 0 1-1-1z"/></symbol>
+  <symbol id="g-building" viewBox="0 0 24 24"><path d="M4 21V5a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v16M12 21V10a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v11M3 21h18M7 8h2M7 12h2M7 16h2M15 13h2M15 17h2"/></symbol>
+  <symbol id="g-drive" viewBox="0 0 87 78"><path d="M6.1 66l4.1 7.1c.9 1.5 2.1 2.7 3.5 3.6L27.5 53H0c0 1.7.4 3.4 1.3 4.9L6.1 66z" fill="#0066DA"/><path d="M43.5 25L29.7 1.3C28.3 2.2 27 3.4 26.1 4.9L1.3 48.1c-.8 1.5-1.3 3.1-1.3 4.9h27.5L43.5 25z" fill="#00AC47"/><path d="M73.3 76.7c1.5-.9 2.7-2.1 3.5-3.6l1.7-2.9 8.2-14.2c.8-1.5 1.3-3.2 1.3-4.9H60.5L73.3 76.7z" fill="#EA4335"/><path d="M43.5 25l13.8-23.7C55.8.4 54.1 0 52.3 0H34.7c-1.8 0-3.5.4-5 1.3L43.5 25z" fill="#00832D"/><path d="M60.5 53H27.5L13.7 76.7c1.5.8 3.2 1.3 5 1.3h47.6c1.8 0 3.5-.4 5-1.3L60.5 53z" fill="#2684FC"/><path d="M73.1 25.5L59.9 2.9C59 1.4 57.8.2 56.3 .4L43.5 25 60.5 53h27.4c0-1.7-.4-3.4-1.3-4.9L73.1 25.5z" fill="#FFBA00"/></symbol>
+  <symbol id="g-bolt" viewBox="0 0 24 24"><path d="M13 3L4 14h7l-1 7 9-11h-7z"/></symbol>
+  <symbol id="g-settings" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></symbol>
+  <symbol id="g-x" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></symbol>
+  <symbol id="g-chev-right" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></symbol>
+  <symbol id="g-chev-left" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></symbol>
+  <symbol id="g-arrow-right" viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></symbol>
+  <symbol id="g-link" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></symbol>
+  <symbol id="g-refresh" viewBox="0 0 24 24"><path d="M21 12a9 9 0 0 1-15.5 6.3L3 16M3 12a9 9 0 0 1 15.5-6.3L21 8M3 21v-5h5M21 3v5h-5"/></symbol>
+  <symbol id="g-trend" viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8M14 7h7v7"/></symbol>
+  <symbol id="g-check" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></symbol>
+  <symbol id="g-play" viewBox="0 0 24 24"><path d="M5 3l14 9-14 9V3z"/></symbol>
+  <symbol id="g-sign-out" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></symbol>
+  <symbol id="g-prog" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></symbol>
+  <symbol id="g-folder" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></symbol>
+</defs>
+</svg>
+
+<!-- ══════════════════════════════════════
+     SCREEN 1 — LOGIN
+══════════════════════════════════════ -->
+<div id="screen-login" class="screen">
+  <div class="login-card">
+    <div class="login-logo">K</div>
+    <div class="login-title">Kozmo</div>
+    <div class="login-sub">
+      Vendor Intelligence Platform<br>
+      Sign in with your Google account to access your workspace.
+    </div>
+    <a href="/auth/google" class="btn-google">
+      <!-- Google "G" logo -->
+      <svg class="g-icon" viewBox="0 0 24 24">
+        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+      </svg>
+      Continue with Google
+    </a>
+    <div class="login-footer">
+      Your Drive files are accessed only with your explicit permission.<br>
+      Access tokens are stored locally on this server only.
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SCREEN 2 — HOME
+══════════════════════════════════════ -->
+<div id="screen-home" class="screen hidden">
+  <div class="h-topbar">
+    <div class="h-bmark">K</div>
+    <div class="h-bname">Kozmo</div>
+    <div class="h-user">
+      <span class="h-email" id="home-email"></span>
+      <div class="h-av" id="home-av" onclick="signOut()" title="Sign out"></div>
+    </div>
+  </div>
+  <div class="h-body">
+    <div class="h-hdr">
+      <div class="h-eyebrow">Workspace</div>
+      <div class="h-title" id="home-greeting">Programs</div>
+      <div class="h-sub">Select a program to start analyzing vendor intelligence.</div>
+    </div>
+    <div class="prog-grid">
+
+      <!-- Tile 1: Vendor Cleanup Program -->
+      <div class="prog-tile" onclick="enterProgram('vcp','Vendor Cleanup Program')">
+        <div class="prog-ico">
+          <svg class="glyph lg"><use href="#g-building"/></svg>
+        </div>
+        <div class="prog-name">Vendor Cleanup Program</div>
+        <div class="prog-desc">
+          Ingest vendor documents directly from Google Drive. Classify signals, compute risk posture, and surface renewal obligations across your entire vendor portfolio.
+        </div>
+        <div class="prog-foot">
+          <span class="prog-badge active">Active</span>
+          <span class="prog-arrow">
+            <svg class="glyph lg"><use href="#g-arrow-right"/></svg>
+          </span>
+        </div>
+      </div>
+
+      <!-- Tile 2: Contract Intelligence (coming soon) -->
+      <div class="prog-tile inactive">
+        <div class="prog-ico">
+          <svg class="glyph lg"><use href="#g-prog"/></svg>
+        </div>
+        <div class="prog-name">Contract Intelligence</div>
+        <div class="prog-desc">
+          Automated contract review — extract SLA terms, flag anomalies, and surface renewal obligations across all vendor agreements. AI-driven clause analysis.
+        </div>
+        <div class="prog-foot">
+          <span class="prog-badge soon">Coming soon</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SCREEN 3 — APP WORKSPACE
+══════════════════════════════════════ -->
+<div class="app hidden" id="screen-app">
+
+  <!-- ── SIDEBAR ── -->
+  <div class="sidebar" id="sb">
+    <div class="sb-top">
+      <div class="bmark" onclick="goHome()" title="Back to Home">K</div>
+      <div class="bname" onclick="goHome()">Kozmo</div>
+      <button class="ibtn" id="col-toggle-btn" onclick="toggleSidebar()" style="margin-left:auto" title="Collapse sidebar">
+        <svg class="glyph xs" id="col-icon"><use href="#g-chev-left"/></svg>
+      </button>
+    </div>
+
+    <!-- Program switcher -->
+    <div class="sb-prog">
+      <button class="sb-prog-btn" onclick="goHome()">
+        <span class="sb-prog-ico">
+          <svg class="glyph xs"><use href="#g-building"/></svg>
+        </span>
+        <span class="sb-prog-lbl" id="sb-prog-name">Vendor Cleanup Program</span>
+        <svg class="glyph xs" style="color:var(--ink-4);flex-shrink:0;transition:opacity var(--tr)" id="sb-prog-chev"><use href="#g-chev-right"/></svg>
+      </button>
+    </div>
+
+    <!-- Nav -->
+    <ul class="nav-list">
+      <li class="nv on" onclick="switchTab('ingest',this)" data-tab-nav="ingest" data-tip="Ingestion">
+        <span class="ni"><svg class="glyph"><use href="#g-drive"/></svg></span>
+        <span class="nl">Ingestion</span>
+      </li>
+      <li class="nv" onclick="switchTab('vendors',this)" data-tab-nav="vendors" data-tip="Vendors">
+        <span class="ni"><svg class="glyph"><use href="#g-building"/></svg></span>
+        <span class="nl">Vendors</span>
+      </li>
+    </ul>
+
+    <div class="sb-bot">
+      <button class="col-btn" onclick="goHome()" title="Home">
+        <span class="col-ico"><svg class="glyph xs"><use href="#g-home"/></svg></span>
+        <span class="col-lbl">Home</span>
+      </button>
+      <div class="sb-user" onclick="signOut()" title="Sign out">
+        <div class="sb-av" id="sb-av"></div>
+        <span class="sb-uname" id="sb-uname">Loading…</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── MAIN ── -->
+  <div class="main">
+    <div class="topbar">
+      <div class="breadcrumb" id="breadcrumb">
+        <span class="bc-link" onclick="goHome()">Home</span>
+        <span class="bc-sep">›</span>
+        <span class="bc-cur" id="bc-prog">Vendor Cleanup Program</span>
+      </div>
+      <div class="trr">
+        <button class="ibtn" onclick="refreshAll()" title="Refresh">
+          <svg class="glyph sm"><use href="#g-refresh"/></svg>
+        </button>
+        <div class="avbtn" id="top-av" onclick="signOut()" title="Sign out"></div>
+      </div>
+    </div>
+
+    <!-- VIEW: PROGRAM -->
+    <div class="view on" id="view-prog">
+      <div class="pv-content">
+
+        <!-- Page header -->
+        <div class="page-hdr">
+          <div class="phdr-top">
+            <div>
+              <div class="phdr-eyebrow">Program</div>
+              <div class="phdr-title" id="prog-title">Vendor Cleanup</div>
+              <div class="phdr-sub">Ingest documents from Google Drive, run the vendor intelligence pipeline, and monitor posture in real time.</div>
+            </div>
+            <div class="phdr-right">
+              <div class="status-pill disc" id="drive-pill">
+                <span class="sp-dot"></span>
+                <span id="drive-pill-text">Not connected</span>
+              </div>
+            </div>
+          </div>
+          <div class="tab-bar">
+            <button class="tab-btn on" data-tab="ingest" onclick="switchTab('ingest',this)">Ingestion</button>
+            <button class="tab-btn" data-tab="vendors" onclick="switchTab('vendors',this)">Vendors</button>
+          </div>
+        </div>
+
+        <!-- Tab panels -->
+        <div class="tab-panels">
+
+          <!-- ── INGESTION TAB ── -->
+          <div class="tab-panel on" id="panel-ingest">
+            <div class="ingest-panel">
+
+              <!-- Drive connection card -->
+              <div class="drive-card disc" id="drive-card">
+                <div class="drive-card-hdr">
+                  <div class="drive-card-ico disc" id="drive-ico">
+                    <svg style="width:22px;height:22px" viewBox="0 0 87 78"><path d="M6.1 66l4.1 7.1c.9 1.5 2.1 2.7 3.5 3.6L27.5 53H0c0 1.7.4 3.4 1.3 4.9L6.1 66z" fill="#0066DA"/><path d="M43.5 25L29.7 1.3C28.3 2.2 27 3.4 26.1 4.9L1.3 48.1c-.8 1.5-1.3 3.1-1.3 4.9h27.5L43.5 25z" fill="#00AC47"/><path d="M73.3 76.7c1.5-.9 2.7-2.1 3.5-3.6l1.7-2.9 8.2-14.2c.8-1.5 1.3-3.2 1.3-4.9H60.5L73.3 76.7z" fill="#EA4335"/><path d="M43.5 25l13.8-23.7C55.8.4 54.1 0 52.3 0H34.7c-1.8 0-3.5.4-5 1.3L43.5 25z" fill="#00832D"/><path d="M60.5 53H27.5L13.7 76.7c1.5.8 3.2 1.3 5 1.3h47.6c1.8 0 3.5-.4 5-1.3L60.5 53z" fill="#2684FC"/><path d="M73.1 25.5L59.9 2.9C59 1.4 57.8.2 56.3.4L43.5 25 60.5 53h27.4c0-1.7-.4-3.4-1.3-4.9L73.1 25.5z" fill="#FFBA00"/></svg>
+                  </div>
+                  <div class="drive-card-info">
+                    <div class="drive-card-title">Google Drive</div>
+                    <div class="drive-card-email" id="drive-email">Not connected — authorize to ingest documents</div>
+                  </div>
+                  <div class="drive-card-actions">
+                    <a href="/auth/google" class="btn-s p" id="btn-connect">
+                      <svg class="glyph sm"><use href="#g-link"/></svg>
+                      Connect Google Account
+                    </a>
+                    <button class="btn-s danger" id="btn-disconnect" style="display:none" onclick="disconnectDrive()">
+                      Disconnect
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Ingestion form -->
+              <div class="ingest-form">
+                <div class="if-title">Run Ingestion</div>
+                <div class="if-sub">
+                  Paste a Google Drive folder or file link below. Kozmo will download all supported documents (PDF, Google Docs, Sheets, Slides) and run the full vendor intelligence pipeline.
+                </div>
+                <div class="if-row">
+                  <input type="text" class="if-input" id="drive-url"
+                         placeholder="Paste a Drive folder URL or file URL (folders/… or file/d/…)" />
+                  <button class="btn-s p" id="btn-run" onclick="runIngestion()" disabled>
+                    <svg class="glyph sm"><use href="#g-play"/></svg>
+                    Run
+                  </button>
+                </div>
+              </div>
+
+              <!-- Live ingestion log -->
+              <div class="log-card">
+                <div class="log-hdr">
+                  <svg class="glyph sm" style="color:var(--ink-3)"><use href="#g-trend"/></svg>
+                  <span class="log-hdr-title">Ingestion Log</span>
+                  <div class="log-status idle" id="log-status">
+                    <span class="ls-dot"></span>
+                    <span id="log-status-text">Idle</span>
+                  </div>
+                </div>
+                <div class="log-body" id="log-body">
+                  <div class="log-idle">Waiting for ingestion to start…</div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- ── VENDORS TAB ── -->
+          <div class="tab-panel" id="panel-vendors">
+            <div class="vendors-panel">
+              <div class="v-hdr">
+                <div>
+                  <div class="v-title">Vendor Portfolio</div>
+                  <div class="v-sub" id="vendor-count">Loading…</div>
+                </div>
+                <button class="btn-s" onclick="loadVendors()">
+                  <svg class="glyph sm"><use href="#g-refresh"/></svg>
+                  Refresh
+                </button>
+              </div>
+              <div class="vtbl-wrap">
+                <table class="vtbl">
+                  <thead>
+                    <tr>
+                      <th>Vendor</th>
+                      <th>Band</th>
+                      <th>Stance</th>
+                      <th>Confidence</th>
+                      <th>As Of</th>
+                    </tr>
+                  </thead>
+                  <tbody id="vendor-tbody">
+                    <tr><td colspan="5" style="text-align:center;color:var(--ink-4);padding:var(--s8)">Loading vendors…</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /tab-panels -->
+      </div><!-- /pv-content -->
+    </div><!-- /view-prog -->
+
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<!-- ── TWEAKS ── -->
+<button class="float-settings" id="float-settings-btn" onclick="tTweaks()" title="Appearance" style="display:none">
+  <svg class="glyph sm"><use href="#g-settings"/></svg>
+</button>
+
+<div class="tweaks" id="tweaks">
+  <div class="tw-h">
+    <span class="tw-t">Appearance</span>
+    <span class="tw-x" onclick="tTweaks()"><svg class="glyph xs"><use href="#g-x"/></svg></span>
+  </div>
+  <div class="tw-b">
+    <div class="tw-sec">
+      <div class="tw-l">Accent Color</div>
+      <div class="tw-row" id="tw-accent" style="gap:10px">
+        <div class="tw-swatch on" data-accent="coral"   style="background:#F06A6A" title="Coral"></div>
+        <div class="tw-swatch"    data-accent="indigo"  style="background:#4573D2" title="Indigo"></div>
+        <div class="tw-swatch"    data-accent="emerald" style="background:#14A085" title="Emerald"></div>
+        <div class="tw-swatch"    data-accent="violet"  style="background:#6F58D9" title="Violet"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════
+//  KOZMO WORKSPACE  —  Client-side logic
+// ══════════════════════════════════════════════
+
+var S = {
+  screen: 'login',
+  email: null,
+  connected: false,
+  running: false,
+  sse: null,
+  programName: ''
+};
+
+// ─────────────────────────────────────────────
+//  SCREEN MANAGEMENT
+// ─────────────────────────────────────────────
+function show(name) {
+  ['login','home','app'].forEach(function(n) {
+    document.getElementById('screen-' + n).classList.toggle('hidden', n !== name);
+  });
+  S.screen = name;
+  // Show/hide settings button in app only
+  var btn = document.getElementById('float-settings-btn');
+  if (btn) btn.style.display = name === 'app' ? 'flex' : 'none';
+}
+
+function goHome() {
+  show('home');
+  stopSse();
+}
+
+function enterProgram(id, name) {
+  S.programName = name || 'Program';
+  var progTitle = document.getElementById('prog-title');
+  if (progTitle) progTitle.textContent = name || 'Program';
+  var bcProg = document.getElementById('bc-prog');
+  if (bcProg) bcProg.textContent = name || 'Program';
+  var sbName = document.getElementById('sb-prog-name');
+  if (sbName) sbName.textContent = name || 'Program';
+  show('app');
+  switchTab('ingest', null, true);
+  updateDriveCard();
+}
+
+function signOut() {
+  S.email = null;
+  S.connected = false;
+  stopSse();
+  show('login');
+}
+
+// ─────────────────────────────────────────────
+//  AUTH CHECK
+// ─────────────────────────────────────────────
+async function checkAuth() {
+  try {
+    var r = await fetch('/auth/google/status');
+    var d = await r.json();
+    S.email = d.email || null;
+    S.connected = d.connected && !d.tokenExpired;
+    applyUserUI();
+    show(d.connected ? 'home' : 'login');
+  } catch(e) {
+    show('login');
+  }
+}
+
+function applyUserUI() {
+  var e = S.email || '';
+  var initials = e ? (e[0] || '?').toUpperCase() : '?';
+
+  // Home
+  setTxt('home-email', e);
+  setTxt('home-av', initials);
+  if (e) {
+    var hr = new Date().getHours();
+    var greet = hr < 12 ? 'Good morning' : hr < 17 ? 'Good afternoon' : 'Good evening';
+    setTxt('home-greeting', greet + ', ' + e.split('@@')[0]);
+  }
+
+  // Sidebar / topbar
+  setTxt('sb-av', initials);
+  setTxt('sb-uname', e || 'User');
+  setTxt('top-av', initials);
+}
+
+function updateDriveCard() {
+  var card     = document.getElementById('drive-card');
+  var ico      = document.getElementById('drive-ico');
+  var email    = document.getElementById('drive-email');
+  var pill     = document.getElementById('drive-pill');
+  var pillTxt  = document.getElementById('drive-pill-text');
+  var btnConn  = document.getElementById('btn-connect');
+  var btnDisc  = document.getElementById('btn-disconnect');
+  var btnRun   = document.getElementById('btn-run');
+
+  if (S.connected && S.email) {
+    card.className      = 'drive-card conn';
+    ico.className       = 'drive-card-ico conn';
+    email.textContent   = S.email;
+    pill.className      = 'status-pill conn';
+    pillTxt.textContent = S.email;
+    btnConn.style.display = 'none';
+    btnDisc.style.display = 'inline-flex';
+    if (btnRun) btnRun.disabled = false;
+  } else {
+    card.className      = 'drive-card disc';
+    ico.className       = 'drive-card-ico disc';
+    email.textContent   = 'Not connected — authorize to ingest documents';
+    pill.className      = 'status-pill disc';
+    pillTxt.textContent = 'Not connected';
+    btnConn.style.display = 'inline-flex';
+    btnDisc.style.display = 'none';
+    if (btnRun) btnRun.disabled = true;
+  }
+}
+
+function disconnectDrive() {
+  S.connected = false;
+  S.email = null;
+  updateDriveCard();
+  applyUserUI();
+  show('login');
+}
+
+// ─────────────────────────────────────────────
+//  TAB SWITCHING
+// ─────────────────────────────────────────────
+function switchTab(name, triggerEl, silent) {
+  document.querySelectorAll('.tab-btn').forEach(function(b) {
+    b.classList.toggle('on', b.dataset.tab === name);
+  });
+  document.querySelectorAll('[data-tab-nav]').forEach(function(n) {
+    n.classList.toggle('on', n.dataset.tabNav === name);
+  });
+  document.querySelectorAll('.tab-panel').forEach(function(p) {
+    p.classList.remove('on');
+  });
+  var panel = document.getElementById('panel-' + name);
+  if (panel) panel.classList.add('on');
+  if (name === 'vendors' && !silent) loadVendors();
+}
+
+// ─────────────────────────────────────────────
+//  SIDEBAR COLLAPSE
+// ─────────────────────────────────────────────
+function toggleSidebar() {
+  var sb   = document.getElementById('sb');
+  var icon = document.getElementById('col-icon');
+  var col  = sb.classList.toggle('col');
+  icon.querySelector('use').setAttribute('href', col ? '#g-chev-right' : '#g-chev-left');
+}
+
+// ─────────────────────────────────────────────
+//  VENDORS
+// ─────────────────────────────────────────────
+async function loadVendors() {
+  var tbody = document.getElementById('vendor-tbody');
+  tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--ink-4);padding:40px">Loading…</td></tr>';
+  try {
+    var r = await fetch('/kyv/vendors');
+    var vendors = await r.json();
+    setTxt('vendor-count', vendors.length + ' vendor' + (vendors.length !== 1 ? 's' : '') + ' discovered');
+    if (!vendors.length) {
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--ink-4);padding:40px">No vendors discovered yet. Connect a Google Drive folder and run ingestion.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = vendors.map(function(v) {
+      var band  = (v.band || '').toLowerCase();
+      var bdg   = band === 'healthy' ? 'bdg-green' : band === 'atrisk' ? 'bdg-amber' : band === 'critical' ? 'bdg-red' : 'bdg-grey';
+      // confidence is 0-1; show as % or '—' for unscored KYV vendors
+      var conf  = (v.confidence != null && v.confidence > 0)
+                    ? (v.confidence * 100).toFixed(0) + '%' : '—';
+      return '<tr>'
+        + '<td><div class="vt-name">' + esc(v.name) + '</div>'
+        +     '<div class="vt-id">'   + esc(v.entityId) + '</div></td>'
+        + '<td><span class="bdg ' + bdg + '">' + esc(v.band || 'Unknown') + '</span></td>'
+        + '<td>' + esc(v.stance || 'Unknown') + '</td>'
+        + '<td><span class="score-val">' + conf + '</span></td>'
+        + '<td>' + esc(v.asOf ? new Date(v.asOf).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'2-digit'}) : '—') + '</td>'
+        + '</tr>';
+    }).join('');
+  } catch(e) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--urgent-ink);padding:40px">Error loading vendors. Is the server running?</td></tr>';
+  }
+}
+
+function refreshAll() {
+  var active = document.querySelector('.tab-panel.on');
+  if (active && active.id === 'panel-vendors') loadVendors();
+}
+
+// ─────────────────────────────────────────────
+//  INGESTION
+// ─────────────────────────────────────────────
+function addLog(msg, type) {
+  var body = document.getElementById('log-body');
+  // Clear idle message on first real line
+  var idle = body.querySelector('.log-idle');
+  if (idle) idle.remove();
+  var ts   = new Date().toLocaleTimeString('en-GB', {hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  var line = document.createElement('div');
+  line.className = 'log-line';
+  line.innerHTML = '<span class="log-ts">' + ts + '</span><span class="log-msg ' + esc(type || 'info') + '">' + esc(msg) + '</span>';
+  body.appendChild(line);
+  body.scrollTop = body.scrollHeight;
+}
+
+function clearLog() {
+  var body = document.getElementById('log-body');
+  body.innerHTML = '';
+}
+
+function setLogStatus(state, text) {
+  var el  = document.getElementById('log-status');
+  el.className = 'log-status ' + state;
+  setTxt('log-status-text', text);
+}
+
+async function runIngestion() {
+  var url = (document.getElementById('drive-url').value || '').trim();
+  if (!url) { document.getElementById('drive-url').focus(); return; }
+  if (S.running) return;
+
+  S.running = true;
+  document.getElementById('btn-run').disabled = true;
+  clearLog();
+  setLogStatus('running', 'Running…');
+
+  startSse();
+
+  addLog('Starting ingestion…', 'info');
+  addLog('Drive URL: ' + url, 'dl');
+
+  try {
+    var r = await fetch('/kyv/run', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({driveUrl: url})
+    });
+    var data = await r.json();
+
+    if (!r.ok) {
+      var errMsg = data.detail || data.error || ('HTTP ' + r.status);
+      addLog('Failed: ' + errMsg, 'err');
+      setLogStatus('error', 'Failed');
+    } else {
+      if (data.stages && data.stages.length) {
+        data.stages.forEach(function(s) {
+          addLog('Stage ' + s.order + '  ' + s.name + '  (' + s.itemsProcessed + ' items processed)', 'stage');
+        });
+      }
+      if (data.unreadableDocuments && data.unreadableDocuments.length) {
+        data.unreadableDocuments.forEach(function(u) {
+          addLog('Skipped  ' + (u.path || u.relativePath) + '  — ' + u.reason, 'warn');
+        });
+      }
+      addLog('Run ID: ' + data.runId, 'ok');
+      addLog('Status: ' + (data.status || 'Completed'), 'ok');
+      setLogStatus('done', 'Complete');
+      // Switch to Vendors tab to show results
+      setTimeout(function() { switchTab('vendors', null, false); }, 1200);
+    }
+  } catch(e) {
+    addLog('Request error: ' + e.message, 'err');
+    setLogStatus('error', 'Error');
+  } finally {
+    S.running = false;
+    document.getElementById('btn-run').disabled = !S.connected;
+    stopSse();
+  }
+}
+
+// ─────────────────────────────────────────────
+//  SSE — live event stream
+// ─────────────────────────────────────────────
+function startSse() {
+  stopSse();
+  S.sse = new EventSource('/events');
+  S.sse.onmessage = function(e) {
+    try { handleEvent(JSON.parse(e.data)); } catch(ex) {}
+  };
+  S.sse.onerror = function() { stopSse(); };
+}
+
+function stopSse() {
+  if (S.sse) { S.sse.close(); S.sse = null; }
+}
+
+function handleEvent(msg) {
+  if (!msg || !msg.type) return;
+  switch(msg.type) {
+    case 'kyv-started':
+      addLog('Pipeline started by server', 'info');
+      break;
+    case 'kyv-downloading':
+      addLog('Downloading from Google Drive…', 'dl');
+      if (msg.data && msg.data.fileCount)
+        addLog('Found ' + msg.data.fileCount + ' file(s)', 'dl');
+      break;
+    case 'kyv-stage':
+      if (msg.data)
+        addLog('Stage: ' + msg.data.name + ' (' + (msg.data.itemsProcessed || 0) + ' items)', 'stage');
+      break;
+    case 'kyv-complete':
+      addLog('Pipeline finished — loading discovered vendors…', 'ok');
+      loadVendors();
+      switchTab('vendors');
+      break;
+    case 'kyv-error':
+      addLog('Server error: ' + (msg.data && msg.data.error || 'Unknown'), 'err');
+      break;
+  }
+}
+
+// ─────────────────────────────────────────────
+//  TWEAKS
+// ─────────────────────────────────────────────
+var TWEAKS = {accent: 'coral'};
+function applyTweaks() {
+  document.documentElement.setAttribute('data-accent', TWEAKS.accent);
+  document.querySelectorAll('#tw-accent .tw-swatch').forEach(function(s) {
+    s.classList.toggle('on', s.dataset.accent === TWEAKS.accent);
+  });
+}
+function setTweak(k, v) { TWEAKS[k] = v; applyTweaks(); }
+function tTweaks() { document.getElementById('tweaks').classList.toggle('open'); }
+document.querySelectorAll('#tw-accent .tw-swatch').forEach(function(s) {
+  s.addEventListener('click', function() { setTweak('accent', s.dataset.accent); });
+});
+applyTweaks();
+
+// Design-mode edit protocol (preserves compatibility with Claude Design tool)
+window.addEventListener('message', function(e) {
+  var m = e.data;
+  if (!m || typeof m !== 'object') return;
+  if (m.type === '__activate_edit_mode')   document.getElementById('tweaks').classList.add('open');
+  if (m.type === '__deactivate_edit_mode') document.getElementById('tweaks').classList.remove('open');
+});
+try { window.parent.postMessage({type: '__edit_mode_available'}, '*'); } catch(e) {}
+
+// ─────────────────────────────────────────────
+//  UTILS
+// ─────────────────────────────────────────────
+function esc(s) {
+  return String(s || '')
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function setTxt(id, txt) {
+  var el = document.getElementById(id);
+  if (el) el.textContent = txt;
+}
+
+// ─────────────────────────────────────────────
+//  BOOT
+// ─────────────────────────────────────────────
+checkAuth();
+</script>
+</body>
+</html>
