@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text.Json;
 using Kozmo.Contracts;
 using Kozmo.Contracts.Config;
@@ -12,7 +13,9 @@ namespace Ii.CandidateExtraction;
 /// <see cref="Value"/> is the RAW magnitude as stated in the document — e.g. 99.9 for a
 /// "99.9% uptime SLA", 4.6 for a "4.6/5.0" CSAT score, a Unix timestamp for
 /// <c>renewal_date</c> — NOT a 0-1 normalised rubric score. Normalisation against the scoring
-/// rubric is a downstream concern, not this extractor's job.
+/// rubric is a downstream concern, not this extractor's job. The renewal_date timestamp is
+/// computed deterministically in <see cref="DocumentBeliefExtractor"/> from the model's plain
+/// "YYYY-MM-DD" string — the model is never asked to do the date arithmetic itself.
 /// </para>
 /// <para>
 /// <see cref="Dimension"/> is null for structural claims (e.g. <c>renewal_date</c>, which
@@ -110,8 +113,30 @@ public sealed class DocumentBeliefExtractor
             if (!seen.Add(criterion))
                 continue;
 
-            if (!fact.TryGetProperty("value", out var valueEl) || valueEl.ValueKind != JsonValueKind.Number)
-                continue; // no concrete numeric value — abstain on this fact
+            double value;
+            if (string.Equals(criterion, "renewal_date", StringComparison.OrdinalIgnoreCase))
+            {
+                // The model emits a plain "YYYY-MM-DD" string; the epoch conversion happens here,
+                // deterministically, rather than asking the model to do date arithmetic itself
+                // (LLM-computed timestamps drift — see KYV_KNOWN_GAPS.md).
+                if (!fact.TryGetProperty("value", out var dateEl) || dateEl.ValueKind != JsonValueKind.String)
+                    continue; // no concrete date string — abstain on this fact
+
+                var dateText = dateEl.GetString();
+                if (string.IsNullOrWhiteSpace(dateText) ||
+                    !DateTimeOffset.TryParseExact(dateText, "yyyy-MM-dd", CultureInfo.InvariantCulture,
+                        DateTimeStyles.AssumeUniversal, out var parsedDate))
+                    continue; // unparseable date — abstain rather than guess
+
+                value = parsedDate.ToUnixTimeSeconds();
+            }
+            else
+            {
+                if (!fact.TryGetProperty("value", out var valueEl) || valueEl.ValueKind != JsonValueKind.Number)
+                    continue; // no concrete numeric value — abstain on this fact
+
+                value = valueEl.GetDouble();
+            }
 
             var evidence = GetString(fact, "evidence");
             if (string.IsNullOrWhiteSpace(evidence))
@@ -131,7 +156,7 @@ public sealed class DocumentBeliefExtractor
             candidates.Add(new BeliefCandidate(
                 Dimension:  dimension,
                 Criterion:  criterion,
-                Value:      valueEl.GetDouble(),
+                Value:      value,
                 Confidence: confidence,
                 SourceTier: tier,
                 Derivation: $"doc:{docId} \"{Truncate(evidence!, 200)}\""));

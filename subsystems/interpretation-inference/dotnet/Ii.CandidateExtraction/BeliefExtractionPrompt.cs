@@ -46,9 +46,11 @@ public static class BeliefExtractionPrompt
           invoice"). value = integer days (e.g. 30). Do NOT use insurance, cancellation, or
           termination notice periods for this fact.
         - renewal_date: an explicit CALENDAR date the agreement renews or is next due for
-          renewal (e.g. "renews on September 1, 2026"). value = that date as a Unix timestamp
-          (seconds since epoch, UTC midnight). An auto-renewal clause with no specific date is a
-          RULE, not a date — omit renewal_date unless a concrete calendar date is stated.
+          renewal (e.g. "renews on September 1, 2026"). value = that date formatted as the
+          STRING "YYYY-MM-DD" (e.g. "2026-09-01") — a plain calendar date, NOT a Unix timestamp;
+          do not attempt to compute a timestamp yourself, the conversion happens deterministically
+          downstream. An auto-renewal clause with no specific date is a RULE, not a date — omit
+          renewal_date unless a concrete calendar date is stated.
         - annual_value: an explicit contract price or subscription fee paid by the customer.
           value = the dollar amount as a plain number (e.g. 250000 for "$250,000/year").
           Insurance requirements, liability caps, and indemnification ceilings are NOT fees.
@@ -67,7 +69,7 @@ public static class BeliefExtractionPrompt
           "facts": [
             {
               "criterion": "<sla_uptime|csat|payment_terms|renewal_date|annual_value>",
-              "value": <number>,
+              "value": <number, EXCEPT renewal_date which is the string "YYYY-MM-DD">,
               "evidence": "<exact quoted span from the document text>",
               "confidence": <float 0.0-1.0>
             }
