@@ -1,3 +1,4 @@
+using Ii.Completeness;
 using Ii.Contracts;
 using Km.Store;
 using Kozmo.Contracts;
@@ -13,36 +14,39 @@ namespace Ii.Spine;
 /// </summary>
 public sealed class IiFacade : IIiFacade
 {
-    private readonly IObservationModule _observation;
-    private readonly IRubricModule      _rubric;
-    private readonly IIndexModule       _index;
-    private readonly IPostureModule     _posture;
-    private readonly IDecayEngine       _decay;
-    private readonly IEntityStore       _store;
-    private readonly SaasProfile        _profile;
-    private readonly EntityRegistry     _registry;
-    private readonly IClock             _clock;
+    private readonly IObservationModule      _observation;
+    private readonly IRubricModule           _rubric;
+    private readonly IIndexModule            _index;
+    private readonly IPostureModule          _posture;
+    private readonly IDecayEngine            _decay;
+    private readonly IEntityStore            _store;
+    private readonly SaasProfile             _profile;
+    private readonly EntityRegistry          _registry;
+    private readonly IClock                  _clock;
+    private readonly CompletenessOrchestrator? _completeness;
 
     public IiFacade(
-        IObservationModule observation,
-        IRubricModule      rubric,
-        IIndexModule       index,
-        IPostureModule     posture,
-        IDecayEngine       decay,
-        IEntityStore       store,
-        SaasProfile        profile,
-        EntityRegistry     registry,
-        IClock?            clock = null)
+        IObservationModule         observation,
+        IRubricModule              rubric,
+        IIndexModule               index,
+        IPostureModule             posture,
+        IDecayEngine               decay,
+        IEntityStore               store,
+        SaasProfile                profile,
+        EntityRegistry             registry,
+        IClock?                    clock        = null,
+        CompletenessOrchestrator?  completeness = null)
     {
-        _observation = observation;
-        _rubric      = rubric;
-        _index       = index;
-        _posture     = posture;
-        _decay       = decay;
-        _store       = store;
-        _profile     = profile;
-        _registry    = registry;
-        _clock       = clock ?? new WallClock();
+        _observation  = observation;
+        _rubric       = rubric;
+        _index        = index;
+        _posture      = posture;
+        _decay        = decay;
+        _store        = store;
+        _profile      = profile;
+        _registry     = registry;
+        _clock        = clock ?? new WallClock();
+        _completeness = completeness;
     }
 
     public async Task<Guid> SubmitSignalAsync(Signal signal, CancellationToken ct = default)
@@ -193,6 +197,10 @@ public sealed class IiFacade : IIiFacade
         var meta     = ComputeMeta(entityId, decayed, anchored, allHistory, now);
         var posture  = _posture.Assign(index, null, entity?.RenewalDate, _profile, now, meta);
         var mgmt     = ComputeManagementBlock(entityId, decayed, allBeliefs, scores, meta);
+
+        // Phase 5: Q&A completeness convergence — synchronous, in the same recompute pass.
+        if (_completeness != null)
+            await _completeness.RunAsync(entityId, allBeliefs, now, ct);
 
         return new VendorJudgement(index, posture, meta, mgmt);
     }

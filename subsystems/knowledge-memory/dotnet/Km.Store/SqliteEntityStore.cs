@@ -720,6 +720,18 @@ public sealed class SqliteEntityStore : IEntityStore, IRegistryStore, ICheckInRo
         return Task.FromResult<CheckInRow?>(ReadCheckInRow(reader));
     }
 
+    public Task<IReadOnlyList<CheckInRow>> GetResolvedCheckInsForVendorAsync(Guid vendorId, CancellationToken ct = default)
+    {
+        using var cmd = _conn.CreateCommand();
+        cmd.CommandText = "SELECT * FROM checkins WHERE vendor_id = @vendorId AND status IN ('PROCESSED', 'EXPIRED') ORDER BY raised_at";
+        cmd.Parameters.AddWithValue("@vendorId", vendorId.ToString());
+        var results = new List<CheckInRow>();
+        using var reader = cmd.ExecuteReader();
+        while (reader.Read())
+            results.Add(ReadCheckInRow(reader));
+        return Task.FromResult<IReadOnlyList<CheckInRow>>(results);
+    }
+
     private static CheckInRow ReadCheckInRow(Microsoft.Data.Sqlite.SqliteDataReader reader)
     {
         var pairedCol = reader.GetOrdinal("paired_vendor_id");

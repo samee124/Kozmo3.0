@@ -89,6 +89,39 @@ public sealed class CachingLlmClient : IKozmoLlm
         }
     }
 
+    public async Task<LlmResult> CompleteVisionAsync(
+        string            system,
+        byte[]            imageBytes,
+        int               maxTokens = 500,
+        CancellationToken ct        = default)
+    {
+        var key = ComputeVisionKey(system, imageBytes, maxTokens, _model, _temperature);
+
+        await _lock.WaitAsync(ct);
+        try
+        {
+            var cache = LoadCache();
+
+            if (cache.TryGetValue(key, out var entry))
+                return EntryToResult(entry);
+
+            if (!_recordMode)
+                throw new LlmCacheMissException(key);
+
+            if (_inner is null)
+                throw new InvalidOperationException("Record mode requires an inner client.");
+
+            var result = await _inner.CompleteVisionAsync(system, imageBytes, maxTokens, ct);
+            cache[key] = ResultToEntry(result);
+            SaveCache(cache);
+            return result;
+        }
+        finally
+        {
+            _lock.Release();
+        }
+    }
+
     /// <summary>
     /// Stable SHA-256 hash of (model, temperature, system, user, maxTokens).
     /// Internal so tests can verify determinism across all key dimensions.
@@ -100,6 +133,20 @@ public sealed class CachingLlmClient : IKozmoLlm
         var input = $"{model}|{temp}|{system}|{user}|{maxTokens}";
         var bytes = SHA256.HashData(Encoding.UTF8.GetBytes(input));
         return Convert.ToHexString(bytes).ToLowerInvariant();
+    }
+
+    /// <summary>
+    /// Stable SHA-256 hash for vision calls. The "vision|" prefix guarantees no collision
+    /// with text-prompt keys even if image bytes happened to produce the same pre-hash string.
+    /// Image bytes are hashed separately (not base64-embedded) to keep the input string small.
+    /// </summary>
+    internal static string ComputeVisionKey(
+        string system, byte[] imageBytes, int maxTokens, string model, float temperature)
+    {
+        var temp    = temperature.ToString("R", CultureInfo.InvariantCulture);
+        var imgHash = Convert.ToHexString(SHA256.HashData(imageBytes)).ToLowerInvariant();
+        var input   = $"vision|{model}|{temp}|{system}|{imgHash}|{maxTokens}";
+        return Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(input))).ToLowerInvariant();
     }
 
     // ── Serialization ──────────────────────────────────────────────────────

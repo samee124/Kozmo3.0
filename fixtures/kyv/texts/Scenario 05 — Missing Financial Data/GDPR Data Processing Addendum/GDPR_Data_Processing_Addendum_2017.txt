@@ -1,0 +1,94 @@
+```
+SALESFORCE.ORG
+DATA PROCESSING ADDENDUM
+(GDPR Salesforce Processor Binding Corporate Rules and Standard Contractual Clauses
+(Revision October 2017)
+
+This Data Processing Addendum ("DPA") forms part of the Master Subscription Agreement between Customer and the Salesforce.org entity named in such Agreement (namely, Salesforce.org, a California public benefit corporation, or Salesforce.org EMEA Limited, a company incorporated England) or other written or electronic agreement between such Salesforce.org entity and Customer for the purchase of online services from Salesforce.org (the "Agreement") to reflect the parties' agreement with regard to the Processing of Customer Data, including Personal Data, in accordance with the requirements of Data Protection Laws and Regulations. Customer understands that salesforce.com, inc. ("SFDC") performs the online services that Customer purchases from Salesforce.org. Consequently, SFDC conducts the Processing of Customer Data. Salesforce.org will cause SFDC to comply with all requirements set forth in this DPA. SFDC is not a party to this DPA, but Salesforce.org has concluded a separate contract with SFDC under which SFDC is contractually obligated to conduct all Processing of Customer Data in compliance with the terms of this DPA between Customer and Salesforce.org.
+
+HOW TO EXECUTE THIS DPA:
+
+1. This DPA consists of three parts: the main body of the DPA, and Schedules 1, 2, 3, 4 and 5 (including Appendices 1 to 3).
+2. This DPA has been signed by the Salesforce.org entity which is a party to the Agreement with Customer. The Standard Contractual Clauses in Schedule 5 have been pre-signed on behalf of salesforce.com having its principal place of business at 507 Townsend Street, Suite 300, San Francisco, California 94105 as the Data Importer.
+3. To complete this DPA, Customer must:
+   a. Complete the information in the signature box and sign (the signature block is not immediately after Section 12).
+   b. Complete the information regarding the data exporter (in the opening paragraph of Schedule 5 and in Appendix 1 of Schedule 5).
+   c. Complete the information in the signature boxes of Schedule 5 and sign (the signature boxes are set out immediately after Clause 12 of Schedule 5 and at the end of Appendix 1 of Schedule 5).
+4. Submit the completed and signed DPA to Salesforce.org via SFDO-DPA@salesforce.com.
+
+HOW THIS DPA APPLIES
+
+If the Customer entity signing this DPA is a party to the Agreement, this DPA is an addendum to and forms part of the Agreement. In such case, the Salesforce.org entity that is party to the Agreement is party to this DPA.
+
+If the Customer entity signing this DPA has executed an Order Form with Salesforce.org pursuant to the Agreement, but is not itself a party to the Agreement, this DPA is an addendum to that Order Form and applicable renewal Order Forms, and Salesforce.org is party to this DPA.
+
+If the Customer entity signing this DPA is neither a party to an Order Form nor the Agreement, this DPA is not valid and is not legally binding. Such entity should request that the Customer entity who is a party to the Agreement executes this DPA.
+
+This DPA shall not replace any comparable or additional rights relating to Processing of Customer Data contained in Customer's Agreement (including any existing data processing addendum to the Agreement).
+
+DATA PROCESSING TERMS
+
+In the course of providing the Services to Customer that Customer purchases from Salesforce.org pursuant to the Agreement between Customer and Salesforce.org, SFDC may Process Personal Data on behalf of Customer. Salesforce.org shall cause that SFDC to comply with the following provisions with respect to any Personal Data, each acting reasonably and in good faith. The parties agree that where the text below states that SFDC will take a certain action, that such text means that Salesforce.org will procure that SFDC will take that action; and the parties do not intend that SFDC will have any direct liability or obligation to the Customer.
+
+October 19, 2017 SFDO DPA
+```
+```
+1. DEFINITIONS
+
+“Authorised Associate” means any of Customer’s Associate(s) which (a) is subject to the data protection laws and regulations of the European Union, the European Economic Area and/or their member states, Switzerland and/or the United Kingdom, and (b) is permitted to use the Services pursuant to the Agreement between Customer and Salesforce.org, but has not signed its own Order Form with Salesforce.org and is not a “Customer” as defined under the Agreement.
+
+“Controller” means the entity which determines the purposes and means of the Processing of Personal Data.
+
+“Data Protection Laws and Regulations” means all laws and regulations, including laws and regulations of the European Union, the European Economic Area and their member states, Switzerland and the United Kingdom, applicable to the Processing of Personal Data under the Agreement.
+
+“Data Subject” means the identified or identifiable person to whom Personal Data relates.
+
+“GDPR” means the Regulation (EU) 2016/679 of the European Parliament and of the Council of 27 April 2016 on the protection of natural persons with regard to the processing of personal data and on the free movement of such data, and repealing Directive 95/46/EC (General Data Protection Regulation).
+
+“Personal Data” means any information relating to (i) an identified or identifiable natural person and, (ii) an identifiable information under applicable Data Protection Laws and Regulations, where for each of (i) and (ii) data is Customer Data.
+
+“Processing” means any operation or set of operations which is performed upon Personal Data, whether or not by automated means, such as collection, recording, organization, storage, adaptation or alteration, retrieval, consultation, use, disclosure by transmission, dissemination or otherwise making available, alignment or combination, blocking, erasure or destruction.
+
+“Processor” means the entity which Processes Personal Data on behalf of the Data Controller.
+
+“Salesforce.org” means the Salesforce entity which is a party to this DPA, as specified in the section “HOW THIS DPA APPLIES” above, being Salesforce.org, a nonprofit California public benefit corporation having its principal place of business at 50 Fremont Street, Suite 300, San Francisco, California 94105; or Salesforce.org EMEA Limited a company incorporated in England with registered office at 100 New Bridge Street, London, EC4V 6JA, United Kingdom.
+
+“Salesforce Processor BCR” means SFDC’s processor binding corporate rules for the Processing of Personal Data, the most current version of which is available on SFDC’s website, currently located at http://trust.salesforce.com, which govern transfers of Personal Data to third countries to and between members of the SFDC Group, and to third-party Subprocessors. The scope of application of the Salesforce Processor BCR is set out in Section 1 of this DPA and Section 1 of Schedule 1.
+
+“Security, Privacy and Architecture Documentation” means the Security, Privacy and Architecture Documentation applicable to the specific Services purchased by Customer, as updated from time to time, and accessible via SFDC’s Trust and Compliance webpage (also accessible via http://help.salesforce.com and http://www.salesforce.com/company/legal/agreements.jsp under the “Trust and Compliance Documentation” heading, or as otherwise made reasonably available by SFDC.
+
+“SFDC” means the Salesforce.com entity or entities that perform the Data Processing and Services that Salesforce.org resells to Customer, including salesforce.com, inc., a company incorporated in Delaware.
+
+“SFDC Group” means SFDC and its Affiliates engaged in the Processing of Personal Data. Neither SFDC nor any Affiliate in the SFDC Group are parties to this DPA or the Agreement with Customer. Salesforce.org is not an Affiliate of SFDC.
+
+“Standard Contractual Clauses” means the terms attached hereto as Schedule 5 pursuant to the European Commission’s decision (C(2010)593) of 5 February 2010 on Standard Contractual Clauses for the transfer of personal data to processors established in third countries which do not ensure an adequate level of data protection.
+
+“Sub-processor” means any Processor engaged by SFDC or a member of the SFDC Group.
+
+“Supervisory Authority” means an independent public authority which is established by an EU Member State pursuant to GDPR.
+
+October 19, 2017 SFDO DPA
+```
+```
+2. PROCESSING OF PERSONAL DATA
+
+2.1 Roles of the Parties. The parties acknowledge and agree that with regard to the Processing of Personal Data that Customer uploads to the online platforms and Services operated by SFDC, Customer is the Controller, Salesforce.org takes on the responsibility as the Processor, Salesforce.org will engage SFDC as a sub-processor and members of the SFDC Group will engage Sub-processors pursuant to the requirements set forth in Section 5 “Sub-processors” below.
+
+2.2 Customer’s Processing of Personal Data. Customer shall, in its use of the Services, Process Personal Data in accordance with the requirements of Data Protection Laws and Regulations. For the avoidance of doubt, Customer’s instructions for the Processing of Personal Data shall comply with Data Protection Laws and Regulations. Customer shall have sole responsibility for the accuracy, quality, and legality of Personal Data and the means by which Customer acquired Personal Data.
+
+2.3 Salesforce.org’s Processing of Personal Data. Salesforce.org processes limited relationship information to process Customer’s orders, invoice Customer, update Customer on new offerings and arrange for Services and support to be provided by SFDC. Salesforce.org personnel does not access, view or otherwise process any data that Customer uploaded to the online platforms or Services unless instructed by Customer, for example, in the context of technical support. Salesforce.org shall allow SFDC to Process Customer’s Personal Data in accordance with Section 2.4 hereof.
+
+2.4 SFDC’s Processing of Personal Data. Salesforce.org shall, and shall cause SFDC to, Process Personal Data as Confidential Information and shall only Process Personal Data on behalf of and in accordance with Customer’s documented instructions for the following purposes: (i) Processing in accordance with the Agreement and applicable Order form; (ii) Processing initiated by Users in their use of the Services; and (iii) Processing to comply with other documented reasonable instructions provided by Customer (e.g., via email) where such instructions are consistent with the terms of the Agreement. If Customer provides instructions that require customized development, services or efforts, Salesforce.org shall provide Customer with a fee quote for the resulting costs before incurring any expenses on Customer’s behalf.
+
+2.5 Details of the Processing. The subject-matter of Processing of Personal Data by Salesforce.org and SFDC is the provision of the Services to Customer. The duration of the Processing, the types of Personal Data and categories of Data Subjects processed under this DPA are further specified in Schedule 4 (Details of Processing) to this DPA.
+
+3. RIGHTS OF DATA SUBJECTS
+
+3.1 Data Subject Requests. Salesforce.org shall, to the extent legally permitted, promptly notify Customer if Salesforce.org or SFDC receives a request from a Data Subject to access, correct or delete that person’s Personal Data or a Data Subject objects to the Processing thereof (“Data Subject Request”). Salesforce.org shall not, and shall cause SFDC not to, respond to a Data Subject Request unless Customer’s prior written consent to such request is received from Customer to which Customer never agrees. To the extent Customer, in its use of the Services, does not provide a Data Subject Request, Salesforce.org shall, and shall cause SFDC to, upon Customer’s request provide commercial and reasonable assistance to facilitate such Data Subject Request, to the extent that Salesforce.org or SFDC is legally permitted to do so and provided that such Data Subject Request is exercised in accordance with Data Protection Laws and Regulations. To the extent legally permitted, Customer shall be responsible for any costs arising from Salesforce.org’s and SFDC’s provision of such assistance.
+
+3.2 Data Subject Request. With effect from 25 May 2018, the following wording will replace Section 3.1 (“Data Subject Request”) in its entirety: Data Subject Requests. Salesforce.org shall, to the extent legally permitted, promptly notify Customer if Salesforce.org receives a request from a Data Subject to exercise the Data Subject’s rights of access, right to rectification, restriction of Processing, erasure (“right to be forgotten”), data portability, object to the Processing, or its right not to be subject to an automated individual decision making (“Data Subject Request”). Taking into account the nature of the Processing, Salesforce.org shall, and shall procure that SFDC shall, assist Customer by appropriate technical and organizational measures, insofar as this is possible, for the fulfilment of Customer’s obligation to respond to a Data Subject Request under Data Protection Laws and Regulations. In addition, to the extent Customer, in its use of the Services, does not have the ability to address a Data Subject Request, Salesforce.org shall, and shall procure that SFDC shall, upon Customer’s request provide commercially reasonable efforts to assist Customer in responding to such Data Subject Request, to the extent Salesforce.org and/or SFDC are legally permitted to do so and the response to such Data Subject Request is required under Data Protection Laws and Regulations. To the extent legally permitted, Customer shall be responsible for any costs arising from Salesforce.org and/or SFDC’s provision of such assistance.
+
+4. SFDC PERSONNEL
+
+October 19, 2017 SFDO DPA
+```

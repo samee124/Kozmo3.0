@@ -7,3 +7,7 @@
 *.sln text eol=crlf
 *.json text eol=lf
 *.md text eol=lf
+
+# KYV cassette-recorder text fixtures — cassette keys are a SHA-256 of this exact text,
+# so CRLF drift on checkout (autocrlf) silently breaks cassette key matching.
+fixtures/kyv/texts/**/*.txt text eol=lf

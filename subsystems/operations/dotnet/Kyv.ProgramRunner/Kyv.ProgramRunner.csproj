@@ -14,5 +14,7 @@
     <ProjectReference Include="..\..\..\workflow-coordination\dotnet\Wc.CheckIn\Wc.CheckIn.csproj" />
     <ProjectReference Include="..\..\..\workflow-coordination\dotnet\Wc.Contracts\Wc.Contracts.csproj" />
     <ProjectReference Include="..\..\..\..\libs\Kozmo.Llm\Kozmo.Llm.csproj" />
+    <!-- CompletenessOrchestrator: initial completeness run per resolved vendor (Phase 5, Commit 4). -->
+    <ProjectReference Include="..\..\..\interpretation-inference\dotnet\Ii.Completeness\Ii.Completeness.csproj" />
   </ItemGroup>
 </Project>

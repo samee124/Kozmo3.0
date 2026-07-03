@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>Ii.Completeness</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Ii.Contracts\Ii.Contracts.csproj" />
+    <!-- Kozmo.Llm provides IKozmoLlm + CachingLlmClient — no OpenAI dependency.
+         The real client (Kozmo.Llm.OpenAi) is banned here by BannedSymbols.txt (Invariant #5). -->
+    <ProjectReference Include="..\..\..\..\libs\Kozmo.Llm\Kozmo.Llm.csproj" />
+    <!-- Wc.Contracts + Wc.CheckIn: GapCheckInStage and CompletenessOrchestrator wire into
+         the check-in loop (Phase 5 §4, Commit 3). Completeness gaps share ICheckInStore
+         and CheckInKind.DIMENSION_GAP with identity triage. -->
+    <ProjectReference Include="..\..\..\..\subsystems\workflow-coordination\dotnet\Wc.Contracts\Wc.Contracts.csproj" />
+    <ProjectReference Include="..\..\..\..\subsystems\workflow-coordination\dotnet\Wc.CheckIn\Wc.CheckIn.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.BannedApiAnalyzers" Version="3.3.4" PrivateAssets="all" />
+    <AdditionalFiles Include="BannedSymbols.txt" />
+  </ItemGroup>
+  <PropertyGroup>
+    <WarningsAsErrors>RS0030</WarningsAsErrors>
+  </PropertyGroup>
+</Project>

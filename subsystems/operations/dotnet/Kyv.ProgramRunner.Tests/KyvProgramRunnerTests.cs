@@ -97,26 +97,25 @@ public sealed class KyvProgramRunnerTests : IDisposable
         Assert.Equal(Now,                        run.StartedAt);
         Assert.NotEqual(Guid.Empty,              run.RunId);
 
-        // All 6 declared stages must be recorded
-        Assert.Equal(6, run.Stages.Count);
+        // All 7 declared stages must be recorded
+        Assert.Equal(7, run.Stages.Count);
         var names = run.Stages.Select(s => s.StageName).ToList();
-        Assert.Contains("ingest",         names);
-        Assert.Contains("classify",       names);
-        Assert.Contains("extract",        names);
-        Assert.Contains("filter",         names);
-        Assert.Contains("resolve",        names);
-        Assert.Contains("raise_checkins", names);
+        Assert.Contains("ingest",            names);
+        Assert.Contains("classify",          names);
+        Assert.Contains("extract",           names);
+        Assert.Contains("filter",            names);
+        Assert.Contains("resolve",           names);
+        Assert.Contains("raise_checkins",    names);
+        Assert.Contains("completeness_init", names);
 
-        // Unreadable documents must be reported — not silently dropped.
-        // Scenario 05 contains two image-only PDFs (no text layer) that PdfPig cannot read.
-        Assert.NotNull(run.UnreadableDocuments);
-        Assert.True(run.UnreadableDocuments.Count >= 1,
-            $"Expected at least 1 unreadable document; got 0. " +
-            $"Image-only PDFs in Scenario 05 must surface as UnreadableDocuments, not silent skips.");
-
+        // After cassette recording, OCR reads both Scenario 05 image-only PDFs
+        // (GDPR_Data_Processing_Addendum_2017.pdf and MSA_01_Salesforceorg_NSU_2018.pdf)
+        // via CompleteVisionAsync (3-page cap). Neither should remain Unreadable.
+        // If this fails, re-run tools/Kyv.CandidateRecorder to populate OCR cassette entries.
         Console.WriteLine($"[KYV] {run.UnreadableDocuments.Count} unreadable doc(s):");
         foreach (var u in run.UnreadableDocuments)
             Console.WriteLine($"  ! {u.RelativePath}  ({u.Reason})");
+        Assert.Empty(run.UnreadableDocuments);
     }
 
     [SkippableFact]

@@ -13,6 +13,8 @@
     <ProjectReference Include="..\Ii.Posture\Ii.Posture.csproj" />
     <ProjectReference Include="..\Ii.Decay\Ii.Decay.csproj" />
     <ProjectReference Include="..\Ii.Fakes\Ii.Fakes.csproj" />
+    <!-- Completeness orchestrator hooks into RecomputeVendorAsync (Phase 5, Commit 3). -->
+    <ProjectReference Include="..\Ii.Completeness\Ii.Completeness.csproj" />
     <ProjectReference Include="..\..\..\..\subsystems\knowledge-memory\dotnet\Km.Store\Km.Store.csproj" />
     <ProjectReference Include="..\..\..\..\libs\Kozmo.Platform\Kozmo.Platform.csproj" />
   </ItemGroup>

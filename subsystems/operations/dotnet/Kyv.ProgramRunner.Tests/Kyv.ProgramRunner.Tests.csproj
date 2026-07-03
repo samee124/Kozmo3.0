@@ -24,9 +24,18 @@
     <ProjectReference Include="..\Kyv.ProgramRunner\Kyv.ProgramRunner.csproj" />
     <ProjectReference Include="..\..\..\identity-governance\dotnet\Ig.Contracts\Ig.Contracts.csproj" />
     <ProjectReference Include="..\..\..\interpretation-inference\dotnet\Ii.Contracts\Ii.Contracts.csproj" />
+    <ProjectReference Include="..\..\..\interpretation-inference\dotnet\Ii.Completeness\Ii.Completeness.csproj" />
+    <ProjectReference Include="..\..\..\interpretation-inference\dotnet\Ii.Spine\Ii.Spine.csproj" />
     <ProjectReference Include="..\..\..\knowledge-memory\dotnet\Km.Store\Km.Store.csproj" />
     <ProjectReference Include="..\..\..\workflow-coordination\dotnet\Wc.CheckIn\Wc.CheckIn.csproj" />
     <ProjectReference Include="..\..\..\workflow-coordination\dotnet\Wc.Contracts\Wc.Contracts.csproj" />
     <ProjectReference Include="..\..\..\..\libs\Kozmo.Llm\Kozmo.Llm.csproj" />
+    <!-- Spine modules needed to build a real IiFacade for production-wiring tests. -->
+    <ProjectReference Include="..\..\..\interpretation-inference\dotnet\Ii.Decay\Ii.Decay.csproj" />
+    <ProjectReference Include="..\..\..\interpretation-inference\dotnet\Ii.Index\Ii.Index.csproj" />
+    <ProjectReference Include="..\..\..\interpretation-inference\dotnet\Ii.Observation\Ii.Observation.csproj" />
+    <ProjectReference Include="..\..\..\interpretation-inference\dotnet\Ii.Posture\Ii.Posture.csproj" />
+    <ProjectReference Include="..\..\..\interpretation-inference\dotnet\Ii.Rubric\Ii.Rubric.csproj" />
+    <ProjectReference Include="..\..\..\..\libs\Kozmo.Contracts\Kozmo.Contracts.csproj" />
   </ItemGroup>
 </Project>
