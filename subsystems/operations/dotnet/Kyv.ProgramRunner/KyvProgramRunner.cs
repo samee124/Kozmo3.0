@@ -233,6 +233,16 @@ public sealed class KyvProgramRunner
         // correctly: the completeness engine treats empty beliefs as UNKNOWN answers → all L1
         // questions become gaps → initial gap check-ins raised. Null when cassette is absent
         // (legacy/demo).
+        //
+        // Per-vendor failure containment: production's completeness LLM is always replay-only
+        // (no live network in the demo runtime path), so a belief combination that was never
+        // pre-recorded — e.g. one vendor's evidence just changed after a new document arrived —
+        // hits a cache miss. QuestionAnsweringStage/CompletenessOrchestrator do not catch that
+        // internally, so without a guard here it would propagate out of RunAsync and fail this
+        // entire multi-vendor run, taking every OTHER vendor's check-ins down with it. Mirrors
+        // Stage 3's per-document extraction-miss handling: one bad input degrades gracefully
+        // instead of aborting the whole pipeline. Caught broadly (not just LlmCacheMissException)
+        // because ANY completeness failure for one vendor must stay scoped to that vendor.
         var completenessCheckInCount = 0;
         if (_completeness != null)
         {
@@ -244,9 +254,18 @@ public sealed class KyvProgramRunner
 
             foreach (var vid in resolvedVendorIds)
             {
-                var vendorBeliefs = await _entityStore.GetCurrentBeliefsAsync(vid, ct);
-                var profile = await _completeness.RunAsync(vid, vendorBeliefs, now, ct);
-                completenessCheckInCount += profile.GapQuestionIds.Count;
+                try
+                {
+                    var vendorBeliefs = await _entityStore.GetCurrentBeliefsAsync(vid, ct);
+                    var profile = await _completeness.RunAsync(vid, vendorBeliefs, now, ct);
+                    completenessCheckInCount += profile.GapQuestionIds.Count;
+                }
+                catch (Exception)
+                {
+                    // This vendor's completeness_init step is skipped this run — no check-ins
+                    // raised for it this cycle — but every other vendor, and every earlier stage
+                    // (persist_beliefs, raise_checkins), is unaffected.
+                }
             }
         }
         executions.Add(new(8, "completeness_init", now, completenessCheckInCount));

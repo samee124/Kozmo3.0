@@ -106,6 +106,63 @@ public sealed class CompletenessWiringTests : IDisposable
         Assert.Contains(open, ci => ci.Kind == CheckInKind.DIMENSION_GAP);
     }
 
+    // ── (1b) Stage 8 hardening: one vendor's completeness failure is contained ──
+    //
+    // Production's completeness LLM is always replay-only — a belief combination that was
+    // never pre-recorded hits a cache miss, and neither QuestionAnsweringStage nor
+    // CompletenessOrchestrator catch that internally. Without a per-vendor guard in
+    // KyvProgramRunner, one vendor's cache miss would propagate out of Stage 8's loop and fail
+    // the entire multi-vendor run — including every OTHER vendor's check-ins. This proves the
+    // failure is contained: the run completes, and an unaffected vendor still gets its
+    // DIMENSION_GAP check-ins raised.
+
+    [SkippableFact]
+    public async Task KyvRunner_OneVendorCompletenessFailure_DoesNotFailRunOrOtherVendors()
+    {
+        Skip.If(!Directory.Exists(Workspace),
+            $"Workspace absent: '{Workspace}' — place scenario PDFs there to run this test.");
+
+        var repoRoot        = FindRepoRoot();
+        var cassette        = Path.Combine(repoRoot, "fixtures", "kyv", "candidate-extraction.cassette.json");
+        var beliefCassette  = Path.Combine(repoRoot, "fixtures", "kyv", "belief-extraction.cassette.json");
+        Skip.If(!File.Exists(beliefCassette), "Belief-extraction cassette not recorded yet.");
+        var llm       = new CachingLlmClient(cassette, recordMode: false);
+        var beliefLlm = new CachingLlmClient(beliefCassette, recordMode: false);
+
+        // Real beliefs (not empty) are needed so vendors' completeness prompts are actually
+        // distinguishable from one another — IIVS's persisted beliefs carry "IIVS" in their
+        // Derivation text (e.g. "doc:QBR_Q32022_IIVS_RevMed.pdf ..."), which the fake below uses
+        // to fail ONLY IIVS's completeness call, simulating "this vendor's belief combination was
+        // never pre-recorded" while every other vendor answers normally.
+        var selectiveThrowLlm = new SelectiveThrowLlm(throwWhenUserContains: "IIVS");
+        var completeness = new CompletenessOrchestrator(
+            new QuestionAnsweringStage(selectiveThrowLlm), new GapCheckInStage(),
+            _checkInStore, DepthLevel.L1, "kyv@kozmo");
+
+        var profile = CatalogueTestHelper.LoadProfile();
+        var runner = new KyvProgramRunner(
+            llm, new WiringFakeEntityTypeClassifier(EntityType.Company),
+            new NoOpIdentityRegistry(), _checkInStore,
+            entityStore: _store, profile: profile,
+            beliefLlm: beliefLlm,
+            completeness: completeness);
+
+        // Must complete successfully — IIVS's completeness failure must not propagate.
+        var run = await runner.RunAsync(Workspace, Now);
+        Assert.Equal(ProgramRunStatus.Completed, run.Status);
+        Assert.Contains(run.Stages, s => s.StageName == "completeness_init");
+
+        // The throwing fake was actually exercised for IIVS (proves the failure was real, not
+        // just absent because IIVS didn't resolve).
+        Assert.True(selectiveThrowLlm.ThrewAtLeastOnce,
+            "Expected the fake to throw for IIVS at least once — otherwise this test proves nothing.");
+
+        // Other vendors still got their DIMENSION_GAP check-ins — the failure did not take down
+        // the rest of Stage 8.
+        var open = await _checkInStore.GetOpenAsync();
+        Assert.Contains(open, ci => ci.Kind == CheckInKind.DIMENSION_GAP);
+    }
+
     // ── (2) KYV facade vs legacy: side-by-side call count ───────────────────────
     //
     // Same CountingLlm, two different IiFacade instances.
@@ -231,6 +288,31 @@ file sealed class CountingLlm : IKozmoLlm
         Interlocked.Increment(ref _count);
         var el = JsonSerializer.Deserialize<JsonElement>(UnknownJson);
         return Task.FromResult(new LlmResult(el, 0.10, "counting-fake"));
+    }
+
+    public Task<LlmResult> CompleteVisionAsync(
+        string system, byte[] imageBytes, int maxTokens = 500, CancellationToken ct = default) =>
+        throw new NotSupportedException();
+}
+
+file sealed class SelectiveThrowLlm(string throwWhenUserContains) : IKozmoLlm
+{
+    private const string UnknownJson =
+        """{"answer":"UNKNOWN","confidence":0.10,"cited_belief_ids":[],"reasoning":"No evidence."}""";
+
+    public bool ThrewAtLeastOnce { get; private set; }
+
+    public Task<LlmResult> CompleteJsonAsync(
+        string system, string user, int maxTokens = 500, CancellationToken ct = default)
+    {
+        if (user.Contains(throwWhenUserContains, StringComparison.OrdinalIgnoreCase))
+        {
+            ThrewAtLeastOnce = true;
+            throw new LlmCacheMissException("simulated unrecorded belief combination");
+        }
+
+        var el = JsonSerializer.Deserialize<JsonElement>(UnknownJson);
+        return Task.FromResult(new LlmResult(el, 0.10, "selective-throw-fake"));
     }
 
     public Task<LlmResult> CompleteVisionAsync(
