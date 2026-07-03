@@ -14,8 +14,13 @@ namespace Kozmo.Llm;
 ///   <item><b>Record (seed-prep only)</b>: on a miss, delegates to an inner client, writes the
 ///     result to the cache file, then returns it.</item>
 /// </list>
-/// Cache key is a stable SHA-256 hash of (model, temperature, system, user, maxTokens).
-/// If the model or temperature changes the key changes, preventing silent replay of stale results.
+/// Cache key is a stable SHA-256 hash of (model, temperature, system, user, maxTokens), with
+/// line endings normalized to LF before hashing so the key is immune to CRLF/LF drift across
+/// checkouts and platforms (see <see cref="ComputeKey"/>). Lookups also fall back to the
+/// pre-normalization ("legacy") key so cassettes recorded before this change keep replaying
+/// without a mass re-record; all new writes use the normalized key, so cassettes converge over
+/// time. If the model or temperature changes the key changes, preventing silent replay of stale
+/// results.
 /// </summary>
 public sealed class CachingLlmClient : IKozmoLlm
 {
@@ -64,7 +69,8 @@ public sealed class CachingLlmClient : IKozmoLlm
         int    maxTokens = 500,
         CancellationToken ct = default)
     {
-        var key = ComputeKey(system, user, maxTokens, _model, _temperature);
+        var key       = ComputeKey(system, user, maxTokens, _model, _temperature);
+        var legacyKey = ComputeLegacyKey(system, user, maxTokens, _model, _temperature);
 
         await _lock.WaitAsync(ct);
         try
@@ -74,10 +80,18 @@ public sealed class CachingLlmClient : IKozmoLlm
             if (cache.TryGetValue(key, out var entry))
                 return EntryToResult(entry);
 
+            // Backward compatibility: cassettes recorded before line-ending normalization was
+            // introduced were keyed on the raw, un-normalized prompt text. Fall back to that
+            // key so existing cassettes keep replaying without a re-record pass. New entries
+            // are always written under the normalized key (below), so this fallback path only
+            // ever matters for old data — it never masks a genuine miss on freshly recorded data.
+            if (cache.TryGetValue(legacyKey, out entry))
+                return EntryToResult(entry);
+
             if (!_recordMode)
                 throw new LlmCacheMissException(key);
 
-            // record mode — call inner, persist
+            // record mode — call inner, persist under the normalized key
             var result = await _inner!.CompleteJsonAsync(system, user, maxTokens, ct);
             cache[key] = ResultToEntry(result);
             SaveCache(cache);
@@ -95,7 +109,8 @@ public sealed class CachingLlmClient : IKozmoLlm
         int               maxTokens = 500,
         CancellationToken ct        = default)
     {
-        var key = ComputeVisionKey(system, imageBytes, maxTokens, _model, _temperature);
+        var key       = ComputeVisionKey(system, imageBytes, maxTokens, _model, _temperature);
+        var legacyKey = ComputeLegacyVisionKey(system, imageBytes, maxTokens, _model, _temperature);
 
         await _lock.WaitAsync(ct);
         try
@@ -103,6 +118,11 @@ public sealed class CachingLlmClient : IKozmoLlm
             var cache = LoadCache();
 
             if (cache.TryGetValue(key, out var entry))
+                return EntryToResult(entry);
+
+            // See CompleteJsonAsync — same backward-compatible fallback for pre-normalization
+            // vision cassette entries.
+            if (cache.TryGetValue(legacyKey, out entry))
                 return EntryToResult(entry);
 
             if (!_recordMode)
@@ -123,31 +143,80 @@ public sealed class CachingLlmClient : IKozmoLlm
     }
 
     /// <summary>
-    /// Stable SHA-256 hash of (model, temperature, system, user, maxTokens).
-    /// Internal so tests can verify determinism across all key dimensions.
+    /// Stable SHA-256 hash of (model, temperature, system, user, maxTokens) — the key used for
+    /// ALL new cassette writes. Internal so tests can verify determinism across all key dimensions.
+    /// <para>
+    /// Line endings in the assembled input are normalized to LF before hashing. Prompt text
+    /// often originates from C# raw string literals or fixture files whose physical line-ending
+    /// bytes depend on the checkout (<c>.gitattributes</c> eol rules, <c>core.autocrlf</c>) or the
+    /// host OS (e.g. <see cref="JsonSerializerOptions.WriteIndented"/> emits <c>Environment.NewLine</c>).
+    /// Without normalization, the exact same logical prompt hashes differently across machines or
+    /// checkouts, silently breaking cassette replay. Normalizing here makes the key a function of
+    /// content, not incidental line-ending encoding.
+    /// </para>
     /// </summary>
     internal static string ComputeKey(
         string system, string user, int maxTokens, string model, float temperature)
     {
         var temp  = temperature.ToString("R", CultureInfo.InvariantCulture);
-        var input = $"{model}|{temp}|{system}|{user}|{maxTokens}";
-        var bytes = SHA256.HashData(Encoding.UTF8.GetBytes(input));
-        return Convert.ToHexString(bytes).ToLowerInvariant();
+        var input = NormalizeLineEndings($"{model}|{temp}|{system}|{user}|{maxTokens}");
+        return Hash(input);
     }
 
     /// <summary>
-    /// Stable SHA-256 hash for vision calls. The "vision|" prefix guarantees no collision
-    /// with text-prompt keys even if image bytes happened to produce the same pre-hash string.
-    /// Image bytes are hashed separately (not base64-embedded) to keep the input string small.
+    /// Pre-normalization key, computed on the raw (un-normalized) prompt text — i.e. exactly
+    /// what <see cref="ComputeKey"/> computed before line-ending normalization was introduced.
+    /// Read-only lookup fallback: every cassette entry recorded before this change was written
+    /// under this key. Never used to write new entries — <see cref="ComputeKey"/> is the sole
+    /// write key, so cassettes converge on the normalized scheme over time without a mass
+    /// re-record of already-working cassettes.
+    /// </summary>
+    internal static string ComputeLegacyKey(
+        string system, string user, int maxTokens, string model, float temperature)
+    {
+        var temp  = temperature.ToString("R", CultureInfo.InvariantCulture);
+        var input = $"{model}|{temp}|{system}|{user}|{maxTokens}";
+        return Hash(input);
+    }
+
+    /// <summary>
+    /// Stable SHA-256 hash for vision calls — the key used for ALL new vision cassette writes.
+    /// The "vision|" prefix guarantees no collision with text-prompt keys even if image bytes
+    /// happened to produce the same pre-hash string. Image bytes are hashed separately (not
+    /// base64-embedded) to keep the input string small. The <paramref name="system"/> prompt is
+    /// line-ending normalized for the same reason as <see cref="ComputeKey"/>.
     /// </summary>
     internal static string ComputeVisionKey(
         string system, byte[] imageBytes, int maxTokens, string model, float temperature)
     {
         var temp    = temperature.ToString("R", CultureInfo.InvariantCulture);
         var imgHash = Convert.ToHexString(SHA256.HashData(imageBytes)).ToLowerInvariant();
-        var input   = $"vision|{model}|{temp}|{system}|{imgHash}|{maxTokens}";
-        return Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(input))).ToLowerInvariant();
+        var input   = NormalizeLineEndings($"vision|{model}|{temp}|{system}|{imgHash}|{maxTokens}");
+        return Hash(input);
     }
+
+    /// <summary>
+    /// Pre-normalization vision key — see <see cref="ComputeLegacyKey"/>. Read-only lookup
+    /// fallback for vision cassette entries recorded before normalization.
+    /// </summary>
+    internal static string ComputeLegacyVisionKey(
+        string system, byte[] imageBytes, int maxTokens, string model, float temperature)
+    {
+        var temp    = temperature.ToString("R", CultureInfo.InvariantCulture);
+        var imgHash = Convert.ToHexString(SHA256.HashData(imageBytes)).ToLowerInvariant();
+        var input   = $"vision|{model}|{temp}|{system}|{imgHash}|{maxTokens}";
+        return Hash(input);
+    }
+
+    /// <summary>
+    /// Normalizes all line-ending styles to LF: CRLF pairs first (so they collapse to one LF,
+    /// not two), then any remaining stray CR (bare old-Mac-style line endings).
+    /// </summary>
+    private static string NormalizeLineEndings(string s) =>
+        s.Replace("\r\n", "\n").Replace("\r", "\n");
+
+    private static string Hash(string input) =>
+        Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(input))).ToLowerInvariant();
 
     // ── Serialization ──────────────────────────────────────────────────────
 
