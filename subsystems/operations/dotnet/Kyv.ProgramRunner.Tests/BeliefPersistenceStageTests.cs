@@ -74,6 +74,13 @@ public sealed class BeliefPersistenceStageTests
         Assert.Equal(1.00, sla.Value, precision: 6); // 99.9% falls in the top uptime_sla bucket
         Assert.True(sla.Confidence > 0, "Scored belief must keep a non-zero confidence — it feeds RubricModule.");
 
+        // ── Value convention 1(b): Derivation carries the REAL quoted evidence, not the
+        // generic "vendor-file:{claimKey}" template — completeness reads this to ground answers
+        // that need the human fact (e.g. "99.9% uptime"), which the banded 1.00 Value can't give it.
+        Assert.NotEqual("vendor-file:sla_uptime", sla.Derivation);
+        Assert.Equal(slaCandidate.Derivation, sla.Derivation);
+        Assert.Contains("99.9% uptime", sla.Derivation);
+
         // ── Structural: payment_terms, renewal_date, annual_value persist RAW, Confidence == 0 ──
         var paymentTerms = byKey["payment_terms"];
         Assert.Equal(candidates.Single(c => c.Criterion == "payment_terms").Value, paymentTerms.Value, precision: 6);

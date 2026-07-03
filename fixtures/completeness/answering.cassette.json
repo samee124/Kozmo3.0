@@ -278,5 +278,45 @@
     "answerJson": "{\u0022answer\u0022:\u0022UNKNOWN\u0022,\u0022confidence\u0022:0.3,\u0022cited_belief_ids\u0022:[],\u0022reasoning\u0022:\u0022The provided beliefs do not contain any information regarding the contractual renewal date for the vendor agreement.\u0022}",
     "confidence": 0.85,
     "reasoningSummary": ""
+  },
+  "e3efdb1560ecf635c123d4a9ca8219c936892b4f77b222be489200cd14debae9": {
+    "answerJson": "{\u0022answer\u0022:\u0022UNKNOWN\u0022,\u0022confidence\u0022:0.3,\u0022cited_belief_ids\u0022:[],\u0022reasoning\u0022:\u0022There is no evidence provided regarding the vendor\\u0027s performance against their contracted SLA over the past 12 months.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "bf2c114bfa7cc7b3f726824b4d78609c8f09b018755e8880c2c658d8928546a7": {
+    "answerJson": "{\u0022answer\u0022:\u0022UNKNOWN\u0022,\u0022confidence\u0022:0.3,\u0022cited_belief_ids\u0022:[],\u0022reasoning\u0022:\u0022The beliefs do not provide any information regarding the current CSAT or NPS score for the vendor.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "e47c1b46ab2ad5a9c6a547c5f4e971cdfe68331e02b9cde3e73897f791d3725a": {
+    "answerJson": "{\u0022answer\u0022:\u0022YES\u0022,\u0022confidence\u0022:1.0,\u0022cited_belief_ids\u0022:[\u0022de110000-0000-0000-0000-000000000003\u0022,\u0022de110000-0000-0000-0000-000000000004\u0022],\u0022reasoning\u0022:\u0022There is a primary belief confirming defined payment terms stating that all undisputed amounts will be paid within thirty days of the date of invoice.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "32043c615bf27cb543bda5b8fad67564b7241ddfbcf33b55525beb7d818df95a": {
+    "answerJson": "{\u0022answer\u0022:\u0022UNKNOWN\u0022,\u0022confidence\u0022:0.3,\u0022cited_belief_ids\u0022:[],\u0022reasoning\u0022:\u0022The beliefs do not provide sufficient information to determine the total annual contract value.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "4086d6c1daf6aec7d6d32cf865b43b9b70c2b309cdd63498d899adb99cce876e": {
+    "answerJson": "{\u0022answer\u0022:\u0022UNKNOWN\u0022,\u0022confidence\u0022:0.3,\u0022cited_belief_ids\u0022:[],\u0022reasoning\u0022:\u0022There is no evidence provided regarding the existence of a documented uptime SLA for the vendor.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "458bfd529d6fa5e4dd8c37f57e8870ffff92b2913161d0f0087fb72651a26ba0": {
+    "answerJson": "{\u0022answer\u0022:\u0022UNKNOWN\u0022,\u0022confidence\u0022:0.3,\u0022cited_belief_ids\u0022:[],\u0022reasoning\u0022:\u0022The provided beliefs do not contain any information regarding the vendor\\u0027s contracted uptime SLA percentage.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "ab7f88dac2758e74f1016a1dae8f729a82ed724cecb41101ea7709eda5e3d75f": {
+    "answerJson": "{\u0022answer\u0022:\u0022UNKNOWN\u0022,\u0022confidence\u0022:0.3,\u0022cited_belief_ids\u0022:[],\u0022reasoning\u0022:\u0022The provided beliefs do not contain any information regarding the alignment of the vendor\\u0027s product roadmap with our strategic direction.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "a862b4ae3c46ec1a6ef6832acb46a100fa3771a060d0f5931ecb5f076c3c44ca": {
+    "answerJson": "{\u0022answer\u0022:\u0022UNKNOWN\u0022,\u0022confidence\u0022:0.3,\u0022cited_belief_ids\u0022:[],\u0022reasoning\u0022:\u0022The provided beliefs do not contain any information regarding the contractual renewal date for the vendor agreement.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
   }
 }

@@ -25,6 +25,14 @@ public sealed class VendorFileWriteService
     /// Write a vendor file belief, applying the tier ceiling cap and supersession rules.
     /// Returns the written belief.
     /// </summary>
+    /// <param name="derivation">
+    /// The real evidence text (e.g. a quoted span: doc:QBR.pdf "4.6 out of 5.0"), when the
+    /// caller has one. Falls back to the generic "vendor-file:{claimKey}" template when null or
+    /// blank — preserves exact prior behavior for every caller that doesn't supply one.
+    /// Derivation is annotation only — excluded from the belief fingerprint (FingerprintComputer
+    /// hashes only Dimension/Criterion/Value/Confidence) — so this never affects scoring or
+    /// determinism.
+    /// </param>
     public async Task<Belief> WriteBeliefAsync(
         Guid           vendorId,
         string         claimKey,
@@ -37,6 +45,7 @@ public sealed class VendorFileWriteService
         BeliefProvenance provenance,
         DateTimeOffset ingestedAt,
         DateTimeOffset? validUntil = null,
+        string?        derivation = null,
         CancellationToken ct = default)
     {
         // Resolve claim_key definition once — used for ceiling and half-life
@@ -68,7 +77,7 @@ public sealed class VendorFileWriteService
             SourceTier:    tier,
             Confidence:    confidence,   // structural=0.0; scored=extractorConfidence (store clamps to §2 ceiling)
             Freshness:     1.0,          // decay applied at scoring time via DecayEngine
-            Derivation:    $"vendor-file:{claimKey}",
+            Derivation:    string.IsNullOrWhiteSpace(derivation) ? $"vendor-file:{claimKey}" : derivation,
             SourceSignals: [],
             Version:       version,
             SupersededBy:  null,

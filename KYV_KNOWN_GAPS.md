@@ -101,3 +101,55 @@ issue this fix targets, and is out of scope here.
 discussion: give the belief model a real, separate evidence-weight field distinct from scoring
 `Confidence`, so structural facts can carry honest "how much do we trust this as evidence" without
 overloading the field `RubricModule` depends on. Deferred — not started.
+
+## Value-representation follow-up: option 1(b) shipped, does NOT fully close the gap
+
+`Belief.Confidence` had two jobs colliding (above); `Belief.Value` has the same problem —
+`RubricModule` needs the banded 0-1 score, completeness needs the human-readable fact (a CSAT of
+"4.6 out of 5.0" persists as `Value = 1.00`). Investigating this surfaced TWO defects, not one:
+
+1. `AnsweringPrompt.BeliefView` never serialized `Value` at all — the LLM saw no number for any
+   belief, banded or raw.
+2. `VendorFileWriteService.WriteBeliefAsync` **discarded the real evidence text unconditionally**,
+   writing `Derivation: "vendor-file:{claimKey}"` regardless of what the caller had.
+   `BeliefCandidate.Derivation` (built by `DocumentBeliefExtractor`) already carried the real
+   quoted span (e.g. `doc:QBR....pdf "4.6 out of 5.0"`) — `BeliefPersistenceStage` had it in hand
+   and it was thrown away before persistence. `AnsweringPrompt` already serializes `Derivation`,
+   so this — not (1) — was the actual fix target for option 1(b).
+3. This is bigger than a completeness problem: `VendorFileRenderer.FormatValue` (the user-facing
+   vendor-file markdown report) and `DtoMapper.cs` (`BeliefViewDto.Value`, sent to
+   `/vendors/{id}/trail`) both display `Belief.Value` directly — a scored belief's banded `1.00`
+   shows as "1.00" there too, independent of completeness.
+
+**Option 1(b) shipped:** `VendorFileWriteService.WriteBeliefAsync` gained an optional
+`derivation` parameter — uses it when supplied, falls back to the exact prior
+`"vendor-file:{claimKey}"` template when null/blank (zero behavior change for the ~15 other call
+sites that don't pass one). `BeliefPersistenceStage` now threads `BeliefCandidate.Derivation`
+through. No `AnsweringPrompt` change was needed — it already surfaces `Derivation`.
+`Derivation` is confirmed excluded from the belief fingerprint (`FingerprintComputer` only hashes
+`Dimension, Criterion, Value, Confidence` via `BeliefSnapshot`) — golden (26/26) and the
+determinism-spike/fingerprint-annotation tests (7/7) confirm no fingerprint drift.
+
+**Verified mechanically working, but did NOT ground the CSAT question.** `BeliefPersistenceStageTests`
+and a new `Kozmo.VendorFile.Tests` pair (`WriteService_UsesCallerDerivation_WhenSupplied` /
+`WriteService_FallsBackToTemplate_WhenNoDerivationSupplied`) confirm the real quoted text now
+survives into `Belief.Derivation` — for IIVS's real `csat` belief this is now literally
+`doc:QBR_Q32022_IIVS_RevMed.pdf "Study quality scores averaged 4.6 out of 5.0 based on sponsor
+feedback surveys."`, not the old template. **But re-running the real-vendor completeness proof
+against the re-recorded cassette shows Experiential coverage unchanged at 0/2 (0%)** — the model
+now answers `saas.exp.l1.2` ("what is the current CSAT or NPS score") as UNKNOWN and does not even
+cite the belief (previously, with the generic-template Derivation, it *did* cite the belief but
+still said UNKNOWN — arguably a regression on citation, not just a non-improvement). Financial
+stayed at 1/2 (50%), unchanged. Best working hypothesis: "study quality scores" in the real
+document's own evidence text reads to the model as a different, more specific metric than "CSAT or
+NPS score" — a wording-match problem the LLM is (arguably correctly) being conservative about,
+not a numeric-representation problem. This was not chased further — out of scope for 1(b), and
+resolving it either needs option 1(a) (a structured raw-value field the LLM can read
+unambiguously, independent of free-text wording) or a documentation/derivation-quality
+improvement upstream in `DocumentBeliefExtractor`'s evidence-quote extraction.
+
+**Net effect of 1(b):** real evidence text now correctly reaches the belief's `Derivation` field
+end-to-end (verified) and is available to any future consumer that reads it, but it did not by
+itself unlock the Experiential coverage this stocktake was hoping for. `VendorFileRenderer`/
+`DtoMapper` still display banded `Value` for scored beliefs — untouched, deferred to 1(a) as
+originally planned.

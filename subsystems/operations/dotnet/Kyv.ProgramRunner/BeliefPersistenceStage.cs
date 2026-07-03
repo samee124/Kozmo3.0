@@ -79,6 +79,7 @@ public sealed class BeliefPersistenceStage
                     observedAt:          now,
                     provenance:          new BeliefProvenance(Guid.Empty, candidate.Derivation), // no Evidence row in the KYV pipeline yet
                     ingestedAt:          now,
+                    derivation:          candidate.Derivation, // real quoted evidence — see VendorFileWriteService docs
                     ct:                  ct);
 
                 written++;

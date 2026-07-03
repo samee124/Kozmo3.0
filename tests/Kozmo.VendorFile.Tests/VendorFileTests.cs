@@ -144,6 +144,58 @@ public sealed class VendorFileTests
         Assert.Equal(30, belief.HalfLifeDays); // from claim_key catalogue
     }
 
+    // ── Value convention 1(b): real derivation text survives the write path ─────
+
+    [Fact, Trait("Category", "VendorFile")]
+    public async Task WriteService_UsesCallerDerivation_WhenSupplied()
+    {
+        var profile   = new Catalogue().Load(CataloguePath);
+        var store     = new SqliteEntityStore("Data Source=:memory:", profile);
+        var svc       = new VendorFileWriteService(store, profile);
+        const string realEvidence = "doc:QBR_Q32022.pdf \"4.6 out of 5.0\"";
+
+        var belief = await svc.WriteBeliefAsync(
+            vendorId:            Guid.NewGuid(),
+            claimKey:            "csat",
+            dimension:           Dimension.Experiential,
+            criterion:           "csat",
+            rawValue:            0.80,
+            tier:                SourceTier.Verified,
+            extractorConfidence: 0.80,
+            observedAt:          new DateTimeOffset(2025, 9, 15, 0, 0, 0, TimeSpan.Zero),
+            provenance:          new BeliefProvenance(Guid.NewGuid(), "field:csat"),
+            ingestedAt:          new DateTimeOffset(2025, 10, 1, 0, 0, 0, TimeSpan.Zero),
+            derivation:          realEvidence);
+
+        Assert.Equal(realEvidence, belief.Derivation);
+    }
+
+    [Theory, Trait("Category", "VendorFile")]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("   ")]
+    public async Task WriteService_FallsBackToTemplate_WhenNoDerivationSupplied(string? derivation)
+    {
+        var profile   = new Catalogue().Load(CataloguePath);
+        var store     = new SqliteEntityStore("Data Source=:memory:", profile);
+        var svc       = new VendorFileWriteService(store, profile);
+
+        var belief = await svc.WriteBeliefAsync(
+            vendorId:            Guid.NewGuid(),
+            claimKey:            "csat",
+            dimension:           Dimension.Experiential,
+            criterion:           "csat",
+            rawValue:            0.80,
+            tier:                SourceTier.Verified,
+            extractorConfidence: 0.80,
+            observedAt:          new DateTimeOffset(2025, 9, 15, 0, 0, 0, TimeSpan.Zero),
+            provenance:          new BeliefProvenance(Guid.NewGuid(), "field:csat"),
+            ingestedAt:          new DateTimeOffset(2025, 10, 1, 0, 0, 0, TimeSpan.Zero),
+            derivation:          derivation);
+
+        Assert.Equal("vendor-file:csat", belief.Derivation); // exact prior behavior preserved
+    }
+
     [Fact, Trait("Category", "VendorFile")]
     public async Task WriteService_AppliesTierCeiling_InferredTier()
     {
