@@ -2263,5 +2263,10 @@
     "answerJson": "{\u0022facts\u0022:[],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document does not contain any of the specified facts.\u0022}",
     "confidence": 0.85,
     "reasoningSummary": ""
+  },
+  "b9fd5a011b772c93d093a99a28ceb136808dd5316f1331b587f9739c928ee0d1": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:214500,\u0022evidence\u0022:\u0022Annual Subscription Fee: $214,500.00 per year.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Invoices are due and payable within thirty (30) days of the invoice date (Net 30)\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the annual subscription fee and the payment terms.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
   }
 }

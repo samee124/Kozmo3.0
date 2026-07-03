@@ -358,5 +358,45 @@
     "answerJson": "{\u0022answer\u0022:\u0022UNKNOWN\u0022,\u0022confidence\u0022:0.3,\u0022cited_belief_ids\u0022:[],\u0022reasoning\u0022:\u0022The provided beliefs do not contain any information regarding the contractual renewal date for the vendor agreement.\u0022}",
     "confidence": 0.85,
     "reasoningSummary": ""
+  },
+  "c1b8d92d5d4a760eb1fab30ceb2d75db6ce6e304af4e49b920d24cd86b9e1d15": {
+    "answerJson": "{\u0022answer\u0022:\u0022UNKNOWN\u0022,\u0022confidence\u0022:0.3,\u0022cited_belief_ids\u0022:[],\u0022reasoning\u0022:\u0022The provided beliefs do not contain any information regarding the vendor\\u0027s performance against their contracted SLA over the past 12 months.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "30727d4858de98657e775aa61646c93519bc318f6163d2001fd0fb46c0870d4e": {
+    "answerJson": "{\u0022answer\u0022:\u0022UNKNOWN\u0022,\u0022confidence\u0022:0.3,\u0022cited_belief_ids\u0022:[],\u0022reasoning\u0022:\u0022The provided beliefs do not contain any information regarding the current CSAT or NPS score for the vendor.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "c44cade23b1ea123bc2f5b6ac5cfb0776ba8f39f9e6887fba7d93802860a53b8": {
+    "answerJson": "{\u0022answer\u0022:\u0022YES\u0022,\u0022confidence\u0022:1.0,\u0022cited_belief_ids\u0022:[\u0022de110000-0000-0000-000000000001\u0022,\u0022de110000-0000-0000-000000000002\u0022],\u0022reasoning\u0022:\u0022There is a signed contract that specifies the annual subscription fee and payment terms, confirming the existence of defined payment terms.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "c8a03938072d18aa4f11312e912c65dd782158fcf4656f0b2438baea456e9a82": {
+    "answerJson": "{\u0022answer\u0022:\u0022214500\u0022,\u0022confidence\u0022:1.0,\u0022cited_belief_ids\u0022:[\u0022de110000-0000-0000-0000-000000000001\u0022],\u0022reasoning\u0022:\u0022The total annual contract value is explicitly stated as $214,500.00 per year in the primary source.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "eddea4fb5ef42a9adf89c5c4b5f94c92c6e42d8cf84c4bdf968dc304442179af": {
+    "answerJson": "{\u0022answer\u0022:\u0022UNKNOWN\u0022,\u0022confidence\u0022:0.3,\u0022cited_belief_ids\u0022:[],\u0022reasoning\u0022:\u0022There is no evidence provided regarding the existence of a documented uptime SLA for the vendor.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "814eca1f6f3a5befe50704138365a70751c0cb7e73182c42a30fe77fe885be26": {
+    "answerJson": "{\u0022answer\u0022:\u0022UNKNOWN\u0022,\u0022confidence\u0022:0.3,\u0022cited_belief_ids\u0022:[],\u0022reasoning\u0022:\u0022The provided beliefs do not contain any information regarding the vendor\\u0027s contracted uptime SLA percentage.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "11d81131a58c72dbd9155643b943951ad658333d90f2519e0445f61f1bbd3bcb": {
+    "answerJson": "{\u0022answer\u0022:\u0022UNKNOWN\u0022,\u0022confidence\u0022:0.3,\u0022cited_belief_ids\u0022:[],\u0022reasoning\u0022:\u0022The provided beliefs do not contain any information regarding the vendor\\u0027s product roadmap or its alignment with our strategic direction.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "ef3f224da8212479c4403c881cf35fb38dea36554b4a06275cfe68bcd3705e89": {
+    "answerJson": "{\u0022answer\u0022:\u0022June 30, 2028\u0022,\u0022confidence\u0022:0.8,\u0022cited_belief_ids\u0022:[\u0022de110000-0000-0000-0000-000000000003\u0022],\u0022reasoning\u0022:\u0022The renewal date is specified in the verified belief regarding the term extension.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
   }
 }

@@ -198,6 +198,30 @@ else
     await RunVendor("IIVS (real documents)", realIivsVendorId, realIivsBeliefs);
 }
 
+// ── Salesforce (real documents) — completed Order Form scenario ───────────────
+// Same real-pipeline mechanism as IIVS above. Scenario 05's real documents (SOW, Amendment 2)
+// both defer fees/payment terms to an Order Form referenced by name but never present in the
+// corpus; a faithful, completing-not-inventing Order Form was authored and dropped into the
+// workspace (see KYV_KNOWN_GAPS.md) to close that gap. Records the "after" belief set — the
+// Order Form's structural facts (annual_value, payment_terms) now flow into Financial coverage,
+// while renewal_date correctly abstains (the Order Form's term is "coterminous with the
+// Agreement", no calendar date) so Amendment 2's 2028-06-30 renewal_date stays the sole source.
+
+var realSalesforceVendorId = Guid.Parse("d0000000-0000-0000-0000-000000000002");
+
+var realSalesforceBeliefs = await RealVendorBeliefFixture.BuildAsync(
+    workspacePath, candidateCassette, kyvBeliefCassette, kyvProfile, "Salesforce", realSalesforceVendorId, kyvNow);
+
+if (realSalesforceBeliefs is null)
+{
+    Console.WriteLine("[completeness-recorder] Salesforce real-document scenario SKIPPED — " +
+                       "workspace, cassette, or resolved vendor not found.");
+}
+else
+{
+    await RunVendor("Salesforce (real documents)", realSalesforceVendorId, realSalesforceBeliefs);
+}
+
 // ── Summary ───────────────────────────────────────────────────────────────────
 
 Console.WriteLine();

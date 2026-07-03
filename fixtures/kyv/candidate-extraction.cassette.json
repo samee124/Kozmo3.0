@@ -1518,5 +1518,10 @@
     "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Salesforce.org\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:\u0022salesforce.org\u0022,\u0022address\u0022:\u002250 Fremont Street, Suite 300, San Francisco, California 94105\u0022,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Nova Southeastern University, Inc.\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:\u00223301 College Avenue, Fort Lauderdale, Florida 33314\u0022,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly names Salesforce.org as the vendor and Nova Southeastern University, Inc. as the customer, along with their respective addresses.\u0022}",
     "confidence": 0.85,
     "reasoningSummary": ""
+  },
+  "32dd92c9b7e34be3e1ef60c2c0a20bfbe8f6da2771885ffc8dee4e591bd252cf": {
+    "answerJson": "{\u0022parties\u0022:[{\u0022name\u0022:\u0022Nova Southeastern University, Inc.\u0022,\u0022role\u0022:\u0022customer\u0022,\u0022domain\u0022:null,\u0022address\u0022:null,\u0022tax_id\u0022:null},{\u0022name\u0022:\u0022Salesforce, Inc.\u0022,\u0022role\u0022:\u0022vendor\u0022,\u0022domain\u0022:null,\u0022address\u0022:null,\u0022tax_id\u0022:null}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document clearly identifies Nova Southeastern University, Inc. as the customer and Salesforce, Inc. as the vendor in the context of a service agreement.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
   }
 }
