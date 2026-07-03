@@ -318,5 +318,45 @@
     "answerJson": "{\u0022answer\u0022:\u0022UNKNOWN\u0022,\u0022confidence\u0022:0.3,\u0022cited_belief_ids\u0022:[],\u0022reasoning\u0022:\u0022The provided beliefs do not contain any information regarding the contractual renewal date for the vendor agreement.\u0022}",
     "confidence": 0.85,
     "reasoningSummary": ""
+  },
+  "58c05ab2e2140d8702084f7d2e0f48cc3b1645d72c32120c79be5de6c3c71f74": {
+    "answerJson": "{\u0022answer\u0022:\u0022UNKNOWN\u0022,\u0022confidence\u0022:0.3,\u0022cited_belief_ids\u0022:[],\u0022reasoning\u0022:\u0022The provided beliefs do not contain any information regarding the vendor\\u0027s performance against their contracted SLA.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "e2ac1eb9bd65c854809bd725998003e5f3cc68604d13872e4d84288a4526eb92": {
+    "answerJson": "{\u0022answer\u0022:\u0022UNKNOWN\u0022,\u0022confidence\u0022:0.3,\u0022cited_belief_ids\u0022:[],\u0022reasoning\u0022:\u0022The provided beliefs do not contain any information regarding the current CSAT or NPS score for the vendor.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "4b8adf77119472eedc97c6559d08961af5c03a15d5b7d6178e92a441a07d4931": {
+    "answerJson": "{\u0022answer\u0022:\u0022YES\u0022,\u0022confidence\u0022:0.8,\u0022cited_belief_ids\u0022:[\u0022de110000-0000-0000-0000-000000000001\u0022,\u0022de110000-0000-0000-0000-000000000002\u0022],\u0022reasoning\u0022:\u0022There is evidence of a defined payment term of \\u0027Net 30\\u0027 and an invoice indicating a total due amount, suggesting a signed contract with payment terms.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "bf1b6a5268e69b8f2347fe13f429948a3483df22ad79fc8c5b3329ea1ef0ce49": {
+    "answerJson": "{\u0022answer\u0022:\u002234,700\u0022,\u0022confidence\u0022:0.8,\u0022cited_belief_ids\u0022:[\u0022de110000-0000-0000-0000-000000000001\u0022],\u0022reasoning\u0022:\u0022The total annual contract value is derived from the verified belief indicating a total due amount of $34,700.00.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "36ea53b23360dd774e4593cf8a422cf1f1bb6b8ba442f94945f67c0ba5927987": {
+    "answerJson": "{\u0022answer\u0022:\u0022UNKNOWN\u0022,\u0022confidence\u0022:0.3,\u0022cited_belief_ids\u0022:[],\u0022reasoning\u0022:\u0022The provided beliefs do not contain any information regarding a documented uptime SLA for the vendor.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "505f08e97a931196557eb20da90e5bd6632a4f0934b6d209d82d381676aca9da": {
+    "answerJson": "{\u0022answer\u0022:\u0022UNKNOWN\u0022,\u0022confidence\u0022:0.3,\u0022cited_belief_ids\u0022:[],\u0022reasoning\u0022:\u0022The provided beliefs do not contain any information regarding the vendor\\u0027s contracted uptime SLA percentage.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "a7f2d6a36032ec9d2a6a9f7c63241dd5cc530c45b4f90a8b7a5b1025fe979b03": {
+    "answerJson": "{\u0022answer\u0022:\u0022UNKNOWN\u0022,\u0022confidence\u0022:0.3,\u0022cited_belief_ids\u0022:[],\u0022reasoning\u0022:\u0022The provided beliefs do not contain any information regarding the vendor\\u0027s product roadmap or its alignment with our strategic direction.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "1a1543610a0ccccabb42107af12a251bbb7c9385c485434b67232a2c209aad0c": {
+    "answerJson": "{\u0022answer\u0022:\u0022UNKNOWN\u0022,\u0022confidence\u0022:0.3,\u0022cited_belief_ids\u0022:[],\u0022reasoning\u0022:\u0022The provided beliefs do not contain any information regarding the contractual renewal date for the vendor agreement.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
   }
 }

@@ -20,11 +20,16 @@ namespace Kyv.ProgramRunner.Tests;
 /// tension this papers over; a real evidence-weight/scoring-weight split is the proper long-term
 /// fix, deferred for now.
 ///
-/// Result after the fix: saas.fin.l1.1 ("signed contract with defined payment terms") now answers
-/// YES, grounded in the real payment_terms beliefs — Financial coverage 1/2 (50%), up from 0/2.
-/// Other dimensions and saas.fin.l1.2 (a numeric "what is the total annual contract value"
-/// question) remain UNKNOWN — a real document/extraction-ambiguity question, not the
-/// confidence-representation issue this test targets, and out of this commit's scope.
+/// Post extraction-bug fixes (Commits A/B/C): IIVS's real documents no longer produce a csat
+/// belief at all — its only apparent CSAT evidence was "study quality scores averaged 4.6 out of
+/// 5.0", a QA metric on lab study deliverables, which Commit C's tightened prompt + guard now
+/// correctly rejects. That means IIVS genuinely has no real customer-satisfaction evidence in its
+/// corpus — a true reflection of the source documents, not a regression. This test was updated to
+/// assert the ABSENCE of that mis-extracted belief instead of its presence.
+///
+/// Result: saas.fin.l1.1 ("signed contract with defined payment terms") answers YES, grounded in
+/// the real payment_terms belief — Financial coverage 1/2 (50%). Other dimensions and
+/// saas.fin.l1.2 (a numeric "what is the total annual contract value" question) remain UNKNOWN.
 /// </summary>
 public sealed class RealDocumentCompletenessProofTests
 {
@@ -51,11 +56,12 @@ public sealed class RealDocumentCompletenessProofTests
         Assert.NotNull(beliefs);
         Assert.NotEmpty(beliefs!); // the persistence bridge DOES carry real documents into real beliefs
 
-        // A scored belief (csat, banded 0-1) is present alongside structural ones (payment_terms,
-        // annual_value) — confirming the belief set genuinely mixes both kinds. The persisted
-        // Confidence=0 on structural beliefs is UNCHANGED by the presentation-confidence fix —
-        // only what QuestionAnsweringStage shows the LLM changes.
-        Assert.Contains(beliefs!, b => b.Criterion.Equals("csat", StringComparison.OrdinalIgnoreCase) && b.Confidence > 0);
+        // Commit C regression guard: IIVS's only apparent CSAT evidence was a mis-extracted QA
+        // metric ("study quality scores") — the fix means it must NOT appear as a csat belief.
+        Assert.DoesNotContain(beliefs!, b => b.Criterion.Equals("csat", StringComparison.OrdinalIgnoreCase));
+
+        // Structural belief present with Confidence=0 — UNCHANGED by the presentation-confidence
+        // fix; only what QuestionAnsweringStage shows the LLM changes.
         Assert.Contains(beliefs!, b => b.Criterion.Equals("payment_terms", StringComparison.OrdinalIgnoreCase) && b.Confidence == 0.0);
 
         var answeringLlm = new Kozmo.Llm.CachingLlmClient(answeringCassette, recordMode: false);

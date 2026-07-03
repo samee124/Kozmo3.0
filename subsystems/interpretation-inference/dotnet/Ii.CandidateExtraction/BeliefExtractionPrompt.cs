@@ -38,10 +38,17 @@ public static class BeliefExtractionPrompt
         - sla_uptime: an explicit committed or reported uptime/SLA percentage
           (e.g. "99.9% uptime"). value = the percentage number as given (e.g. 99.9),
           NOT divided by 100.
-        - csat: an explicit customer satisfaction / quality score on a 1.0-5.0 rating scale ONLY
-          (e.g. "4.6 out of 5.0", "CSAT rating: 4.2/5"). value = the score exactly as given
-          (e.g. 4.6). Do NOT extract a CSAT figure given as a percentage or on a 0-100 scale
-          (e.g. "CSAT: 92%") — that is a different scale this fact does not cover; omit it.
+        - csat: an explicit CUSTOMER SATISFACTION score — from a customer survey, CSAT/NPS
+          program, or similar sentiment measure of the customer's satisfaction with the VENDOR
+          RELATIONSHIP — on a 1.0-5.0 rating scale ONLY (e.g. "Customer satisfaction survey:
+          4.6 out of 5.0", "CSAT rating: 4.2/5"). value = the score exactly as given (e.g. 4.6).
+          Do NOT extract a CSAT figure given as a percentage or on a 0-100 scale (e.g. "CSAT: 92%")
+          — that is a different scale this fact does not cover; omit it. Do NOT extract a "study
+          quality score", "product quality score", or any other operational/QA/technical quality
+          metric that is not explicitly about the customer's sentiment toward the vendor
+          relationship — a quality score on a study, deliverable, or product is NOT a customer
+          satisfaction score, even when it shares the same 1.0-5.0 shape (e.g. "Study quality
+          scores averaged 4.6 out of 5.0" is a QA metric, not CSAT — omit it).
         - payment_terms: the invoice payment due period ONLY (e.g. "due within 30 days of
           invoice"). value = integer days (e.g. 30). Do NOT use insurance, cancellation, or
           termination notice periods for this fact.

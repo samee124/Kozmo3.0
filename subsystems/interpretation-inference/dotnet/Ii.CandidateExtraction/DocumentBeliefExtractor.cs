@@ -153,6 +153,17 @@ public sealed class DocumentBeliefExtractor
                 ContainsTerminationLanguage(evidence!))
                 continue;
 
+            // Narrow backstop for the same prompt rule (BeliefExtractionPrompt.System's csat
+            // negative example): reject the two specific non-customer quality metrics a real
+            // document confused with CSAT ("study quality scores" — see KYV_KNOWN_GAPS.md).
+            // Deliberately narrow, not a general "must mention customer/satisfaction" filter —
+            // that would risk rejecting legitimate CSAT evidence phrased without those exact
+            // words. The prompt tightening is the primary fix; this only catches the specific
+            // confusion already proven to happen.
+            if (string.Equals(criterion, "csat", StringComparison.OrdinalIgnoreCase) &&
+                ContainsNonCustomerQualityLanguage(evidence!))
+                continue;
+
             var rawConf = fact.TryGetProperty("confidence", out var cf) && cf.ValueKind == JsonValueKind.Number
                 ? cf.GetDouble()
                 : result.Confidence;
@@ -186,6 +197,16 @@ public sealed class DocumentBeliefExtractor
 
     private static bool ContainsTerminationLanguage(string evidence) =>
         TerminationLanguage.Any(kw => evidence.Contains(kw, StringComparison.OrdinalIgnoreCase));
+
+    // ── csat non-customer-quality guard ─────────────────────────────────────────
+
+    // The exact negative-example phrases from BeliefExtractionPrompt.System's csat rule —
+    // narrow by design (see comment at the call site above).
+    private static readonly string[] NonCustomerQualityLanguage =
+        ["study quality", "product quality"];
+
+    private static bool ContainsNonCustomerQualityLanguage(string evidence) =>
+        NonCustomerQualityLanguage.Any(kw => evidence.Contains(kw, StringComparison.OrdinalIgnoreCase));
 
     // ── JSON helpers ───────────────────────────────────────────────────────────
 
