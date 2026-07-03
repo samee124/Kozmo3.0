@@ -84,8 +84,8 @@ builder.Services.AddSingleton<Func<IKozmoLlm?>>(sp => () =>
 });
 
 // ── Google Drive connector ─────────────────────────────────────────────────
-var googleClientId     = Environment.GetEnvironmentVariable("GOOGLE_CLIENT_ID")     ?? "";
-var googleClientSecret = Environment.GetEnvironmentVariable("GOOGLE_CLIENT_SECRET") ?? "";
+var googleClientId     = Environment.GetEnvironmentVariable("GOOGLE_CLIENT_ID")     ?? builder.Configuration["GOOGLE_CLIENT_ID"]     ?? "";
+var googleClientSecret = Environment.GetEnvironmentVariable("GOOGLE_CLIENT_SECRET") ?? builder.Configuration["GOOGLE_CLIENT_SECRET"] ?? "";
 const string GoogleRedirectUri = "http://localhost:5000/auth/google/callback";
 
 builder.Services.AddSingleton(new GoogleOAuthService(googleClientId, googleClientSecret, GoogleRedirectUri));
