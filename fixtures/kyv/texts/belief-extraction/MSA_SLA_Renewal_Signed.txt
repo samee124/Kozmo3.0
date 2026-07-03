@@ -1,0 +1,29 @@
+SAMPLE DOCUMENT — FOR TESTING PURPOSES ONLY (belief-extraction fixture, not a real vendor contract)
+
+MASTER SUBSCRIPTION AGREEMENT
+
+This Master Subscription Agreement ("Agreement") is entered into as of 1 September 2025 (the "Effective Date") by and between Northwind Cloud Services, Inc., a Delaware corporation ("Vendor"), and Cascade Health Partners LLC ("Customer").
+
+1. Services. Vendor shall provide Customer with access to the Northwind platform (the "Services") as described in the applicable Order Form.
+
+2. Service Level. Vendor guarantees a Service availability commitment of 99.9% uptime, measured monthly, exclusive of scheduled maintenance windows. If Vendor fails to meet this commitment in any calendar month, Customer shall be entitled to a service credit as described in Exhibit B.
+
+3. Fees and Payment. The annual subscription fee for the Services is $180,000, invoiced annually in advance. All invoices are due and payable within thirty (30) days of the invoice date. Late payments accrue interest at 1.5% per month.
+
+4. Term and Renewal. The initial term of this Agreement commences on the Effective Date and continues through 31 August 2026. This Agreement shall renew on September 1, 2026 for a successive one-year term unless either party provides Vendor at least sixty (60) days' prior written notice of non-renewal.
+
+5. Confidentiality. Each party agrees to hold the other's Confidential Information in strict confidence and not to disclose it to any third party without prior written consent.
+
+6. Limitation of Liability. Neither party shall be liable for any indirect, incidental, special, or consequential damages arising out of this Agreement.
+
+7. Governing Law. This Agreement is governed by the laws of the State of Delaware, without regard to its conflict of laws principles.
+
+IN WITNESS WHEREOF, the parties have executed this Agreement as of the Effective Date.
+
+Northwind Cloud Services, Inc.
+By: Alice Reyes
+Title: VP, Customer Success
+
+Cascade Health Partners LLC
+By: Marcus Chen
+Title: Director of Procurement

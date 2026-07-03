@@ -166,11 +166,21 @@ public sealed class ObservationModule : IObservationModule
 
     private static double? ApplyNumericThresholds(double value, IReadOnlyList<RubricThreshold> thresholds)
     {
-        // Find the last threshold where value >= min (thresholds ordered high-to-low min, or use first where value < max)
-        for (var i = 0; i < thresholds.Count; i++)
+        // Domain is [min(Min), max(Max)] across all buckets, regardless of the list's own order
+        // (some criteria are authored ascending, others descending). A value outside that domain
+        // is out-of-range for this rubric and must not silently fall into whichever bucket
+        // happens to be last in the array — abstain (return null) instead of guessing.
+        var domainMin = thresholds.Min(t => t.Min);
+        var domainMax = thresholds.Max(t => t.Max);
+        if (value < domainMin || value > domainMax) return null;
+
+        foreach (var t in thresholds)
         {
-            var t = thresholds[i];
-            bool inRange = value >= t.Min && (i == thresholds.Count - 1 || value < t.Max);
+            // Upper bound is exclusive except for the bucket that owns the domain ceiling —
+            // otherwise a value exactly at the top of the range (e.g. 100% uptime) would match
+            // no bucket at all.
+            var isTopBucket = t.Max == domainMax;
+            var inRange     = value >= t.Min && (value < t.Max || (isTopBucket && value <= t.Max));
             if (inRange) return t.Score;
         }
         return null;

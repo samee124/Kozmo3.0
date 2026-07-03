@@ -1,0 +1,1512 @@
+{
+  "09b76a5ed04c58744b15a0bb9dad7d0bfcea07fcbda1f67b7ed59ef45fea5460": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022sla_uptime\u0022,\u0022value\u0022:99.9,\u0022evidence\u0022:\u0022Vendor guarantees a Service availability commitment of 99.9% uptime\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022All invoices are due and payable within thirty (30) days of the invoice date\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022renewal_date\u0022,\u0022value\u0022:1693526400,\u0022evidence\u0022:\u0022This Agreement shall renew on September 1, 2026\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:180000,\u0022evidence\u0022:\u0022The annual subscription fee for the Services is $180,000\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the uptime, payment terms, renewal date, and annual value.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "6639e47d90d8c4caa2bc7e3bfdda260aa5075e5d0eb908d8f621b349a06ac60d": {
+    "answerJson": "{\u0022facts\u0022:[],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022No explicit facts regarding SLA uptime, customer satisfaction, payment terms, renewal date, or annual value are present in the document.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "d69ac7248c2d90df370f69b4d07d30d1b2e13fef4a1d5b7b6eeea9d4e82b880f": {
+    "answerJson": "{\u0022facts\u0022:[],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document does not contain any explicit statements regarding SLA uptime, customer satisfaction scores, payment terms, renewal dates, or annual values.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "1803f2f6be827bcd5694d95b1d66517b0f4e310f03e95180d305f7fe01c54008": {
+    "answerJson": "{\u0022facts\u0022:[],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document does not contain any of the specified facts.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "bf8e86a11d68ba81ebdcdce7d6d5e93d0656a963e517dfcef37c14405a5ffd4f": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms 14 Aug 2022 Net 30\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:33600,\u0022evidence\u0022:\u0022TOTAL DUE $33,600.00\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total amount due.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "5273de89abb937a30cfe3deebfb4fb1faf31718d96cd958d13f45e32f91fafc5": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms 31 Aug 2022 Net 30\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:12600,\u0022evidence\u0022:\u0022TOTAL DUE $12,600.00\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total amount due.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "327309bed2b327f96d3d3ebe15e4c3a5df80b04376d7eda423d40bb4ede4ae81": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms 15 Oct 2022 Net 30\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:17100,\u0022evidence\u0022:\u0022TOTAL DUE $17,100.00\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total amount due.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "e91e75fc1a615050b4ef7f0972bdb6d543babdaacd96f7549375683f43e54e88": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms 31 May 2023 Net 30\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:39200,\u0022evidence\u0022:\u0022TOTAL DUE $39,200.00\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "d50aae8a10745e6c599dac6a8b924f38428f4fbb8e8f3878a1ce9ad84524b5be": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms 15 Jul 2023 Net 30\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:34700,\u0022evidence\u0022:\u0022TOTAL DUE $34,700.00\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total amount due.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "f577407cf112e9b619976a9886579ce442e3d9df69d17f35b9e750e26f6344f3": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms 31 Aug 2023 Net 30\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:18100,\u0022evidence\u0022:\u0022TOTAL DUE $18,100.00\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "70d0c187b92bbc6312eecb15e0b1264143ca84ff533358ab14afef8059365172": {
+    "answerJson": "{\u0022facts\u0022:[],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022No explicit facts regarding SLA uptime, customer satisfaction, payment terms, renewal date, or annual value were found in the document.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "c9a80a572f02067f04deab8c27aba938a8421da396f898a41d58b1940ded985a": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022sla_uptime\u0022,\u0022value\u0022:100,\u0022evidence\u0022:\u0022100%\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022csat\u0022,\u0022value\u0022:4.6,\u0022evidence\u0022:\u00224.6 out of 5.0\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022all payments received within Net 30 terms\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:57750,\u0022evidence\u0022:\u0022$57,750\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the SLA uptime, customer satisfaction score, payment terms, and annual value.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "f206d20c235e7511aa577185c45f6c6fbbf013493b31002ac9010e43b50fbf8a": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms Net 30 days from invoice date\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms as \\u0027Net 30 days from invoice date\\u0027.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "717aa51bdf80e33b863fb4293451e59f131ae592b1baf417799af94690d14846": {
+    "answerJson": "{\u0022facts\u0022:[],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document does not contain any of the specified facts.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "97f87097851891ba20c4234517a5687b5c7cdb69f10896cb41004e37da1143a0": {
+    "answerJson": "{\u0022facts\u0022:[],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document does not contain any explicit statements regarding SLA uptime, customer satisfaction scores, payment terms, renewal dates, or annual values.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "fb8ce4f5bd64a43db9765194fecef50ad6600f5845d98b58dc865a7474539a73": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:60,\u0022evidence\u0022:\u0022Biogen Idec shall pay the amounts payable to Vendor hereunder within sixty (60) days of receipt of invoices submitted by Vendor\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms as sixty days for invoice payments.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "ce74444b08507a8edad9c166fda17cc1f1f6e04d809bfa29e4b6432fb8aff903": {
+    "answerJson": "{\u0022facts\u0022:[],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document does not contain any of the specified facts.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "34be67f2aa433cf396cf654a3d7388db8e9d19d335d198edae4bef10aa33d4ae": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:45,\u0022evidence\u0022:\u0022Payment Terms: Net 45 days\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:34400,\u0022evidence\u0022:\u0022TOTAL DUE $34,400.00\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "21aa882829792fcd560cfa4144135e604b34dec905668f85dd602bde3dc764c7": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:45,\u0022evidence\u0022:\u0022Payment Terms: Net 45 days\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:22320,\u0022evidence\u0022:\u0022TOTAL DUE $22,320.00\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "14f7496ed020335ed91420270e7b4cbf21883e6ce2f7865cc92cc8ccf1dd3b64": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:45,\u0022evidence\u0022:\u0022Payment Terms: Net 45 days\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:39850,\u0022evidence\u0022:\u0022TOTAL DUE $39,850.00\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total amount due.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "8fc1750df69a0d7b405bf8969fd297749f75b53c01d9ed4ed7b1f5132c0e5a74": {
+    "answerJson": "{\u0022facts\u0022:[],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document contains meeting notes and does not explicitly state any of the required facts.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "5f0e6270dfbd25489f027578a259bab97276fd783dc8eee7587477f235eb4eeb": {
+    "answerJson": "{\u0022facts\u0022:[],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document does not contain any explicit statements regarding SLA uptime, customer satisfaction scores, payment terms, renewal dates, or annual values.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "c55421c7bbfe164a10be2457129f7cb405549e304026eee89ad2f884271b8a23": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:45,\u0022evidence\u0022:\u0022Payment terms: Net 45 days from receipt of a correct, original invoice.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:124200,\u0022evidence\u0022:\u0022PO Total: $124,200.00\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total contract price.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "1ddf998dd217a1fcf45b57ef9803af9e0fc242aab1dbe5448b356c81d4896fd2": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:45,\u0022evidence\u0022:\u0022Prudential shall pay all amounts not reasonably disputed within forty-five (45) days of Prudential\\u0027s receipt of a correct, original invoice.\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms as 45 days for invoice payment.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "0932bd73a0a528906b72437dffd18c1baca01346a443a70376471d0b88b7cf4e": {
+    "answerJson": "{\u0022facts\u0022:[],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document does not contain any of the specified facts.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "5611ce1960691625056d8f8bb85905936e94f79aad82fb260425f1f1b7ac8033": {
+    "answerJson": "{\u0022facts\u0022:[],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document does not contain any of the specified facts.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "259c89327c144cd2d0aa380d0b3f3881fb2b34738256436fe6130db66e6fe9ed": {
+    "answerJson": "{\u0022facts\u0022:[],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document does not contain any of the specified facts.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "94e16ef2da695e9e2f77379aa57e13e34f459794f780f18ba1bee81579f93bfb": {
+    "answerJson": "{\u0022facts\u0022:[],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document does not contain any of the specified facts.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "308cb654064f0805378f57d50f144241a2ae9bad3ce889811ffaf449c977d117": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:45,\u0022evidence\u0022:\u0022Payment Terms: Net 45 days\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:38000,\u0022evidence\u0022:\u0022TOTAL DUE $38,000.00\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "72d658c5829d722a49f661bb957a1b2a891af56de89723908eb69f31b2fda2d2": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:45,\u0022evidence\u0022:\u0022Payment Terms: Net 45 days\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:55000,\u0022evidence\u0022:\u0022TOTAL DUE $55,000.00\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "faaf3a7d1ae7eaef5acb2aa73ab404fc0fb275cca220f5e4d02769b3ec1d87ad": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:45,\u0022evidence\u0022:\u0022Payment Terms: Net 45 days\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:36750,\u0022evidence\u0022:\u0022TOTAL DUE $36,750.00\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "17ef7ba68102821f9ebac7a3d1966113dd531d21ec88361238632c441962ecfe": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:45,\u0022evidence\u0022:\u0022Client shall pay Vendor within forty-five (45) days of receipt of a correct invoice.\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms as 45 days.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "6cd9014b02c91cace16cf9f1a4a434158e51a5ce3bef510238b7122c00dd5a5f": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022terminate this Agreement, or any Order Forms hereunder, without cause at any time upon 30 days prior written notice\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022renewal_date\u0022,\u0022value\u0022:1734297600,\u0022evidence\u0022:\u0022December 10, 2024\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022renewal_date\u0022,\u0022value\u0022:1734566400,\u0022evidence\u0022:\u0022Dec 19, 2024\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and renewal dates.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "0fc1a87ee699bc5f80a096dcf97e75abec67e331088ae07d5af3279ba1ba244b": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022renewal_date\u0022,\u0022value\u0022:1688083200,\u0022evidence\u0022:\u0022extend the Term through June 30, 2028\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the renewal date as June 30, 2028.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "9d7a4e5f1fab551abb10426d2c4d15d6a6b3393864e3c1d60d9f5559dcb30bf7": {
+    "answerJson": "{\u0022facts\u0022:[],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document does not contain any of the specified facts.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "df4c198fb33e622018018fd9c235bfd1683d9b5b23b77e404ec9139031d597e4": {
+    "answerJson": "{\u0022facts\u0022:[],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document does not contain any explicit statements regarding uptime, customer satisfaction scores, payment terms, renewal dates, or annual values.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "2c882fbf7778a458283991ddb56eff71953122613387afa79ce3d61a0a836951": {
+    "answerJson": "{\u0022facts\u0022:[],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document does not contain any of the specified facts.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "2ca4058546d4b4de40e7498ee440a17d944c08f446189a4b7f5c8e165ca7039b": {
+    "answerJson": "{\u0022facts\u0022:[],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022No explicit facts regarding SLA uptime, customer satisfaction, payment terms, renewal date, or annual value were found in the document.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "67dc36793320e00f4ff01ac470f36ab02758fcf8752da7bd09e95d745e1b6684": {
+    "answerJson": "{\u0022facts\u0022:[],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document does not contain any of the specified facts.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "6d9e67767cd1de3c364362551568682af6f2e142e88d6ac9082e53b3ee562fd7": {
+    "answerJson": "{\u0022facts\u0022:[],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document does not contain any explicit statements regarding SLA uptime, customer satisfaction scores, payment terms, renewal dates, or annual values.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "deb881271518cb3d87910e69ef2d8660ca0f5aea7f366f5a6eadb6638538b375": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:420000,\u0022evidence\u0022:\u0022$420,000.00\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the annual subscription fee as $420,000.00.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "c300addce1d6949c6da5ebebaa49f1cbfbaa6be40a863dabad8577e73ce0851c": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:185000,\u0022evidence\u0022:\u0022$185,000.00\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the total authorized amount as $185,000.00.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "29f7c93920ca31273bbdb5f6ec889689304a4cab29e9565562339b6c6e7d24a7": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:22000,\u0022evidence\u0022:\u0022$22,000.00\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the total authorized amount as $22,000.00.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "7bc1093a09587907c370d93b368b07653e868559d22a0937843e5d50a035f263": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:65000,\u0022evidence\u0022:\u0022$65,000.00\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the total authorized amount as $65,000.00.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "f45ab668e126778e89e8fbe509c656b0fac461708ff96a29ecb4a41a0e9258e1": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:15000,\u0022evidence\u0022:\u0022$15,000.00\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the total authorized amount as $15,000.00.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "2f4859d20ec9a210d81748a4988912d584f52ebd2a62efb163fe259949ce9699": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:441000,\u0022evidence\u0022:\u0022$441,000.00\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the annual subscription fee as $441,000.00.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "a58e964b7b0f4835b15eb6aa0e1a9a3998ff7e6b2b14ee4dc1f4066446d55a94": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:18500,\u0022evidence\u0022:\u0022$18,500.00\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the total authorized amount as $18,500.00.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "5cb9b2adab0b26faa2c0d84299cd961088e45593018a3cd539fe2d0f3d7d461a": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:58000,\u0022evidence\u0022:\u0022$58,000.00\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the total authorized amount as $58,000.00.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "95748d145f07ccd26962d6343ab6189af6b0f74deb1f7205db63241a235a48ef": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:12000,\u0022evidence\u0022:\u0022$12,000.00\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the total authorized amount as $12,000.00.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "29515d8020f3d9a12175856b8bf6075e862b7d7d84bdcd0596906ae81caf3777": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:21000,\u0022evidence\u0022:\u0022$21,000.00\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the total authorized amount as $21,000.00.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "ff59b27d4e44baa0c390716c6293f58b2016c4c23c3f9755ef9e89e31ffabb72": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:15750,\u0022evidence\u0022:\u0022$15,750.00\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the total authorized amount as $15,750.00.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "fb123601e9e6925a9a97741894489e609ac66368a0b0fd7109e39623b3a297f2": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:463000,\u0022evidence\u0022:\u0022$463,000.00\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the annual subscription fee as $463,000.00.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "53cb1f35d39d66da9bc7b7b997561745bc3304e603fe60eefa1d89fc9c4aa315": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:19800,\u0022evidence\u0022:\u0022$19,800.00\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the total authorized amount as $19,800.00.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "aa760213abcf90eb9bd55f2ab128fc496bad12fe338333a5fd8c4e9d30156191": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:71500,\u0022evidence\u0022:\u0022$71,500.00\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the total authorized amount as $71,500.00.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "05e5bc75d328c1e1645a36bb7a9a7c3e339db536fceed642da94bc43c8aa3d1b": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:94000,\u0022evidence\u0022:\u0022$94,000.00\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the total authorized amount as $94,000.00.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "fad5ecdb47407d1f8837fb6a510d6d51765e7a0a1ebf8b29bf4761cc6c5d0bdc": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:23200,\u0022evidence\u0022:\u0022$23,200.00\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the total authorized amount as $23,200.00.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "3c5cf4674060b63856c4369017899d38948c7b448e43ed4d1a291734aaa41843": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:16500,\u0022evidence\u0022:\u0022$16,500.00\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the total authorized amount as $16,500.00.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "bbb230f22379b2ba856d2c85d1c9336e4d03d0c1c7ac0f77560ef648998300cf": {
+    "answerJson": "{\u0022facts\u0022:[],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document does not contain any of the specified facts.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "29ac67cb9c4270ce7f62a1373e3542bdf1404c141b0b0d73356ae63062b23525": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:420000,\u0022evidence\u0022:\u0022$420,000.00\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the annual subscription fee and the payment terms.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "ad7cd76012153ee82c0cf72a387aaf26066bf01ced68d70397cd449452ac8f60": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:15416.67,\u0022evidence\u0022:\u0022Total Due: $15,416.67\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "bdff51790c468982a549956f83966eab5c55ada1c69a098e38f09a72f47f5003": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:5542.8,\u0022evidence\u0022:\u0022Total Due: $5,542.80\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "5c35acf4dceb2104e7e739e5d2de5b6b918f52d276389a00cde1db106a05acb4": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:15416.67,\u0022evidence\u0022:\u0022Total Due: $15,416.67\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "e6ea96d505b010e37f100fdd3d8609f4369e6ebb54be546ed23c3bba62870f28": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:912.36,\u0022evidence\u0022:\u0022Total Due: $912.36\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "adf79759cd856c553cf39b57318db8b1903eb863808ab2c427af8462a5c7e8a1": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:15416.67,\u0022evidence\u0022:\u0022Total Due: $15,416.67\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "1392fb163ecdf439958cf7c504e9cbc5da3fdd4d3ffb41903c4842c98102bc2b": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:2532.65,\u0022evidence\u0022:\u0022Total Due: $2,532.65\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "0c76259ab9c5bce97783cb4faf6eb4365f853a0a819257a95a4819921ef7c08f": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:15416.67,\u0022evidence\u0022:\u0022Total Due: $15,416.67\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "998044b8f5b1137e138fa8654c8a3b7011b3f9a6cee87b26831883ffd9124928": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:11000,\u0022evidence\u0022:\u0022Total Due: $11,000.00\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "4d6f86c4caf3fc6ca55fcc7547142d980d0350d83cf96a2dd145c413ec646642": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:1835.87,\u0022evidence\u0022:\u0022Total Due: $1,835.87\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "ffbd067b02bbcab86642c3209d61b18c26e370c4a1b0ed09cb26eb981cd556e9": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:4252.52,\u0022evidence\u0022:\u0022Total Due: $4,252.52\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "3492188f6c99993b9174be07fa3da4d5efe81209c74a77bf4dd80b351e89b9ab": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:15416.67,\u0022evidence\u0022:\u0022Total Due: $15,416.67\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "7caf7fdddfe7c21d575d09ea1fba57a14da7a6fce3d7733098e9fc1a7d18e11b": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:11000,\u0022evidence\u0022:\u0022Total Due: $11,000.00\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "5a47940a3e5920042d373c9b85d5f021484cd19c3af9e525cfeee734a28ef3a9": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:2234.77,\u0022evidence\u0022:\u0022Total Due: $2,234.77\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "edc234f6eb5f6523ee539b41d052fc194f648c6b264aabf597fb6a2b91fb1454": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:15416.67,\u0022evidence\u0022:\u0022Total Due: $15,416.67\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "a4841d583c109ebd0f6a65802aab8d80c6396305ec2cb2cb04a215e75d081191": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:2633.20,\u0022evidence\u0022:\u0022Total Due: $2,633.20\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "3712420d362117c0aae023b4c3e5f99ccaecbd629cb44e03e012b69e49709317": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:15416.67,\u0022evidence\u0022:\u0022Total Due: $15,416.67\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "91060cced8fa3b63c2b3bd3727990a5e56f738558b7f61df56c5b010f2f85349": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:2490.63,\u0022evidence\u0022:\u0022Total Due: $2,490.63\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "98489bd539c7a488e11ac4ef8c5244ddc0f609a2ce5c342be597cce37bf5b1a4": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:21666.67,\u0022evidence\u0022:\u0022Total Due: $21,666.67\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "af9db23b9df4992ad2a0ad3eb4651a9794b81d9579b25a78da0b681506ef5968": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:4777.56,\u0022evidence\u0022:\u0022Total Due: $4,777.56\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "b65393f573d2a68bc8209be7486eae404f8d7d65d1739d7b760d93ea3908e49e": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:15416.67,\u0022evidence\u0022:\u0022Total Due: $15,416.67\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "45f526cba17555fbd0ed28b4a59ec719ce5bf6f42c6e640601729b78678c9a07": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:1503,\u0022evidence\u0022:\u0022Total Due: $1,503.00\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "28da48b482c629d651f8c973be88fcd3725ff81004563dc01709fdc5e06c8dc0": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:21666.67,\u0022evidence\u0022:\u0022Total Due: $21,666.67\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "5a7e3f363a9b06508a379eb6a367804b546979cfd4c5d699ae05d07a7785e501": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:15416.67,\u0022evidence\u0022:\u0022Total Due: $15,416.67\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "991e3338bf43b60df289eea50bcf8186c78ef81e90b9424ef52bdebe5597cfe3": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:15000,\u0022evidence\u0022:\u0022Customer Audit Program - Annual Fee $15,000.00\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the annual fee for the service.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "b75fc4d281a6625f7f9c0ee30447cf26eea5b02bb48d50880543cd6182805ac9": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:3099.45,\u0022evidence\u0022:\u0022Total Due: $3,099.45\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "fca1831f36e15a1b037032a2620bda05668bff92991132b93bcbd10519810403": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:21666.66,\u0022evidence\u0022:\u0022Total Due: $21,666.66\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "1429e295c39c815df34161444609d41f1545c1943b711cd17bfc2630dd9ad784": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:15416.67,\u0022evidence\u0022:\u0022Total Due: $15,416.67\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "1aedf64cba985f7c1c597105764a3fcb7dddc74de7a19c8873497b6e45ff403c": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:1090.19,\u0022evidence\u0022:\u0022Total Due: $1,090.19\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "117337bdf64d49e5aa63ca9de67a99e765b4e45ce349e169e3781c694460af77": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:15416.67,\u0022evidence\u0022:\u0022Total Due: $15,416.67\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "504abc93ba624254eefa1cd6c67d54ff32257b24489ab01f594c2b2a9b8c3f6e": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:4668.74,\u0022evidence\u0022:\u0022Total Due: $4,668.74\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "cad681ec76400e75516bfac321719d220e0111bac39d56ec15679355b208ce48": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:1077.28,\u0022evidence\u0022:\u0022Total Due: $1,077.28\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "b7963c090dd85f40b7306c331d0ae6f5db38619aa171b89c8b5f6492cbbae8ca": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:15416.63,\u0022evidence\u0022:\u0022Total Due: $15,416.63\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "7342787dcde3f89776fa2814512bd958c49c8364ec66cefce368b5c1d83a1671": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:2268.76,\u0022evidence\u0022:\u0022Total Due: $2,268.76\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "e265d272fa5d613b29a66a5b0ebf38fdba6f42c42e1a20dec04351af0125e7f7": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:441000,\u0022evidence\u0022:\u0022$441,000.00\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the annual subscription fee and the payment terms.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "64a8a62a8a801e5094e673010208fb23f2b6dd042f12b74ccbe3e7c32bb94736": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:2564.87,\u0022evidence\u0022:\u0022Total Due: $2,564.87\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "9376e58c68de34ab1de770058c0b2aa8d8ad4cab26dd661df94e294addc9890f": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:5746.59,\u0022evidence\u0022:\u0022Total Due: $5,746.59\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "44afccd38b7f52a93f7660f66960d9f9cd3db6e063af5a0635eea3b49a789be1": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:1143.34,\u0022evidence\u0022:\u0022Total Due: $1,143.34\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "acc3a72cd45cdf969e7f274044e88a792a493bc9e8839c440a216bb97f3162cb": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:1035.18,\u0022evidence\u0022:\u0022Total Due: $1,035.18\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "1f7bbb4ab0a44ea611841ebdf4709bee7fe23d130e6710f9461eb6b47f06e327": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:2799.10,\u0022evidence\u0022:\u0022Total Due: $2,799.10\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "574aa508eccabbb080d865af18cb9a2345061da9a5d675c6706c54bfecea5007": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:19333.33,\u0022evidence\u0022:\u0022Total Due: $19,333.33\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "278c6ab6c6da50dac1e0004b2221cf9fa81640f735c203f2135865a669a41a91": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:5621.07,\u0022evidence\u0022:\u0022Total Due: $5,621.07\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "10dc6e71392369788ef67cf51bf88c40074457ba0a88fff54b6942ae94835861": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:2930.81,\u0022evidence\u0022:\u0022Total Due: $2,930.81\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "ada968c2dc551e35090ba6b4c002f1b0432526ec2bb633f7d55fafb0bc89179f": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:19333.33,\u0022evidence\u0022:\u0022Total Due: $19,333.33\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "231c9ca1ebe879f5a4b1069e9040840713d4645857811a4b8fc3ad1717ea9fdf": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:2206.78,\u0022evidence\u0022:\u0022Total Due: $2,206.78\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "34b080e0bbc59dcbcbfefffa86d98921ec160e37ea37589bfd8142f74e23fc92": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:12000,\u0022evidence\u0022:\u0022Total Due: $12,000.00\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "a3e91a09ce93544494326f2f575108419b0934a14d5e46bb7d43ed0894298a83": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:19333.34,\u0022evidence\u0022:\u0022Total Due: $19,333.34\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "e7d12c0cfbf0d76b96597d16e7b00c77dbbad738ce0dc82cf1dda31046529ed4": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:957.69,\u0022evidence\u0022:\u0022Total Due: $957.69\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "5e81a3daf8d86994718997b86e975d2131b3c4d3137497b79a2b4d6e68405d46": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:6073.58,\u0022evidence\u0022:\u0022Total Due: $6,073.58\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "7c3d0a8b644e5996dbe9b72c3831f0086f42aead66673a54cfc5ba70dfed0d6a": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:2666.71,\u0022evidence\u0022:\u0022Total Due: $2,666.71\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "3df60063e5811a52ce36834b04db9a198e9720e51f7dcb845681fa82e328b3c1": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:2860,\u0022evidence\u0022:\u0022Total Due: $2,860.00\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "95ba68cea5a09a1cc51ef9d29b43688c1c92dae3b36c0f92426ed4f2354c0d35": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:15750,\u0022evidence\u0022:\u0022Customer Audit Program - Annual Fee $15,750.00\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the annual fee.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "9777752a68139056bdc0eb64f8a9e7cc54333f9f10aa5affac8381282ea7fe49": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:1743.30,\u0022evidence\u0022:\u0022Total Due: $1,743.30\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "3f799184ce270d4d7ac64b58c704d3da1092bde9777654ebe80ab8dd55619fdb": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:4382.57,\u0022evidence\u0022:\u0022Total Due: $4,382.57\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "a246f756f598d49f612fc7fb0df9870d629523d0b49c6a0ac5a32ce4135f5ba7": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:2343.86,\u0022evidence\u0022:\u0022Total Due: $2,343.86\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "c5ef1d412050f5a6ad2ae2b962682b9b3cd4c4c0ceebbdf71f8efd35f7d97216": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:1232.24,\u0022evidence\u0022:\u0022Total Due: $1,232.24\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "1eeca2a097d59045f35714540a6beda62fd8a7c4de6a8450ff0af41bbe176b5d": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:463000,\u0022evidence\u0022:\u0022$463,000.00\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the annual subscription fee and the payment terms.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "3c225661d2efabe283d1aa4f1c6236f15bcfaacb9049cc974ef27392411a8a54": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:1342.34,\u0022evidence\u0022:\u0022Total Due: $1,342.34\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "fdc33f78d787a787d62bb1f407f69b9262bb2053d80297d9a723f76ab032bf65": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:5086.04,\u0022evidence\u0022:\u0022Total Due: $5,086.04\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "8b119157c0fd1618afed5b3c54c63f70a16547fdd57716e3ecd2a10acba00c7b": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:2499.28,\u0022evidence\u0022:\u0022Total Due: $2,499.28\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "858366a067740cd2f47ca050ec9d6048f56cd2c37e3c0c4fc1bdd27966f0df60": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:2281.46,\u0022evidence\u0022:\u0022Total Due: $2,281.46\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "28a2e5bca19ae830af52716de900408ed3d359c32c71b7533d81c42d8ead0ac3": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:23833.33,\u0022evidence\u0022:\u0022Total Due: $23,833.33\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "efb8b24920953484ddfcfb5ff7da464daa2724d294f48722df492565eaf4518f": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:2105.23,\u0022evidence\u0022:\u0022Total Due: $2,105.23\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "1a31e7da2b7e14d8bf8916c6f72e34541dcec05853164748b6ef18bc9d35e6f8": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:23833.33,\u0022evidence\u0022:\u0022Total Due: $23,833.33\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "ff473359a542356d004214fb18399b4929cbc059734d89c754af875a801a33e1": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:4262.57,\u0022evidence\u0022:\u0022Total Due: $4,262.57\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "004744009ad34292f56b97a7fc7e96bd34e667103e6ae0092e4b019dea698403": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:1234,\u0022evidence\u0022:\u0022Total Due: $1,234.00\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "13a5134035b21db27819a0828aa359a108373bff855b6a4280f078f17ac70c04": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:15666.67,\u0022evidence\u0022:\u0022Total Due: $15,666.67\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "d4a6ade6adf491d806107db66297c28fdf3d5071f4e44d3e9ccead1f9667fcfe": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:23833.34,\u0022evidence\u0022:\u0022Total Due: $23,833.34\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "515945585b5a42d514817395c546e9d5089ffe7f8f8a67fb92e598531fbd9ecd": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:1484.38,\u0022evidence\u0022:\u0022Total Due: $1,484.38\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "9d6e45224a2ee4f0fac94a626ef9d56b84094f63e42b65f301706eeca2b35ea0": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:15666.67,\u0022evidence\u0022:\u0022Total Due: $15,666.67\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "2ffccad1602ac082468305fdc380aadab59a0d2e4a694871291232b0173addcc": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:9800,\u0022evidence\u0022:\u0022Total Due: $9,800.00\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "414ad81794a521a15864a896765c631a684de8fdddb5556ada67f4d5b3db0879": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:1366.1,\u0022evidence\u0022:\u0022Total Due: $1,366.10\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "928537ef4afc5e8adb55b40a14a39af8d335303160cf785f03f2450d97c087de": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:15666.67,\u0022evidence\u0022:\u0022Total Due: $15,666.67\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "63a084306c31a502b2d6ac9d68c207840771be2b89830cfbc400a4db4d86787d": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:4659.14,\u0022evidence\u0022:\u0022Total Due: $4,659.14\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "c22158cff296ae584d36972f8a0abf489e759e59d13ed5166f8b2b3bd1993f47": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:2830.70,\u0022evidence\u0022:\u0022Total Due: $2,830.70\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "5119d5e6e77c323df2bcb0cc3e6c249033dc28efbe0dc53d5b8836ab3913e670": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:15666.67,\u0022evidence\u0022:\u0022Total Due: $15,666.67\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "0938522f9e1efdbd04a805b69ac16e4cdc024c005238ece0106641bd355e0847": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:1388.26,\u0022evidence\u0022:\u0022Total Due: $1,388.26\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "d011615ff5ea3641ade7c744fb26758b694c6d96183ce7eeebf5067dfdedfcdd": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:16500,\u0022evidence\u0022:\u0022Customer Audit Program - Annual Fee $16,500.00\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the annual fee.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "1a503e04f29c253572f8d8fc414ad406e39bff70fbc15a819277d916767fa67d": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:15666.67,\u0022evidence\u0022:\u0022Total Due: $15,666.67\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "93336122da8c1cd8176a603ab3effca3aac94f0a905b2df93eeda4aa8bc7099f": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:2741.86,\u0022evidence\u0022:\u0022Total Due: $2,741.86\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "06a81fa8e83dd7407f41ba2d301c1206bf7b32a84bd204f0842b10ddc03d043a": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:9400,\u0022evidence\u0022:\u0022Total Due: $9,400.00\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "811363af7dfc4c1d874949bf97916e3d80e94ccb8364e00efb24189452d3baa7": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:15666.65,\u0022evidence\u0022:\u0022Total Due: $15,666.65\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "f40841933d2b5666d9362267b9161809a4572a9cc6f2924a93130a962cf6fe4a": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:5261.25,\u0022evidence\u0022:\u0022Total Due: $5,261.25\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "39aee0a19ca724e58f259cfd2d391958e1969a47dbd51bd2abf294ca36283fe2": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:1479.19,\u0022evidence\u0022:\u0022Total Due: $1,479.19\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "6b5210b6305aec7e23dea370dcf084b5c15eb2d29add2e235ac0719057ffee80": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:2995.87,\u0022evidence\u0022:\u0022Total Due: $2,995.87\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "4de1efc5cec1b600e98b2f45b1a2d22fb14cdd624a598b6af5b26dac0757578d": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:2909.46,\u0022evidence\u0022:\u0022Total Due: $2,909.46\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "cfc2bf24e2e6455d3dd9618e3a83c3d5deb607179229aeaae458a024681c39bd": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:1349.67,\u0022evidence\u0022:\u0022Total Due: $1,349.67\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "1b110d4843fd3110624c3fd8a15648aee2af95a13de2dc155b0d97e059d8dd00": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:1779.73,\u0022evidence\u0022:\u0022Total Due: $1,779.73\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "2b8602d7a7cef0c3762134b2ad25c23b99ba66fb1eaeddc0b197843b886a8e48": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:1185.75,\u0022evidence\u0022:\u0022Total Due: $1,185.75\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "faf0ca2f21c025b4c34de3ba663283bdde90ed305194a6c4ba2e80078b62707b": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:1429.57,\u0022evidence\u0022:\u0022Total Due: $1,429.57\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "d00f763642764b3d2a18ce4c7174d775714e2ab17d0e31ff1941e7dff3c3907c": {
+    "answerJson": "{\u0022facts\u0022:[],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022No explicit facts regarding SLA uptime, customer satisfaction, payment terms, renewal date, or annual value are present in the document.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "2fb9b9281ba411d748b7a32dffe5ac52e8b8545901c7e87964df7d6dd025d5b6": {
+    "answerJson": "{\u0022facts\u0022:[],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document does not contain any of the specified facts.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "84de324c31c30ad4d2fc8ded71f38a48856476a7895d8ad8ab145608e90a19c5": {
+    "answerJson": "{\u0022facts\u0022:[],\u0022confidence\u0022:0.0,\u0022reasoning\u0022:\u0022The document does not contain any of the specified facts.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "7d02d16ba634b7ad46c6236f9df2f488f6dcfc6ca4e5f65b64482a21712054ac": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022sla_uptime\u0022,\u0022value\u0022:99.9,\u0022evidence\u0022:\u0022Vendor guarantees a Service availability commitment of 99.9% uptime\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022All invoices are due and payable within thirty (30) days of the invoice date\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022renewal_date\u0022,\u0022value\u0022:1693526400,\u0022evidence\u0022:\u0022This Agreement shall renew on September 1, 2026\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:180000,\u0022evidence\u0022:\u0022The annual subscription fee for the Services is $180,000\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the uptime, payment terms, renewal date, and annual value.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "42b5ac005cca14354615c2eca8b09679c803bafbd8ac91f5a495b21ca71ea542": {
+    "answerJson": "{\u0022facts\u0022:[],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022No explicit facts regarding SLA uptime, customer satisfaction, payment terms, renewal date, or annual value are present in the document.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "f085ddbd0240042ccfdada1689d8512f3c768367a2f46055d8d5330fc3426172": {
+    "answerJson": "{\u0022facts\u0022:[],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document does not contain any explicit statements regarding SLA uptime, customer satisfaction scores, payment terms, renewal dates, or annual values.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "f56e618eb7089db9b64e3424b6bfdfec0937e6728f0e4de8a16581e7d8e9878f": {
+    "answerJson": "{\u0022facts\u0022:[],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document does not contain any of the specified facts.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "55147f2762109e1ee2bccdbeda2a35578284ef7ec63accf368424798e522e788": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms 14 Aug 2022 Net 30\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:33600,\u0022evidence\u0022:\u0022TOTAL DUE $33,600.00\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "44ae0815b95aaa696f79af4bd32a1aadae6789face183be243fe846a3c945517": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms 31 Aug 2022 Net 30\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:12600,\u0022evidence\u0022:\u0022TOTAL DUE $12,600.00\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "d797b7a2f4069f120eeac5c36ee49bebc6c4adf31877558bc8ee7be9a328bb02": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms 15 Oct 2022 Net 30\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:17100,\u0022evidence\u0022:\u0022TOTAL DUE $17,100.00\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total amount due, which are the only relevant facts present.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "dfdcebbab395c8e8e33ecc62f297469efd0a952d155a697d189de48d5313bc4e": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms 31 May 2023 Net 30\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:39200,\u0022evidence\u0022:\u0022TOTAL DUE $39,200.00\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "24d1fc294daeb330e2ca4088b8d992a208dccb62e6e9c2fb580bb898f429aa71": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms 15 Jul 2023 Net 30\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:34700,\u0022evidence\u0022:\u0022TOTAL DUE $34,700.00\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total amount due.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "992a430a140efa02602db0eb0bc8ae56f83b71d88ebefbd8395051241a50979b": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms 31 Aug 2023 Net 30\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:18100,\u0022evidence\u0022:\u0022TOTAL DUE $18,100.00\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total amount due.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "60fb395e0687feb91712c5fb95d4db82d76f35e84e4ef534b951d9ee88d377bb": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022all undisputed amounts will be paid within thirty (30) days of the date of invoice.\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms as 30 days for undisputed amounts.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "88e9d5335a3177c85e9b45d79bf8b0af7b23e44c01b08a8a0113a184963f36d0": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022csat\u0022,\u0022value\u0022:4.6,\u0022evidence\u0022:\u0022Study quality scores averaged 4.6 out of 5.0 based on sponsor feedback surveys.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022all payments received within Net 30 terms\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:57750,\u0022evidence\u0022:\u0022Invoices issued this quarter $57,750\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the customer satisfaction score, payment terms, and annual value.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "dd8c49c227f167bc393eebd846c5bc4513c10658aad9f315671ab30745489fff": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms Net 30 days from invoice date\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms as \\u0027Net 30 days from invoice date\\u0027.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "aa2379a2fd22253c2cebdc5e85308225eee6c73378975e290587257e049602ba": {
+    "answerJson": "{\u0022facts\u0022:[],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document does not contain any of the specified facts.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "df2ae3282172802ad6d49919aab26ea00cd11c9914e70607a91f0f5721535936": {
+    "answerJson": "{\u0022facts\u0022:[],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document does not contain any explicit statements regarding SLA uptime, customer satisfaction scores, payment terms, renewal dates, or annual values.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "0f140a2d854aa07517f4a605c9aeed11071ad270438e5957358a4800add124e2": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:60,\u0022evidence\u0022:\u0022Biogen Idec shall pay the amounts payable to Vendor hereunder within sixty (60) days of receipt of invoices submitted by Vendor\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms as sixty days for invoice payments.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "7d433036480cf3b33794a1a24ac3ceb88921aaecdec03ea33d6031c320e46b3e": {
+    "answerJson": "{\u0022facts\u0022:[],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document does not contain any of the specified facts.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "74d3dca6da0b8bd1485290f20337f1977988bf0903be187f8feea30f416579e8": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:45,\u0022evidence\u0022:\u0022Payment Terms: Net 45 days\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:34400,\u0022evidence\u0022:\u0022TOTAL DUE $34,400.00\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "0a7f230b5175f5a7f963fba0915c586ff8551831412cd173668759ce5a5e0c83": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:45,\u0022evidence\u0022:\u0022Payment Terms: Net 45 days\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:22320,\u0022evidence\u0022:\u0022TOTAL DUE $22,320.00\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "9a949df15f6514031cefd19523f6f7484067cc11c0a6d79bbd67db4059fa3624": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:45,\u0022evidence\u0022:\u0022Payment Terms: Net 45 days\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:39850,\u0022evidence\u0022:\u0022TOTAL DUE $39,850.00\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "f7bfaa5eac5d6b95cc6d27bc98f3f3f3e68c9998ec9f5cf4a73113bcf37d11ce": {
+    "answerJson": "{\u0022facts\u0022:[],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document contains meeting notes and does not provide any explicit values for the specified facts.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "4290613a35efdc2d43d124395dfa2da15e8ce039d712decc63c9cb8ceb9252ca": {
+    "answerJson": "{\u0022facts\u0022:[],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document does not contain any explicit statements regarding SLA uptime, customer satisfaction scores, payment terms, renewal dates, or annual values.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "446c77f81b1f47e927c795960047fbe7c1412f58b2afecf9d88333d8c1df2c2f": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:45,\u0022evidence\u0022:\u0022Payment terms: Net 45 days from receipt of a correct, original invoice.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:124200,\u0022evidence\u0022:\u0022PO Total: $124,200.00\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total contract value.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "c8af406a0376cafb73f0a83d5dd5c91ee658300d80eed3928d6b2933dfadf2aa": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:60,\u0022evidence\u0022:\u0022Vendor shall present all invoices for payment to Prudential no later than sixty (60) days after the Services have been performed.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:45,\u0022evidence\u0022:\u0022Prudential shall pay all amounts not reasonably disputed within forty-five (45) days of Prudential\\u0027s receipt of a correct, original invoice.\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states two payment terms related to invoice submission and payment timelines.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "847a8180cb8549c8b2d75bce0fd632189c7d7db7a2705debef196ee9e83f19de": {
+    "answerJson": "{\u0022facts\u0022:[],\u0022confidence\u0022:0.0,\u0022reasoning\u0022:\u0022The document does not contain any of the specified facts.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "8844913cc02e599e447f294220b6998e3c00dc26fbbb5479c806a2f07b715e3a": {
+    "answerJson": "{\u0022facts\u0022:[],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document does not contain any of the specified facts.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "1d48d1d039452f5448b3de13d601dce2016cac3cd8f4ac8e072eaa47c9ed5d36": {
+    "answerJson": "{\u0022facts\u0022:[],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document does not contain any of the specified facts.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "3c2a777a915547ed65cb2cbfa283fece5496656d96f68544dff6135a3e5d06ee": {
+    "answerJson": "{\u0022facts\u0022:[],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document does not contain any of the specified facts.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "a0d0dadc66325cc80bce839f62fe0005db77deabf708a7e47963b05b3773d5a1": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:45,\u0022evidence\u0022:\u0022Payment Terms: Net 45 days\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:38000,\u0022evidence\u0022:\u0022TOTAL DUE $38,000.00\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "4ea83b256a4f97a4a0960a5b67e20e2ea540a9984b89ac1e09a5970cf26da71f": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:45,\u0022evidence\u0022:\u0022Payment Terms: Net 45 days\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:55000,\u0022evidence\u0022:\u0022TOTAL DUE $55,000.00\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "51ed79eee92dfb721c328e7a39dd7e6069bfd353a36741e3099203ab7e461cea": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:45,\u0022evidence\u0022:\u0022Payment Terms: Net 45 days\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:36750,\u0022evidence\u0022:\u0022TOTAL DUE $36,750.00\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "06f5381dcb2744c31c812fcf7ab9c3130c0af953d64eaf50b47793d551370dea": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:45,\u0022evidence\u0022:\u0022Client shall pay Vendor within forty-five (45) days of receipt of a correct invoice.\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms as 45 days.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "5e2b5d4f9a107f9c95fd91b7c91a4c5f3781e04ee84b21f79c2630be4000ab42": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022renewal_date\u0022,\u0022value\u0022:1734297600,\u0022evidence\u0022:\u0022December 10, 2024\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022terminate this Agreement, or any Order Forms hereunder, without cause at any time upon 30 days prior written notice\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states a renewal date and payment terms, which are the only facts present.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "1691437ab00d61308823f8d35e9201adb4d998c32d844c55f279c222e023e48c": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022renewal_date\u0022,\u0022value\u0022:1688083200,\u0022evidence\u0022:\u0022the Term through June 30, 2028\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the renewal date as June 30, 2028.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "10422e9b3ed7e19f383470aaec27156e09bda20d0805c2d5b90e4aba56a33e3c": {
+    "answerJson": "{\u0022facts\u0022:[],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document does not contain any of the specified facts.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "45263b2a8f4d1132b0451e27119cdac8d446833ce32bf9093566a01104a60afe": {
+    "answerJson": "{\u0022facts\u0022:[],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document does not contain any explicit statements regarding uptime, customer satisfaction scores, payment terms, renewal dates, or annual values.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "da5db95c4bb896ca93ae0e572281ba7d5b3f9be19ee2a01b518e8baf2cbfaaee": {
+    "answerJson": "{\u0022facts\u0022:[],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document does not contain any of the specified facts.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "113fbf9a8ba5f211fd337abb92aa4527c67735fd9fc60cf263becd500e25448f": {
+    "answerJson": "{\u0022facts\u0022:[],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022No explicit facts regarding SLA uptime, customer satisfaction, payment terms, renewal date, or annual value were found in the document.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "6b8e962c785c34daa7c8a134aef824c1e455e6697f7da5fe05267b41df813bda": {
+    "answerJson": "{\u0022facts\u0022:[],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document does not contain any of the specified facts.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "ddce93f464a3b7bbfaebb3f04724c983255ded5b2f19e40531b8746609d7cf45": {
+    "answerJson": "{\u0022facts\u0022:[],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document does not contain any explicit statements regarding SLA uptime, customer satisfaction scores, payment terms, renewal dates, or annual values.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "d15aa6938761d14d920f6856638529a550a4b4c5f4b35c37b446be0e8384b87f": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:420000,\u0022evidence\u0022:\u0022$420,000.00\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the annual subscription fee as $420,000.00.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "11f0ad462d5499e94994b51b1c1a6dbd92d2118d93c43368654d028365e400eb": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:185000,\u0022evidence\u0022:\u0022$185,000.00\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the total authorized amount as $185,000.00.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "75e6dc23a53b6cd7f646bf1d7a84f5f2b3c6a14d76c58f935052a292e2e91fed": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:22000,\u0022evidence\u0022:\u0022$22,000.00\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the total authorized amount as $22,000.00.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "5bd27c5ff017b2965fc01857019d42b5f492156d05c29617e5bc65d5ced5e9be": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:65000,\u0022evidence\u0022:\u0022$65,000.00\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the total authorized amount as $65,000.00.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "0c75ef309b9a8040bab90266aedb039a1708dda2b19a53f06895cdca22adf9d3": {
+    "answerJson": "{\u0022facts\u0022:[],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document does not contain any explicit statements regarding SLA uptime, customer satisfaction scores, payment terms, renewal dates, or annual values.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "346afee2cf768ce74a71e29f199dd443afd49a043446e9e24bf94ddd3ed8ff66": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:441000,\u0022evidence\u0022:\u0022$441,000.00\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the annual subscription fee as $441,000.00.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "317c8c4499f9bb6e1dfc4a251733d5c800e35f8923ea83b36f07dcec5b901280": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:18500,\u0022evidence\u0022:\u0022$18,500.00\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the total authorized amount as $18,500.00.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "6a8d948601dd74f58a38477eac413496373417d87fdb0d2750ce4fe4ce6e9efa": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:58000,\u0022evidence\u0022:\u0022$58,000.00\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the total authorized amount as $58,000.00.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "2f075ffc76ed53cc3ce14c01f600bc545f5f12dabab0bcc1a148e516944da8b5": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:12000,\u0022evidence\u0022:\u0022$12,000.00\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the total authorized amount as $12,000.00.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "314a433e2abceae181a13ec14d86a4ae4fa7650dd31ec2085c9ed534e10264aa": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:21000,\u0022evidence\u0022:\u0022$21,000.00\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the total authorized amount as $21,000.00.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "434e5b7b46b54f5c7b69824110c46dc391f47b05f5670c431b6ddb78d466b680": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:15750,\u0022evidence\u0022:\u0022$15,750.00\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the total authorized amount as $15,750.00.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "635ed3f59664c40da2f1a63cc5ff035ea797f965c9513bc05730bb778a2cb4d9": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:463000,\u0022evidence\u0022:\u0022$463,000.00\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the annual subscription fee as $463,000.00.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "d966f7b8706ff1015feefc853577bb6b10d615bae21584ce7fbb14a294c7538b": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:19800,\u0022evidence\u0022:\u0022$19,800.00\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the total authorized amount as $19,800.00.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "d4e39366d23fa72a31681b13bfa63166bd9761aa58a7fa354a8a07739442c7e1": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:71500,\u0022evidence\u0022:\u0022$71,500.00\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the total authorized amount as $71,500.00.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "736eef093cf868aabe06afc7b1d48af26e26c2eeed632db248b6bcf9c2b603b5": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:94000,\u0022evidence\u0022:\u0022$94,000.00\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the total authorized amount as $94,000.00.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "bd8bddcf11e96a7d4e37a7f3688b5f6b697bef72f9b931a36180942bd3c0bdeb": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:23200,\u0022evidence\u0022:\u0022$23,200.00\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the total authorized amount as $23,200.00.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "b8b742968098babb8d692731d1b1bfc1f0cc12735051e3e2ac492164e4b68e69": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:16500,\u0022evidence\u0022:\u0022$16,500.00\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the total authorized amount as $16,500.00.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "fb47cf209d8461f3503e9de370dd33e2f9e086c75a37e164ebb9440d46c5be52": {
+    "answerJson": "{\u0022facts\u0022:[],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022No explicit facts regarding SLA uptime, customer satisfaction, payment terms, renewal date, or annual value were present in the document.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "1c28a8cf9e1588b22068546537ddf1503a7ce3d77a1c37fe7a7ce999385fde5a": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:420000,\u0022evidence\u0022:\u0022$420,000.00\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the annual subscription fee and the payment terms.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "4995fb1e06d294b0f9f87e4cec053dbdf2a02d682b3f4a1e4e0a4f5457daa5d8": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:15416.67,\u0022evidence\u0022:\u0022Total Due: $15,416.67\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "9bb172b6000ca69c0e3b438092eee820bcb19c549ff279feaea757d2cfe94df9": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:5542.8,\u0022evidence\u0022:\u0022Total Due: $5,542.80\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "6e8940bf09994af785e7627aa4945cfb952317d499aa1f248d78bdc6ef1fccfa": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:15416.67,\u0022evidence\u0022:\u0022Total Due: $15,416.67\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "0e521a9d6523a05072aa048093ad445ae9bb55ae11321168dccfe356b1131b24": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:912.36,\u0022evidence\u0022:\u0022Total Due: $912.36\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "c7f8f18c700d208efa576a37c908094dd1b18dcf0ce2f2a051c92d89210386d8": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:15416.67,\u0022evidence\u0022:\u0022Total Due: $15,416.67\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "ac38b15ef3e4bc7ef7d356f4b3b5fb6dae3c0d60d5dd721bcf3fe1c7a60ff8d3": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:2532.65,\u0022evidence\u0022:\u0022Total Due: $2,532.65\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "23a275b4379bf2f0e2f9aaaa26aa6ce0f5afba4dffe01648c79c71053a653432": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:15416.67,\u0022evidence\u0022:\u0022Total Due: $15,416.67\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "b3944b5fe708e1e94593b9c73214f4f296f8a9f48d85dbd5d63f7253ecada679": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:11000,\u0022evidence\u0022:\u0022Total Due: $11,000.00\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "ba49b358ec39de7f9b8d9bc8cc85feffa83032059a5ac69b383b1f22b94c8a95": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:1835.87,\u0022evidence\u0022:\u0022Total Due: $1,835.87\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "7ff5b41efd39c149a279de62414c563dd22f14b57f588b5fb0381c8e351d064a": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:4252.52,\u0022evidence\u0022:\u0022Total Due: $4,252.52\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "781c791a7426e4a9fd81278391279185a6ceceb59e20afbf77d4bee86022a6ba": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:15416.67,\u0022evidence\u0022:\u0022Total Due: $15,416.67\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "06a57b98b5ed23b36c0468a2822e190baca3213bce8a955ab947218015792fdb": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:11000,\u0022evidence\u0022:\u0022Total Due: $11,000.00\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "47e247e0db581b3dde0ba4ba13be30df0afbf1e48e74b31831bfe22f72227ab4": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:2234.77,\u0022evidence\u0022:\u0022Total Due: $2,234.77\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "32880530e3e2aadf300276186127f56d5124f7b2fb899f114a8f35cd050b96dd": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:15416.67,\u0022evidence\u0022:\u0022Total Due: $15,416.67\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "24de6140548c416a490cceca39aed3566dacb85c81932b1ab51406a0e27e2957": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:2633.20,\u0022evidence\u0022:\u0022Total Due: $2,633.20\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "9e17e0b0ef23dece157171bd705fa35d427379e5cb76a272eb948fd910cec25d": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:15416.67,\u0022evidence\u0022:\u0022Total Due: $15,416.67\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "e714386b11ba3eef086804b0a899e267a6dd457914d9d9eb2a8b63ebf3252ac3": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:2490.63,\u0022evidence\u0022:\u0022Total Due: $2,490.63\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "e3751d316d8ca45e5fde03e5aa224136f379b6459595dfa9db98bf71b6b0c920": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:21666.67,\u0022evidence\u0022:\u0022Total Due: $21,666.67\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "9c7d8deb5cd707ffbbf43d0691bec650d9c97eb70c9fd1dc8768edaa0ff17704": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:4777.56,\u0022evidence\u0022:\u0022Total Due: $4,777.56\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "509a2e5de05174a6c0ef848b3d593c48f8bc4b0b4d7019f2e39e6a572bbc1eb3": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:15416.67,\u0022evidence\u0022:\u0022Total Due: $15,416.67\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "2a22979d02729bd474cea7f61391d5a86928c8446171b2659fa38cace8516050": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:1503,\u0022evidence\u0022:\u0022Total Due: $1,503.00\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "a1cee850791392143a5f6235d9c8f1416a328f1319d5d6e520d648b435be32a3": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:21666.67,\u0022evidence\u0022:\u0022Total Due: $21,666.67\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "bdad7f1f292fe7b7766e45fe241be40f09e1700591de94843ca46b943f695d43": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:15416.67,\u0022evidence\u0022:\u0022Total Due: $15,416.67\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "6c39f3adad5e0baf9357cab06ea6a9961ea2d2512c216729a112b875fdb85a7b": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:15000,\u0022evidence\u0022:\u0022Customer Audit Program - Annual Fee $15,000.00\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the annual fee.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "b328705fb77469bf47051eeac7ae7b9a9a6c0aaf330cbc24826e8d30e557f314": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:3099.45,\u0022evidence\u0022:\u0022Total Due: $3,099.45\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "fbd1eebcfa4100c3ce3fb84692f52eb635337f3224c90d2058f1a600c2aa6f56": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:21666.66,\u0022evidence\u0022:\u0022Total Due: $21,666.66\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "824fc1872ec4ff5c22925c6e9d816ec64ecfbe21039c8fe62a4357b480086af7": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:15416.67,\u0022evidence\u0022:\u0022Total Due: $15,416.67\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "4d9ab8ab44947ff4915dbd860dfcd5b7ae563f48e227808e51677f99ea40bcbd": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:1090.19,\u0022evidence\u0022:\u0022Total Due: $1,090.19\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "ed06c8d41492fae8cf25a087f3a3062025afde06094242b1c531bfa3a4d268aa": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:15416.67,\u0022evidence\u0022:\u0022Total Due: $15,416.67\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "c2fe1cd5da441a7cb53fd90bd78b0d178179e3ba5877030b2a0cd7acd21a8633": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:4668.74,\u0022evidence\u0022:\u0022Total Due: $4,668.74\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "bc07d9c5fdea7d5828e9820083932dd9c9f5cd22593a0074d9f34ac719343e1d": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:1077.28,\u0022evidence\u0022:\u0022Total Due: $1,077.28\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "0c287a3f47cbea4d3de05fe94cd7aa4d25c46fa20fbdac817aded15a777ae7a6": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:15416.63,\u0022evidence\u0022:\u0022Total Due: $15,416.63\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "7174b075f83067bd101737d3a946768de600764273f1ff881ffbcd8aca41f716": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:2268.76,\u0022evidence\u0022:\u0022Total Due: $2,268.76\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "02d40aaec3055d1093dca53d8b054af885b35916f02d62027c1ed15ff8544ee8": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:441000,\u0022evidence\u0022:\u0022$441,000.00\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the annual subscription fee and the payment terms.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "ff003ef93c1d9e6707bb346bd2c9c7b692a995bb2aa8525e830141ef73e7fd1c": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:2564.87,\u0022evidence\u0022:\u0022Total Due: $2,564.87\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "92f9880ed6df80c9c241680918c1c71020fa6ff34606b47df9fbcb9c97529c2a": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:5746.59,\u0022evidence\u0022:\u0022Total Due: $5,746.59\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "a2aab0e564b44a43b23060d7fc362808c7adfaa1f4bfd003185dfa2881a7e49a": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:1143.34,\u0022evidence\u0022:\u0022Total Due: $1,143.34\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "d2ece3fba65ad80ccd82abc0b389706eec227e005044ea623ef06dead33f5b7b": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:1035.18,\u0022evidence\u0022:\u0022Total Due: $1,035.18\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "e6c9938a0a72fe67cdf9f2ca1a9c36ad98972d2fc050cdf8d23515c40a85dbad": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:2799.10,\u0022evidence\u0022:\u0022Total Due: $2,799.10\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "567a98ef0eb705cdfeb03617536078e3b8563045e71d9e90b66b58d6ee0abfd6": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:19333.33,\u0022evidence\u0022:\u0022Total Due: $19,333.33\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "bb6148a7c610063afc1140f239b000d3b4a0091b70faad7befe1fe8bf326d67f": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:5621.07,\u0022evidence\u0022:\u0022Total Due: $5,621.07\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "c5830f29258c3870299f92faae773f08e06676cdf37024a0ee10a0cbcfa827da": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:2930.81,\u0022evidence\u0022:\u0022Total Due: $2,930.81\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "30c2d09b022307412d7a3e21b1435252c00912f7db069be3cd5cb7edcf08ecf9": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:19333.33,\u0022evidence\u0022:\u0022Total Due: $19,333.33\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "5c5eb93fd52b253bcda054271af600f4580773227f8d2d043945034d7a6e104e": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:2206.78,\u0022evidence\u0022:\u0022Total Due: $2,206.78\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "79054ecc6ece66298b46539be57436cce5c417df79e3c361b9a87253422df4f9": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:12000,\u0022evidence\u0022:\u0022Total Due: $12,000.00\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "6ddb36f0da397f8bc76e005a335b45c8548c14ec1c00f92511bb4baaf4f41ffc": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:19333.34,\u0022evidence\u0022:\u0022Total Due: $19,333.34\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "14e93b792741ccf0878eb157a5dbd3b9990f4dd60dffb6b15bb6b10c1fbfe437": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:957.69,\u0022evidence\u0022:\u0022Total Due: $957.69\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "11ceb5c37db6ea3d44a1a53a4b5e2d1c671b6f6423b8c522012b33797acaa75e": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:6073.58,\u0022evidence\u0022:\u0022Total Due: $6,073.58\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "757a559e6587631869649d454f486f8de15ab041d354da240322f642c6d914f2": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:2666.71,\u0022evidence\u0022:\u0022Total Due: $2,666.71\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "05c410f2ac108b1684b702e3cd509f40adb3e550eaaac6656944cbe3feda1eaf": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:2860,\u0022evidence\u0022:\u0022Total Due: $2,860.00\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "eb995ea42bcc4afe543ac94d53af26bc335b005f10e78a31daafbe186363527e": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:15750,\u0022evidence\u0022:\u0022Customer Audit Program - Annual Fee $15,750.00\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the annual fee.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "5022628b2b7068282074faf66e5c2a59404f0109c1fa25b6d54fc40295aff19e": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:1743.3,\u0022evidence\u0022:\u0022Total Due: $1,743.30\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "8942758cbd313a87431c2c7547f6509249ac5123135f70b148a94f5400de8d0b": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:4382.57,\u0022evidence\u0022:\u0022Total Due: $4,382.57\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "a1b2ff1e3ba37f6706a65491f636c36c89234602ae79eff034321289910d601a": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:2343.86,\u0022evidence\u0022:\u0022Total Due: $2,343.86\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "a4267c7f45a53c4756573a9db11764dc830eca34b8bb8728a9c3f28b76d48868": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:1232.24,\u0022evidence\u0022:\u0022Total Due: $1,232.24\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "956aea751e3f76c270d33962f8e07b522bd37b03fdabfc0016fee5905d2b02d4": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:463000,\u0022evidence\u0022:\u0022$463,000.00\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the annual subscription fee and the payment terms.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "fe76f3c5287706f22db8652304439fdda6261a361fc278579a0f323e01db6582": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:1342.34,\u0022evidence\u0022:\u0022Total Due: $1,342.34\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "0cd50e27d0d356bdf75b615d42cbf38bcb3e9c60c8930ff4ba2ccbc5fef3c69b": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:5086.04,\u0022evidence\u0022:\u0022Total Due: $5,086.04\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "88fddbd49c7d77a7aad93e2a3842ba706a3109a844d289f0f3a45de6e74d64f0": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:2499.28,\u0022evidence\u0022:\u0022Total Due: $2,499.28\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "f8a65ddebbc43aa48e196c7a359aefd80c7307242f8c2507b0196c99f9fa871d": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:2281.46,\u0022evidence\u0022:\u0022Total Due: $2,281.46\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "2584c87d405c9781c39313c249f7104efc3135c3832ceede11f648150ec0dc57": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:23833.33,\u0022evidence\u0022:\u0022Total Due: $23,833.33\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "ef88e0ae19a8e1f64e6176d9d82395e2b5653f244554415e45be9b3d9faa5a3e": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:2105.23,\u0022evidence\u0022:\u0022Total Due: $2,105.23\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "e150ab9e61f99a0333d9f64be362dd30bdd19d0e04a5b0ac1ef5330489aaeb26": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:23833.33,\u0022evidence\u0022:\u0022Total Due: $23,833.33\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "18a0f6db2d938b1257e151698d41b2ad55fa56fd1d0894599a38916ce8637a23": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:4262.57,\u0022evidence\u0022:\u0022Total Due: $4,262.57\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "bcba6ad5125cb811ef2aa52b9f2f68f971e41a16f7a040b507e365598f524f21": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:1234,\u0022evidence\u0022:\u0022Total Due: $1,234.00\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "7374cdf72d946066a5dfb14ccb39a862c3c58ee6247937ad337590b1f08beaee": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:15666.67,\u0022evidence\u0022:\u0022Total Due: $15,666.67\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "1879b8a4a781531230e75354c46fe0a89da1bb4cb320ed930aa0b9bf1a2502a2": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:23833.34,\u0022evidence\u0022:\u0022Total Due: $23,833.34\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "641fd0ba39bbb57db811373fc94fee5c3744cea8fdffd79ed3fe3cc909777ede": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:1484.38,\u0022evidence\u0022:\u0022Total Due: $1,484.38\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "9ccbc27a73633e44d44f680cdf3598ddba49fb21a83edc775a3d9d1629d5e628": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:15666.67,\u0022evidence\u0022:\u0022Total Due: $15,666.67\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "7f6a1ecae123935543fc93bd5bacd965366ceab8d78137957cae3f8dcdbe829b": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:9800,\u0022evidence\u0022:\u0022Total Due: $9,800.00\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "67b1ec2d66e7eccc11ac341e83310c845403ec82a22876a5ecac6ca6922a00e3": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:1366.1,\u0022evidence\u0022:\u0022Total Due: $1,366.10\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "033eae81e65135d8ec0a25d0ed8f9b1e016540f1d949709ba7c35488436e70ac": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:15666.67,\u0022evidence\u0022:\u0022Total Due: $15,666.67\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "49febd592a741de7246d429ba8daff7e4556c02cf45b6ee9574eb2043d7c2191": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:4659.14,\u0022evidence\u0022:\u0022Total Due: $4,659.14\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "1b4d90135e4e71a323cb4fc889f302d8895a5cec0de74203fca5a59543e1495f": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:2830.70,\u0022evidence\u0022:\u0022Total Due: $2,830.70\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "e4055c0d73e46615876f33e8d9474b47f748267b9c0cd38305952b6133b7c013": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:15666.67,\u0022evidence\u0022:\u0022Total Due: $15,666.67\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "71e2f250e014831a3fc29b74883f12056517b49db9f001dec26820c1a859d72c": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:1388.26,\u0022evidence\u0022:\u0022Total Due: $1,388.26\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "6f1154ebab35830976c55c6d353eeeeeb76c0c85cf5263814d0b01bfd736cfa3": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:16500,\u0022evidence\u0022:\u0022Customer Audit Program - Annual Fee $16,500.00\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the annual fee.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "f9e7e11ab0417a42227c5a8490ecd013a59e69b0f4e1e330fad2ec3035c841f0": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:15666.67,\u0022evidence\u0022:\u0022Total Due: $15,666.67\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "e7e8ca46c7d14e6aa7a272e250562d42c969983bf4ead6caacafec933ed20f41": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:2741.86,\u0022evidence\u0022:\u0022Total Due: $2,741.86\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "b9aa8f1933c081a00c5cc1796fa667f40e176ad8652bdc0e1d5d071f882b7863": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:9400,\u0022evidence\u0022:\u0022Total Due: $9,400.00\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "fef4f8502e1df6094577af8e3a5230a58d3d87ba968d82ae594c04ab49c51ffb": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:15666.65,\u0022evidence\u0022:\u0022Total Due: $15,666.65\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "652273a1e9d31aa01696ed7247dfd151bfc7b36c1df73d290cc7a1d594b0f179": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:5261.25,\u0022evidence\u0022:\u0022Total Due: $5,261.25\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "3016ea44e901f9f519c6bbcda7246e245d4dd13ec092aeb82da39ea5ad408a1a": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:1479.19,\u0022evidence\u0022:\u0022Total Due: $1,479.19\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "370dc6259c745efaf33cd8c613f71b4e06e1dfbd37de2fb247f005a0627cf392": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:2995.87,\u0022evidence\u0022:\u0022Total Due: $2,995.87\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "5292232c75118263274db50dbf4cbe16cf2ae29bb2e281fb733f5391be3e6595": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:2909.46,\u0022evidence\u0022:\u0022Total Due: $2,909.46\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "b582c5830ba984350a3dce40eb2cf9667addd631a3671e4c3885ee785bd0abeb": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:1349.67,\u0022evidence\u0022:\u0022Total Due: $1,349.67\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "3eaa54cd693a1b58985493f22bc1558285011624a792f51aa1a14db73fdf7a86": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:1779.73,\u0022evidence\u0022:\u0022Total Due: $1,779.73\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "05f5b4402161e6b1b0211078e474e297c7378217ecadb3f94814af8677d7f8da": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:1185.75,\u0022evidence\u0022:\u0022Total Due: $1,185.75\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "4bf70aeee8248bbb5786c1692a135139b22b625438aef23c679683c110dbd296": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 from invoice date.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:1429.57,\u0022evidence\u0022:\u0022Total Due: $1,429.57\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total due amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "64664ff8cbb76aa42501000c29ae5aecd7006ca6efd606402b4bc590fa3f8fd0": {
+    "answerJson": "{\u0022facts\u0022:[],\u0022confidence\u0022:0.0,\u0022reasoning\u0022:\u0022The document does not contain any explicit statements regarding SLA uptime, customer satisfaction scores, payment terms, renewal dates, or annual values.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "2bc12f6478e99a4349faf0b46b20a0511e94b98a454a6cd955a190535403c43d": {
+    "answerJson": "{\u0022facts\u0022:[],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document does not contain any of the specified facts.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "f8b69cd05ab320ebc2181cc196fa6e1af29c9c1d9de811afdb07ee880c960660": {
+    "answerJson": "{\u0022facts\u0022:[],\u0022confidence\u0022:0.0,\u0022reasoning\u0022:\u0022The document does not contain any of the specified facts.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  }
+}
