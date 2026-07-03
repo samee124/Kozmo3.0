@@ -142,6 +142,17 @@ public sealed class DocumentBeliefExtractor
             if (string.IsNullOrWhiteSpace(evidence))
                 continue; // ungrounded fact — abstain rather than trust an uncited value
 
+            // Deterministic guard, not a prompt rule: BeliefExtractionPrompt.System already tells
+            // the model "NEVER extract payment_terms from... termination notice periods", and the
+            // model still does it occasionally (confirmed on a real Salesforce document — see
+            // KYV_KNOWN_GAPS.md). Re-stating the rule more emphatically doesn't reliably fix an
+            // instruction the model already had and broke, so this enforces it in code instead —
+            // regardless of what the model returned, an evidence span that reads as a
+            // termination/cancellation/notice-period clause never becomes a payment_terms belief.
+            if (string.Equals(criterion, "payment_terms", StringComparison.OrdinalIgnoreCase) &&
+                ContainsTerminationLanguage(evidence!))
+                continue;
+
             var rawConf = fact.TryGetProperty("confidence", out var cf) && cf.ValueKind == JsonValueKind.Number
                 ? cf.GetDouble()
                 : result.Confidence;
@@ -164,6 +175,17 @@ public sealed class DocumentBeliefExtractor
 
         return candidates;
     }
+
+    // ── payment_terms termination-notice guard ─────────────────────────────────
+
+    // Substrings that indicate the quoted span is about a termination/cancellation/insurance
+    // notice period rather than an invoice payment due date — exactly the exclusion
+    // BeliefExtractionPrompt.System already states, enforced here deterministically.
+    private static readonly string[] TerminationLanguage =
+        ["terminat", "cancel", "notice"];
+
+    private static bool ContainsTerminationLanguage(string evidence) =>
+        TerminationLanguage.Any(kw => evidence.Contains(kw, StringComparison.OrdinalIgnoreCase));
 
     // ── JSON helpers ───────────────────────────────────────────────────────────
 
