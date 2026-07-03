@@ -144,7 +144,14 @@ public sealed class ObservationModule : IObservationModule
 
     // ── Rule-based rubric scoring ─────────────────────────────────────────────
 
-    private static double? ScoreFromRubric(string criterion, object rawValue, SaasProfile profile)
+    /// <summary>
+    /// Bands a raw magnitude into a 0-1 rubric score via the named scoring_rubric.saas.v1.json
+    /// criterion (numeric thresholds or enum scores). Public so other belief-writing paths
+    /// (e.g. Kyv.ProgramRunner's belief-persistence stage) can reuse this proven banding logic
+    /// instead of reimplementing it — see KYV_KNOWN_GAPS.md "Belief bridge Commit 1 -> Commit 2".
+    /// Returns null if the criterion is unknown or the value is out of the criterion's domain.
+    /// </summary>
+    public static double? ScoreFromRubric(string criterion, object rawValue, SaasProfile profile)
     {
         if (!profile.ScoringRubric.TryGetValue(criterion, out var rubric)) return null;
 

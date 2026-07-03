@@ -85,9 +85,11 @@ public sealed class CompletenessWiringTests : IDisposable
             new QuestionAnsweringStage(countingLlm), new GapCheckInStage(),
             _checkInStore, DepthLevel.L1, "kyv@kozmo");
 
+        var profile = CatalogueTestHelper.LoadProfile();
         var runner = new KyvProgramRunner(
             llm, new WiringFakeEntityTypeClassifier(EntityType.Company),
             new NoOpIdentityRegistry(), _checkInStore,
+            entityStore: _store, profile: profile,
             completeness: completeness);
 
         var run = await runner.RunAsync(Workspace, Now);

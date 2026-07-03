@@ -1,6 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Kozmo.Contracts;
+using Kozmo.Contracts.Config;
 
 namespace Ii.Completeness;
 
@@ -46,9 +47,9 @@ public static class AnsweringPrompt
         }
         """;
 
-    public static string User(Question question, IReadOnlyList<Belief> beliefs)
+    public static string User(Question question, IReadOnlyList<Belief> beliefs, SaasProfile? profile = null)
     {
-        var beliefJson = SerializeBeliefs(beliefs);
+        var beliefJson = SerializeBeliefs(beliefs, profile);
         if (beliefJson.Length > MaxBeliefChars)
             beliefJson = beliefJson[..MaxBeliefChars] + "\n  ... [truncated to fit context window]";
 
@@ -61,7 +62,7 @@ public static class AnsweringPrompt
 
     // Stable, minimal JSON — only the fields the LLM needs to reason and cite.
     // Sorted by Id for determinism; uses string enums for readability.
-    internal static string SerializeBeliefs(IReadOnlyList<Belief> beliefs)
+    internal static string SerializeBeliefs(IReadOnlyList<Belief> beliefs, SaasProfile? profile = null)
     {
         var items = beliefs
             .OrderBy(b => b.Id)
@@ -70,11 +71,43 @@ public static class AnsweringPrompt
                 b.Dimension?.ToString() ?? "Unknown",
                 b.Criterion,
                 b.SourceTier.ToString(),
-                b.Confidence,
+                PresentationConfidence(b, profile),
                 b.Derivation));
 
         return JsonSerializer.Serialize(items, PromptJsonOpts);
     }
+
+    // Presentation-only evidence weight shown to THIS prompt — never the persisted
+    // Belief.Confidence or anything RubricModule sees. VendorFileWriteService intentionally
+    // zeroes Confidence for structural claims (payment_terms, annual_value, renewal_date, ...)
+    // so they never pollute RubricModule's scoring average — correct for scoring. But this
+    // prompt's System text tells the LLM "confidence reflects evidence weight ... no relevant
+    // beliefs -> <= 0.30", and a literal 0.0 reads as "no evidence", suppressing grounded
+    // answers for structural facts that genuinely exist. Substituting the belief's own
+    // source-tier ceiling (the same trust ceiling the store itself uses for scored beliefs)
+    // gives the LLM an honest, non-zero evidence weight without touching the scoring path.
+    // See KYV_KNOWN_GAPS.md — a real evidence-weight vs scoring-weight split in the belief
+    // model is the proper long-term fix; this is the presentation-only stopgap.
+    private static double PresentationConfidence(Belief belief, SaasProfile? profile)
+    {
+        if (belief.Confidence > 0) return belief.Confidence;
+
+        if (profile != null && profile.SourceTiers.TryGetValue(belief.SourceTier.ToString(), out var tierConfig))
+            return tierConfig.Ceiling;
+
+        return FallbackTierCeiling(belief.SourceTier);
+    }
+
+    // Used only when no profile is supplied — mirrors catalogue/profiles/saas/source_tiers.saas.v1.json.
+    private static double FallbackTierCeiling(SourceTier tier) => tier switch
+    {
+        SourceTier.Primary    => 1.0,
+        SourceTier.Verified   => 0.8,
+        SourceTier.Reported   => 0.5,
+        SourceTier.Inferred   => 0.3,
+        SourceTier.Unverified => 0.2,
+        _                     => 0.5,
+    };
 
     private static readonly JsonSerializerOptions PromptJsonOpts = new()
     {

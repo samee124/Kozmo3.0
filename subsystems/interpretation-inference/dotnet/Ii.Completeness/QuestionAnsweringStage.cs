@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Kozmo.Contracts;
+using Kozmo.Contracts.Config;
 using Kozmo.Llm;
 
 namespace Ii.Completeness;
@@ -19,9 +20,20 @@ namespace Ii.Completeness;
 /// </summary>
 public sealed class QuestionAnsweringStage
 {
-    private readonly IKozmoLlm _llm;
+    private readonly IKozmoLlm    _llm;
+    private readonly SaasProfile? _profile;
 
-    public QuestionAnsweringStage(IKozmoLlm llm) => _llm = llm;
+    /// <param name="profile">
+    /// Optional — supplies source-tier ceilings so AnsweringPrompt can derive a presentation-only
+    /// evidence weight for structural beliefs (Confidence == 0). Null preserves prior behavior
+    /// (the belief's raw persisted Confidence is shown as-is); every existing caller that doesn't
+    /// pass real structural beliefs is unaffected either way.
+    /// </param>
+    public QuestionAnsweringStage(IKozmoLlm llm, SaasProfile? profile = null)
+    {
+        _llm     = llm;
+        _profile = profile;
+    }
 
     /// <summary>
     /// Answer every question in <paramref name="questions"/> from the vendor's belief evidence.
@@ -40,7 +52,7 @@ public sealed class QuestionAnsweringStage
 
         foreach (var q in ordered)
         {
-            var user   = AnsweringPrompt.User(q, beliefs);
+            var user   = AnsweringPrompt.User(q, beliefs, _profile);
             var result = await _llm.CompleteJsonAsync(
                 AnsweringPrompt.System, user, AnsweringPrompt.MaxTokens, ct);
 

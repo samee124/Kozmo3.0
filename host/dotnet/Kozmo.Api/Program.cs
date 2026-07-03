@@ -44,7 +44,7 @@ await LoadPersistedVendorsAsync(store, registry);
 var liveCachePath         = FindLlmCachePath();         // resolved once; used for both replay and live-classify
 var completenessCache     = FindCompletenessCachePath(); // separate cassette for Q&A answering
 var checkInRepo           = new CheckInRepository(store);
-var facade                = BuildKyvFacade(store, profile, registry, liveCachePath, checkInRepo, completenessCache);
+var (facade, kyvCompleteness) = BuildKyvFacade(store, profile, registry, liveCachePath, checkInRepo, completenessCache);
 var sseHub                = new SseHub();
 var kyvTracker            = new KyvVendorTracker();
 
@@ -65,6 +65,7 @@ builder.Services.AddCors(c =>
     c.AddDefaultPolicy(p => p.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod()));
 
 builder.Services.AddSingleton<IIiFacade>(facade);
+builder.Services.AddSingleton(new CompletenessHolder(kyvCompleteness));
 builder.Services.AddSingleton(profile);
 builder.Services.AddSingleton(registry);
 builder.Services.AddSingleton(sseHub);
@@ -603,7 +604,9 @@ app.MapPost("/kyv/run", async (
     SseHub                 hub,
     EntityRegistry         entityRegistry,
     KyvVendorTracker       kyvTracker,
-    Func<IKozmoLlm?>       liveLlmFactory) =>
+    Func<IKozmoLlm?>       liveLlmFactory,
+    SaasProfile            profile,
+    CompletenessHolder     completenessHolder) =>
 {
     if (string.IsNullOrWhiteSpace(request.DriveUrl))
         return Results.BadRequest(new { error = "driveUrl must not be empty." });
@@ -677,7 +680,10 @@ app.MapPost("/kyv/run", async (
             llm:              liveLlm,
             entityClassifier: new AlwaysCompanyClassifier(),
             registry:         new IdentityRegistry(storeInst),
-            checkInStore:     checkInStore);
+            checkInStore:     checkInStore,
+            entityStore:      storeInst,
+            profile:          profile,
+            completeness:     completenessHolder.Value);
 
         var run = await runner.RunAsync(tempFolder, DateTimeOffset.UtcNow);
 
@@ -790,7 +796,10 @@ static EntityRegistry BuildRegistry()
 // The completeness orchestrator fires inside RecomputeVendorAsync (the §5 synchronous hook),
 // which is called by ProcessCheckInService when a DIMENSION_GAP check-in is answered.
 // Legacy path (BuildFacade) stays null — signal submission and demo recomputes are LLM-free.
-static IiFacade BuildKyvFacade(
+// Also returns the CompletenessOrchestrator itself so callers other than the facade (e.g.
+// POST /kyv/run's KyvProgramRunner, stage 8) can reuse the SAME instance rather than building
+// a second one against the same cassette.
+static (IiFacade Facade, CompletenessOrchestrator? Completeness) BuildKyvFacade(
     IEntityStore  store, SaasProfile profile, EntityRegistry registry,
     string?       llmCachePath, ICheckInStore checkInStore, string? completenessCache)
 {
@@ -810,7 +819,7 @@ static IiFacade BuildKyvFacade(
         {
             var answeringLlm = new CachingLlmClient(completenessCache, recordMode: false);
             completeness = new CompletenessOrchestrator(
-                new QuestionAnsweringStage(answeringLlm),
+                new QuestionAnsweringStage(answeringLlm, profile),
                 new GapCheckInStage(),
                 checkInStore,
                 DepthLevel.L1,
@@ -818,7 +827,7 @@ static IiFacade BuildKyvFacade(
         }
     }
 
-    return new IiFacade(
+    var facade = new IiFacade(
         new ObservationModule(llm),
         new RubricModule(),
         new IndexModule(),
@@ -829,6 +838,8 @@ static IiFacade BuildKyvFacade(
         registry,
         DemoClock.Fixed,
         completeness);
+
+    return (facade, completeness);
 }
 
 static string? FindLlmCachePath()
@@ -930,6 +941,11 @@ public sealed class KyvVendorTracker
 
 record CheckInAnswerRequest(string? ResponseValue);
 record KyvRunRequest(string DriveUrl);
+
+// Nullable-singleton wrapper — Microsoft.Extensions.DependencyInjection's AddSingleton(TService)
+// overload throws on a null instance, so a possibly-null CompletenessOrchestrator (absent when
+// the completeness cassette isn't present) is registered wrapped in this instead.
+sealed record CompletenessHolder(CompletenessOrchestrator? Value);
 
 // Fallback entity-type classifier: defaults ambiguous names to Company.
 // Deterministic rules in EntityTypeClassificationStage handle most cases;

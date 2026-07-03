@@ -21,15 +21,22 @@
 // LlmCacheMissException when the integration tests replay → obvious failure.
 
 using Ii.Completeness;
+using Km.Store;
 using Kozmo.Contracts;
 using Kozmo.Llm;
 using Kozmo.Llm.OpenAi;
+using Kyv.ProgramRunner;
 
 var flags    = ParseFlags(args);
 var repoRoot = FindRepoRoot();
 var cassette = flags.Cassette ?? Path.Combine(repoRoot, "fixtures", "completeness", "answering.cassette.json");
 var maxDepth = flags.Depth   ?? DepthLevel.L1;
 var anchorNow = new DateTimeOffset(2025, 1, 1, 0, 0, 0, TimeSpan.Zero);
+
+// Supplies source-tier ceilings so AnsweringPrompt can derive a presentation-only evidence
+// weight for structural beliefs (Confidence == 0) — see AnsweringPrompt.PresentationConfidence.
+// Has no effect on the hand-authored FixtureBeliefs below (all Confidence > 0 already).
+var kyvProfile = new Catalogue().Load(Path.Combine(repoRoot, "catalogue", "profiles", "saas"));
 
 Directory.CreateDirectory(Path.GetDirectoryName(cassette)!);
 
@@ -67,7 +74,7 @@ else
     llm = new LoggingLlm(new CachingLlmClient(cassette, recordMode: true, inner: inner));
 }
 
-var stage     = new QuestionAnsweringStage(llm);
+var stage     = new QuestionAnsweringStage(llm, kyvProfile);
 var questions = QuestionSelector.Select(SaasQuestionBank.Category, maxDepth);
 var errors    = 0;
 
@@ -164,6 +171,32 @@ await RunVendor("IIVS (rich)", iivsVendorId, iivsBeliefs);
 // ── Regulus (sparse vendor) ───────────────────────────────────────────────────
 
 await RunVendor("Regulus (sparse)", regulusVendorId, regulusBeliefs);
+
+// ── IIVS (real documents) — Commit 3 proof scenario ────────────────────────────
+// Runs the REAL KyvProgramRunner pipeline (RealVendorBeliefFixture) against the workspace and
+// captures IIVS's actual persisted, identity-correlated, banded beliefs — with ids remapped to
+// fixed values so the resulting prompt (and cassette key) is stable across runs.
+// Kyv.ProgramRunner.Tests calls the SAME RealVendorBeliefFixture.BuildAsync — no duplicated
+// fixture logic that could drift out of sync with what gets recorded here.
+
+var workspacePath     = Path.Combine(repoRoot, "..", "Kozmo Workspace");
+var candidateCassette = Path.Combine(repoRoot, "fixtures", "kyv", "candidate-extraction.cassette.json");
+var kyvBeliefCassette = Path.Combine(repoRoot, "fixtures", "kyv", "belief-extraction.cassette.json");
+var kyvNow            = new DateTimeOffset(2026, 6, 30, 0, 0, 0, TimeSpan.Zero);
+var realIivsVendorId  = Guid.Parse("d0000000-0000-0000-0000-000000000001");
+
+var realIivsBeliefs = await RealVendorBeliefFixture.BuildAsync(
+    workspacePath, candidateCassette, kyvBeliefCassette, kyvProfile, "Vitro", realIivsVendorId, kyvNow);
+
+if (realIivsBeliefs is null)
+{
+    Console.WriteLine("[completeness-recorder] IIVS real-document scenario SKIPPED — " +
+                       "workspace, cassette, or resolved vendor not found.");
+}
+else
+{
+    await RunVendor("IIVS (real documents)", realIivsVendorId, realIivsBeliefs);
+}
 
 // ── Summary ───────────────────────────────────────────────────────────────────
 

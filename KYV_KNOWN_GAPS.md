@@ -62,3 +62,42 @@ or it will silently corrupt dimension scores. Do not "simplify" this into a sing
   bottom. See `Ii.Tests/ObservationModuleThresholdTests.cs` for the regression tests. Golden
   fixtures are unaffected — every real signal value in `fixtures/signals.json` is strictly
   in-domain.
+
+## Commit 3: `Belief.Confidence` means two different things to two different consumers (design tension)
+
+`Belief.Confidence` is asked to serve two consumers with incompatible needs, and Commit 3 is the
+first time real data exposed the collision:
+
+- **`RubricModule` (scoring)** needs `Confidence == 0` on structural beliefs (`payment_terms`,
+  `annual_value`, `renewal_date`) so its `beliefs.Where(b => b.Confidence > 0)` filter keeps them
+  out of the dimension-score average — see the Commit 1→2 section above. This is correct and
+  must not change.
+- **`QuestionAnsweringStage` / `AnsweringPrompt` (completeness)** treats the SAME `Confidence`
+  field as "evidence weight" — its system prompt tells the LLM "confidence reflects evidence
+  weight ... no relevant beliefs → ≤ 0.30". A structural belief's `Confidence = 0.0` reads to the
+  model as "no evidence exists", so it answered UNKNOWN even when the criterion/value/derivation
+  were sitting right there in the prompt (confirmed against real IIVS documents: `saas.fin.l1.1`
+  answered UNKNOWN despite a real `payment_terms` belief being present, reasoning "no information
+  regarding a signed contract or defined payment terms").
+
+**Fix applied (presentation-only, does not touch scoring):** `AnsweringPrompt.PresentationConfidence`
+substitutes the belief's `SourceTier` ceiling (`catalogue/profiles/saas/source_tiers.saas.v1.json`
+— e.g. Primary→1.0, Verified→0.8) for the evidence weight shown to the completeness LLM ONLY when
+the persisted `Confidence == 0`. `QuestionAnsweringStage` takes an optional `SaasProfile? profile`
+to supply the tier ceilings; existing callers that don't pass one keep prior behavior unchanged
+(no existing test ever constructs a `Confidence == 0` belief, so this was a zero-risk addition —
+confirmed by the full suite staying green with unchanged counts everywhere except the new test).
+`RubricModule` and `VendorFileWriteService` are untouched — a structural belief's persisted
+`Confidence` is still `0.0` and it still never reaches the scoring average.
+
+**Verified result** (`Kyv.ProgramRunner.Tests/RealDocumentCompletenessProofTests.cs`, real IIVS
+documents): `saas.fin.l1.1` ("signed contract with defined payment terms") now answers YES,
+grounded in the real `payment_terms` beliefs — Financial coverage 1/2 (50%), up from 0/2.
+`saas.fin.l1.2` ("total annual contract value") is still UNKNOWN — that one looks like a real
+extraction/derivation-clarity question on that specific document, not the confidence-representation
+issue this fix targets, and is out of scope here.
+
+**This is a stopgap, not the fix.** The proper long-term fix is option 2 from the original
+discussion: give the belief model a real, separate evidence-weight field distinct from scoring
+`Confidence`, so structural facts can carry honest "how much do we trust this as evidence" without
+overloading the field `RubricModule` depends on. Deferred — not started.

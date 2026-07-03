@@ -14,5 +14,10 @@
     <ProjectReference Include="..\..\libs\Kozmo.Llm\Kozmo.Llm.csproj" />
     <ProjectReference Include="..\..\libs\Kozmo.Llm.OpenAi\Kozmo.Llm.OpenAi.csproj" />
     <ProjectReference Include="..\..\libs\Kozmo.Contracts\Kozmo.Contracts.csproj" />
+    <!-- Commit 3 proof scenario: runs the REAL KyvProgramRunner pipeline against IIVS's real
+         workspace documents (RealVendorBeliefFixture) instead of only the hand-authored
+         FixtureBeliefs above, so the answering cassette also covers a real-document vendor. -->
+    <ProjectReference Include="..\..\subsystems\operations\dotnet\Kyv.ProgramRunner\Kyv.ProgramRunner.csproj" />
+    <ProjectReference Include="..\..\subsystems\knowledge-memory\dotnet\Km.Store\Km.Store.csproj" />
   </ItemGroup>
 </Project>

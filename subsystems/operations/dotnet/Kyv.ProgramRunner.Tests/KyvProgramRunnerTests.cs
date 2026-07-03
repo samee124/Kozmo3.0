@@ -75,10 +75,15 @@ public sealed class KyvProgramRunnerTests : IDisposable
 
     private KyvProgramRunner BuildRunner()
     {
-        var repoRoot = FindRepoRoot();
-        var cassette = Path.Combine(repoRoot, "fixtures", "kyv", "candidate-extraction.cassette.json");
-        var llm      = new CachingLlmClient(cassette, recordMode: false);
-        return new KyvProgramRunner(llm, new FakeEntityTypeClassifier(EntityType.Company), _registry, _checkInStore);
+        var repoRoot        = FindRepoRoot();
+        var cassette        = Path.Combine(repoRoot, "fixtures", "kyv", "candidate-extraction.cassette.json");
+        var beliefCassette  = Path.Combine(repoRoot, "fixtures", "kyv", "belief-extraction.cassette.json");
+        var llm             = new CachingLlmClient(cassette, recordMode: false);
+        var beliefLlm       = new CachingLlmClient(beliefCassette, recordMode: false);
+        var profile         = CatalogueTestHelper.LoadProfile();
+        return new KyvProgramRunner(
+            llm, new FakeEntityTypeClassifier(EntityType.Company), _registry, _checkInStore,
+            entityStore: _store, profile: profile, beliefLlm: beliefLlm);
     }
 
     // ── Tests ──────────────────────────────────────────────────────────────────
@@ -97,14 +102,15 @@ public sealed class KyvProgramRunnerTests : IDisposable
         Assert.Equal(Now,                        run.StartedAt);
         Assert.NotEqual(Guid.Empty,              run.RunId);
 
-        // All 7 declared stages must be recorded
-        Assert.Equal(7, run.Stages.Count);
+        // All 8 declared stages must be recorded
+        Assert.Equal(8, run.Stages.Count);
         var names = run.Stages.Select(s => s.StageName).ToList();
         Assert.Contains("ingest",            names);
         Assert.Contains("classify",          names);
         Assert.Contains("extract",           names);
         Assert.Contains("filter",            names);
         Assert.Contains("resolve",           names);
+        Assert.Contains("persist_beliefs",   names);
         Assert.Contains("raise_checkins",    names);
         Assert.Contains("completeness_init", names);
 
@@ -144,6 +150,41 @@ public sealed class KyvProgramRunnerTests : IDisposable
         var runRows = await _store.GetAllRegistryVendorsAsync();
         Assert.All(runRows.Where(r => r.Status != "Absorbed"),
             r => Assert.Equal(run.RunId, r.ProgramRunId));
+    }
+
+    // ── Commit 2: belief persistence against REAL workspace documents ──────────
+    //
+    // Proves the belief bridge carries real documents, not just the Commit-1 MSA fixture.
+    // IIVS ("Institute for In Vitro Sciences") is the richest real vendor in the workspace —
+    // if any real vendor ends the run with persisted, banded beliefs, it is this one.
+
+    [SkippableFact]
+    public async Task ProgramRun_IIVS_EndsWithNonEmptyBandedBeliefSet()
+    {
+        RequireWorkspace();
+
+        var runner = BuildRunner();
+        var run    = await runner.RunAsync(Workspace, Now);
+
+        var persistStage = run.Stages.Single(s => s.StageName == "persist_beliefs");
+        Console.WriteLine($"[KYV] persist_beliefs stage wrote {persistStage.ItemsProcessed} belief(s) total across the run.");
+
+        var all = await _registry.GetAllAsync();
+        var iivs = all.FirstOrDefault(v => v.CanonicalName.Contains("Vitro", StringComparison.OrdinalIgnoreCase));
+        Assert.NotNull(iivs);
+
+        var beliefs = await _store.GetCurrentBeliefsAsync(iivs!.VendorId);
+        Console.WriteLine($"[KYV] IIVS ({iivs.VendorId}) has {beliefs.Count} persisted belief(s):");
+        foreach (var b in beliefs)
+            Console.WriteLine($"  {b.Criterion,-16} value={b.Value,-10} conf={b.Confidence:F2} dim={b.Dimension} " +
+                               $"tier={b.SourceTier} observedAt={b.ObservedAt:o} version={b.Version} superseded={b.SupersededBy}");
+
+        Assert.NotEmpty(beliefs);
+
+        // Any scored belief present must be banded (0-1), never a raw magnitude.
+        var scoredCriteria = new[] { "sla_uptime", "csat" };
+        foreach (var b in beliefs.Where(b => scoredCriteria.Contains(b.Criterion, StringComparer.OrdinalIgnoreCase)))
+            Assert.InRange(b.Value, 0.0, 1.0);
     }
 
     [SkippableFact]

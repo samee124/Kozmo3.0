@@ -23,6 +23,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Kyv.ProgramRunner\Kyv.ProgramRunner.csproj" />
     <ProjectReference Include="..\..\..\identity-governance\dotnet\Ig.Contracts\Ig.Contracts.csproj" />
+    <ProjectReference Include="..\..\..\interpretation-inference\dotnet\Ii.CandidateExtraction\Ii.CandidateExtraction.csproj" />
     <ProjectReference Include="..\..\..\interpretation-inference\dotnet\Ii.Contracts\Ii.Contracts.csproj" />
     <ProjectReference Include="..\..\..\interpretation-inference\dotnet\Ii.Completeness\Ii.Completeness.csproj" />
     <ProjectReference Include="..\..\..\interpretation-inference\dotnet\Ii.Spine\Ii.Spine.csproj" />
