@@ -153,3 +153,32 @@ end-to-end (verified) and is available to any future consumer that reads it, but
 itself unlock the Experiential coverage this stocktake was hoping for. `VendorFileRenderer`/
 `DtoMapper` still display banded `Value` for scored beliefs — untouched, deferred to 1(a) as
 originally planned.
+
+## Salesforce demo scenario completed (Path C) — follow-up: malformed-GUID citation drop
+
+Scenario 05's real documents (SOW, Amendment 2) both defer fees and payment terms to an Order Form
+referenced by name but never present in the corpus. A faithful, completing-not-inventing Order
+Form was authored (annual_value $214,500, payment_terms Net 30, term "coterminous with the
+Agreement" — deliberately no calendar date, so `renewal_date` correctly abstains and Amendment 2's
+2028-06-30 stays the sole source) and dropped into the workspace. Result: Salesforce Financial
+coverage went from 0% (0/2) to 100% (2/2); Operational/Experiential stayed honest gaps (no
+invented SLA/CSAT). Pinned by `SalesforceOrderFormCompletenessProofTests`.
+
+**Follow-up, not fixed:** `saas.fin.l1.1` ("signed contract with defined payment terms") answers
+`YES` at confidence 1.0 — genuinely grounded, the model's reasoning cites both the annual_value and
+payment_terms facts by name — but `Answer.CitedBeliefIds` comes back **empty**. The recorded raw
+model response cited belief ids as `"de110000-0000-000000000001"` / `...002` — missing a `-0000-`
+segment versus the real id shape `de110000-0000-0000-0000-000000000001`. `QuestionAnsweringStage`
+parses each cited id with `Guid.TryParse` (see `subsystems/interpretation-inference/dotnet/
+Ii.Completeness/QuestionAnsweringStage.cs`); a malformed id silently fails to parse and is dropped
+from the list rather than surfacing a parse warning. `saas.fin.l1.2` in the same run cited its
+belief correctly, so this is a per-call model formatting slip, not a systemic prompt problem.
+
+**Why it matters for the demo, specifically:** Kozmo's whole pitch is "glass box — same evidence
+in, byte-identical fingerprint out, every claim traceable." An answer that is right but shows no
+citation is indistinguishable, to a viewer, from an answer that is right by luck. It's a
+credibility soft-spot right where the demo is trying to prove the opposite. Noting it here rather
+than fixing it now — the fix is either (a) validate cited ids more leniently (e.g. strip stray
+characters before `Guid.TryParse`), or (b) have `QuestionAnsweringStage` log/flag a parse failure
+instead of silently dropping the id, so at least the gap is visible rather than silent. Neither is
+started.
