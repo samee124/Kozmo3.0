@@ -147,6 +147,64 @@ public sealed class CachingLlmClientTests
         Assert.NotEqual(k1, k2);
     }
 
+    // ── Line-ending normalization ──────────────────────────────────────────
+    //
+    // Prompt text commonly originates from C# raw string literals (whose physical bytes
+    // depend on .gitattributes eol rules / core.autocrlf at checkout) or from
+    // JsonSerializerOptions.WriteIndented (which emits Environment.NewLine — platform
+    // dependent). The same logical prompt must hash identically regardless of which line-ending
+    // style it happens to carry, or cassette replay breaks silently across machines/checkouts.
+
+    [Fact]
+    public void ComputeKey_is_identical_for_CRLF_and_LF_variants_of_the_same_text()
+    {
+        var lf   = "line one\nline two\nline three";
+        var crlf = "line one\r\nline two\r\nline three";
+
+        var kLf   = CachingLlmClient.ComputeKey(lf,   "user", 500, "gpt-4o-mini", 0f);
+        var kCrlf = CachingLlmClient.ComputeKey(crlf, "user", 500, "gpt-4o-mini", 0f);
+
+        Assert.Equal(kLf, kCrlf);
+    }
+
+    [Fact]
+    public void ComputeKey_is_identical_when_only_the_user_prompt_line_endings_differ()
+    {
+        var lf   = "question\n\nevidence line 1\nevidence line 2";
+        var crlf = "question\r\n\r\nevidence line 1\r\nevidence line 2";
+
+        var kLf   = CachingLlmClient.ComputeKey("system", lf,   500, "gpt-4o-mini", 0f);
+        var kCrlf = CachingLlmClient.ComputeKey("system", crlf, 500, "gpt-4o-mini", 0f);
+
+        Assert.Equal(kLf, kCrlf);
+    }
+
+    [Fact]
+    public void ComputeKey_normalizes_stray_CR_as_well_as_CRLF()
+    {
+        // Old-Mac-style bare \r (no paired \n) must also normalize to the same key as \n.
+        var lf       = "line one\nline two";
+        var bareCr   = "line one\rline two";
+
+        var kLf     = CachingLlmClient.ComputeKey(lf,     "user", 500, "gpt-4o-mini", 0f);
+        var kBareCr = CachingLlmClient.ComputeKey(bareCr, "user", 500, "gpt-4o-mini", 0f);
+
+        Assert.Equal(kLf, kBareCr);
+    }
+
+    [Fact]
+    public void ComputeVisionKey_is_identical_for_CRLF_and_LF_system_prompt_variants()
+    {
+        var img  = new byte[] { 1, 2, 3 };
+        var lf   = "instructions\nline two";
+        var crlf = "instructions\r\nline two";
+
+        var kLf   = CachingLlmClient.ComputeVisionKey(lf,   img, 2000, "gpt-4o-mini", 0f);
+        var kCrlf = CachingLlmClient.ComputeVisionKey(crlf, img, 2000, "gpt-4o-mini", 0f);
+
+        Assert.Equal(kLf, kCrlf);
+    }
+
     // ── Vision key stability ──────────────────────────────────────────────
 
     [Fact]
