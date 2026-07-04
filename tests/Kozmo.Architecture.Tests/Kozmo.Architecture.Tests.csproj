@@ -24,6 +24,7 @@
     <ProjectReference Include="..\..\subsystems\interpretation-inference\dotnet\Ii.Posture\Ii.Posture.csproj" />
     <ProjectReference Include="..\..\subsystems\interpretation-inference\dotnet\Ii.Decay\Ii.Decay.csproj" />
     <ProjectReference Include="..\..\subsystems\knowledge-memory\dotnet\Km.Store\Km.Store.csproj" />
+    <ProjectReference Include="..\..\subsystems\interpretation-inference\dotnet\Ii.Completeness\Ii.Completeness.csproj" />
     <ProjectReference Include="..\..\libs\Kozmo.Contracts\Kozmo.Contracts.csproj" />
   </ItemGroup>
 </Project>

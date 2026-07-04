@@ -1,6 +1,7 @@
 using System.Reflection;
 using Kozmo.Contracts;
 using Kozmo.Contracts.Interfaces;
+using Ii.Completeness;
 using Ii.Observation;
 using Ii.Rubric;
 using Ii.Index;
@@ -14,20 +15,21 @@ using Xunit;
 namespace Kozmo.Architecture.Tests;
 
 /// <summary>
-/// The five CI invariant lanes. Run with:
+/// The CI invariant lanes. Run with:
 ///   dotnet test tests/Kozmo.Architecture.Tests --filter "Category=Invariant"
 /// Every test must also FAIL on a deliberate violation before this gate is considered wired.
 /// </summary>
 public sealed class InvariantTests
 {
     // Assembly anchors — type references guarantee the assemblies are in the output dir.
-    private static readonly Assembly ObservationAsm = typeof(ObservationModule).Assembly;
+    private static readonly Assembly ObservationAsm  = typeof(ObservationModule).Assembly;
     private static readonly Assembly RubricAsm       = typeof(RubricModule).Assembly;
     private static readonly Assembly IndexAsm        = typeof(IndexModule).Assembly;
     private static readonly Assembly PostureAsm      = typeof(PostureModule).Assembly;
     private static readonly Assembly DecayAsm        = typeof(DecayEngine).Assembly;
     private static readonly Assembly SpineAsm        = typeof(IiFacade).Assembly;
     private static readonly Assembly KmStoreAsm      = typeof(SqliteEntityStore).Assembly;
+    private static readonly Assembly CompletenessAsm = typeof(CompletenessRubric).Assembly;
 
     private static readonly string CataloguePath = ArchTestHelpers.FindCatalogueDirectory();
 
@@ -174,6 +176,34 @@ public sealed class InvariantTests
                 .GetResult();
             Assert.True(result.IsSuccessful,
                 $"{runtimeNames[i]} has a forbidden live dependency: " +
+                string.Join(", ", result.FailingTypeNames ?? new List<string>()));
+        }
+    }
+
+    // ── The metadata wall (E1 Part 7 Step 4) ──────────────────────────────────
+    //
+    // Km.Store.Metadata (DocumentMetadata / EntityKnowledge / IMetadataStore / SqliteMetadataStore)
+    // is agent-facing and strictly additive — never confidence-scored, never read by scoring or
+    // completeness (E1 Part 3's load-bearing invariant). This lane is CI-enforced, not
+    // conventional: no scoring assembly may reference the Km.Store.Metadata namespace. As of Step
+    // 4, none of the four scoring assemblies reference Km.Store at all, so this currently passes
+    // vacuously for all of them — same shape as Lane 5a passing vacuously before Kozmo.Llm.OpenAi
+    // existed. It starts enforcing the moment anyone adds a reference to reach a metadata type.
+
+    [Fact, Trait("Category", "Invariant")]
+    public void Scoring_assemblies_do_not_reference_metadata_store()
+    {
+        var scoringNames = new[] { "Ii.Rubric", "Ii.Index", "Ii.Posture", "Ii.Completeness" };
+        var scoringAsms  = new[] { RubricAsm, IndexAsm, PostureAsm, CompletenessAsm };
+
+        for (var i = 0; i < scoringAsms.Length; i++)
+        {
+            var result = Types.InAssembly(scoringAsms[i])
+                .ShouldNot().HaveDependencyOnAny("Km.Store.Metadata")
+                .GetResult();
+            Assert.True(result.IsSuccessful,
+                $"{scoringNames[i]} references the metadata store (Km.Store.Metadata) — metadata " +
+                "is agent-facing only and must never reach scoring: " +
                 string.Join(", ", result.FailingTypeNames ?? new List<string>()));
         }
     }
