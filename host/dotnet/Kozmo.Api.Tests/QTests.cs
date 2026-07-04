@@ -20,9 +20,9 @@ namespace Kozmo.Api.Tests;
 ///                renewal-deadline 2026-12-17 is future relative to DemoClock 2026-06-15.
 ///                (renewal = effectiveDate 2026-06-15 + 12mo = 2027-06-15; deadline = 2027-06-15 - 180d)
 ///   Helix      — gate blocks Critical: UNVERIFIED tier (ceiling=0.20) keeps ConfidenceFloor
-///                below 0.60; completeness ≤ 0.25 (2/9 — honest blindness).
+///                below 0.60; completeness ≤ 0.25 (2/10 — honest blindness).
 ///   Northwind  — completeness ≠ confidence: PRIMARY signed contract fills only structural
-///                slots (3/9); all scored dimensions absent.
+///                slots (3/10); all scored dimensions absent.
 ///   Vertex     — contradiction: payment_terms PRIMARY=45 (Net45) vs REPORTED=30 (Net30);
 ///                lower tier cannot supersede, both active, cross-source contradiction raised.
 ///   Aster      — freshness decay: VERIFIED CSV is ~5 months old; usage_trend half-life=30d
@@ -66,7 +66,7 @@ public sealed class QTests
         Assert.True(hxJ.Index.ConfidenceFloor < 0.60,
             $"Helix confidence floor {hxJ.Index.ConfidenceFloor:F3} must be < 0.60 — UNVERIFIED tier (ceiling=0.20) blocks Critical gate");
         Assert.True(hxResult.Completeness.Ratio <= 0.25,
-            $"Helix completeness {hxResult.Completeness.Ratio:P0} must be ≤ 25% — honest blindness, 2/9 slots");
+            $"Helix completeness {hxResult.Completeness.Ratio:P0} must be ≤ 25% — honest blindness, 2/10 slots");
 
         // ── Northwind: structural-only → completeness ≠ confidence ──────────────
         // All beliefs are structural (Confidence=0) — zero dimensions have any contributing

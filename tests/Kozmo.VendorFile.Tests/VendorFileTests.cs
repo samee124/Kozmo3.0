@@ -65,7 +65,7 @@ public sealed class VendorFileTests
         var profile = new Catalogue().Load(CataloguePath);
         Assert.True(profile.ExpectedBeliefSets.ContainsKey("saas_vendor"),
             "expected_belief_sets must define 'saas_vendor' class.");
-        Assert.Equal(9, profile.ExpectedBeliefSets["saas_vendor"].Count);
+        Assert.Equal(10, profile.ExpectedBeliefSets["saas_vendor"].Count);
     }
 
     [Fact, Trait("Category", "VendorFile")]
@@ -553,9 +553,9 @@ public sealed class VendorFileTests
         var current = await store.GetCurrentBeliefsAsync(vendorId);
         var result  = comp.Compute(vendorId, current);
 
-        // saas_vendor expects 9 slots; 3 filled, 6 missing
+        // saas_vendor expects 10 slots; 3 filled, 7 missing
         Assert.Equal(3, result.FilledKeys.Count);
-        Assert.Equal(6, result.GapKeys.Count);
+        Assert.Equal(7, result.GapKeys.Count);
         Assert.True(result.Ratio < 0.5);
     }
 
@@ -963,16 +963,17 @@ public sealed class VendorFileTests
         Assert.NotNull(judgement);
         var management = judgement.Management;
 
-        // Completeness: 6 / 9 filled (notice_period not in expected_belief_sets)
+        // Completeness: 6 / 10 filled (notice_period not in expected_belief_sets)
         Assert.Equal(6, management.FilledCount);
-        Assert.Equal(9, management.ExpectedCount);
-        Assert.Equal(6.0 / 9.0, management.Completeness, precision: 10);
+        Assert.Equal(10, management.ExpectedCount);
+        Assert.Equal(6.0 / 10.0, management.Completeness, precision: 10);
 
-        // Gaps: invoice_accuracy, renewal_intent, contract_on_file
-        Assert.Equal(3, management.GapSlots.Count);
+        // Gaps: invoice_accuracy, renewal_intent, contract_on_file, payment_terms
+        Assert.Equal(4, management.GapSlots.Count);
         Assert.Contains("invoice_accuracy",  management.GapSlots);
         Assert.Contains("renewal_intent",    management.GapSlots);
         Assert.Contains("contract_on_file",  management.GapSlots);
+        Assert.Contains("payment_terms",     management.GapSlots);
 
         // Weak dimensions: only Operational (sla_uptime dim_score = 0.20 < AtRiskMin 0.40)
         Assert.Single(management.WeakDimensions);

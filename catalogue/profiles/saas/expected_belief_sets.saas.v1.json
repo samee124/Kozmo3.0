@@ -13,9 +13,10 @@
         "renewal_intent",
         "contract_on_file",
         "renewal_date",
-        "annual_value"
+        "annual_value",
+        "payment_terms"
       ],
-      "description": "Standard SaaS vendor — 9 slots, 7 scored + 2 structural"
+      "description": "Standard SaaS vendor — 10 slots, 7 scored + 3 structural"
     }
   }
 }
