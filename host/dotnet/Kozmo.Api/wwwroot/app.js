@@ -92,7 +92,9 @@ async function selectVendor(id) {
   ]);
   state.trail      = trail;
   state.trajectory = trajectory;
-  state.lastFingerprint = trail.index.fingerprint;
+  // trail.assessed === false for a vendor with no scored evidence yet (e.g. a KYV vendor with
+  // only structural facts) — index/posture/band are null in that case, not an error.
+  state.lastFingerprint = trail.index ? trail.index.fingerprint : null;
 
   renderDetailView(false);
 }
@@ -103,23 +105,26 @@ function renderDetailView(fingerprintMatch) {
   const trail = state.trail;
   const v     = state.vendors.find(x => x.entityId === state.selectedId);
   const el    = document.getElementById('detail-view');
-  const fp    = trail.index.fingerprint;
-  const bc    = bandClass(trail.band.band);
+  const fp    = trail.index ? trail.index.fingerprint : null;
+  const bc    = bandClass(trail.band ? trail.band.band : null);
 
   el.innerHTML = `
     <div class="detail-header band-${bc}">
       <div class="detail-header-left">
         <h2>${esc(v ? v.name : 'Vendor')}</h2>
         <div class="detail-badges">
-          <span class="badge band-badge band-${bc}">${esc(trail.band.band)}</span>
-          <span class="badge stance-badge">${esc(trail.posture.stance)}</span>
+          <span class="badge band-badge band-${bc}">${esc(trail.band ? trail.band.band : 'Not Assessed')}</span>
+          <span class="badge stance-badge">${esc(trail.posture ? trail.posture.stance : 'Not Assessed')}</span>
         </div>
       </div>
       <div class="fingerprint-box${fingerprintMatch ? ' fingerprint-match' : ''}">
         ${fingerprintMatch ? '<div class="fingerprint-match-banner">Same answer</div>' : ''}
+        ${fp ? `
         <div class="fingerprint-label">Fingerprint</div>
         <div class="fingerprint-value">${esc(fp.substring(0, 16))}&hellip;</div>
-        <div class="fingerprint-full">${esc(fp)}</div>
+        <div class="fingerprint-full">${esc(fp)}</div>` : `
+        <div class="fingerprint-label">Not yet assessed</div>
+        <div class="fingerprint-value">no scored evidence yet</div>`}
       </div>
     </div>
     <div class="detail-upload">
@@ -144,7 +149,7 @@ function renderDetailView(fingerprintMatch) {
       <pre id="vf-md-pre" class="vf-md-pre">Loading…</pre>
     </div>
     <div id="tab-reality"     class="tab-panel hidden">${renderTrailPanel(trail)}</div>
-    <div id="tab-trajectory"  class="tab-panel hidden">${renderTrajectoryPanel(state.trajectory, trail.band.thresholds)}</div>`;
+    <div id="tab-trajectory"  class="tab-panel hidden">${renderTrajectoryPanel(state.trajectory, trail.band ? trail.band.thresholds : null)}</div>`;
 
   el.querySelectorAll('.tab-btn').forEach(btn =>
     btn.addEventListener('click', () => switchTab(btn.dataset.tab)));
@@ -207,6 +212,7 @@ async function loadFileTab() {
 // ── Trail panel ───────────────────────────────────────────────────────────────
 
 function renderMetaCaveats(posture) {
+  if (!posture) return '';
   const parts = [];
   if (posture.cautions && posture.cautions.length)
     parts.push(`<div class="caveats cautions">
@@ -222,6 +228,13 @@ function renderMetaCaveats(posture) {
 }
 
 function renderTrailPanel(trail) {
+  if (!trail.assessed) {
+    return `<div class="trail-section">
+      <p>Not yet assessed — no dimension has any scored evidence yet.
+      See the File tab for the real facts on record (structural claims like
+      annual value and payment terms never feed dimension scoring by design).</p>
+    </div>`;
+  }
   const t = trail.band.thresholds;
   return `
     <div class="trail-section">

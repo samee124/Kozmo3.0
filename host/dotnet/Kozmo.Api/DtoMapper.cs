@@ -84,11 +84,22 @@ internal static class DtoMapper
             Renewal:      renewal);
     }
 
+    /// <summary>
+    /// Null idx/posture means "not assessed" — no dimension has any contributing scored belief
+    /// (see IIndexModule.Aggregate). Returns Assessed=false with everything else null/empty
+    /// rather than 404ing: a vendor whose identity is known but hasn't been scored yet is a real,
+    /// honest state, not an error. Real structural facts (Financial-tagged, e.g. annual_value) are
+    /// visible via /vendors/{id}/vendor-file/markdown regardless of assessment state.
+    /// </summary>
     public static ReasoningTrailDto ToTrail(
-        EntityIndex idx, PostureAssignment posture, EntityRecord entity,
+        EntityIndex? idx, PostureAssignment? posture, EntityRecord entity,
         IReadOnlyList<Belief> beliefs, IReadOnlyList<Signal> signals,
         SaasProfile profile, DateTimeOffset asOf)
     {
+        if (idx is null || posture is null)
+            return new ReasoningTrailDto(
+                Assessed: false, Posture: null, Band: null, Index: null, Dimensions: []);
+
         var signalMap  = signals.ToDictionary(s => s.Id);
         var byDim      = beliefs.Where(b => b.Dimension.HasValue).GroupBy(b => b.Dimension!.Value).ToDictionary(g => g.Key, g => g.ToList());
 
@@ -145,6 +156,7 @@ internal static class DtoMapper
             .ToList();
 
         return new ReasoningTrailDto(
+            Assessed:   true,
             Posture:    ToPostureView(posture, entity, asOf),
             Band:       bandView,
             Index:      ToIndexView(idx, profile),

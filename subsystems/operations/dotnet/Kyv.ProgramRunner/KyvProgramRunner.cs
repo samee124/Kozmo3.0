@@ -2,7 +2,13 @@ using Ig.Contracts;
 using Ig.Resolution;
 using Ii.CandidateExtraction;
 using Ii.Completeness;
+using Ii.Decay;
+using Ii.Index;
 using Ii.Intake;
+using Ii.Observation;
+using Ii.Posture;
+using Ii.Rubric;
+using Ii.Spine;
 using Kozmo.Contracts.Config;
 using Kozmo.Contracts.Interfaces;
 using Kozmo.Llm;
@@ -23,6 +29,13 @@ namespace Kyv.ProgramRunner;
 ///   6 persist_beliefs  — correlate doc-scoped BeliefCandidates to the resolved vendor via the
 ///                        same ClusterId &lt;- DocId path RegistryWriter.Build() uses, persist via
 ///                        BeliefPersistenceStage (Commit 2)
+///   7 raise_checkins   — identity + provisional-vendor gap check-ins
+///   8 completeness_init — Q&amp;A completeness convergence per resolved vendor (direct
+///                        CompletenessOrchestrator call — see stage 9's doc comment for why this
+///                        stays separate from RecomputeVendorAsync's own completeness hook)
+///   9 recompute_index  — Ii.Spine Index/Posture per resolved vendor (click-path fix #3b); a
+///                        vendor with zero scored evidence correctly gets no Index/Posture
+///                        (Ii.Index's #4B null-guard), not a fabricated Band/Stance
 ///
 /// The runner is a declared sequence, not a hardcoded monolith.
 /// Caller supplies <paramref name="now"/> so this class never reads the clock.
@@ -46,10 +59,11 @@ public sealed class KyvProgramRunner
     private readonly PdfPageImageExtractor         _imageExtractor;
     private readonly OcrExtractor                  _ocrExtractor;
     private readonly CompletenessOrchestrator?     _completeness;
+    private readonly EntityRegistry                _spineRegistry;
 
     // Declared stage sequence — names match the KYV program specification.
     private static readonly string[] DeclaredStages =
-        ["ingest", "classify", "extract", "filter", "resolve", "persist_beliefs", "raise_checkins", "completeness_init"];
+        ["ingest", "classify", "extract", "filter", "resolve", "persist_beliefs", "raise_checkins", "completeness_init", "recompute_index"];
 
     public KyvProgramRunner(
         IKozmoLlm                  llm,
@@ -58,9 +72,10 @@ public sealed class KyvProgramRunner
         ICheckInStore              checkInStore,
         IEntityStore               entityStore,
         SaasProfile                profile,
-        IKozmoLlm?                 beliefLlm    = null,
-        string                     owner        = "kyv@kozmo",
-        CompletenessOrchestrator?  completeness = null)
+        IKozmoLlm?                 beliefLlm     = null,
+        string                     owner         = "kyv@kozmo",
+        CompletenessOrchestrator?  completeness  = null,
+        EntityRegistry?            spineRegistry = null)
     {
         _llm            = llm;
         // Identity extraction (DocumentCandidateExtractor) and belief extraction
@@ -84,6 +99,11 @@ public sealed class KyvProgramRunner
         _pdfReader      = new PdfTextExtractor();
         _imageExtractor = new PdfPageImageExtractor();
         _ocrExtractor   = new OcrExtractor(llm);
+        // Ii.Spine.EntityRegistry — distinct from the IIdentityRegistry above (that one resolves
+        // KYV document identity; this one backs Index/Posture's renewal-date lookup). Defaults to
+        // a fresh, empty registry when the caller has none to share — renewal date then reads as
+        // null for KYV vendors (honest gap, not a fabrication) rather than requiring one.
+        _spineRegistry  = spineRegistry ?? new EntityRegistry();
     }
 
     public async Task<ProgramRun> RunAsync(
@@ -243,15 +263,15 @@ public sealed class KyvProgramRunner
         // Stage 3's per-document extraction-miss handling: one bad input degrades gracefully
         // instead of aborting the whole pipeline. Caught broadly (not just LlmCacheMissException)
         // because ANY completeness failure for one vendor must stay scoped to that vendor.
+        var resolvedVendorIds = dispositions
+            .Where(d => d.Disposition != Disposition.NonVendor)
+            .Select(d => d.ClusterId)
+            .Distinct()
+            .ToList();
+
         var completenessCheckInCount = 0;
         if (_completeness != null)
         {
-            var resolvedVendorIds = dispositions
-                .Where(d => d.Disposition != Disposition.NonVendor)
-                .Select(d => d.ClusterId)
-                .Distinct()
-                .ToList();
-
             foreach (var vid in resolvedVendorIds)
             {
                 try
@@ -269,6 +289,54 @@ public sealed class KyvProgramRunner
             }
         }
         executions.Add(new(8, "completeness_init", now, completenessCheckInCount));
+
+        // ── Stage 9: recompute_index — Ii.Spine Index/Posture per resolved vendor ──────────
+        // Before this, KYV never called RecomputeVendorAsync at all: /vendors/{id} and
+        // /vendors/{id}/trail read purely from the store (GetIndexAsync/GetPostureAsync), which
+        // stayed permanently null/404 for every KYV-discovered vendor even after real beliefs
+        // were persisted. Safe to call unconditionally now (click-path fix #4): a vendor with
+        // zero scored evidence in every dimension correctly gets no Index/Posture persisted
+        // (Ii.Index.Aggregate's null guard) — a clean "not assessed" 404, never a fabricated
+        // Band/Stance built from RubricModule's neutral placeholder.
+        //
+        // Deliberately built with completeness: null — Stage 8 above already runs completeness
+        // convergence directly, unconditionally, for every resolved vendor. Wiring completeness
+        // into this facade too would double-run it for any vendor with real scored evidence
+        // (GapCheckInStage's open-check-in dedup makes that harmless, not free — still two cache
+        // lookups instead of one). More importantly, RecomputeVendorAsync returns before ever
+        // reaching completeness when Index is null, which is true for every real vendor in the
+        // current corpus (structural-only evidence) — routing completeness through here instead
+        // of Stage 8's direct call would silently stop completeness from running at all for
+        // exactly the vendors this whole fix chain was built to prove it works for.
+        var recomputeFacade = new IiFacade(
+            new ObservationModule(), new RubricModule(), new IndexModule(),
+            new PostureModule(), new DecayEngine(),
+            _entityStore, _profile, _spineRegistry, completeness: null);
+
+        // RecomputeVendorAsync is documented "read-only; does not persist results" — it exists to
+        // give the vendor-file page a fresh, on-demand judgement without writing anything. For
+        // /vendors/{id} and /vendors/{id}/trail to see anything (they read GetIndexAsync/
+        // GetPostureAsync, which are pure store reads), this stage must persist the result itself
+        // — the same two calls the signal-driven path's RecomputeIndexAsync already makes.
+        var assessedCount = 0;
+        foreach (var vid in resolvedVendorIds)
+        {
+            try
+            {
+                var judgement = await recomputeFacade.RecomputeVendorAsync(vid, ct);
+                if (judgement is null) continue; // not assessed — nothing to persist, by design
+
+                await _entityStore.SaveIndexAsync(judgement.Index, ct);
+                await _entityStore.AppendPostureAsync(judgement.Posture, ct);
+                assessedCount++;
+            }
+            catch (Exception)
+            {
+                // This vendor's Index/Posture recompute is skipped this run — /vendors/{id}
+                // stays 404 for it, but every other vendor and every earlier stage is unaffected.
+            }
+        }
+        executions.Add(new(9, "recompute_index", now, assessedCount));
 
         return new ProgramRun(
             RunId:               runId,

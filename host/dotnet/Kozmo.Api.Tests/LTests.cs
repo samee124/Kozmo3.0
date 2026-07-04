@@ -31,7 +31,8 @@ public class LTests
         var trail = await _client.GetFromJsonAsync<ReasoningTrailDto>($"/vendors/{CorvusId}/trail", JsonOpts);
 
         Assert.NotNull(trail);
-        Assert.Equal("composite", trail!.Band.DrivenBy);
+        Assert.NotNull(trail!.Band); // Corvus has real evidence in every dimension — always assessed
+        Assert.Equal("composite", trail.Band.DrivenBy);
     }
 
     [Fact] [Trait("Class", "L")]
@@ -40,7 +41,8 @@ public class LTests
         var trail = await _client.GetFromJsonAsync<ReasoningTrailDto>($"/vendors/{CloudwaveId}/trail", JsonOpts);
 
         Assert.NotNull(trail);
-        Assert.NotNull(trail!.Posture.Renewal);
+        Assert.NotNull(trail!.Posture); // Cloudwave has real evidence in every dimension — always assessed
+        Assert.NotNull(trail.Posture.Renewal);
         Assert.True(trail.Posture.Renewal!.WindowActive,
             $"Expected windowActive=true, got DaysToRenewal={trail.Posture.Renewal.DaysToRenewal}");
     }

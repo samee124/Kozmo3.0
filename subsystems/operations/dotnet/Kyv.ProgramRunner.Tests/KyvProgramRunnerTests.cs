@@ -102,8 +102,8 @@ public sealed class KyvProgramRunnerTests : IDisposable
         Assert.Equal(Now,                        run.StartedAt);
         Assert.NotEqual(Guid.Empty,              run.RunId);
 
-        // All 8 declared stages must be recorded
-        Assert.Equal(8, run.Stages.Count);
+        // All 9 declared stages must be recorded (recompute_index added by click-path fix #3b)
+        Assert.Equal(9, run.Stages.Count);
         var names = run.Stages.Select(s => s.StageName).ToList();
         Assert.Contains("ingest",            names);
         Assert.Contains("classify",          names);
@@ -113,6 +113,7 @@ public sealed class KyvProgramRunnerTests : IDisposable
         Assert.Contains("persist_beliefs",   names);
         Assert.Contains("raise_checkins",    names);
         Assert.Contains("completeness_init", names);
+        Assert.Contains("recompute_index",   names);
 
         // After cassette recording, OCR reads both Scenario 05 image-only PDFs
         // (GDPR_Data_Processing_Addendum_2017.pdf and MSA_01_Salesforceorg_NSU_2018.pdf)

@@ -131,14 +131,17 @@ app.MapGet("/vendors/{id}", async (string id, IIiFacade f, EntityRegistry reg, S
     return Results.Ok(DtoMapper.ToDetail(guid, entity, idx, pos, prof, DemoClock.AsOf));
 });
 
-// GET /vendors/{id}/trail — full glass-box reasoning chain
+// GET /vendors/{id}/trail — full glass-box reasoning chain.
+// A vendor with no scored evidence yet (e.g. a KYV vendor with only structural facts) returns
+// 200 with Assessed=false, not 404 — "not assessed" is a real, honest state for a known identity,
+// not a missing resource. Only an unrecognized vendor id 404s.
 app.MapGet("/vendors/{id}/trail", async (string id, IIiFacade f, EntityRegistry reg, SaasProfile prof) =>
 {
     if (!Guid.TryParse(id, out var guid)) return Results.BadRequest("Invalid GUID");
     var entity = reg.GetEntity(guid);
     if (entity is null) return Results.NotFound();
     var trail = await f.GetReasoningTrailAsync(guid);
-    if (trail?.Index is null || trail.Posture is null) return Results.NotFound();
+    if (trail is null) return Results.NotFound();
     return Results.Ok(DtoMapper.ToTrail(
         trail.Index, trail.Posture, entity,
         trail.CurrentBeliefs, trail.SourceSignals, prof, DemoClock.AsOf));
@@ -692,7 +695,8 @@ app.MapPost("/kyv/run", async (
             checkInStore:     checkInStore,
             entityStore:      storeInst,
             profile:          profile,
-            completeness:     completenessHolder.Value);
+            completeness:     completenessHolder.Value,
+            spineRegistry:    entityRegistry);
 
         var run = await runner.RunAsync(tempFolder, DateTimeOffset.UtcNow);
 
@@ -710,8 +714,10 @@ app.MapPost("/kyv/run", async (
             new { type = "kyv-complete", ts = DateTimeOffset.UtcNow,
                   data = new { runId = run.RunId, status = run.Status.ToString() } }, JsonOpts));
 
-        // Sync EntityRegistry so /vendors immediately reflects KYV-discovered vendors
-        var allVendors = await storeInst.LoadVendorsAsync();
+        // Sync EntityRegistry so /vendors immediately reflects KYV-discovered vendors.
+        // LoadVendorsAsync() (program_run_id IS NULL) never sees these — KYV's Stage F always
+        // stamps a non-null program_run_id for run isolation. Use the run-scoped query instead.
+        var allVendors = await storeInst.LoadVendorsByRunAsync(run.RunId);
         foreach (var (vid, vname, vren) in allVendors)
             entityRegistry.Register(vid, vname, vren);
 

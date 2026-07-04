@@ -317,11 +317,43 @@ public sealed class SqliteEntityStore : IEntityStore, IRegistryStore, ICheckInRo
         return Task.CompletedTask;
     }
 
-    /// <summary>Load all persisted vendors (user-created). Seeded vendors are not stored here.</summary>
+    /// <summary>
+    /// Load all persisted vendors with no program_run_id (user-created via the legacy vendor-file
+    /// upload path). Seeded demo vendors are not stored here. Deliberately excludes every
+    /// KYV-discovered vendor — KYV's Stage F (RegistryWriter) always stamps a non-null
+    /// program_run_id for run isolation (see ProgramRun_LegacyDemo_Untouched, which pins this
+    /// exact separation). Use <see cref="LoadVendorsByRunAsync"/> to read a specific KYV run's
+    /// vendors instead — do not relax this filter to include them.
+    /// </summary>
     public Task<IReadOnlyList<(Guid Id, string Name, DateTimeOffset? RenewalDate)>> LoadVendorsAsync()
     {
         using var cmd = _conn.CreateCommand();
         cmd.CommandText = "SELECT id, canonical_name, renewal_date FROM vendors WHERE program_run_id IS NULL";
+        var results = new List<(Guid, string, DateTimeOffset?)>();
+        using var reader = cmd.ExecuteReader();
+        while (reader.Read())
+        {
+            var id         = Guid.Parse(reader.GetString(0));
+            var name       = reader.GetString(1);
+            var renewalRaw = reader.IsDBNull(2) ? null : reader.GetString(2);
+            DateTimeOffset? renewal = renewalRaw is null ? null : DateTimeOffset.Parse(renewalRaw);
+            results.Add((id, name, renewal));
+        }
+        return Task.FromResult<IReadOnlyList<(Guid, string, DateTimeOffset?)>>(results);
+    }
+
+    /// <summary>
+    /// Load all vendors stamped with a specific KYV program_run_id — the counterpart to
+    /// <see cref="LoadVendorsAsync"/>'s NULL-only filter. POST /kyv/run uses this with the run id
+    /// it just produced to sync exactly the vendors that run discovered into EntityRegistry,
+    /// instead of the global NULL-filtered query (which would never see them).
+    /// </summary>
+    public Task<IReadOnlyList<(Guid Id, string Name, DateTimeOffset? RenewalDate)>> LoadVendorsByRunAsync(
+        Guid runId)
+    {
+        using var cmd = _conn.CreateCommand();
+        cmd.CommandText = "SELECT id, canonical_name, renewal_date FROM vendors WHERE program_run_id = @run_id";
+        cmd.Parameters.AddWithValue("@run_id", runId.ToString());
         var results = new List<(Guid, string, DateTimeOffset?)>();
         using var reader = cmd.ExecuteReader();
         while (reader.Read())

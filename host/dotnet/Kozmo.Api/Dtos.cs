@@ -50,10 +50,11 @@ public sealed record RenewalViewDto(
     int            DaysToRenewal);
 
 public sealed record ReasoningTrailDto(
-    PostureViewDto                      Posture,
-    BandViewDto                         Band,
-    IndexViewDto                        Index,
-    IReadOnlyList<DimensionBeliefViewDto> Dimensions);
+    bool                                   Assessed,
+    PostureViewDto?                        Posture,
+    BandViewDto?                           Band,
+    IndexViewDto?                          Index,
+    IReadOnlyList<DimensionBeliefViewDto>  Dimensions);
 
 public sealed record BandViewDto(
     string           Band,

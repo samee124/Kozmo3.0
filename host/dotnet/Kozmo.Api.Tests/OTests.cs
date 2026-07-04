@@ -29,7 +29,8 @@ public class OTests
         // Record Cloudwave's fingerprint before the live signal
         var beforeTrail = await _client.GetFromJsonAsync<ReasoningTrailDto>($"/vendors/{CloudwaveId}/trail", JsonOpts);
         Assert.NotNull(beforeTrail);
-        var beforeFp = beforeTrail!.Index.Fingerprint;
+        Assert.NotNull(beforeTrail!.Index); // Cloudwave has real evidence in every dimension — always assessed
+        var beforeFp = beforeTrail.Index.Fingerprint;
 
         // Send a live signal — stub returns Operational/uptime_sla=0.10
         var req      = new { body = "The Cloudwave platform has been experiencing critical outages." };
