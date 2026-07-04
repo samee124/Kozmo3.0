@@ -638,5 +638,45 @@
     "answerJson": "{\u0022answer\u0022:\u0022UNKNOWN\u0022,\u0022confidence\u0022:0.3,\u0022cited_belief_ids\u0022:[\u00223\u0022],\u0022reasoning\u0022:\u0022The beliefs indicate an extension of the term through June 30, 2028, but do not specify the exact contractual renewal date.\u0022}",
     "confidence": 0.85,
     "reasoningSummary": ""
+  },
+  "fd94c28997e989cf8a2f1408831669104100eb67ec0720c1742f5ef25288383f": {
+    "answerJson": "{\u0022answer\u0022:\u0022UNKNOWN\u0022,\u0022confidence\u0022:0.3,\u0022cited_belief_ids\u0022:[],\u0022reasoning\u0022:\u0022The provided beliefs do not contain any information regarding the vendor\\u0027s performance against their contracted SLA.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "fd0abe2690364fb56f012688654df6bef683302be2102460252c11c46eefc746": {
+    "answerJson": "{\u0022answer\u0022:\u0022UNKNOWN\u0022,\u0022confidence\u0022:0.3,\u0022cited_belief_ids\u0022:[],\u0022reasoning\u0022:\u0022The provided beliefs do not contain any information regarding the current CSAT or NPS score for the vendor.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "2cef31810b15b9e03262b884eba295e0d57c1b5a604df9a9feec01994160a602": {
+    "answerJson": "{\u0022answer\u0022:\u0022YES\u0022,\u0022confidence\u0022:0.8,\u0022cited_belief_ids\u0022:[\u00221\u0022,\u00222\u0022],\u0022reasoning\u0022:\u0022There is evidence of defined payment terms and an invoice amount, indicating a signed contract with payment terms.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "65461cb2bbd1ba5de0be222c81e4f33be8cb822d7e528569de47558de112c62d": {
+    "answerJson": "{\u0022answer\u0022:\u002218000\u0022,\u0022confidence\u0022:0.8,\u0022cited_belief_ids\u0022:[\u00221\u0022],\u0022reasoning\u0022:\u0022The total annual contract value is derived from the verified invoice amount of $18,100.00.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "2f058c2844824e8ad3969924d11fa39dc6d6ddf8d14d378a31b61744308889a9": {
+    "answerJson": "{\u0022answer\u0022:\u0022UNKNOWN\u0022,\u0022confidence\u0022:0.3,\u0022cited_belief_ids\u0022:[],\u0022reasoning\u0022:\u0022The provided beliefs do not contain any information regarding the vendor\\u0027s uptime SLA.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "79a537ac45de96df3860e93a8dd15b653de81e873b2e00c317c83785e71ffa6a": {
+    "answerJson": "{\u0022answer\u0022:\u0022UNKNOWN\u0022,\u0022confidence\u0022:0.3,\u0022cited_belief_ids\u0022:[],\u0022reasoning\u0022:\u0022The provided beliefs do not contain any information regarding the vendor\\u0027s contracted uptime SLA percentage.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "e3e3757e42fd3b597ab85c0c17de32863b9b50a50393f7524a61b24d54d7d2a6": {
+    "answerJson": "{\u0022answer\u0022:\u0022UNKNOWN\u0022,\u0022confidence\u0022:0.3,\u0022cited_belief_ids\u0022:[],\u0022reasoning\u0022:\u0022The provided beliefs do not contain any information regarding the vendor\\u0027s product roadmap or its alignment with our strategic direction.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "0a2450098d819b4dba7157ad99bf5051f666df6afbf73b5ccf04afd7eccf053a": {
+    "answerJson": "{\u0022answer\u0022:\u0022UNKNOWN\u0022,\u0022confidence\u0022:0.3,\u0022cited_belief_ids\u0022:[],\u0022reasoning\u0022:\u0022The provided beliefs do not contain any information regarding the contractual renewal date for the vendor agreement.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
   }
 }

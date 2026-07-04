@@ -1,0 +1,11 @@
+{
+  "config_type": "extraction_schemas",
+  "profile": "saas",
+  "version": "v1",
+  "default_claim_keys": ["sla_uptime", "csat", "payment_terms", "renewal_date", "annual_value"],
+  "doc_type_schemas": {
+    "invoice": ["sla_uptime", "csat", "payment_terms", "renewal_date", "invoice_amount"],
+    "msa": ["sla_uptime", "csat", "payment_terms", "renewal_date", "annual_value"],
+    "order_form": ["sla_uptime", "csat", "payment_terms", "renewal_date", "annual_value"]
+  }
+}

@@ -209,18 +209,117 @@ Until one of those lands, **`annual_value` for any invoice-billed vendor is a de
 not a verified annual figure** — don't read it as ground truth in the demo without checking the
 source document.
 
-## Live-signal path has the mirror supersession bug — queued, not folded in
+## Live-signal path "weak supersedes strong" is NOT a bug — it's the live-signal-report feature
 
-`IiFacade.SubmitSignalAsync` (`Ii.Spine/IiFacade.cs`) does zero tier comparison on supersession —
-any new signal for a `(EntityId, Dimension, Criterion)` slot unconditionally supersedes whatever
-was previously current, regardless of `SourceTier`. This is the mirror of the KYV-path bug this
-fix addressed: a weak-tier live signal arriving after a strong one always wins, silently
-discarding the stronger evidence (the KYV path, by contrast, now correctly leaves a stronger
-belief alone when a weaker one arrives later).
+An earlier pass through this file described `IiFacade.SubmitSignalAsync`'s unconditional
+supersession (any new signal for a `(EntityId, Dimension, Criterion)` slot always supersedes
+whatever was current, regardless of `SourceTier`) as "the mirror of the KYV-path bug" — a
+data-loss defect worth fixing. That framing was wrong and has been corrected here.
 
-**Deliberately not fixed in the same effort.** It raises the same contradiction-detection design
-question this fix just worked through (should cross-tier signal disagreement supersede, or stay
-visible for `ContradictionDetector`? note `ContradictionDetector.DetectCrossSource` currently
-doesn't even cover signal-pipeline beliefs, since they carry `ClaimKey=""`), plus a slot-key
-reconciliation (`ClaimKey` vs. `(Dimension, Criterion)`), and has no demo dependency today. Queued
-as the next cleanup.
+`IiFacade.AnchorConfidences` exists specifically so a weaker-tier signal **can** become current
+over a stronger one: it floors the new belief's confidence at the strongest still-valid
+predecessor's decayed confidence, so "corroborating bad news must not demote the band." That
+*is* the live-signal demo feature — a CSM's free-text report about a known issue is supposed to
+become the current, authoritative belief for that criterion, with confidence protected against
+unfair collapse, not blocked from taking effect. This is exercised end-to-end by
+`Kozmo.Api.Tests/OTests.O1_LiveSignal_CreatesBeliefAndRecomputesEngine` (the actual
+`/demo/live-signal` endpoint test) and pinned by two golden fingerprints
+(`GoldenStreamB3Tests.P1_Corvus_WithLlmBelief_FingerprintPin`,
+`LlmStreamTests.L5_Cloudwave_WithLlmBelief_FingerprintPin`) plus
+`MetaCognitionTests.T10_AnchorProvenance_ExposedInReasoningTrail`, which asserts the anchor's
+provenance fields are populated after exactly this kind of reversal.
+
+A tier-then-recency winner-take-all fix was built and tested against this path (mirroring the KYV
+fix's mechanism) and confirmed to close the literal "weak overwrites strong" scenario — but doing
+so removes the reversal `AnchorConfidences` depends on, which broke both golden pins, the T10
+provenance test, and the O1 demo-feature test. Those failures are correct: they were protecting
+intended behavior, and updating them to match the fix would have been encoding a regression, not
+fixing one. The fix was reverted in full (`IiFacade.SubmitSignalAsync`, plus its new tests) rather
+than kept and the tests "corrected." No fix is needed here — this is confirmed working as
+designed.
+
+## E1 Part 7 Step 3: invoice schema fixed the annual_value confusion at extraction — two new gaps surfaced, both deferred, both documented here rather than papered over
+
+Step 3 wired a document-type → extraction-schema mapping (invoice / msa / order_form) and gave
+invoices their own `invoice_amount` claim key instead of `annual_value`, fixing the type-confusion
+described in the "Supersession fix" section above at its root. Real-corpus proof: IIVS's 6
+invoices now extract `invoice_amount` (same values as before, just correctly typed), one of them
+(`Invoice_IIVS-INV-2023-0003.txt`) newly and correctly extracts `invoice_amount = 18100` where it
+previously abstained on `annual_value` entirely (verified against the source: "TOTAL DUE
+$18,100.00" is genuinely present), and Salesforce's Order Form is untouched (`annual_value =
+214500`, same cache key, zero live calls). Re-record was scoped exactly to the 12 invoice-type
+documents (454→466 belief-extraction cassette entries, 0 removed) plus 8 downstream answering-cassette
+entries for IIVS's changed belief set — confirmed via a full before/after diff of the entire 152-doc
+corpus, not just the invoice folder.
+
+**The discipline this proved out:** `BeliefExtractionPromptGenerationTests`'s hash-identity check
+(Step 2) proves PROMPT TEXT stability for a given key set — it says nothing about extraction
+stability once a document's key set actually changes. Swapping `annual_value` for `invoice_amount`
+in the invoice schema changes the prompt's overall composition, and that composition change can
+shift what the model does with a key that itself DID NOT CHANGE (`renewal_date` — see below). The
+acceptance gate for any future schema change is therefore a full before/after extraction diff
+across every document of the affected type(s) — not just the hash test, and not just the intended
+key swap. That diff was run exhaustively here (all 152 documents, all criteria) and found exactly
+three deltas: the 12 intended relabels, the 1 newly-grounded `invoice_amount`, and the one
+unintended shift documented next. Nothing else moved.
+
+### New gap 1 — invoice schema composition change caused a real mis-extraction on an untouched key (renewal_date)
+
+`Invoice_RGL-2023-002.txt` (Scenario 03) gained a `renewal_date` belief
+(`1691971200` = 2023-08-14) that it did not have before the invoice schema change. The source text
+contains `Due Date: 14 August 2023` — the model read this invoice's PAYMENT due date as a CONTRACT
+renewal date. This is a real mis-extraction, the same class of error as the `annual_value`
+milestone confusion (`ContainsMilestoneLanguage`) and the `payment_terms` termination-notice
+confusion (`ContainsTerminationLanguage`) — a raw date/amount that is unambiguous in isolation gets
+swept into the wrong criterion once it sits in a document type asking about it under different
+surrounding context. Unlike those two, this was not present before Step 3 on the identical
+document under the default (pre-invoice-schema) prompt — it is a genuinely new failure mode
+introduced by giving invoices their own schema, not a pre-existing bug this step happened to
+surface.
+
+**Deferred, not fixed:** a `renewal_date` guard analogous to `ContainsMilestoneLanguage` —
+candidate rule: reject `renewal_date` evidence whose surrounding text reads as an invoice
+due-date/invoice-date line (e.g. contains "due date" or sits inside an invoice-schema document at
+all, since invoices structurally have no contract renewal date). The narrower fix — since
+document type is now known at extraction time — may simply be to exclude `renewal_date` from the
+invoice schema entirely once that's confirmed safe against the corpus; that wasn't done here to
+keep Step 3 to exactly the one intended key swap. Does not affect any current pinned test — RGL/
+Regulus is not part of any golden or completeness-proof assertion — but is a real quality
+regression on that document's belief set and should not be forgotten.
+
+### New gap 2 — extraction confusion fixed, but the SAME confusion reappears one layer up, at answering
+
+On the real IIVS document set, `saas.fin.l1.2` ("what is the total annual contract value") now
+answers `18000` at confidence 0.80 (previously `UNKNOWN`) — grounded in whichever single
+`invoice_amount` belief currently survives the same-tier supersession collision described in the
+"Supersession fix" section above (the identical collision mechanism, now recurring under the new
+key name instead of `annual_value`). The extraction layer is correct — that belief is honestly
+labeled `invoice_amount`, a one-time transaction figure, not a contract's annual value — but
+`QuestionAnsweringStage`/`AnsweringPrompt` still hands the model every Financial-dimension belief
+without telling it which claim keys are valid grounding for an "annual value" question, so the
+model does its best with what it's given and answers a specific-sounding number that doesn't
+actually answer what was asked.
+
+**This is an E2 item, not an E1 fix:** the Kozmo_Phase_E1_Spec.md's deferred "deterministic
+retrieval" work (Part 2.5, E1 Step 6) filters the belief pool a question sees by declared claim
+keys — extending that filter (or the question bank itself) to explicitly exclude `invoice_amount`
+from annual-value-style questions is the natural fix, and belongs with E2's question-bank
+work, not E1's extraction work. Capturing here so it isn't lost: **the question bank needs
+invoice-awareness** — it should not offer a one-time invoice figure to answer a question about a
+recurring annual figure, the same way `RubricModule` must never average a structural belief into a
+dimension score.
+
+### Two real, separable findings surfaced while investigating (not the phantom bug — queued for later)
+
+- **Golden gate has a matching gap.** `LlmStreamTests.L5_Cloudwave_WithLlmBelief_FingerprintPin`
+  carries `[Trait("Golden", "true")]`, but the documented gate command
+  (`dotnet test Kozmo.sln --filter "Golden"`) is a name-substring filter — it only catches
+  `GoldenStreamB3Tests.P1` because "Golden" happens to appear in that class's name.
+  `LlmStreamTests` doesn't contain "Golden" anywhere in its class or method names, so L5 silently
+  escapes the documented gate despite being tagged as a golden pin. Worth fixing so a golden
+  fingerprint pin can't drift undetected by the command everyone actually runs — likely means
+  switching the gate to filter on the `Golden=true` trait instead of a name substring.
+- **`EvidenceFusionTests.Q2`/`Q3` pass vacuously today, regardless of this investigation or its
+  (reverted) fix.** Flagged for a closer look someday — worth confirming they're still testing
+  what their names/comments claim (the confidence-anchor chain-walk actually firing and mattering)
+  rather than asserting an invariant that happens to hold true anyway. Not chased further now.

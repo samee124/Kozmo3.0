@@ -33,12 +33,14 @@ public sealed record BeliefCandidate(
 );
 
 /// <summary>
-/// LLM-based dimension-fact extractor (belief bridge, Commit 1).
+/// LLM-based dimension-fact extractor (belief bridge, Commit 1; document-type-aware schemas,
+/// E1 Part 7 Step 3).
 ///
-/// One LLM read per document returns the subset of five catalogue-defined facts
-/// (sla_uptime, csat, payment_terms, renewal_date, annual_value) that are explicitly stated in
-/// the text. Abstention is the default: a document with none of these facts yields an empty
-/// list, not a guess.
+/// One LLM read per document returns the subset of its document-type's schema-selected facts
+/// (<see cref="ResolveExtractionSchema"/> — the pre-E1 default is sla_uptime, csat, payment_terms,
+/// renewal_date, annual_value; an invoice-classified document asks about invoice_amount instead of
+/// annual_value) that are explicitly stated in the text. Abstention is the default: a document with
+/// none of its schema's facts yields an empty list, not a guess.
 ///
 /// Determinism: all calls go through <see cref="IKozmoLlm"/>. In replay mode this is a
 /// <see cref="Kozmo.Llm.CachingLlmClient"/> that serves from a frozen cassette and throws
@@ -74,17 +76,38 @@ public sealed class DocumentBeliefExtractor
         SourceTier        tier,
         CancellationToken ct = default)
     {
-        var system = BeliefExtractionPrompt.System;
-        var user   = BeliefExtractionPrompt.User(documentText);
+        var targetKeys = ResolveExtractionSchema(docId);
+        var system     = BeliefExtractionPrompt.BuildSystem(_profile.ClaimKeyCatalogue, targetKeys);
+        var user       = BeliefExtractionPrompt.User(documentText);
 
         var result = await _llm.CompleteJsonAsync(system, user, BeliefExtractionPrompt.MaxTokens, ct);
 
-        return ParseAndFilter(result, docId, tier);
+        return ParseAndFilter(result, docId, tier, targetKeys);
+    }
+
+    /// <summary>
+    /// E1 Part 7 Step 3: selects the ordered claim-key list to project into the extraction prompt,
+    /// based on the document's inferred type (<see cref="DocTypeInferrer.InferDocType"/>). Falls
+    /// back to <see cref="SaasProfile.DefaultExtractionKeys"/> — and if that is empty (catalogue
+    /// predates the extraction_schemas config), to <see cref="BeliefExtractionPrompt.TargetCriteriaOrder"/>
+    /// — for any document type with no schema entry, so adding a schema is a config change, not a
+    /// code change, and unmapped types are never left without a key set.
+    /// </summary>
+    private IReadOnlyList<string> ResolveExtractionSchema(string docId)
+    {
+        var docType = DocTypeInferrer.InferDocType(docId);
+        if (docType.Length > 0 && _profile.ExtractionSchemas.TryGetValue(docType, out var schema))
+            return schema;
+
+        return _profile.DefaultExtractionKeys.Count > 0
+            ? _profile.DefaultExtractionKeys
+            : BeliefExtractionPrompt.TargetCriteriaOrder;
     }
 
     // ── Parsing ────────────────────────────────────────────────────────────────
 
-    private IReadOnlyList<BeliefCandidate> ParseAndFilter(LlmResult result, string docId, SourceTier tier)
+    private IReadOnlyList<BeliefCandidate> ParseAndFilter(
+        LlmResult result, string docId, SourceTier tier, IReadOnlyList<string> targetKeys)
     {
         if (result.Answer is not JsonElement root)
             return Array.Empty<BeliefCandidate>();
@@ -92,6 +115,7 @@ public sealed class DocumentBeliefExtractor
         if (!root.TryGetProperty("facts", out var factsEl) || factsEl.ValueKind != JsonValueKind.Array)
             return Array.Empty<BeliefCandidate>();
 
+        var targetSet  = new HashSet<string>(targetKeys, StringComparer.OrdinalIgnoreCase);
         var ceiling    = DocTypeInferrer.TierCeiling(tier);
         var candidates = new List<BeliefCandidate>();
         var seen       = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -102,9 +126,9 @@ public sealed class DocumentBeliefExtractor
             if (string.IsNullOrWhiteSpace(criterion))
                 continue;
 
-            // Only catalogue-known, in-scope criteria — everything else is dropped even if
-            // the model returns a well-formed object for it.
-            if (!BeliefExtractionPrompt.TargetCriteria.Contains(criterion))
+            // Only catalogue-known, in-scope criteria for THIS document's schema — everything
+            // else is dropped even if the model returns a well-formed object for it.
+            if (!targetSet.Contains(criterion))
                 continue;
             if (!_profile.ClaimKeyCatalogue.TryGetValue(criterion, out var ckDef))
                 continue;
@@ -164,6 +188,17 @@ public sealed class DocumentBeliefExtractor
                 ContainsNonCustomerQualityLanguage(evidence!))
                 continue;
 
+            // E1 Part 7 Step 3 — annual_value periodicity guard (the deferred fix from
+            // KYV_KNOWN_GAPS.md's IIVS investigation): the invoice extraction schema now asks
+            // about invoice_amount instead of annual_value, which fixes the confusion at the
+            // root for documents classified as invoices. This is defense-in-depth for any other
+            // document type still asking about annual_value — a milestone/one-time payment line
+            // (e.g. an invoice table embedded in a non-invoice-classified document) never becomes
+            // an annual_value belief, regardless of what the model returned.
+            if (string.Equals(criterion, "annual_value", StringComparison.OrdinalIgnoreCase) &&
+                ContainsMilestoneLanguage(evidence!))
+                continue;
+
             var rawConf = fact.TryGetProperty("confidence", out var cf) && cf.ValueKind == JsonValueKind.Number
                 ? cf.GetDouble()
                 : result.Confidence;
@@ -207,6 +242,18 @@ public sealed class DocumentBeliefExtractor
 
     private static bool ContainsNonCustomerQualityLanguage(string evidence) =>
         NonCustomerQualityLanguage.Any(kw => evidence.Contains(kw, StringComparison.OrdinalIgnoreCase));
+
+    // ── annual_value periodicity/milestone guard ────────────────────────────────
+
+    // Narrow by design, matching the one proven real-document confusion (IIVS's per-engagement
+    // invoices: "Milestone M2 -- SOW-01" — see KYV_KNOWN_GAPS.md) — not a general "any dollar
+    // figure near billing language" filter, which would risk rejecting legitimate annual_value
+    // evidence phrased with adjacent invoice/billing context.
+    private static readonly string[] MilestoneLanguage =
+        ["milestone"];
+
+    private static bool ContainsMilestoneLanguage(string evidence) =>
+        MilestoneLanguage.Any(kw => evidence.Contains(kw, StringComparison.OrdinalIgnoreCase));
 
     // ── JSON helpers ───────────────────────────────────────────────────────────
 

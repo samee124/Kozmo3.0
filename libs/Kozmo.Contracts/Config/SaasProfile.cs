@@ -26,6 +26,17 @@ public sealed record SaasProfile(
 
     public IReadOnlyDictionary<string, IReadOnlyList<string>> ExpectedBeliefSets { get; init; } =
         new Dictionary<string, IReadOnlyList<string>>();
+
+    // E1 Part 7 Step 3 — document-type -> extraction-schema mapping (vendor file extension).
+    // DefaultExtractionKeys is the pre-E1 five-key set, used whenever a document's inferred type
+    // (DocTypeInferrer.InferDocType) has no entry in ExtractionSchemas. Empty when the config is
+    // absent (pre-migration profile) — DocumentBeliefExtractor falls back to
+    // BeliefExtractionPrompt.TargetCriteriaOrder in that case.
+    public IReadOnlyList<string> DefaultExtractionKeys { get; init; } =
+        Array.Empty<string>();
+
+    public IReadOnlyDictionary<string, IReadOnlyList<string>> ExtractionSchemas { get; init; } =
+        new Dictionary<string, IReadOnlyList<string>>();
 }
 
 public sealed record DimensionDefinition(
@@ -76,7 +87,22 @@ public sealed record ClaimKeyDefinition(
     string   TypicalTier,      // e.g. "VERIFIED"
     int?     HalfLifeDays,     // null = no decay (contractual)
     double   DimensionWeight   // 0.25 for equal-weighted; 0 for structural
-);
+)
+{
+    // E1 Part 7 Step 1 additions — extraction-prompt generation source (E1 Part 7 Step 2).
+    // Absent/empty for claim keys not yet migrated onto the extended schema.
+    public string  Definition          { get; init; } = "";
+    public string  PositiveExample     { get; init; } = "";
+    public string  NegativeExample     { get; init; } = "";
+    public string? DeterministicGuard  { get; init; }
+
+    // E1 Part 7 Step 2: the exact original BeliefExtractionPrompt.System wording for this key,
+    // byte-for-byte — not a paraphrase of Definition/PositiveExample/NegativeExample above. This
+    // is what BeliefExtractionPrompt.BuildSystem projects, so the generated prompt reproduces the
+    // hand-authored prompt exactly (same cassette cache keys, zero re-record risk). Empty for
+    // claim keys not projected into the extraction prompt.
+    public string PromptFragment { get; init; } = "";
+};
 
 public sealed record ClassificationRule(
     string SourceSystem,

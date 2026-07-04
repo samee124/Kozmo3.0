@@ -29,9 +29,10 @@ public sealed class Catalogue : ICatalogue
         var claimKeys    = TryLoadJson(dir, "claim_key_catalogue.saas.v1.json");
         var docTypeMap   = TryLoadJson(dir, "doc_type_tier_map.saas.v1.json");
         var expectedSets = TryLoadJson(dir, "expected_belief_sets.saas.v1.json");
+        var extractionSchemas = TryLoadJson(dir, "extraction_schemas.saas.v1.json");
 
         var profile = Assemble(dims, rubric, weights, bands, postures, tiers, classify, decay, entityRes,
-                               claimKeys, docTypeMap, expectedSets);
+                               claimKeys, docTypeMap, expectedSets, extractionSchemas);
         Validate(profile);
         return profile;
     }
@@ -57,7 +58,7 @@ public sealed class Catalogue : ICatalogue
     private static SaasProfile Assemble(
         JsonObject dims, JsonObject rubric, JsonObject weights, JsonObject bands,
         JsonObject postures, JsonObject tiers, JsonObject classify, JsonObject decay, JsonObject entityRes,
-        JsonObject? claimKeys, JsonObject? docTypeMap, JsonObject? expectedSets)
+        JsonObject? claimKeys, JsonObject? docTypeMap, JsonObject? expectedSets, JsonObject? extractionSchemas)
     {
         var version = weights["version"]?.GetValue<string>() ?? "unknown";
 
@@ -184,7 +185,14 @@ public sealed class Catalogue : ICatalogue
                     Dimension:      ck["dimension"]?.GetValue<string>() ?? "",
                     TypicalTier:    ck["typical_tier"]?.GetValue<string>() ?? "",
                     HalfLifeDays:   hld,
-                    DimensionWeight: ck["dimension_weight"]?.GetValue<double>() ?? 0.0);
+                    DimensionWeight: ck["dimension_weight"]?.GetValue<double>() ?? 0.0)
+                {
+                    Definition         = ck["definition"]?.GetValue<string>() ?? "",
+                    PositiveExample    = ck["positive_example"]?.GetValue<string>() ?? "",
+                    NegativeExample    = ck["negative_example"]?.GetValue<string>() ?? "",
+                    DeterministicGuard = ck["deterministic_guard"]?.GetValue<string>(),
+                    PromptFragment     = ck["prompt_fragment"]?.GetValue<string>() ?? ""
+                };
             }
         }
 
@@ -206,6 +214,24 @@ public sealed class Catalogue : ICatalogue
                 expectedBeliefSets[kv.Key] = keys;
             }
 
+        // Document-type -> extraction-schema mapping (vendor file extension, E1 Part 7 Step 3)
+        var defaultExtractionKeys = new List<string>();
+        var extractionSchemaMap   = new Dictionary<string, IReadOnlyList<string>>();
+        if (extractionSchemas != null)
+        {
+            defaultExtractionKeys = extractionSchemas["default_claim_keys"]!.AsArray()
+                .Select(x => x!.GetValue<string>())
+                .ToList();
+
+            foreach (var kv in extractionSchemas["doc_type_schemas"]!.AsObject())
+            {
+                var keys = kv.Value!.AsArray()
+                    .Select(x => x!.GetValue<string>())
+                    .ToList();
+                extractionSchemaMap[kv.Key] = keys;
+            }
+        }
+
         return new SaasProfile(
             ConfigVersion:       $"saas.{version}",
             Dimensions:          dimDefs,
@@ -218,9 +244,11 @@ public sealed class Catalogue : ICatalogue
             HalfLifeDays:        halfLifeMap,
             EntityResolution:    erConfig)
         {
-            ClaimKeyCatalogue  = claimKeyDefs,
-            DocTypeTierMap     = docTypeTierMap,
-            ExpectedBeliefSets = expectedBeliefSets
+            ClaimKeyCatalogue    = claimKeyDefs,
+            DocTypeTierMap       = docTypeTierMap,
+            ExpectedBeliefSets   = expectedBeliefSets,
+            DefaultExtractionKeys = defaultExtractionKeys,
+            ExtractionSchemas    = extractionSchemaMap
         };
     }
 

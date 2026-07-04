@@ -45,4 +45,22 @@ public static class DocTypeInferrer
         SourceTier.Unverified => 0.40,
         _                     => 0.80,
     };
+
+    /// <summary>
+    /// E1 Part 7 Step 3: infers a document TYPE (distinct from tier) from filename, used to select
+    /// an extraction schema (SaasProfile.ExtractionSchemas). Narrow by design — only the types
+    /// wired to a distinct schema so far. Anything else returns "" (unclassified), which
+    /// DocumentBeliefExtractor maps to the default (pre-E1) five-key schema — never a code change
+    /// to extend, always a catalogue-config change (a new doc_type_schemas entry).
+    /// </summary>
+    public static string InferDocType(string fileName)
+    {
+        var f = Path.GetFileNameWithoutExtension(fileName).ToLowerInvariant().Replace('_', ' ');
+
+        if (f.Contains("invoice"))                                  return "invoice";
+        if (f.Contains("msa") || f.Contains("master service"))      return "msa";
+        if (f.Contains("order form") || f.Contains("orderform"))    return "order_form";
+
+        return "";
+    }
 }

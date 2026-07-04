@@ -34,7 +34,10 @@ public sealed class VendorFileTests
         Assert.True(profile.ClaimKeyCatalogue.ContainsKey("sla_uptime"));
         Assert.True(profile.ClaimKeyCatalogue.ContainsKey("annual_value"));
         Assert.True(profile.ClaimKeyCatalogue.ContainsKey("renewal_date"));
-        Assert.Equal(14, profile.ClaimKeyCatalogue.Count);
+        // 15, not 14: E1 Part 7 Step 3 adds invoice_amount (invoices extract this instead of
+        // annual_value) — a deliberate catalogue growth, not drift.
+        Assert.True(profile.ClaimKeyCatalogue.ContainsKey("invoice_amount"));
+        Assert.Equal(15, profile.ClaimKeyCatalogue.Count);
     }
 
     [Fact, Trait("Category", "VendorFile")]

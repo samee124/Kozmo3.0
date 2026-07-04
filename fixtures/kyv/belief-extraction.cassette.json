@@ -2268,5 +2268,65 @@
     "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:214500,\u0022evidence\u0022:\u0022Annual Subscription Fee: $214,500.00 per year.\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Invoices are due and payable within thirty (30) days of the invoice date (Net 30)\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the annual subscription fee and the payment terms.\u0022}",
     "confidence": 0.85,
     "reasoningSummary": ""
+  },
+  "75bb2111fc473b777f39a932a12c46caa07bc7f6560bf5736a087c66d5d4350a": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms 14 Aug 2022 Net 30\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022invoice_amount\u0022,\u0022value\u0022:33600,\u0022evidence\u0022:\u0022TOTAL DUE $33,600.00\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total invoice amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "323479c56c387f852b88d70f445e726ffeef2df317bc6ff75b1980c3c1be5908": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms 31 Aug 2022 Net 30\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022invoice_amount\u0022,\u0022value\u0022:12600,\u0022evidence\u0022:\u0022TOTAL DUE $12,600.00\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total invoice amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "92d7bab9ab629169f1fb154ead140ae9e308279d792297ae371fdc91606c95c9": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms 15 Oct 2022 Net 30\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022invoice_amount\u0022,\u0022value\u0022:17100,\u0022evidence\u0022:\u0022TOTAL DUE $17,100.00\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total invoice amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "20fedbc26b7fb8e4b71de08d9a0f874f7a19efe46fc5347194cd5c985eb3e2db": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms 31 May 2023 Net 30\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022invoice_amount\u0022,\u0022value\u0022:39200,\u0022evidence\u0022:\u0022TOTAL DUE $39,200.00\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total invoice amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "fa5d933be139049c3e69795f2fe85262ee6355130b4e31b9cb7768d3a5ab4649": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms 15 Jul 2023 Net 30\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022invoice_amount\u0022,\u0022value\u0022:34700,\u0022evidence\u0022:\u0022TOTAL DUE $34,700.00\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total invoice amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "37250e8f9d1e3db5f3cec837fbf4eea52b70b98fb6b0b612cc5fa2368cfab73a": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms 31 Aug 2023 Net 30\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022invoice_amount\u0022,\u0022value\u0022:18100,\u0022evidence\u0022:\u0022TOTAL DUE $18,100.00\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total invoice amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "7921a373296fd58b9ba30f4691fe81b00aa2d93c3e41b318d499f6936d9b1ea2": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:45,\u0022evidence\u0022:\u0022Payment Terms: Net 45 days\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022invoice_amount\u0022,\u0022value\u0022:34400,\u0022evidence\u0022:\u0022TOTAL DUE $34,400.00\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total invoice amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "5be7fca87ee178280b42cd19570bb683181a33673da9a1f62c0007bd81a41896": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:45,\u0022evidence\u0022:\u0022Payment Terms: Net 45 days\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022invoice_amount\u0022,\u0022value\u0022:22320,\u0022evidence\u0022:\u0022TOTAL DUE $22,320.00\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total invoice amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "66d5f0358997a9fba239e13d288081b674e49c076e549d6afa9c1399b3645572": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:45,\u0022evidence\u0022:\u0022Payment Terms: Net 45 days\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022invoice_amount\u0022,\u0022value\u0022:39850,\u0022evidence\u0022:\u0022TOTAL DUE $39,850.00\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022renewal_date\u0022,\u0022value\u0022:\u00222023-08-14\u0022,\u0022evidence\u0022:\u0022Due Date: 14 August 2023\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms, total invoice amount, and due date.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "effcfd8dca6692b2b58bcd09877d7f16c0283e2d4b01bd2ce5eda13b3ec19d67": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:45,\u0022evidence\u0022:\u0022Payment Terms: Net 45 days\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022invoice_amount\u0022,\u0022value\u0022:38000,\u0022evidence\u0022:\u0022TOTAL DUE $38,000.00\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total invoice amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "df1faf1c14662ee4a203050d856b8bc55fd484022cd357c0a58fb4fa91310c9c": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:45,\u0022evidence\u0022:\u0022Payment Terms: Net 45 days\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022invoice_amount\u0022,\u0022value\u0022:55000,\u0022evidence\u0022:\u0022TOTAL DUE $55,000.00\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total invoice amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "79ff7df05a16988d3b281a52ac5b115d59f20680e8c20fdd2234d62fd6debbd1": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:45,\u0022evidence\u0022:\u0022Payment Terms: Net 45 days\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022invoice_amount\u0022,\u0022value\u0022:36750,\u0022evidence\u0022:\u0022TOTAL DUE $36,750.00\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The document explicitly states the payment terms and the total invoice amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
   }
 }
