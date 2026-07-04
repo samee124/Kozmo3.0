@@ -71,12 +71,16 @@ public sealed class AnsweringStageTests
     [Fact]
     public async Task Grounded_answer_preserves_cited_belief_ids()
     {
+        // cited_belief_ids now carries a small ordinal (see AnsweringPrompt.SerializeBeliefs),
+        // not the belief's real Guid — a single-belief list makes that ordinal unambiguously "1"
+        // without needing to hand-sort a larger fixture by (Criterion, Derivation) to predict it.
         var beliefId = Guid.Parse("b1000001-0000-0000-0000-000000000001");
-        var json = $$"""
+        var belief   = FixtureBeliefs.Iivs.Single(b => b.Id == beliefId);
+        var json = """
             {
               "answer": "YES",
               "confidence": 0.90,
-              "cited_belief_ids": ["{{beliefId}}"],
+              "cited_belief_ids": ["1"],
               "reasoning": "MSA Section 3.1 documents a 99.9% uptime SLA."
             }
             """;
@@ -85,7 +89,7 @@ public sealed class AnsweringStageTests
         var q     = L1Questions.First(q => q.Dimension == Dimension.Operational);
 
         var answers = await stage.AnswerAsync(
-            Guid.NewGuid(), [q], FixtureBeliefs.Iivs, AnchorNow);
+            Guid.NewGuid(), [q], [belief], AnchorNow);
 
         var answer = Assert.Single(answers);
         Assert.Equal("YES", answer.Value.ToUpperInvariant());

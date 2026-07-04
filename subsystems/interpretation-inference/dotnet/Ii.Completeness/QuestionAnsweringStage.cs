@@ -50,13 +50,19 @@ public sealed class QuestionAnsweringStage
         var ordered = questions.OrderBy(q => q.Id, StringComparer.Ordinal).ToList();
         var answers = new List<Answer>(ordered.Count);
 
+        // Same ordering AnsweringPrompt.SerializeBeliefs uses internally — the ordinal labels
+        // shown to the LLM and this map must agree, or citations resolve to the wrong belief.
+        var ordinalToId = AnsweringPrompt.OrderForPrompt(beliefs)
+            .Select((b, i) => (Ordinal: i + 1, b.Id))
+            .ToDictionary(x => x.Ordinal, x => x.Id);
+
         foreach (var q in ordered)
         {
             var user   = AnsweringPrompt.User(q, beliefs, _profile);
             var result = await _llm.CompleteJsonAsync(
                 AnsweringPrompt.System, user, AnsweringPrompt.MaxTokens, ct);
 
-            answers.Add(ParseAnswer(result, q.Id, vendorId, now));
+            answers.Add(ParseAnswer(result, q.Id, vendorId, now, ordinalToId));
         }
 
         return answers.AsReadOnly();
@@ -66,10 +72,11 @@ public sealed class QuestionAnsweringStage
     // Any parse failure → UNKNOWN / 0.10 so a malformed response is treated as a gap,
     // never as a crash or a fabricated answer.
     private static Answer ParseAnswer(
-        LlmResult      result,
-        string         questionId,
-        Guid           vendorId,
-        DateTimeOffset now)
+        LlmResult                     result,
+        string                        questionId,
+        Guid                          vendorId,
+        DateTimeOffset                now,
+        IReadOnlyDictionary<int, Guid> ordinalToId)
     {
         const double UnknownConfidence = 0.10;
 
@@ -84,7 +91,7 @@ public sealed class QuestionAnsweringStage
         if (value.Equals("UNKNOWN", StringComparison.OrdinalIgnoreCase))
             confidence = Math.Min(confidence, 0.30);
 
-        var citedIds = ParseCitedIds(root);
+        var citedIds = ParseCitedIds(root, ordinalToId);
 
         return new Answer(questionId, value, confidence)
         {
@@ -104,7 +111,12 @@ public sealed class QuestionAnsweringStage
             AnsweredAt     = now,
         };
 
-    private static IReadOnlyList<Guid> ParseCitedIds(JsonElement root)
+    // Cited ids are small 1-based ordinals now (see AnsweringPrompt.SerializeBeliefs), not real
+    // belief Guids — the model may return them as a JSON string ("2") or a bare number (2);
+    // both are accepted. An ordinal outside the range that was actually offered in the prompt
+    // is silently dropped, same discipline as the old GUID-parse failure path: a malformed or
+    // hallucinated citation degrades the citation list, never the run.
+    private static IReadOnlyList<Guid> ParseCitedIds(JsonElement root, IReadOnlyDictionary<int, Guid> ordinalToId)
     {
         if (!root.TryGetProperty("cited_belief_ids", out var arr) ||
             arr.ValueKind != JsonValueKind.Array)
@@ -113,8 +125,14 @@ public sealed class QuestionAnsweringStage
         var ids = new List<Guid>();
         foreach (var el in arr.EnumerateArray())
         {
-            var s = el.ValueKind == JsonValueKind.String ? el.GetString() : null;
-            if (s != null && Guid.TryParse(s, out var id))
+            int? ordinal = el.ValueKind switch
+            {
+                JsonValueKind.Number when el.TryGetInt32(out var n)              => n,
+                JsonValueKind.String when int.TryParse(el.GetString(), out var n) => n,
+                _                                                                 => null,
+            };
+
+            if (ordinal.HasValue && ordinalToId.TryGetValue(ordinal.Value, out var id))
                 ids.Add(id);
         }
         return ids.AsReadOnly();

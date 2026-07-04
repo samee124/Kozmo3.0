@@ -60,14 +60,31 @@ public static class AnsweringPrompt
             beliefJson;
     }
 
+    /// <summary>
+    /// Deterministic prompt order for a belief list — sorted by Criterion then Derivation, the
+    /// same ordering <c>RealVendorBeliefFixture</c> already used to remap ids for cassette
+    /// stability. Promoted here so the ordinal labels in <see cref="SerializeBeliefs"/> and the
+    /// ordinal→real-id map <see cref="QuestionAnsweringStage"/> builds for citation translation
+    /// are guaranteed to agree — both are computed by calling this same method.
+    /// </summary>
+    public static IReadOnlyList<Belief> OrderForPrompt(IReadOnlyList<Belief> beliefs) =>
+        beliefs
+            .OrderBy(b => b.Criterion,  StringComparer.OrdinalIgnoreCase)
+            .ThenBy(b => b.Derivation,  StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
     // Stable, minimal JSON — only the fields the LLM needs to reason and cite.
-    // Sorted by Id for determinism; uses string enums for readability.
+    // "Id" is a small 1-based ORDINAL, not the real belief.Id — belief.Id is Guid.NewGuid() at
+    // persistence time, so embedding it here made every genuine run's prompt (and therefore its
+    // cassette key) different from every other run, even for byte-identical evidence. The
+    // ordinal is stable across runs for the same belief set (OrderForPrompt is deterministic),
+    // so the SAME evidence always produces the SAME prompt regardless of the random ids beneath
+    // it. QuestionAnsweringStage translates cited ordinals back to real belief ids afterward.
     internal static string SerializeBeliefs(IReadOnlyList<Belief> beliefs, SaasProfile? profile = null)
     {
-        var items = beliefs
-            .OrderBy(b => b.Id)
-            .Select(b => new BeliefView(
-                b.Id.ToString(),
+        var items = OrderForPrompt(beliefs)
+            .Select((b, i) => new BeliefView(
+                (i + 1).ToString(),
                 b.Dimension?.ToString() ?? "Unknown",
                 b.Criterion,
                 b.SourceTier.ToString(),

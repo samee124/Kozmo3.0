@@ -79,11 +79,12 @@ public sealed class SalesforceOrderFormCompletenessProofTests
 
         var contractExistence = answers.Single(a => a.QuestionId == "saas.fin.l1.1");
         Assert.Equal("YES", contractExistence.Value, ignoreCase: true);
-        // Known gap (KYV_KNOWN_GAPS.md): the model's citation list for this answer contained
-        // malformed GUIDs that failed Guid.TryParse and were silently dropped by the parser — the
-        // answer is grounded (confidence 1.0, reasoning cites both facts) but carries no visible
-        // citation. Pinning the observed behavior rather than papering over it.
-        Assert.Empty(contractExistence.CitedBeliefIds);
+        // Previously a known gap (KYV_KNOWN_GAPS.md): the model cited malformed GUIDs here that
+        // failed Guid.TryParse and were silently dropped. Fixed as a side effect of the belief-id
+        // ordinal stability fix — citations are now small integers ("1", "2"), far less prone to
+        // being mangled than a 36-character GUID, and this answer now resolves both real ids.
+        Assert.Contains(annualValue.Id, contractExistence.CitedBeliefIds);
+        Assert.Contains(paymentTerms.Id, contractExistence.CitedBeliefIds);
 
         var annualValueAnswer = answers.Single(a => a.QuestionId == "saas.fin.l1.2");
         Assert.Equal("214500", annualValueAnswer.Value);
