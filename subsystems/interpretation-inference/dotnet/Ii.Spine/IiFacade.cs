@@ -199,8 +199,26 @@ public sealed class IiFacade : IIiFacade
         var mgmt     = ComputeManagementBlock(entityId, decayed, allBeliefs, scores, meta);
 
         // Phase 5: Q&A completeness convergence — synchronous, in the same recompute pass.
+        // Production's completeness LLM is always replay-only (no live network in the demo
+        // runtime path), so a belief combination that was never pre-recorded hits a cache miss.
+        // CompletenessOrchestrator/QuestionAnsweringStage do not catch that internally, so without
+        // a guard here it would propagate out of RecomputeVendorAsync and take down every caller —
+        // the vendor-file page, the check-in answer flow, all of them (see IIiFacade.cs callers).
+        // Mirrors KyvProgramRunner stage 8's per-vendor containment: a completeness failure here
+        // degrades to "no completeness update this cycle," not a failed recompute. The index,
+        // posture, meta, and management block above are already computed and remain valid.
         if (_completeness != null)
-            await _completeness.RunAsync(entityId, allBeliefs, now, ct);
+        {
+            try
+            {
+                await _completeness.RunAsync(entityId, allBeliefs, now, ct);
+            }
+            catch (Exception)
+            {
+                // This recompute's completeness convergence is skipped — the caller still gets a
+                // fully-formed VendorJudgement from the index/posture/meta/mgmt already computed.
+            }
+        }
 
         return new VendorJudgement(index, posture, meta, mgmt);
     }
@@ -354,7 +372,7 @@ public sealed class IiFacade : IIiFacade
             if (anch.Confidence > orig.Confidence + 1e-6)
                 anchorNotes.Add(
                     $"{anch.Dimension}/{anch.Criterion}: confidence anchored " +
-                    $"{orig.Confidence:F3}\u2192{anch.Confidence:F3} " +
+                    $"{orig.Confidence:F3}→{anch.Confidence:F3} " +
                     $"(floor from prior {orig.SourceTier} belief)");
         }
 
