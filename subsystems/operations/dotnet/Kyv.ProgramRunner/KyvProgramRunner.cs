@@ -9,6 +9,7 @@ using Ii.Observation;
 using Ii.Posture;
 using Ii.Rubric;
 using Ii.Spine;
+using Km.Store.Metadata;
 using Kozmo.Contracts.Config;
 using Kozmo.Contracts.Interfaces;
 using Kozmo.Llm;
@@ -28,7 +29,10 @@ namespace Kyv.ProgramRunner;
 ///                        annotate → disposition → persist to registry (RegistryWriter)
 ///   6 persist_beliefs  — correlate doc-scoped BeliefCandidates to the resolved vendor via the
 ///                        same ClusterId &lt;- DocId path RegistryWriter.Build() uses, persist via
-///                        BeliefPersistenceStage (Commit 2)
+///                        BeliefPersistenceStage (Commit 2); also persists doc-scoped
+///                        MetadataCandidates via MetadataPersistenceStage when a metadata store is
+///                        supplied (E1 Part 7 Step 5) — same correlation, routed to Km.Store.Metadata
+///                        instead of IEntityStore, never scored, never read by scoring assemblies
 ///   7 raise_checkins   — identity + provisional-vendor gap check-ins
 ///   8 completeness_init — Q&amp;A completeness convergence per resolved vendor (direct
 ///                        CompletenessOrchestrator call — see stage 9's doc comment for why this
@@ -50,6 +54,7 @@ public sealed class KyvProgramRunner
     private readonly IdentityGate                  _stageE;
     private readonly RegistryWriter                _stageF;
     private readonly BeliefPersistenceStage        _stageBeliefs;
+    private readonly MetadataPersistenceStage?     _stageMetadata;
     private readonly IEntityStore                  _entityStore;
     private readonly SaasProfile                   _profile;
     private readonly RaiseCheckInsStage            _raiseStage;
@@ -75,7 +80,8 @@ public sealed class KyvProgramRunner
         IKozmoLlm?                 beliefLlm     = null,
         string                     owner         = "kyv@kozmo",
         CompletenessOrchestrator?  completeness  = null,
-        EntityRegistry?            spineRegistry = null)
+        EntityRegistry?            spineRegistry = null,
+        IMetadataStore?            metadataStore = null)
     {
         _llm            = llm;
         // Identity extraction (DocumentCandidateExtractor) and belief extraction
@@ -90,6 +96,9 @@ public sealed class KyvProgramRunner
         _stageE         = new IdentityGate();
         _stageF         = new RegistryWriter(registry);
         _stageBeliefs   = new BeliefPersistenceStage(entityStore, profile);
+        // E1 Part 7 Step 5 — null when no caller supplies a metadata store (every existing
+        // caller today), so metadata extraction still runs but is simply not persisted anywhere.
+        _stageMetadata  = metadataStore is null ? null : new MetadataPersistenceStage(metadataStore);
         _entityStore    = entityStore;
         _profile        = profile;
         _raiseStage     = new RaiseCheckInsStage();
@@ -131,8 +140,9 @@ public sealed class KyvProgramRunner
         executions.Add(new(2, "classify",  now, classified.Count));
 
         // ── Stage 3+4: extract + filter (both inside DocumentCandidateExtractor)
-        var allCandidates       = new List<CandidateIdentityBelief>();
-        var factCandidatesByDoc = new List<(string DocId, IReadOnlyList<BeliefCandidate> Candidates)>();
+        var allCandidates           = new List<CandidateIdentityBelief>();
+        var factCandidatesByDoc     = new List<(string DocId, IReadOnlyList<BeliefCandidate> Candidates)>();
+        var metadataCandidatesByDoc = new List<(string DocId, IReadOnlyList<MetadataCandidate> Candidates)>();
         foreach (var (pdfPath, tier) in classified)
         {
             var bytes = File.ReadAllBytes(pdfPath);
@@ -179,17 +189,20 @@ public sealed class KyvProgramRunner
             var beliefs = await extractor.ExtractAsync(text, docId, tier, ct);
             allCandidates.AddRange(beliefs);
 
-            // Dimension-fact extraction (Commit 2 belief bridge). A cassette miss means this
-            // particular document has no recorded belief-extraction entry — treat as zero facts
-            // rather than failing the whole KYV run, same tolerance the OCR fallback above uses.
+            // Dimension-fact + metadata extraction (Commit 2 belief bridge; E1 Part 7 Step 5
+            // metadata). One LLM pass yields both. A cassette miss means this particular document
+            // has no recorded belief-extraction entry — treat as zero facts/metadata rather than
+            // failing the whole KYV run, same tolerance the OCR fallback above uses.
             try
             {
-                var facts = await beliefExtractor.ExtractAsync(text, docId, tier, ct);
-                factCandidatesByDoc.Add((docId, facts));
+                var extraction = await beliefExtractor.ExtractAsync(text, docId, tier, ct);
+                factCandidatesByDoc.Add((docId, extraction.Beliefs));
+                metadataCandidatesByDoc.Add((docId, extraction.Metadata));
             }
             catch (LlmCacheMissException)
             {
                 factCandidatesByDoc.Add((docId, Array.Empty<BeliefCandidate>()));
+                metadataCandidatesByDoc.Add((docId, Array.Empty<MetadataCandidate>()));
             }
         }
         executions.Add(new(3, "extract", now, allCandidates.Count));
@@ -227,6 +240,13 @@ public sealed class KyvProgramRunner
         var beliefsWritten = await _stageBeliefs.PersistAsync(
             factCandidatesByDoc, annotated, dispositions, now, ct);
         executions.Add(new(6, "persist_beliefs", now, beliefsWritten));
+
+        // Metadata persistence (E1 Part 7 Step 5) — same doc-scoped correlation, routed to
+        // Km.Store.Metadata instead of IEntityStore. Not a declared stage of its own (it is part
+        // of "persist" conceptually, not a new pipeline phase) — no-op when no metadata store was
+        // supplied to this runner.
+        if (_stageMetadata != null)
+            await _stageMetadata.PersistAsync(metadataCandidatesByDoc, annotated, dispositions, now, ct);
 
         // ── Stage 7: raise_checkins ────────────────────────────────────────────
         // Identity check-ins: raised automatically from Triage+PossibleSameEntity dispositions.

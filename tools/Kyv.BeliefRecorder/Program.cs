@@ -82,10 +82,11 @@ else
     baseLlm = new LoggingLlm(cachingLlm); // prints raw JSON before the filter
 }
 
-var extractor  = new DocumentBeliefExtractor(baseLlm, profile);
-var errorLog   = new List<string>();
-int processed  = 0;
-int totalFacts = 0;
+var extractor     = new DocumentBeliefExtractor(baseLlm, profile);
+var errorLog      = new List<string>();
+int processed     = 0;
+int totalFacts    = 0;
+int totalMetadata = 0;
 
 foreach (var textFile in allTexts)
 {
@@ -96,10 +97,13 @@ foreach (var textFile in allTexts)
 
     Console.WriteLine($"  ── {relPath}  [{tier}]");
 
-    IReadOnlyList<BeliefCandidate> facts;
+    IReadOnlyList<BeliefCandidate>   facts;
+    IReadOnlyList<MetadataCandidate> metadata;
     try
     {
-        facts = await extractor.ExtractAsync(text, fileName, tier);
+        var extraction = await extractor.ExtractAsync(text, fileName, tier);
+        facts    = extraction.Beliefs;
+        metadata = extraction.Metadata;
     }
     catch (LlmCacheMissException)
     {
@@ -130,13 +134,20 @@ foreach (var textFile in allTexts)
                 $"  dim={(f.Dimension.HasValue ? f.Dimension.ToString() : "(none)")}");
     }
 
-    totalFacts += facts.Count;
+    if (metadata.Count > 0)
+    {
+        foreach (var m in metadata)
+            Console.WriteLine($"  * {m.FieldName,-24} value={m.Value}");
+    }
+
+    totalFacts    += facts.Count;
+    totalMetadata += metadata.Count;
     processed++;
     Console.WriteLine();
 }
 
 Console.WriteLine(new string('═', 72));
-Console.WriteLine($"[belief-recorder] processed {processed}/{allTexts.Count} file(s), {totalFacts} fact(s) total");
+Console.WriteLine($"[belief-recorder] processed {processed}/{allTexts.Count} file(s), {totalFacts} fact(s), {totalMetadata} metadata field(s) total");
 if (!flags.Verify)
     Console.WriteLine($"[belief-recorder] cassette → {cassette}");
 

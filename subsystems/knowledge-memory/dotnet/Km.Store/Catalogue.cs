@@ -30,9 +30,10 @@ public sealed class Catalogue : ICatalogue
         var docTypeMap   = TryLoadJson(dir, "doc_type_tier_map.saas.v1.json");
         var expectedSets = TryLoadJson(dir, "expected_belief_sets.saas.v1.json");
         var extractionSchemas = TryLoadJson(dir, "extraction_schemas.saas.v1.json");
+        var metadataFields    = TryLoadJson(dir, "metadata_field_catalogue.saas.v1.json");
 
         var profile = Assemble(dims, rubric, weights, bands, postures, tiers, classify, decay, entityRes,
-                               claimKeys, docTypeMap, expectedSets, extractionSchemas);
+                               claimKeys, docTypeMap, expectedSets, extractionSchemas, metadataFields);
         Validate(profile);
         return profile;
     }
@@ -58,7 +59,8 @@ public sealed class Catalogue : ICatalogue
     private static SaasProfile Assemble(
         JsonObject dims, JsonObject rubric, JsonObject weights, JsonObject bands,
         JsonObject postures, JsonObject tiers, JsonObject classify, JsonObject decay, JsonObject entityRes,
-        JsonObject? claimKeys, JsonObject? docTypeMap, JsonObject? expectedSets, JsonObject? extractionSchemas)
+        JsonObject? claimKeys, JsonObject? docTypeMap, JsonObject? expectedSets, JsonObject? extractionSchemas,
+        JsonObject? metadataFields)
     {
         var version = weights["version"]?.GetValue<string>() ?? "unknown";
 
@@ -214,21 +216,29 @@ public sealed class Catalogue : ICatalogue
                 expectedBeliefSets[kv.Key] = keys;
             }
 
-        // Document-type -> extraction-schema mapping (vendor file extension, E1 Part 7 Step 3)
-        var defaultExtractionKeys = new List<string>();
-        var extractionSchemaMap   = new Dictionary<string, IReadOnlyList<string>>();
+        // Document-type -> extraction-schema mapping (vendor file extension, E1 Part 7 Step 3/5/6)
+        var defaultSchema       = new ExtractionSchema(Array.Empty<string>(), Array.Empty<MetadataFieldGroup>());
+        var extractionSchemaMap = new Dictionary<string, ExtractionSchema>();
         if (extractionSchemas != null)
         {
-            defaultExtractionKeys = extractionSchemas["default_claim_keys"]!.AsArray()
-                .Select(x => x!.GetValue<string>())
-                .ToList();
+            defaultSchema = ParseExtractionSchema(extractionSchemas["default"]!.AsObject());
 
             foreach (var kv in extractionSchemas["doc_type_schemas"]!.AsObject())
+                extractionSchemaMap[kv.Key] = ParseExtractionSchema(kv.Value!.AsObject());
+        }
+
+        // Metadata field catalogue (vendor file extension, E1 Part 7 Step 5)
+        var metadataFieldDefs = new Dictionary<string, MetadataFieldDefinition>();
+        if (metadataFields != null)
+        {
+            foreach (var kv in metadataFields["metadata_fields"]!.AsObject())
             {
-                var keys = kv.Value!.AsArray()
-                    .Select(x => x!.GetValue<string>())
-                    .ToList();
-                extractionSchemaMap[kv.Key] = keys;
+                var mf = kv.Value!.AsObject();
+                metadataFieldDefs[kv.Key] = new MetadataFieldDefinition(
+                    Definition:      mf["definition"]?.GetValue<string>() ?? "",
+                    PositiveExample: mf["positive_example"]?.GetValue<string>() ?? "",
+                    NegativeExample: mf["negative_example"]?.GetValue<string>() ?? "",
+                    PromptFragment:  mf["prompt_fragment"]?.GetValue<string>() ?? "");
             }
         }
 
@@ -244,12 +254,29 @@ public sealed class Catalogue : ICatalogue
             HalfLifeDays:        halfLifeMap,
             EntityResolution:    erConfig)
         {
-            ClaimKeyCatalogue    = claimKeyDefs,
-            DocTypeTierMap       = docTypeTierMap,
-            ExpectedBeliefSets   = expectedBeliefSets,
-            DefaultExtractionKeys = defaultExtractionKeys,
-            ExtractionSchemas    = extractionSchemaMap
+            ClaimKeyCatalogue      = claimKeyDefs,
+            DocTypeTierMap         = docTypeTierMap,
+            ExpectedBeliefSets     = expectedBeliefSets,
+            DefaultExtractionSchema = defaultSchema,
+            ExtractionSchemas      = extractionSchemaMap,
+            MetadataFieldCatalogue = metadataFieldDefs
         };
+    }
+
+    private static ExtractionSchema ParseExtractionSchema(JsonObject schemaObj)
+    {
+        var beliefKeys = schemaObj["claim_keys"]!.AsArray()
+            .Select(x => x!.GetValue<string>())
+            .ToList();
+        var metadataFieldGroups = schemaObj["metadata_field_groups"]!.AsArray()
+            .Select(g =>
+            {
+                var go = g!.AsObject();
+                var fields = go["fields"]!.AsArray().Select(x => x!.GetValue<string>()).ToList();
+                return new MetadataFieldGroup(go["name"]!.GetValue<string>(), fields);
+            })
+            .ToList();
+        return new ExtractionSchema(beliefKeys, metadataFieldGroups);
     }
 
     private static void Validate(SaasProfile p)

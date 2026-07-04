@@ -30,7 +30,7 @@ public sealed class PaymentTermsTerminationGuardTests
             """;
         var extractor = new DocumentBeliefExtractor(new FakeLlm(json), Profile);
 
-        var candidates = await extractor.ExtractAsync("irrelevant document text", "test.txt", SourceTier.Verified);
+        var candidates = (await extractor.ExtractAsync("irrelevant document text", "test.txt", SourceTier.Verified)).Beliefs;
 
         Assert.Empty(candidates);
     }
@@ -43,7 +43,7 @@ public sealed class PaymentTermsTerminationGuardTests
             """;
         var extractor = new DocumentBeliefExtractor(new FakeLlm(json), Profile);
 
-        var candidates = await extractor.ExtractAsync("irrelevant document text", "test.txt", SourceTier.Verified);
+        var candidates = (await extractor.ExtractAsync("irrelevant document text", "test.txt", SourceTier.Verified)).Beliefs;
 
         var candidate = Assert.Single(candidates);
         Assert.Equal("payment_terms", candidate.Criterion);

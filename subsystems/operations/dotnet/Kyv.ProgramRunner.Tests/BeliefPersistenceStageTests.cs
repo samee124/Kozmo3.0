@@ -43,7 +43,7 @@ public sealed class BeliefPersistenceStageTests
 
         // Real extraction — same call KyvProgramRunner.RunAsync makes during Stage 3.
         var extractor  = new DocumentBeliefExtractor(llm, profile);
-        var candidates = await extractor.ExtractAsync(text, MsaFileName, tier);
+        var candidates = (await extractor.ExtractAsync(text, MsaFileName, tier)).Beliefs;
 
         var slaCandidate = candidates.Single(c => c.Criterion == "sla_uptime");
         Assert.Equal(99.9, slaCandidate.Value, precision: 6); // sanity: extractor emits the raw magnitude

@@ -1,0 +1,115 @@
+{
+  "config_type": "metadata_field_catalogue",
+  "profile": "saas",
+  "version": "v1",
+  "metadata_fields": {
+    "termination_clause": {
+      "definition": "The conditions under which either party may terminate the agreement (for cause, for convenience, or upon a triggering event).",
+      "positive_example": "\"Either party may terminate this Agreement for material breach not cured within 30 days of written notice.\"",
+      "negative_example": "A plain expiration date or the initial contract duration is not a termination clause -- that is term_length. Do not extract a bare date here.",
+      "prompt_fragment": "- termination_clause: the conditions under which either party may terminate the agreement\n  (for cause, for convenience, or upon a triggering event). E.g. \"Either party may terminate\n  this Agreement for material breach not cured within 30 days of written notice.\" A plain\n  expiration date or the initial contract duration is NOT a termination clause -- that is\n  term_length, a different field this does not cover."
+    },
+    "notice_period": {
+      "definition": "The advance-notice window required for termination or non-renewal.",
+      "positive_example": "\"either party may terminate upon 90 days' prior written notice\"",
+      "negative_example": "An invoice due date or payment due period is not a notice_period.",
+      "prompt_fragment": "- notice_period: the advance-notice window required for termination or non-renewal (e.g.\n  \"either party may terminate upon 90 days' prior written notice\"). An invoice due date or\n  payment due period is NOT a notice_period -- that is a different, transactional fact this\n  field does not cover."
+    },
+    "liability_cap": {
+      "definition": "The maximum aggregate liability either party can be held to under the agreement.",
+      "positive_example": "\"Vendor's total liability shall not exceed the fees paid in the preceding 12 months.\"",
+      "negative_example": "An insurance policy's coverage limit is not the contract's liability cap unless the MSA itself states the cap.",
+      "prompt_fragment": "- liability_cap: the maximum aggregate liability either party can be held to under the\n  agreement (e.g. \"Vendor's total liability shall not exceed the fees paid in the preceding\n  12 months.\"). An insurance policy's coverage limit is NOT the contract's liability cap\n  unless the MSA itself states the cap -- that is insurance_requirements, a different field."
+    },
+    "indemnification": {
+      "definition": "Which party indemnifies the other, and for what (IP infringement, breach, third-party claims).",
+      "positive_example": "\"Vendor shall indemnify Customer against third-party claims arising from Vendor's breach of this Agreement.\"",
+      "negative_example": "A warranty of performance is not an indemnification obligation -- that is warranty_terms.",
+      "prompt_fragment": "- indemnification: which party indemnifies the other, and for what (IP infringement, breach,\n  third-party claims). E.g. \"Vendor shall indemnify Customer against third-party claims\n  arising from Vendor's breach of this Agreement.\" A warranty of performance is NOT an\n  indemnification obligation -- that is warranty_terms, a different field."
+    },
+    "governing_law": {
+      "definition": "Which jurisdiction's law governs the agreement.",
+      "positive_example": "\"This Agreement shall be governed by the laws of the State of Delaware.\"",
+      "negative_example": "The venue/mechanism for resolving a dispute (arbitration, litigation forum) is dispute_resolution, not governing_law -- extract each separately even when they appear in the same clause.",
+      "prompt_fragment": "- governing_law: which jurisdiction's law governs the agreement (e.g. \"This Agreement shall\n  be governed by the laws of the State of Delaware.\"). The venue or MECHANISM for resolving a\n  dispute (arbitration, litigation forum) is dispute_resolution, a different field -- extract\n  each separately even when they appear in the same sentence."
+    },
+    "data_processing_terms": {
+      "definition": "Data protection / privacy / data-processing-addendum obligations governing how customer data is handled.",
+      "positive_example": "\"Vendor shall process Customer Data solely in accordance with the Data Processing Addendum attached as Exhibit C.\"",
+      "negative_example": "A security certification (e.g. ISO 27001) mentioned only as a badge, with no data-handling obligation stated, is not data_processing_terms.",
+      "prompt_fragment": "- data_processing_terms: data protection / privacy / data-processing-addendum obligations\n  governing how customer data is handled. E.g. \"Vendor shall process Customer Data solely in\n  accordance with the Data Processing Addendum attached as Exhibit C.\" A security\n  certification mentioned only as a badge, with no data-handling obligation stated, does not\n  count -- omit it."
+    },
+    "warranty_terms": {
+      "definition": "Warranties the vendor makes about the service or product (performance, non-infringement, fitness for purpose).",
+      "positive_example": "\"Vendor warrants the Services will materially conform to the Documentation for the Term.\"",
+      "negative_example": "An indemnification obligation is not a warranty -- that is indemnification, a different field.",
+      "prompt_fragment": "- warranty_terms: warranties the vendor makes about the service or product (performance,\n  non-infringement, fitness for purpose). E.g. \"Vendor warrants the Services will materially\n  conform to the Documentation for the Term.\" An indemnification obligation is NOT a\n  warranty -- that is indemnification, a different field."
+    },
+    "confidentiality": {
+      "definition": "Confidentiality/NDA obligations, including any stated survival period or exceptions.",
+      "positive_example": "\"Each party shall keep the other's Confidential Information confidential for 5 years following disclosure.\"",
+      "negative_example": "A data-processing/privacy obligation about customer data is data_processing_terms, not confidentiality, even though both involve protecting information.",
+      "prompt_fragment": "- confidentiality: confidentiality/NDA obligations, including any stated survival period or\n  exceptions. E.g. \"Each party shall keep the other's Confidential Information confidential\n  for 5 years following disclosure.\" A data-processing/privacy obligation about CUSTOMER DATA\n  is data_processing_terms, a different field, even though both involve protecting information."
+    },
+    "ip_terms": {
+      "definition": "Intellectual property ownership or license terms -- who owns work product, what license is granted.",
+      "positive_example": "\"All right, title, and interest in the Deliverables shall vest in Customer upon full payment.\"",
+      "negative_example": "A confidentiality obligation about trade secrets is confidentiality, not ip_terms, unless ownership or licensing of IP is explicitly addressed.",
+      "prompt_fragment": "- ip_terms: intellectual property ownership or license terms -- who owns work product, what\n  license is granted. E.g. \"All right, title, and interest in the Deliverables shall vest in\n  Customer upon full payment.\" A confidentiality obligation about trade secrets is\n  confidentiality, a different field, unless ownership or licensing of IP is explicitly stated."
+    },
+    "dispute_resolution": {
+      "definition": "The mechanism and venue for resolving disputes -- arbitration, mediation, or litigation forum.",
+      "positive_example": "\"Any dispute arising under this Agreement shall be resolved by binding arbitration in New York, NY.\"",
+      "negative_example": "Which jurisdiction's substantive law applies is governing_law, not dispute_resolution -- extract each separately even when they appear in the same sentence.",
+      "prompt_fragment": "- dispute_resolution: the mechanism and venue for resolving disputes -- arbitration,\n  mediation, or litigation forum. E.g. \"Any dispute arising under this Agreement shall be\n  resolved by binding arbitration in New York, NY.\" Which jurisdiction's substantive LAW\n  applies is governing_law, a different field -- extract each separately even when they\n  appear in the same sentence."
+    },
+    "auto_renewal_terms": {
+      "definition": "The terms of an automatic-renewal clause -- the renewal period length and the non-renewal notice requirement, as stated.",
+      "positive_example": "\"This Agreement automatically renews for successive one-year terms unless either party provides 60 days' written notice of non-renewal.\"",
+      "negative_example": "A specific calendar renewal date is a different, scored fact (renewal_date) -- this field captures the RULE, not a concrete date.",
+      "prompt_fragment": "- auto_renewal_terms: the terms of an automatic-renewal clause -- the renewal period length\n  and the non-renewal notice requirement, as stated. E.g. \"This Agreement automatically\n  renews for successive one-year terms unless either party provides 60 days' written notice\n  of non-renewal.\" A specific calendar renewal date is a different, separately-scored fact --\n  this field captures the RULE, not a concrete date."
+    },
+    "sla_definition": {
+      "definition": "The free-text description of what the SLA commitment covers -- measurement method, exclusions, or credit schedule.",
+      "positive_example": "\"Uptime is measured monthly, excluding scheduled maintenance windows of up to 4 hours per month.\"",
+      "negative_example": "The numeric uptime percentage itself is a different, separately-scored fact -- this field captures how the commitment is DEFINED, not the percentage figure.",
+      "prompt_fragment": "- sla_definition: the free-text description of what the SLA commitment covers -- measurement\n  method, exclusions, or credit schedule. E.g. \"Uptime is measured monthly, excluding\n  scheduled maintenance windows of up to 4 hours per month.\" The numeric uptime percentage\n  itself is a different, separately-scored fact -- this field captures how the commitment is\n  DEFINED, not the percentage figure."
+    },
+    "term_length": {
+      "definition": "The INITIAL contract term duration.",
+      "positive_example": "\"This Agreement shall commence on the Effective Date and continue for an initial term of 36 months.\"",
+      "negative_example": "The auto-renewal rule or a specific renewal calendar date are different fields (auto_renewal_terms, renewal_date) -- this field is the initial term only.",
+      "prompt_fragment": "- term_length: the INITIAL contract term duration (e.g. \"This Agreement shall commence on\n  the Effective Date and continue for an initial term of 36 months.\"). The auto-renewal rule\n  or a specific renewal calendar date are different fields -- this is the initial term only."
+    },
+    "assignment_clause": {
+      "definition": "Whether and how the agreement may be assigned or transferred to a third party.",
+      "positive_example": "\"Neither party may assign this Agreement without the other's prior written consent, except to a successor in a merger or acquisition.\"",
+      "negative_example": "A change-of-control provision unrelated to assignment rights is not this field unless assignment itself is addressed.",
+      "prompt_fragment": "- assignment_clause: whether and how the agreement may be assigned or transferred to a third\n  party. E.g. \"Neither party may assign this Agreement without the other's prior written\n  consent, except to a successor in a merger or acquisition.\""
+    },
+    "force_majeure": {
+      "definition": "The force majeure clause excusing performance due to events outside a party's reasonable control.",
+      "positive_example": "\"Neither party shall be liable for delay caused by acts of God, war, or other events beyond its reasonable control.\"",
+      "negative_example": "A generic risk disclaimer unrelated to excusing non-performance is not force_majeure.",
+      "prompt_fragment": "- force_majeure: the force majeure clause excusing performance due to events outside a\n  party's reasonable control. E.g. \"Neither party shall be liable for delay caused by acts\n  of God, war, or other events beyond its reasonable control.\""
+    },
+    "audit_rights": {
+      "definition": "Whether and how a party may audit the other's compliance with the agreement (records, security controls).",
+      "positive_example": "\"Customer may audit Vendor's compliance with this Agreement no more than once per year upon 30 days' notice.\"",
+      "negative_example": "A third-party certification (e.g. ISO 27001) is not an audit right unless the MSA itself grants an audit privilege.",
+      "prompt_fragment": "- audit_rights: whether and how a party may audit the other's compliance with the agreement\n  (records, security controls). E.g. \"Customer may audit Vendor's compliance with this\n  Agreement no more than once per year upon 30 days' notice.\""
+    },
+    "insurance_requirements": {
+      "definition": "Insurance coverage the vendor is contractually required to carry under the MSA.",
+      "positive_example": "\"Vendor shall maintain commercial general liability insurance with limits of at least $2,000,000 per occurrence.\"",
+      "negative_example": "A separately-issued insurance certificate document's own coverage figures are not this field unless the MSA itself states the requirement.",
+      "prompt_fragment": "- insurance_requirements: insurance coverage the vendor is contractually required to carry\n  under the MSA. E.g. \"Vendor shall maintain commercial general liability insurance with\n  limits of at least $2,000,000 per occurrence.\""
+    },
+    "non_solicitation": {
+      "definition": "Restriction on soliciting the other party's employees or customers during and after the term.",
+      "positive_example": "\"Neither party shall solicit the other's employees for employment during the Term and for 12 months thereafter.\"",
+      "negative_example": "A general confidentiality obligation about personnel information is confidentiality, not non_solicitation, unless a solicitation restriction is explicitly stated.",
+      "prompt_fragment": "- non_solicitation: restriction on soliciting the other party's employees or customers\n  during and after the term. E.g. \"Neither party shall solicit the other's employees for\n  employment during the Term and for 12 months thereafter.\""
+    }
+  }
+}

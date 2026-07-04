@@ -84,7 +84,7 @@ public sealed class BeliefExtractionTests
 
         try
         {
-            return (await extractor.ExtractAsync(text, docId, tier)).ToList();
+            return (await extractor.ExtractAsync(text, docId, tier)).Beliefs.ToList();
         }
         catch (LlmCacheMissException)
         {

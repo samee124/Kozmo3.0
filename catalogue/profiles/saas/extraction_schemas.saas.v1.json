@@ -2,10 +2,39 @@
   "config_type": "extraction_schemas",
   "profile": "saas",
   "version": "v1",
-  "default_claim_keys": ["sla_uptime", "csat", "payment_terms", "renewal_date", "annual_value"],
+  "default": {
+    "claim_keys": ["sla_uptime", "csat", "payment_terms", "renewal_date", "annual_value"],
+    "metadata_field_groups": []
+  },
   "doc_type_schemas": {
-    "invoice": ["sla_uptime", "csat", "payment_terms", "renewal_date", "invoice_amount"],
-    "msa": ["sla_uptime", "csat", "payment_terms", "renewal_date", "annual_value"],
-    "order_form": ["sla_uptime", "csat", "payment_terms", "renewal_date", "annual_value"]
+    "invoice": {
+      "claim_keys": ["sla_uptime", "csat", "payment_terms", "renewal_date", "invoice_amount"],
+      "metadata_field_groups": []
+    },
+    "msa": {
+      "claim_keys": ["sla_uptime", "csat", "payment_terms", "renewal_date", "annual_value"],
+      "metadata_field_groups": [
+        {
+          "name": "commercial_terms",
+          "fields": ["liability_cap", "term_length", "auto_renewal_terms", "notice_period", "assignment_clause"]
+        },
+        {
+          "name": "risk_legal",
+          "fields": ["termination_clause", "indemnification", "governing_law", "dispute_resolution", "force_majeure"]
+        },
+        {
+          "name": "performance_compliance",
+          "fields": ["sla_definition", "data_processing_terms", "audit_rights", "warranty_terms"]
+        },
+        {
+          "name": "protective_terms",
+          "fields": ["insurance_requirements", "confidentiality", "ip_terms", "non_solicitation"]
+        }
+      ]
+    },
+    "order_form": {
+      "claim_keys": ["sla_uptime", "csat", "payment_terms", "renewal_date", "annual_value"],
+      "metadata_field_groups": []
+    }
   }
 }

@@ -30,7 +30,7 @@ public sealed class RenewalDateConversionTests
             """;
         var extractor = new DocumentBeliefExtractor(new FakeLlm(json), Profile);
 
-        var candidates = await extractor.ExtractAsync("irrelevant document text", "test.txt", SourceTier.Verified);
+        var candidates = (await extractor.ExtractAsync("irrelevant document text", "test.txt", SourceTier.Verified)).Beliefs;
 
         var renewal = Assert.Single(candidates);
         Assert.Equal("renewal_date", renewal.Criterion);
@@ -48,7 +48,7 @@ public sealed class RenewalDateConversionTests
             """;
         var extractor = new DocumentBeliefExtractor(new FakeLlm(json), Profile);
 
-        var candidates = await extractor.ExtractAsync("irrelevant document text", "test.txt", SourceTier.Verified);
+        var candidates = (await extractor.ExtractAsync("irrelevant document text", "test.txt", SourceTier.Verified)).Beliefs;
 
         Assert.Empty(candidates);
     }
@@ -61,7 +61,7 @@ public sealed class RenewalDateConversionTests
             """;
         var extractor = new DocumentBeliefExtractor(new FakeLlm(json), Profile);
 
-        var candidates = await extractor.ExtractAsync("irrelevant document text", "test.txt", SourceTier.Verified);
+        var candidates = (await extractor.ExtractAsync("irrelevant document text", "test.txt", SourceTier.Verified)).Beliefs;
 
         Assert.Empty(candidates);
     }
@@ -75,7 +75,7 @@ public sealed class RenewalDateConversionTests
             """;
         var extractor = new DocumentBeliefExtractor(new FakeLlm(json), Profile);
 
-        var candidates = await extractor.ExtractAsync("irrelevant document text", "test.txt", SourceTier.Verified);
+        var candidates = (await extractor.ExtractAsync("irrelevant document text", "test.txt", SourceTier.Verified)).Beliefs;
 
         var sla = Assert.Single(candidates);
         Assert.Equal(99.9, sla.Value, precision: 6);
