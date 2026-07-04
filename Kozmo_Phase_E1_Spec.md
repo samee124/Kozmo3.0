@@ -77,11 +77,11 @@ Examples:
 
 **This fixes the type-confusion at the root.** An invoice's amount is extracted as `invoice_amount` (a transaction fact), not `annual_value` (a contract fact). The IIVS per-invoice problem disappears because the invoice schema never produces an `annual_value` belief.
 
-**One extraction call per document**, projecting the type's schema into the prompt; beliefs and metadata come out of the same pass, routed to their respective stores.
+**One isolated belief call per document, plus one call per declared metadata field group** (revised in Part 7 Step 6 — see §5.4). A single combined pass asking about beliefs and all of a type's metadata fields at once does not scale past a handful of categories; belief extraction and metadata extraction are separate LLM calls, routed to their respective stores. A document type with no metadata groups declared (the common case) still makes exactly one call.
 
 ### 2.3 Metadata — a second store, with a hard wall
 
-**New structure** (`VendorKnowledge` / `DocumentMetadata`): structured fields per document type, keyed to vendor + document, retained and queryable by agents — and **never confidence-scored, never read by scoring** (`RubricModule`, `IndexModule`, `PostureModule`, completeness).
+**New structure** (`EntityKnowledge` / `DocumentMetadata`): structured fields per document type, keyed to entity + document, retained and queryable by agents — and **never confidence-scored, never read by scoring** (`RubricModule`, `IndexModule`, `PostureModule`, completeness). Named on the same `EntityId` convention as `Belief`/`EntityIndex`/`PostureAssignment` — the scored core is entity-generic; "vendor" is a label on top of it, not the model (confirmed by diagnosis before Part 7 Step 4 shipped).
 
 The metadata store is what lets extraction capture *a lot* while keeping the scored core *clean*. Thirty extracted clauses inform agent action; they do not become thirty low-confidence beliefs polluting a dimension score.
 
@@ -159,6 +159,18 @@ CI-enforced invariant lane. No scoring assembly references the metadata store. T
 ### 5.3 Cassette economics improve
 
 Type-specific prompts mean **prompt-per-schema**. A schema edit invalidates only *that schema's* cassette entries — strictly better isolation than today's single-prompt model, where any prompt edit invalidates every document's cache key. E1 makes re-records cheaper and more targeted, not more expensive.
+
+### 5.4 Metadata extraction is multi-pass, grouped ~4-5 fields per call
+
+**Finding (Part 7 Step 5→6, real-corpus proof):** asking about a document type's belief facts plus *all* of its metadata fields in one LLM call does not scale past a handful of categories. MSA's 18 metadata fields asked in one pass alongside the 5 belief facts gave **near-zero recall** — the real IIVS MSA (the richest document in the corpus, verified via keyword grep to state most of the 18 clause types) yielded **0** metadata fields, twice, even after fixing an unrelated document-truncation bug and adding a worked example to the prompt. The model was not failing to find the clauses; it was failing to hold 18+ categories in attention across one response.
+
+Splitting the same 18 fields into **4 groups of 4-5 thematically-related fields**, each extracted in its own isolated LLM call (metadata-only, no belief facts, no other groups' fields even mentioned), took the same document from 0 to **14/18 — verified complete recall** (the 4 "misses" were confirmed genuinely absent from the source text, not model failures). A diagnostic run with 3 groups (one accidentally sized at 8) showed the pattern precisely: a 5-field group hit 100% recall, an 8-field group hit 38% and missed fields present in the source text.
+
+**The rule going forward, for every document type's metadata depth work (invoice, PO, Order Form, and beyond):**
+- **Group size: ~4-5 fields per LLM call.** This is now a load-bearing design parameter, not a one-off MSA tuning choice — treat 8 as already too large based on direct evidence.
+- **Grouping lives in config** (`extraction_schemas.saas.v1.json`'s `metadata_field_groups`, `{name, fields}`), never in code — adding a document type's metadata depth is a catalogue change, matching every other E1 extension point.
+- **The belief pass stays a separate, isolated call**, never combined with any metadata group. This is not just a recall optimization — it structurally eliminates the composition-ripple risk (a metadata/schema change altering unrelated belief extraction) that surfaced twice independently (Part 7 Step 3's `renewal_date` misread on an invoice; Part 7 Step 5's combined-pass belief drift) before the calls were fully separated.
+- **Cost scales linearly with group count** (1 belief call + N group calls per document of that type), not with total field count — bounded and predictable, and it only applies to document types that declare metadata groups at all (everything else stays a single call, unaffected).
 
 ---
 

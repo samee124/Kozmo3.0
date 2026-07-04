@@ -309,6 +309,47 @@ invoice-awareness** — it should not offer a one-time invoice figure to answer 
 recurring annual figure, the same way `RubricModule` must never average a structural belief into a
 dimension score.
 
+## E1 Part 7 Step 5→6: metadata extraction is multi-pass, not one-pass — the attention wall
+
+Step 5 tried the obvious design: one LLM call per document, asking about the document type's
+belief facts AND all of its metadata fields together. For MSA (5 belief keys + 18 metadata
+fields), this gave **near-zero metadata recall** — the real IIVS MSA (the richest document in the
+corpus; a keyword grep against its source text confirmed most of the 18 clause types are
+genuinely stated) yielded **0 metadata fields**, twice, even after fixing an unrelated
+document-truncation bug (`MaxDocChars` was silently cutting the 41,000-character document off
+before reaching most of its clauses) and adding a worked example to the prompt disambiguating
+"facts" from "metadata". A real, separate regression also surfaced from the same combined prompt:
+an insurance policy limit got extracted as `annual_value` on the same document (fixed with a new
+`ContainsInsuranceOrLiabilityLanguage` guard, same pattern as `ContainsMilestoneLanguage`).
+
+**Diagnosis, not guesswork:** a targeted single-document experiment split the same 18 fields into
+3 ad hoc groups on the same document. A 5-field group hit **100% recall**; an 8-field group hit
+**38%** and missed fields present in the source text. This isolated the real cause — the model
+(GPT-4o-mini) cannot reliably hold ~18 simultaneous extraction categories in attention across one
+response, regardless of prompt wording, document truncation, or worked examples. It is not a
+recall/capability floor (the 100%-recall group proves the model finds this content just fine) —
+it is a **category-count-per-call** ceiling.
+
+**Step 6 fix — multi-pass, general, config-driven:** `DocumentBeliefExtractor` now makes one
+isolated belief call (unchanged, never combined with metadata — see `Kozmo_Phase_E1_Spec.md` §5.4)
+plus one call per metadata field **group** the document type declares in
+`extraction_schemas.saas.v1.json` (`metadata_field_groups`, ~4-5 fields each), unioning the
+results. MSA's 18 fields became 4 groups. Real-corpus result: IIVS went from 0 to **14/18** —
+verified complete recall, the 4 "misses" (`liability_cap`, `sla_definition`,
+`data_processing_terms`, `non_solicitation`) confirmed genuinely absent from the source text, not
+model failures. This is now the documented architecture and design parameter (`Kozmo_Phase_E1_Spec.md`
+§5.4) for every future document type's metadata depth work — invoice/PO/Order Form metadata is a
+catalogue change (declare their groups at ~4-5 fields each), not a new architecture.
+
+**Bonus, not the goal:** separating the belief call from metadata entirely also structurally
+closed the composition-ripple risk that surfaced independently twice — Step 3's invoice-schema
+change misreading an unrelated `renewal_date` on one document, and Step 5's combined prompt
+picking up two extra belief facts on IIVS/Regulus that Step 3's prompt never produced. With
+beliefs and metadata in permanently separate LLM calls, a metadata schema change cannot perturb
+belief extraction even in principle — proven, not just argued, by a full 152-document corpus diff
+showing zero belief-line differences after the Step 6 re-record (235 facts, byte-identical to the
+pre-Step-5 baseline).
+
 ### Two real, separable findings surfaced while investigating (not the phantom bug — queued for later)
 
 - **Golden gate has a matching gap.** `LlmStreamTests.L5_Cloudwave_WithLlmBelief_FingerprintPin`
