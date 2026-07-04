@@ -36,6 +36,25 @@ public sealed class RecomputeVendorAsyncCompletenessGuardTests
         var registry = new EntityRegistry();
         registry.Register(VendorId, "Acme Test Vendor, Inc.", renewalDate: null);
 
+        // Seed one real scored belief — RecomputeVendorAsync now returns null for a vendor with
+        // zero scored evidence (fix #4), which would short-circuit before ever reaching the
+        // completeness guard this test exists to prove.
+        await store.AppendBeliefAsync(new Belief(
+            Id:            Guid.NewGuid(),
+            EntityId:      VendorId,
+            Dimension:     Dimension.Operational,
+            Criterion:     "sla_uptime",
+            Value:         0.90,
+            SourceTier:    SourceTier.Verified,
+            Confidence:    0.90,
+            Freshness:     1.0,
+            Derivation:    "test-seed",
+            SourceSignals: [],
+            Version:       1,
+            SupersededBy:  null,
+            CreatedAt:     DateTimeOffset.UtcNow,
+            TraceId:       Guid.NewGuid()));
+
         var alwaysThrowLlm = new AlwaysThrowLlm();
         var completeness = new CompletenessOrchestrator(
             new QuestionAnsweringStage(alwaysThrowLlm, profile),

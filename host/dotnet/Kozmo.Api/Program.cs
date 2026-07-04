@@ -452,14 +452,23 @@ app.MapGet("/vendors/{id}/vendor-file/markdown", async (
     var allBeliefs    = await storeInst.GetBeliefHistoryAsync(guid);
     var evidence      = await storeInst.GetEvidenceForVendorAsync(guid);
 
-    var markdown = VendorFileRenderer.Render(
-        vendorId:      guid,
-        vendorName:    entity.CanonicalName,
-        asOf:          DemoClock.AsOf,
-        judgement:     judgement,
-        activeBeliefs: activeBeliefs,
-        allBeliefs:    allBeliefs,
-        evidence:      evidence);
+    // No dimension has any scored evidence yet — render identity + real belief evidence without
+    // a fabricated Band/Stance, rather than a verdict manufactured from zero evidence.
+    var markdown = judgement is null
+        ? VendorFileRenderer.RenderNotAssessed(
+            vendorId:      guid,
+            vendorName:    entity.CanonicalName,
+            asOf:          DemoClock.AsOf,
+            activeBeliefs: activeBeliefs,
+            evidence:      evidence)
+        : VendorFileRenderer.Render(
+            vendorId:      guid,
+            vendorName:    entity.CanonicalName,
+            asOf:          DemoClock.AsOf,
+            judgement:     judgement,
+            activeBeliefs: activeBeliefs,
+            allBeliefs:    allBeliefs,
+            evidence:      evidence);
 
     return Results.Content(markdown, "text/plain; charset=utf-8");
 });

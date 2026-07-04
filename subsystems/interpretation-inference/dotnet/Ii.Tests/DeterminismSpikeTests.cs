@@ -46,6 +46,8 @@ public sealed class DeterminismSpikeTests
 
         var idx1 = _idx.Aggregate(entityId, scores, beliefs, null, _profile, now);
         var idx2 = _idx.Aggregate(entityId, scores, beliefs, null, _profile, now);
+        Assert.NotNull(idx1);
+        Assert.NotNull(idx2);
 
         Assert.Equal(idx1.Fingerprint, idx2.Fingerprint);
         Assert.Equal(idx1.Composite,   idx2.Composite);
@@ -62,6 +64,7 @@ public sealed class DeterminismSpikeTests
         var beliefs3 = BuildBeliefs(entityId, now, skipDimension: Dimension.Strategic);
         var scores3  = ComputeAllScores(entityId, beliefs3, now);
         var initial  = _idx.Aggregate(entityId, scores3, beliefs3, null, _profile, now);
+        Assert.NotNull(initial); // 3 dimensions have real evidence — never the "no evidence" null case
 
         // Add a new Strategic belief
         var newBelief = MakeBelief(entityId, Dimension.Strategic, "renewal_intent", 0.50,
@@ -71,6 +74,7 @@ public sealed class DeterminismSpikeTests
 
         // Full recompute
         var full = _idx.Aggregate(entityId, allScores, allBeliefs, initial, _profile, now);
+        Assert.NotNull(full);
 
         // Incremental recompute (only Strategic changed)
         var stratScore  = allScores[Dimension.Strategic];
@@ -117,6 +121,7 @@ public sealed class DeterminismSpikeTests
         };
         var scores = ComputeAllScores(entityId, beliefs, now);
         var idx    = _idx.Aggregate(entityId, scores, beliefs, null, _profile, now);
+        Assert.NotNull(idx); // all 4 dimensions have real (Reported-tier) evidence
 
         // Composite ≈ 0.10 → would be Critical, but confidence_floor = 0.50 < 0.60 → must be AtRisk
         Assert.Equal(Band.AtRisk,   idx.Band);

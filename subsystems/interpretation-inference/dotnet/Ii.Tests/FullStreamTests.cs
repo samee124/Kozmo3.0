@@ -159,6 +159,7 @@ public sealed class FullStreamTests
         };
         var scores = AllDimScores(entityId, beliefs, profile);
         var idx    = index.Aggregate(entityId, scores, beliefs, null, profile, now);
+        Assert.NotNull(idx);
 
         Assert.Equal(Band.AtRisk, idx.Band);
         Assert.True(idx.ConfidenceFloor < 0.60,
@@ -433,6 +434,7 @@ public sealed class FullStreamTests
         });
 
         var fullIdx = h.Index.Aggregate(entityId, scores, decayed, null, h.Profile, now);
+        Assert.NotNull(fullIdx);
 
         Assert.Equal(incIdx.Fingerprint,                  fullIdx.Fingerprint);
         Assert.Equal(incIdx.Band,                         fullIdx.Band);
@@ -732,6 +734,7 @@ public sealed class FullStreamTests
         };
         var scores = AllDimScores(entityId, beliefs, profile);
         var idx    = index.Aggregate(entityId, scores, beliefs, null, profile, now);
+        Assert.NotNull(idx);
 
         Assert.Equal(Band.Critical, idx.Band);
         Assert.Equal("composite", idx.BandDrivenBy);
@@ -758,6 +761,7 @@ public sealed class FullStreamTests
         };
         var scores = AllDimScores(entityId, beliefs, profile);
         var idx    = index.Aggregate(entityId, scores, beliefs, null, profile, now);
+        Assert.NotNull(idx);
 
         Assert.Equal(Band.AtRisk, idx.Band);
         Assert.Equal("worst-dimension-floor", idx.BandDrivenBy);

@@ -760,6 +760,7 @@ public sealed class VendorFileTests
         await svc.WriteBeliefAsync(vendorId, "renewal_date", Dimension.Financial, "renewal_date", 1756684800, SourceTier.Primary, 1.0, observedAt, new BeliefProvenance(Guid.NewGuid(), "contract:§7"), observedAt);
 
         var judgement = await facade.RecomputeVendorAsync(vendorId);
+        Assert.NotNull(judgement);
 
         // All four dimensions scored
         Assert.Equal(4, judgement.Index.DimensionScores.Count);
@@ -809,6 +810,7 @@ public sealed class VendorFileTests
         var renewalId = (await svcA.WriteBeliefAsync(vendorId, "renewal_date", Dimension.Financial, "renewal_date", 1756684800, SourceTier.Primary, 1.0, observedAt, new BeliefProvenance(Guid.NewGuid(), "contract:§7"), observedAt)).Id;
 
         var judgeA = await facadeA.RecomputeVendorAsync(vendorId);
+        Assert.NotNull(judgeA);
 
         // No structural belief ID must appear in any dimension's contributing IDs
         var structuralIds = new HashSet<Guid> { annualId, renewalId };
@@ -829,6 +831,7 @@ public sealed class VendorFileTests
         await svcB.WriteBeliefAsync(vendorId, "roadmap_alignment", Dimension.Strategic,    "roadmap_alignment", 0.70, SourceTier.Verified, 1.0, observedAt, new BeliefProvenance(Guid.NewGuid(), "email:ref1"), observedAt);
 
         var judgeB = await facadeB.RecomputeVendorAsync(vendorId);
+        Assert.NotNull(judgeB);
 
         // Removing structural beliefs leaves composite, band, and all dim scores unchanged
         Assert.Equal(judgeA.Index.Composite, judgeB.Index.Composite, precision: 10);
@@ -866,6 +869,7 @@ public sealed class VendorFileTests
         await svc.WriteBeliefAsync(vendorId, "notice_period", Dimension.Financial, "notice_period", 60,         SourceTier.Primary, 1.0, observedAt, prov, observedAt);
 
         var judgement  = await facade.RecomputeVendorAsync(vendorId);
+        Assert.NotNull(judgement);
         var management = judgement.Management;
 
         // Completeness: 6 / 9 filled (notice_period not in expected_belief_sets)
@@ -928,6 +932,7 @@ public sealed class VendorFileTests
 
         // Recompute to get the full VendorJudgement
         var judgement = await facade.RecomputeVendorAsync(vendorId);
+        Assert.NotNull(judgement);
 
         // Fetch all beliefs + evidence from the store
         var activeBeliefs = await store.GetCurrentBeliefsAsync(vendorId);

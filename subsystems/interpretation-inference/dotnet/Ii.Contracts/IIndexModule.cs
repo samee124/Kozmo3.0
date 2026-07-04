@@ -8,8 +8,10 @@ public interface IIndexModule
     /// <summary>
     /// Aggregate all four DimensionScores into an EntityIndex with composite, band, and fingerprint.
     /// Time is provided by the caller (Ii.Spine) — never read the clock internally.
+    /// Returns null when no dimension has any scored (Confidence > 0) contributing evidence —
+    /// there is nothing to band a verdict on.
     /// </summary>
-    EntityIndex Aggregate(
+    EntityIndex? Aggregate(
         Guid                                          entityId,
         IReadOnlyDictionary<Dimension, DimensionScore> dimensionScores,
         IReadOnlyList<Belief>                         allBeliefs,

@@ -51,11 +51,26 @@ public sealed class VendorFileWriteService
         // Resolve claim_key definition once — used for ceiling and half-life
         _profile.ClaimKeyCatalogue.TryGetValue(claimKey, out var ckDef);
 
-        // Structural claims carry null dimension and Confidence=0 so they don't feed RubricModule.
-        // Non-structural: pass extractorConfidence through; the store applies §2 ceiling on write.
+        // Structural claims carry Confidence=0 so they never feed RubricModule (which filters on
+        // Confidence > 0, not Dimension — see below). Non-structural: pass extractorConfidence
+        // through; the store applies §2 ceiling on write.
         var isStructural = ckDef?.ClaimClass == "structural";
         var confidence   = isStructural ? 0.0 : extractorConfidence;
-        var effectiveDim = isStructural ? (Dimension?)null : (Dimension?)dimension;
+
+        // Dimension nulling used to be blanket "isStructural -> null", which also nulled
+        // annual_value/payment_terms even though the catalogue tags both Financial — making real
+        // Financial facts invisible to every dimension-grouped view (trail, vendor-file dimension
+        // counts) even though they could never leak into scoring anyway (Confidence=0 already
+        // excludes them there). Now: only claims the catalogue itself declares dimensionless
+        // (dimension: "" — renewal_date, notice_period, auto_renewal, liability_cap,
+        // contract_on_file) carry a null Dimension. A structural claim WITH a catalogued
+        // dimension (annual_value, payment_terms -> Financial) keeps it — safe for scoring
+        // because RubricModule.ScoreDimension filters on Confidence > 0, not Dimension, and
+        // Confidence stays forced to 0 above regardless of this change.
+        var hasCatalogueDimension = !string.IsNullOrEmpty(ckDef?.Dimension);
+        var effectiveDim = hasCatalogueDimension
+            ? (Dimension?)dimension
+            : isStructural ? (Dimension?)null : (Dimension?)dimension;
 
         // Half-life from claim_key catalogue; null means use tier-based decay
         var halfLifeDays = ckDef != null ? (ckDef.HalfLifeDays ?? 0) : (int?)null;

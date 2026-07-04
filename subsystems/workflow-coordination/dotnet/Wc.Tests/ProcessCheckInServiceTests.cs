@@ -376,10 +376,10 @@ internal sealed class TrackingFacade : IIiFacade
 {
     public List<Guid> RecomputedVendors { get; } = new();
 
-    public Task<VendorJudgement> RecomputeVendorAsync(Guid entityId, CancellationToken ct = default)
+    public Task<VendorJudgement?> RecomputeVendorAsync(Guid entityId, CancellationToken ct = default)
     {
         RecomputedVendors.Add(entityId);
-        return Task.FromResult<VendorJudgement>(null!);
+        return Task.FromResult<VendorJudgement?>(null);
     }
 
     public Task<Guid>                           SubmitSignalAsync(Signal signal, CancellationToken ct = default)      => throw new NotSupportedException();

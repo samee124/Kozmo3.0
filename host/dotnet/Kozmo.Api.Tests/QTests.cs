@@ -69,14 +69,18 @@ public sealed class QTests
             $"Helix completeness {hxResult.Completeness.Ratio:P0} must be ≤ 25% — honest blindness, 2/9 slots");
 
         // ── Northwind: structural-only → completeness ≠ confidence ──────────────
+        // All beliefs are structural (Confidence=0) — zero dimensions have any contributing
+        // scored belief, so RecomputeVendorAsync correctly returns null ("not assessed") per the
+        // click-path fix (#4B): a vendor with no scored evidence must never get a fabricated
+        // Band/Stance built from RubricModule's (0.5, confidence 0.0) neutral placeholder.
+        // Completeness (claim-key based, independent of Index/Posture) is unaffected.
         var nwResult = await RunVendorAsync(profile, NorthwindId, "Northwind Logistics Inc.", "northwind.evidence.json");
-        var nwJ      = nwResult.Judgement!;
 
+        Assert.Null(nwResult.Judgement);
         Assert.True(nwResult.Completeness.Ratio <= 0.45,
             $"Northwind completeness {nwResult.Completeness.Ratio:P0} must be ≤ 45% — only structural claims filled");
         Assert.True(nwResult.Completeness.GapKeys.Count >= 5,
             $"Northwind must have ≥ 5 evidence gaps; got {nwResult.Completeness.GapKeys.Count}");
-        Assert.NotEqual(Band.Critical, nwJ.Index.Band);
 
         // ── Vertex: cross-source contradiction on payment_terms ──────────────────
         var vxResult = await RunVendorAsync(profile, VertexId, "Vertex Systems Ltd.", "vertex.evidence.json");
@@ -100,11 +104,11 @@ public sealed class QTests
             "delta-threshold check is scoped to scored claim_keys only");
 
         // ── Spread: bands are not all uniform ────────────────────────────────────
+        // Northwind excluded — it has no Index (not assessed; see above).
         var bands = new[]
         {
             cwJ.Index.Band,
             hxJ.Index.Band,
-            nwJ.Index.Band,
             vxResult.Judgement!.Index.Band,
             asResult.Judgement!.Index.Band,
             brResult.Judgement!.Index.Band,

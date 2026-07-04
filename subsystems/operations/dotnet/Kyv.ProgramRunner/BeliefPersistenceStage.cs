@@ -71,7 +71,12 @@ public sealed class BeliefPersistenceStage
                 await _writeService.WriteBeliefAsync(
                     vendorId:            vendorId,
                     claimKey:            candidate.Criterion,
-                    dimension:           candidate.Dimension ?? Dimension.Financial, // structural placeholder; store nulls it via claim_class
+                    // candidate.Dimension is already the catalogue's declared dimension (e.g.
+                    // Financial for annual_value/payment_terms, null for renewal_date and other
+                    // dimensionless structural claims — see DocumentBeliefExtractor). The
+                    // fallback only matters for the null case; VendorFileWriteService decides
+                    // the persisted Dimension from the catalogue itself, not from this value.
+                    dimension:           candidate.Dimension ?? Dimension.Financial,
                     criterion:           candidate.Criterion,
                     rawValue:            value.Value,
                     tier:                candidate.SourceTier,

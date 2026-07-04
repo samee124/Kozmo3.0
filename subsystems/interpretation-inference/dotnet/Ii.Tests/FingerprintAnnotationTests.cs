@@ -57,6 +57,8 @@ public sealed class FingerprintAnnotationTests
 
         var idx1 = index.Aggregate(entityId, scores, [ruleBelief], null, profile, now);
         var idx2 = index.Aggregate(entityId, scores, [llmBelief],  null, profile, now);
+        Assert.NotNull(idx1);
+        Assert.NotNull(idx2);
 
         // Fingerprints must be identical — annotation fields are NOT fingerprint inputs
         Assert.Equal(64, idx1.Fingerprint.Length);
@@ -102,6 +104,8 @@ public sealed class FingerprintAnnotationTests
 
         var idx1 = index.Aggregate(entityId, scores1, [belief1], null, profile, now);
         var idx2 = index.Aggregate(entityId, scores2, [belief2], null, profile, now);
+        Assert.NotNull(idx1);
+        Assert.NotNull(idx2);
 
         // Different core tuple → different fingerprint
         Assert.NotEqual(idx1.Fingerprint, idx2.Fingerprint);

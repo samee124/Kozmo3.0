@@ -106,14 +106,23 @@ public sealed class VendorFileStageRunner
         var allBeliefs    = await _store.GetBeliefHistoryAsync(vendorId, ct);
         var evidence      = await _store.GetEvidenceForVendorAsync(vendorId, ct);
 
-        var markdown = VendorFileRenderer.Render(
-            vendorId:      vendorId,
-            vendorName:    vendorName,
-            asOf:          asOf,
-            judgement:     judgement,
-            activeBeliefs: activeBeliefs,
-            allBeliefs:    allBeliefs,
-            evidence:      evidence);
+        // No dimension has any scored evidence yet — render identity + real belief evidence
+        // without a fabricated Band/Stance, rather than a verdict manufactured from zero evidence.
+        var markdown = judgement is null
+            ? VendorFileRenderer.RenderNotAssessed(
+                vendorId:      vendorId,
+                vendorName:    vendorName,
+                asOf:          asOf,
+                activeBeliefs: activeBeliefs,
+                evidence:      evidence)
+            : VendorFileRenderer.Render(
+                vendorId:      vendorId,
+                vendorName:    vendorName,
+                asOf:          asOf,
+                judgement:     judgement,
+                activeBeliefs: activeBeliefs,
+                allBeliefs:    allBeliefs,
+                evidence:      evidence);
 
         // ── Stage 4: Write .md to disk ────────────────────────────────────────
         var dir = Path.GetDirectoryName(outputPath);
@@ -129,8 +138,8 @@ public sealed class VendorFileStageRunner
             Evidence:     evidenceRows,
             Beliefs:      writtenBeliefs,
             Completeness: completeness,
-            Index:        judgement.Index,
-            Posture:      judgement.Posture)
+            Index:        judgement?.Index,
+            Posture:      judgement?.Posture)
         {
             Judgement        = judgement,
             RenderedMarkdown = markdown,

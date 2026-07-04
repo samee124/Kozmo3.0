@@ -181,7 +181,7 @@ public sealed class IiFacade : IIiFacade
 
     public Task ResetAsync(CancellationToken ct = default) => _store.ResetAsync(ct);
 
-    public async Task<VendorJudgement> RecomputeVendorAsync(Guid entityId, CancellationToken ct = default)
+    public async Task<VendorJudgement?> RecomputeVendorAsync(Guid entityId, CancellationToken ct = default)
     {
         var now        = _clock.UtcNow;
         var allBeliefs = await _store.GetCurrentBeliefsAsync(entityId, ct);
@@ -192,6 +192,7 @@ public sealed class IiFacade : IIiFacade
 
         var scores   = BuildAllDimensionScores(entityId, anchored);
         var index    = _index.Aggregate(entityId, scores, anchored, null, _profile, now);
+        if (index is null) return null; // no dimension has scored evidence — nothing to band
 
         var entity   = _registry.GetEntity(entityId);
         var meta     = ComputeMeta(entityId, decayed, anchored, allHistory, now);
@@ -249,8 +250,10 @@ public sealed class IiFacade : IIiFacade
         if (previous == null)
         {
             // First signal — full aggregate
-            var scores = BuildAllDimensionScores(entityId, anchored);
-            newIndex = _index.Aggregate(entityId, scores, anchored, null, _profile, now);
+            var scores     = BuildAllDimensionScores(entityId, anchored);
+            var aggregated = _index.Aggregate(entityId, scores, anchored, null, _profile, now);
+            if (aggregated is null) return; // no dimension has scored evidence — nothing to persist
+            newIndex = aggregated;
         }
         else
         {

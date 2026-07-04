@@ -39,8 +39,10 @@ public interface IIiFacade
     /// Recompute a full banded judgement from the vendor-file belief set currently in the store.
     /// decay → anchor → Rubric (scored only) → Index → Posture → MetaCognition.
     /// Read-only; does not persist results.
+    /// Returns null when no dimension has any scored (Confidence > 0) contributing evidence —
+    /// "not assessed," not a fabricated verdict from the neutral placeholder score.
     /// </summary>
-    Task<VendorJudgement> RecomputeVendorAsync(Guid entityId, CancellationToken ct = default);
+    Task<VendorJudgement?> RecomputeVendorAsync(Guid entityId, CancellationToken ct = default);
 }
 
 public sealed record VendorJudgement(

@@ -36,6 +36,48 @@ public static class VendorFileRenderer
         return sb.ToString();
     }
 
+    /// <summary>
+    /// Renders the vendor file when <see cref="IIiFacade.RecomputeVendorAsync"/> returned null —
+    /// no dimension has any contributing (scored) belief, so there is no Band/Stance to show.
+    /// Shows identity and the real belief evidence (structural facts persist and ground
+    /// completeness even with no scored evidence) without inventing a verdict. This is the
+    /// "not assessed" state — never a fabricated Band/Stance built from zero evidence.
+    /// </summary>
+    public static string RenderNotAssessed(
+        Guid vendorId,
+        string vendorName,
+        DateTimeOffset asOf,
+        IReadOnlyList<Belief> activeBeliefs,
+        IReadOnlyList<Evidence> evidence)
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine($"# Vendor File — {vendorName}");
+        sb.AppendLine();
+        sb.AppendLine("## Identity");
+        sb.AppendLine();
+        sb.AppendLine("| Field | Value |");
+        sb.AppendLine("|---|---|");
+        sb.AppendLine($"| Vendor | {vendorName} |");
+        sb.AppendLine($"| Vendor ID | `{vendorId}` |");
+        sb.AppendLine($"| As of | {asOf:yyyy-MM-dd} |");
+        sb.AppendLine("| Band | _not assessed_ |");
+        sb.AppendLine("| Stance | _not assessed_ |");
+        sb.AppendLine();
+        sb.AppendLine("> No dimension has any scored evidence yet, so no Band or Stance can be");
+        sb.AppendLine("> assigned. This is a correct \"not assessed\" state, not a gap in this page —");
+        sb.AppendLine("> structural facts (annual value, payment terms, renewal date, ...) never feed");
+        sb.AppendLine("> dimension scoring by design, even when they exist and are grounded below.");
+        sb.AppendLine();
+        sb.AppendLine("---");
+        sb.AppendLine();
+        AppendBeliefWorkingState(sb, activeBeliefs, asOf);
+        AppendEvidence(sb, evidence);
+        sb.AppendLine("---");
+        sb.AppendLine();
+        sb.Append("*Rendered by Kozmo VendorFileRenderer — deterministic, no AI generation.*");
+        return sb.ToString();
+    }
+
     // ── Layer 1: Identity ─────────────────────────────────────────────────────
 
     private static void AppendIdentity(StringBuilder sb, Guid vendorId, string vendorName,

@@ -181,6 +181,11 @@ public sealed class CompletenessWiringTests : IDisposable
             new QuestionAnsweringStage(countingLlm), new GapCheckInStage(),
             kyvCheckIn, DepthLevel.L1, "kyv@kozmo");
 
+        // At least one scored belief so RecomputeVendorAsync's Index is non-null (see the
+        // click-path fix plan, #4B) — a vendor with zero scored evidence anywhere correctly
+        // short-circuits to "not assessed" before completeness ever runs, by design. This test
+        // is about the completeness WIRING, not that edge case, so give it real evidence.
+        await SeedOneScoredBeliefAsync(kyvStore);
         var kyvFacade = BuildTestFacade(kyvStore, kyvOrch);
         await kyvFacade.RecomputeVendorAsync(VendorId);
         var kyvCallCount = countingLlm.CallCount;
@@ -189,6 +194,7 @@ public sealed class CompletenessWiringTests : IDisposable
         // Legacy facade — null completeness
         countingLlm.Reset();
         var legacyStore  = new SqliteEntityStore("Data Source=:memory:");
+        await SeedOneScoredBeliefAsync(legacyStore);
         var legacyFacade = BuildTestFacade(legacyStore, completeness: null);
         await legacyFacade.RecomputeVendorAsync(VendorId);
         var legacyCallCount = countingLlm.CallCount;
@@ -198,6 +204,23 @@ public sealed class CompletenessWiringTests : IDisposable
             "KYV facade must invoke completeness LLM on RecomputeVendorAsync.");
         Assert.Equal(0, legacyCallCount);
     }
+
+    private static Task SeedOneScoredBeliefAsync(SqliteEntityStore store) =>
+        store.AppendBeliefAsync(new Belief(
+            Id:            Guid.NewGuid(),
+            EntityId:      VendorId,
+            Dimension:     Dimension.Operational,
+            Criterion:     "sla_uptime",
+            Value:         0.90,
+            SourceTier:    SourceTier.Verified,
+            Confidence:    0.90,
+            Freshness:     1.0,
+            Derivation:    "test-seed",
+            SourceSignals: [],
+            Version:       1,
+            SupersededBy:  null,
+            CreatedAt:     Now,
+            TraceId:       Guid.NewGuid()));
 
     // ── (3) ProcessCheckInService → completeness re-answers ─────────────────────
     //

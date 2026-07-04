@@ -15,7 +15,7 @@ public sealed class IndexModule : IIndexModule
     private static readonly Dimension[] AllDimensions =
         [Dimension.Operational, Dimension.Experiential, Dimension.Financial, Dimension.Strategic];
 
-    public EntityIndex Aggregate(
+    public EntityIndex? Aggregate(
         Guid                                          entityId,
         IReadOnlyDictionary<Dimension, DimensionScore> dimensionScores,
         IReadOnlyList<Belief>                         allBeliefs,
@@ -24,6 +24,7 @@ public sealed class IndexModule : IIndexModule
         DateTimeOffset                                now)
     {
         var full = EnsureAllDimensions(entityId, dimensionScores);
+        if (full.Values.All(s => s.ContributingBeliefIds.Count == 0)) return null;
         return Build(entityId, full, allBeliefs, previous, profile, now);
     }
 
