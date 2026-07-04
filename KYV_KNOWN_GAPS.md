@@ -182,3 +182,45 @@ than fixing it now — the fix is either (a) validate cited ids more leniently (
 characters before `Guid.TryParse`), or (b) have `QuestionAnsweringStage` log/flag a parse failure
 instead of silently dropping the id, so at least the gap is visible rather than silent. Neither is
 started.
+
+## Supersession fix (E1 prerequisite) — `annual_value`'s same-tier tiebreak picks an arbitrary winner
+
+Investigating the reported "IIVS has 5 simultaneously-current `annual_value` beliefs" symptom
+found it doesn't reproduce as stated — `SqliteEntityStore.AppendBeliefAsync`'s same-tier
+deterministic tiebreak already collapses IIVS's real 6 milestone invoices down to exactly ONE
+current `annual_value` belief ($34,700, Version 5) — but that "single truth" is itself wrong. IIVS
+has no annual figure anywhere in its real document corpus: all 6 invoices are one-off CRO
+milestone bills ($12,600–$39,200, e.g. "Milestone M2 -- SOW-01"), yet `BeliefExtractionPrompt`
+has no periodicity check for `annual_value` (unlike `payment_terms`/`csat`, which already have
+deterministic guards — `ContainsTerminationLanguage`/`ContainsNonCustomerQualityLanguage` — added
+after exactly this kind of real-document failure), so every invoice's "TOTAL DUE" line gets
+extracted as a competing `annual_value` candidate. All 6 land on the same `SourceTier.Verified`
+(via `DocTypeInferrer`'s filename-default, not `doc_type_tier_map.saas.v1.json`), so they
+genuinely collide as one same-tier slot, and the tiebreak (content-ordinal comparison, since
+`ObservedAt` ties within a KYV run) picks whichever invoice's filename sorts last —
+`Invoice_IIVS-INV-2023-0002.pdf` — not the invoice that means anything. The other 5 real amounts
+are now silently superseded and invisible in the vendor-file view.
+
+**Real fix is E1-side, not supersession:** either a deterministic guard rejecting
+milestone/periodic invoice language for `annual_value` (mirroring the existing
+`ContainsTerminationLanguage` pattern), and/or a distinct per-invoice claim key with its own
+sum/period aggregation semantics instead of sharing `annual_value`'s single-slot supersession.
+Until one of those lands, **`annual_value` for any invoice-billed vendor is a deterministic pick,
+not a verified annual figure** — don't read it as ground truth in the demo without checking the
+source document.
+
+## Live-signal path has the mirror supersession bug — queued, not folded in
+
+`IiFacade.SubmitSignalAsync` (`Ii.Spine/IiFacade.cs`) does zero tier comparison on supersession —
+any new signal for a `(EntityId, Dimension, Criterion)` slot unconditionally supersedes whatever
+was previously current, regardless of `SourceTier`. This is the mirror of the KYV-path bug this
+fix addressed: a weak-tier live signal arriving after a strong one always wins, silently
+discarding the stronger evidence (the KYV path, by contrast, now correctly leaves a stronger
+belief alone when a weaker one arrives later).
+
+**Deliberately not fixed in the same effort.** It raises the same contradiction-detection design
+question this fix just worked through (should cross-tier signal disagreement supersede, or stay
+visible for `ContradictionDetector`? note `ContradictionDetector.DetectCrossSource` currently
+doesn't even cover signal-pipeline beliefs, since they carry `ClaimKey=""`), plus a slot-key
+reconciliation (`ClaimKey` vs. `(Dimension, Criterion)`), and has no demo dependency today. Queued
+as the next cleanup.

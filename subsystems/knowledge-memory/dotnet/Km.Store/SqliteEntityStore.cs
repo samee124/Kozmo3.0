@@ -46,15 +46,61 @@ public sealed class SqliteEntityStore : IEntityStore, IRegistryStore, ICheckInRo
             if (clamped != belief.Confidence)
                 belief = belief with { Confidence = clamped };
 
-            // §7: append-and-supersede keyed on (entity_id, claim_key).
-            // Collects ALL active priors in the slot (not just the first) so that a re-upload
-            // after a duplicate-write incident collapses the slot back to one active belief.
+            // §7: append-and-supersede keyed on (entity_id, claim_key). Tier is compared per prior,
+            // NOT winner-take-all across the whole slot — the three outcomes are deliberately
+            // asymmetric, not a gap to close:
+            //   • new STRONGER than a prior  → that prior is corrected/upgraded: supersede it
+            //     (a Quote superseded by the signed Contract — T13/WriteService_Supersession_
+            //     PrimarySuperseedsVerified).
+            //   • new WEAKER than a prior    → leave BOTH current, untouched. This is NOT the
+            //     "new" case superseding, and it is NOT the reverse either: a stronger belief
+            //     already on record and a weaker one arriving later is a genuine cross-source
+            //     disagreement (or, for scored claim keys, an independent corroborating
+            //     measurement) — ContradictionDetector.DetectCrossSource and RubricModule's
+            //     weighted fusion both depend on seeing every current belief in the slot to do
+            //     their job (MetaCognitionTests T11/T12, QTests.VendorFixtures_SpreadHolds).
+            //     Silently picking a tier winner here would make disagreements invisible.
+            //   • new SAME tier as a prior   → a true collision over the same slot (e.g. two
+            //     Primary documents), which the two rules above have no opinion on. Resolved via
+            //     the interim deterministic tiebreak below — no test currently covers this case
+            //     the way T11/T13 cover cross-tier, so there's no existing contract to preserve.
             if (belief.SupersededBy == null)
             {
                 var priors = FindActivePriorsInSlot(belief.EntityId, belief.ClaimKey);
-                foreach (var p in priors)
-                    if (VendorFileShouldSupersede(p.tier, p.observedAt, belief.SourceTier, belief.ObservedAt))
-                        priorsToSupersede.Add(p.id);
+                if (priors.Count > 0)
+                {
+                    var newRank    = VendorFileTierRank(belief.SourceTier);
+                    var tiedPriors = new List<(Guid id, SourceTier tier, DateTimeOffset? observedAt, string derivation, double value)>();
+                    foreach (var p in priors)
+                    {
+                        var priorRank = VendorFileTierRank(p.tier);
+                        if (newRank > priorRank) priorsToSupersede.Add(p.id);   // new corrects/upgrades prior
+                        else if (newRank == priorRank) tiedPriors.Add(p);       // same-tier collision
+                        // newRank < priorRank: leave both untouched — see comment above
+                    }
+
+                    if (tiedPriors.Count > 0)
+                    {
+                        var winner = new SupersessionCandidate(
+                            null, belief.ObservedAt, belief.Derivation, belief.Value);
+                        foreach (var p in tiedPriors)
+                        {
+                            var candidate = new SupersessionCandidate(p.id, p.observedAt, p.derivation, p.value);
+                            if (IsStrongerForSlot(candidate, winner)) winner = candidate;
+                        }
+
+                        if (winner.PriorId is Guid winnerId)
+                        {
+                            belief = belief with { SupersededBy = winnerId };
+                            foreach (var p in tiedPriors)
+                                if (p.id != winnerId) priorsToSupersede.Add(p.id);
+                        }
+                        else
+                        {
+                            foreach (var p in tiedPriors) priorsToSupersede.Add(p.id);
+                        }
+                    }
+                }
             }
         }
 
@@ -535,49 +581,92 @@ public sealed class SqliteEntityStore : IEntityStore, IRegistryStore, ICheckInRo
 
     // ── Vendor file write-path helpers (§2 ceilings + §7 supersession) ───────
 
-    private IReadOnlyList<(Guid id, SourceTier tier, DateTimeOffset? observedAt)> FindActivePriorsInSlot(
-        Guid entityId, string claimKey)
+    /// <summary>
+    /// One candidate in a same-tier collision over a (entity_id, claim_key) slot — either an
+    /// existing active prior (PriorId set) or the newly arriving belief (PriorId null). Carries
+    /// only the fields IsStrongerForSlot needs to compare candidates; never the belief's random Id
+    /// (a fresh Guid per run, not stable across runs), CreatedAt (identical for every belief in a
+    /// single KYV run — see ObservedAt below), or SourceTier (the caller guarantees every
+    /// candidate passed here already shares the same tier).
+    /// </summary>
+    private readonly record struct SupersessionCandidate(
+        Guid? PriorId, DateTimeOffset? ObservedAt, string Derivation, double Value);
+
+    private IReadOnlyList<(Guid id, SourceTier tier, DateTimeOffset? observedAt, string derivation, double value)>
+        FindActivePriorsInSlot(Guid entityId, string claimKey)
     {
         using var cmd = _conn.CreateCommand();
         cmd.CommandText =
-            "SELECT id, source_tier, observed_at FROM beliefs " +
-            "WHERE entity_id = @eid AND claim_key = @ck AND superseded_by IS NULL";
+            "SELECT id, source_tier, observed_at, derivation, value FROM beliefs " +
+            "WHERE entity_id = @eid AND claim_key = @ck AND superseded_by IS NULL " +
+            "ORDER BY id";
         cmd.Parameters.AddWithValue("@eid", entityId.ToString());
         cmd.Parameters.AddWithValue("@ck",  claimKey);
         using var reader = cmd.ExecuteReader();
-        var results = new List<(Guid, SourceTier, DateTimeOffset?)>();
+        var results = new List<(Guid, SourceTier, DateTimeOffset?, string, double)>();
         while (reader.Read())
         {
             var id     = Guid.Parse(reader.GetString(0));
             var tier   = Enum.Parse<SourceTier>(reader.GetString(1));
             var obsRaw = reader.IsDBNull(2) ? null : reader.GetString(2);
             DateTimeOffset? obs = obsRaw is null ? null : DateTimeOffset.Parse(obsRaw);
-            results.Add((id, tier, obs));
+            var derivation = reader.GetString(3);
+            var value      = reader.GetDouble(4);
+            results.Add((id, tier, obs, derivation, value));
         }
         return results;
     }
 
-    private static bool VendorFileShouldSupersede(
-        SourceTier priorTier, DateTimeOffset? priorObservedAt,
-        SourceTier newTier,   DateTimeOffset? newObservedAt)
+    /// <summary>
+    /// Same-tier collision tiebreak: true if `a` outranks `b` for "current" status in a
+    /// (entity_id, claim_key) slot, GIVEN both are already the same tier (the caller only invokes
+    /// this among candidates it has pre-filtered to equal SourceTier — see AppendBeliefAsync's §7.
+    /// Cross-tier disagreement is handled entirely by the caller and never reaches here: a
+    /// stronger prior stays current alongside a weaker new arrival untouched, feeding
+    /// ContradictionDetector.DetectCrossSource / RubricModule fusion).
+    ///
+    /// observedAt is the recency tiebreak. KYV currently stamps every belief in a run with the
+    /// same run-wide timestamp (no real per-document dates yet — that's E1 work), so observedAt is
+    /// typically equal and this branch is a no-op today; the deterministic content ordering below
+    /// is what actually resolves same-tier collisions in the meantime. It compares only stable,
+    /// content-derived fields — never a belief's Id (a fresh random Guid every run) and never
+    /// insertion/arrival order — so the same two belief contents pick the same winner regardless of
+    /// which run or which order they were appended in. Once E1 supplies real per-document dates,
+    /// observedAt starts doing real work and this fallback simply stops firing; no logic change
+    /// needed here.
+    /// </summary>
+    private static bool IsStrongerForSlot(SupersessionCandidate a, SupersessionCandidate b)
     {
-        var priorRank = VendorFileTierRank(priorTier);
-        var newRank   = VendorFileTierRank(newTier);
-        if (newRank > priorRank) return true;
-        if (newRank == priorRank)
-            return !newObservedAt.HasValue || !priorObservedAt.HasValue
-                   || newObservedAt.Value >= priorObservedAt.Value;
-        return false;
+        if (a.ObservedAt.HasValue && b.ObservedAt.HasValue && a.ObservedAt.Value != b.ObservedAt.Value)
+            return a.ObservedAt.Value > b.ObservedAt.Value;
+
+        var cmp = string.CompareOrdinal(a.Derivation ?? "", b.Derivation ?? "");
+        if (cmp != 0) return cmp > 0;
+        return a.Value.CompareTo(b.Value) > 0;
     }
 
-    private static int VendorFileTierRank(SourceTier tier) => tier switch
+    /// <summary>
+    /// Tier strength, read from the catalogue's source_tiers weight (source_tiers.saas.v1.json) so
+    /// this ranking can never drift from the config-driven values used elsewhere (§2's confidence
+    /// clamp above, AnsweringPrompt.PresentationConfidence). Falls back to a hardcoded ladder —
+    /// same ordering as the current catalogue — only when no profile is available (e.g. a store
+    /// constructed without one) or the profile omits a tier.
+    /// </summary>
+    private double VendorFileTierRank(SourceTier tier)
     {
-        SourceTier.Primary    => 4,
-        SourceTier.Verified   => 3,
-        SourceTier.Reported   => 2,
-        SourceTier.Inferred   => 1,
-        SourceTier.Unverified => 0,
-        _                     => 0
+        if (_profile is not null && _profile.SourceTiers.TryGetValue(tier.ToString(), out var tc))
+            return tc.Weight;
+        return FallbackVendorFileTierRank(tier);
+    }
+
+    private static double FallbackVendorFileTierRank(SourceTier tier) => tier switch
+    {
+        SourceTier.Primary    => 1.0,
+        SourceTier.Verified   => 0.8,
+        SourceTier.Reported   => 0.5,
+        SourceTier.Inferred   => 0.3,
+        SourceTier.Unverified => 0.2,
+        _                     => 0.0
     };
 
     // ── IRegistryStore — canonical vendor + alias persistence ─────────────────

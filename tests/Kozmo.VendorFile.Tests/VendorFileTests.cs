@@ -277,6 +277,97 @@ public sealed class VendorFileTests
         Assert.DoesNotContain(current, b => b.Id == v1.Id && b.SupersededBy == null);
     }
 
+    [Fact, Trait("Category", "VendorFile")]
+    public async Task WriteService_Supersession_StrongThenWeak_BothStayCurrent_NotAContradiction()
+    {
+        // Deliberately asymmetric with WriteService_Supersession_PrimarySuperseedsVerified above:
+        // a Primary belief already on record, followed by a WEAKER Verified belief for the same
+        // slot, is NOT a correction — it's a genuine cross-source disagreement (or, for scored
+        // claim keys, an independent corroborating measurement). Both must stay current so
+        // ContradictionDetector.DetectCrossSource / RubricModule's fusion can see them
+        // (see MetaCognitionTests T11/T12 for the full contradiction-detection assertions this
+        // store-level behavior feeds). The store must not silently pick a tier winner here.
+        var profile  = new Catalogue().Load(CataloguePath);
+        var store    = new SqliteEntityStore("Data Source=:memory:", profile);
+        var svc      = new VendorFileWriteService(store, profile);
+        var vendorId = Guid.NewGuid();
+        var dt1      = new DateTimeOffset(2025, 9, 1, 0, 0, 0, TimeSpan.Zero);
+        var dt2      = new DateTimeOffset(2025, 9, 15, 0, 0, 0, TimeSpan.Zero);
+
+        // First: write Primary belief
+        var strong = await svc.WriteBeliefAsync(
+            vendorId: vendorId, claimKey: "sla_uptime",
+            dimension: Dimension.Operational, criterion: "sla_uptime",
+            rawValue: 0.92, tier: SourceTier.Primary, extractorConfidence: 1.0,
+            observedAt: dt1, provenance: new BeliefProvenance(Guid.NewGuid(), "page:6"),
+            ingestedAt: dt1);
+        Assert.Equal(1, strong.Version);
+        Assert.Null(strong.SupersededBy);
+
+        // Second: write Verified belief — weaker, arrives later. Must NOT be superseded, and
+        // must NOT touch the Primary belief either.
+        var weak = await svc.WriteBeliefAsync(
+            vendorId: vendorId, claimKey: "sla_uptime",
+            dimension: Dimension.Operational, criterion: "sla_uptime",
+            rawValue: 0.82, tier: SourceTier.Verified, extractorConfidence: 0.9,
+            observedAt: dt2, provenance: new BeliefProvenance(Guid.NewGuid(), "row:2"),
+            ingestedAt: dt2);
+
+        Assert.Null(weak.SupersededBy);
+
+        var current = await store.GetCurrentBeliefsAsync(vendorId);
+        Assert.Equal(2, current.Count(b => b.SupersededBy == null));
+        Assert.Contains(current, b => b.Id == strong.Id && b.SupersededBy == null);
+        Assert.Contains(current, b => b.Id == weak.Id && b.SupersededBy == null);
+    }
+
+    [Fact, Trait("Category", "VendorFile")]
+    public async Task WriteService_Supersession_SameTierCollision_DeterministicAcrossRuns()
+    {
+        // Same-tier collision (two Primary documents, e.g. an MSA and a later Amendment), with
+        // identical observedAt — the realistic KYV shape today, since a single run stamps every
+        // belief with the same run-wide timestamp (real per-document dates are E1 work). The
+        // interim tiebreak must be deterministic content ordering, never insertion/arrival order:
+        // running the two writes in either order, across independent "runs" (fresh store, fresh
+        // vendor id each time), must pick the same winning content both times.
+        var profile = new Catalogue().Load(CataloguePath);
+        var dt      = new DateTimeOffset(2025, 9, 1, 0, 0, 0, TimeSpan.Zero);
+
+        async Task<double> RunScenario(bool msaFirst)
+        {
+            var store    = new SqliteEntityStore("Data Source=:memory:", profile);
+            var svc      = new VendorFileWriteService(store, profile);
+            var vendorId = Guid.NewGuid();
+
+            Task<Belief> WriteMsa() => svc.WriteBeliefAsync(
+                vendorId: vendorId, claimKey: "renewal_date",
+                dimension: Dimension.Strategic, criterion: "renewal_date",
+                rawValue: 20270101, tier: SourceTier.Primary, extractorConfidence: 1.0,
+                observedAt: dt, provenance: new BeliefProvenance(Guid.NewGuid(), "MSA §12.2"),
+                ingestedAt: dt, derivation: "doc:MSA.pdf \"renews 2027-01-01\"");
+
+            Task<Belief> WriteAmendment() => svc.WriteBeliefAsync(
+                vendorId: vendorId, claimKey: "renewal_date",
+                dimension: Dimension.Strategic, criterion: "renewal_date",
+                rawValue: 20280630, tier: SourceTier.Primary, extractorConfidence: 1.0,
+                observedAt: dt, provenance: new BeliefProvenance(Guid.NewGuid(), "Amendment 2 §3"),
+                ingestedAt: dt, derivation: "doc:Amendment2.pdf \"renews 2028-06-30\"");
+
+            if (msaFirst) { await WriteMsa(); await WriteAmendment(); }
+            else          { await WriteAmendment(); await WriteMsa(); }
+
+            var current = await store.GetCurrentBeliefsAsync(vendorId);
+            Assert.Single(current);
+            return current[0].Value;
+        }
+
+        var winnerValueMsaFirst   = await RunScenario(msaFirst: true);
+        var winnerValueAmendFirst = await RunScenario(msaFirst: false);
+
+        // Same winning content regardless of which document was written first.
+        Assert.Equal(winnerValueMsaFirst, winnerValueAmendFirst);
+    }
+
     // ── Phase 1 store-level enforcement ──────────────────────────────────────
 
     [Fact, Trait("Category", "VendorFile")]

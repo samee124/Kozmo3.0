@@ -107,11 +107,14 @@ public sealed class VendorFileWriteService
             ClassificationMethod = ClassificationMethod.Rule
         };
 
-        // §2 ceiling clamping and §7 supersession are enforced by the store.
+        // §2 ceiling clamping and §7 supersession are enforced by the store. §7 can now decide
+        // the new belief itself loses the tier-then-recency comparison and arrives already
+        // superseded — look it up via history (not GetCurrentBeliefsAsync, which filters exactly
+        // that row out) so the caller sees the true persisted SupersededBy, not a stale local copy
+        // that still shows null.
         await _store.AppendBeliefAsync(belief, ct);
 
-        // Return the persisted belief so the caller sees the store-enforced confidence.
-        var current = await _store.GetCurrentBeliefsAsync(vendorId, ct);
-        return current.FirstOrDefault(b => b.Id == belief.Id) ?? belief;
+        var history = await _store.GetBeliefHistoryAsync(vendorId, ct);
+        return history.FirstOrDefault(b => b.Id == belief.Id) ?? belief;
     }
 }
