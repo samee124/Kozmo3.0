@@ -36,14 +36,18 @@ public static class DocTypeInferrer
     /// Per-tier confidence ceiling — matches the catalogue source_tiers config.
     /// These are the max confidence values the tier system allows; the extractor clamps to them.
     /// </summary>
+    // E-signal Part 5 Step 1: Correspondence added at a value consistent with source_tiers.saas.v1.json
+    // (0.25). The pre-existing non-monotonic drift among the other rows (Inferred > Reported here,
+    // unlike source_tiers.json) is untouched — out of scope for this step.
     public static double TierCeiling(SourceTier tier) => tier switch
     {
-        SourceTier.Primary    => 0.95,
-        SourceTier.Verified   => 0.80,
-        SourceTier.Reported   => 0.50,
-        SourceTier.Inferred   => 0.60,
-        SourceTier.Unverified => 0.40,
-        _                     => 0.80,
+        SourceTier.Primary        => 0.95,
+        SourceTier.Verified       => 0.80,
+        SourceTier.Reported       => 0.50,
+        SourceTier.Inferred       => 0.60,
+        SourceTier.Unverified     => 0.40,
+        SourceTier.Correspondence => 0.25,
+        _                         => 0.80,
     };
 
     /// <summary>

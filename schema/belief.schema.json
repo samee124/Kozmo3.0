@@ -23,6 +23,6 @@
   },
   "$defs": {
     "Dimension": { "enum": ["Operational", "Experiential", "Financial", "Strategic"] },
-    "SourceTier": { "enum": ["Verified", "Inferred", "Reported", "Unverified"] }
+    "SourceTier": { "enum": ["Verified", "Inferred", "Reported", "Unverified", "Correspondence"] }
   }
 }

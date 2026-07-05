@@ -12,11 +12,12 @@ public enum Dimension
 
 public enum SourceTier
 {
-    Verified   = 0,
-    Inferred   = 1,
-    Reported   = 2,
-    Unverified = 3,
-    Primary    = 4   // of-record, executed — vendor file only
+    Verified      = 0,
+    Inferred      = 1,
+    Reported      = 2,
+    Unverified    = 3,
+    Primary       = 4,  // of-record, executed — vendor file only
+    Correspondence = 5  // informal correspondence (email) — strictly weakest; E-signal Part 5 Step 1
 }
 
 public enum DocType
