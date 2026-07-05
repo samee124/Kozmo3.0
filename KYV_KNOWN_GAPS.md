@@ -394,13 +394,8 @@ pre-Step-5 baseline).
   now. `ParsedEmail.InReplyTo`/`References` are already on the struct and will be empty/null for
   every message in this corpus — not a parsing bug, an honest reflection of the source data. Update
   §3.4 before Step 7 starts.
-- **The two hardcoded tier-ceiling fallback switches still need a `Correspondence` case.**
-  `SqliteEntityStore.FallbackVendorFileTierRank` and `AnsweringPrompt.FallbackTierCeiling` (both
-  profile-less fallbacks, only reached when no `SaasProfile` is supplied — real runs read
-  `source_tiers.saas.v1.json` first via `TryGetValue` and never hit them) don't have a
-  `Correspondence` arm yet; each falls through to its `_ =>` default (`0.0` and `0.5` respectively),
-  which would be wrong if ever exercised for a correspondence-tier belief. Flagged at Step 1
-  (`5c3b27f`) as out of scope for "add the tier and prove it's inert"; carried forward here so it
-  isn't lost. Needs fixing at Step 4/5 (interpretation), when correspondence-tier beliefs first get
-  produced and could realistically reach a profile-less code path (e.g. a test harness or tool that
-  doesn't wire a `SaasProfile`).
+- ~~**The two hardcoded tier-ceiling fallback switches still need a `Correspondence` case.**~~
+  **RESOLVED at Step 4.** `SqliteEntityStore.FallbackVendorFileTierRank` and
+  `AnsweringPrompt.FallbackTierCeiling` both gained a `SourceTier.Correspondence => 0.25` arm,
+  consistent with `source_tiers.saas.v1.json`. Flagged at Step 1 (`5c3b27f`), carried forward at
+  Step 3, closed here now that correspondence-tier beliefs are imminent (Step 5).

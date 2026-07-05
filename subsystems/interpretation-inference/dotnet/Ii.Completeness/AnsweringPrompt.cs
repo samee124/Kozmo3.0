@@ -118,12 +118,13 @@ public static class AnsweringPrompt
     // Used only when no profile is supplied — mirrors catalogue/profiles/saas/source_tiers.saas.v1.json.
     private static double FallbackTierCeiling(SourceTier tier) => tier switch
     {
-        SourceTier.Primary    => 1.0,
-        SourceTier.Verified   => 0.8,
-        SourceTier.Reported   => 0.5,
-        SourceTier.Inferred   => 0.3,
-        SourceTier.Unverified => 0.2,
-        _                     => 0.5,
+        SourceTier.Primary        => 1.0,
+        SourceTier.Verified       => 0.8,
+        SourceTier.Reported       => 0.5,
+        SourceTier.Inferred       => 0.3,
+        SourceTier.Unverified     => 0.2,
+        SourceTier.Correspondence => 0.25,
+        _                         => 0.5,
     };
 
     private static readonly JsonSerializerOptions PromptJsonOpts = new()

@@ -110,6 +110,43 @@
       "positive_example": "\"Neither party shall solicit the other's employees for employment during the Term and for 12 months thereafter.\"",
       "negative_example": "A general confidentiality obligation about personnel information is confidentiality, not non_solicitation, unless a solicitation restriction is explicitly stated.",
       "prompt_fragment": "- non_solicitation: restriction on soliciting the other party's employees or customers\n  during and after the term. E.g. \"Neither party shall solicit the other's employees for\n  employment during the Term and for 12 months thereafter.\""
+    },
+
+    "sentiment": {
+      "definition": "The overall tone of the correspondence toward the vendor relationship -- positive, neutral, or strained/negative -- as expressed by the sender. Relationship color, not a numeric rating.",
+      "positive_example": "\"We are satisfied with the terms and appreciate the quick turnaround\" -> value \"positive\". \"This is well outside what we'd expect from an SLA standpoint\" -> value \"strained\".",
+      "negative_example": "A numeric customer-satisfaction survey score (e.g. \"CSAT: 4.6/5.0\") is not sentiment -- that is the csat belief, a separately-scored fact. A plain transactional email with no expressed tone (an invoice, a scheduling note) is not sentiment -- omit it rather than guessing a tone that isn't there.",
+      "prompt_fragment": "- sentiment: the overall tone of the email toward the vendor relationship -- positive,\n  neutral, or strained/negative -- as expressed by the sender (e.g. \"We are satisfied with\n  the terms and appreciate the quick turnaround\" -> \"positive\"; \"This is well outside what\n  we'd expect from an SLA standpoint\" -> \"strained\"). A numeric CSAT/NPS survey score is a\n  different, separately-scored fact, NOT sentiment -- do not extract it here. A plain\n  transactional email with no expressed tone is NOT sentiment -- omit it."
+    },
+    "commitment": {
+      "definition": "An explicit promise or future obligation stated in the email -- something one party commits to doing, with a concrete deliverable or timeframe.",
+      "positive_example": "\"We'll have the sandbox environment ready by Friday\" -> a commitment to deliver the sandbox by Friday.",
+      "negative_example": "A request for the OTHER party to act (\"could you send the W-9?\") is not a commitment -- that is request, a different signal. A vague aspiration with no concrete deliverable or timeframe (\"we'll look into ways to improve\") is too weak to extract -- omit it.",
+      "prompt_fragment": "- commitment: an explicit promise or future obligation stated in the email -- something ONE\n  PARTY commits to doing, with a concrete deliverable or timeframe (e.g. \"We'll have the\n  sandbox environment ready by Friday\"). A request for the OTHER party to act (\"could you\n  send the W-9?\") is NOT a commitment -- that is request, a different signal. A vague\n  aspiration with no concrete deliverable or timeframe (\"we'll look into ways to improve\")\n  is too weak to extract -- omit it."
+    },
+    "issue_raised": {
+      "definition": "A problem, complaint, or escalation raised about the vendor relationship or service.",
+      "positive_example": "\"This is well outside what we'd expect from an SLA standpoint. We'd like to discuss remediation.\" -> an SLA-performance issue raised.",
+      "negative_example": "A routine status update with no complaint or problem stated is not an issue. A previously-raised issue mentioned only as closed/resolved (\"this satisfies our annual review requirements, closing out the ticket\") is not a NEW issue_raised -- that closure may be sentiment, not an issue -- omit it here.",
+      "prompt_fragment": "- issue_raised: a problem, complaint, or escalation raised about the vendor relationship or\n  service (e.g. \"This is well outside what we'd expect from an SLA standpoint. We'd like to\n  discuss remediation.\"). A routine status update with no complaint or problem stated is NOT\n  an issue -- omit it. A previously-raised issue mentioned only as closed or resolved is NOT\n  a new issue_raised -- omit it here (that may be sentiment instead)."
+    },
+    "stakeholder_signal": {
+      "definition": "A change in who is engaged in the relationship -- a new contact, a handoff, a sponsor's involvement, or a stated change in engagement level.",
+      "positive_example": "\"I'm handing this account off to Lindsey going forward\" -> a stakeholder handoff to Lindsey.",
+      "negative_example": "A person merely CC'd on a routine email, with no stated change in role or engagement, is not a stakeholder_signal -- omit it.",
+      "prompt_fragment": "- stakeholder_signal: a change in who is engaged in the relationship -- a new contact, a\n  handoff, a sponsor's involvement, or a stated change in engagement level (e.g. \"I'm\n  handing this account off to Lindsey going forward\"). A person merely CC'd on a routine\n  email, with no stated change in role or engagement, is NOT a stakeholder_signal -- omit it."
+    },
+    "request": {
+      "definition": "An explicit ask directed at the other party that requires action -- a document, a decision, or a meeting.",
+      "positive_example": "\"Could you please forward the W-9 and ACH banking form to your Accounts Payable team?\" -> a request for banking documents.",
+      "negative_example": "A rhetorical question, or a statement of intent about one's OWN next steps (\"I'll follow up next week\"), is not a request -- that is commitment, a different signal, or no signal at all if too vague.",
+      "prompt_fragment": "- request: an explicit ask directed at the OTHER party that requires action -- a document, a\n  decision, or a meeting (e.g. \"Could you please forward the W-9 and ACH banking form to your\n  Accounts Payable team?\"). A statement of intent about one's OWN next steps (\"I'll follow up\n  next week\") is NOT a request -- that is commitment, a different signal, or no signal at all\n  if too vague."
+    },
+    "responsiveness": {
+      "definition": "How quickly and consistently a party responds across a thread -- reply latency and engagement cadence. Derived DETERMINISTICALLY from message timestamps and thread structure (Kozmo_Phase_E_Signal_Spec.md Appendix #2), NOT interpreted by the LLM -- catalogued here for completeness of the signal-type vocabulary only. Deliberately excluded from every metadata_field_group in extraction_schemas.saas.v1.json so the interpretation prompt never asks the model to judge it; a future deterministic pass (Step 7, thread awareness) computes it from ParsedEmail timestamps instead.",
+      "positive_example": "N/A -- computed from date deltas across a thread, not extracted from text.",
+      "negative_example": "N/A -- never projected into an LLM prompt; any text-based guess at responsiveness would be exactly the kind of thing the LLM-interprets/code-computes split (the renewal_date lesson) exists to prevent.",
+      "prompt_fragment": "- responsiveness: NOT LLM-extracted -- computed deterministically from message timestamps\n  and thread structure. This fragment exists for catalogue completeness only and must never\n  be projected into a generated prompt (no metadata_field_group references \"responsiveness\")."
     }
   }
 }

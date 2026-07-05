@@ -662,12 +662,13 @@ public sealed class SqliteEntityStore : IEntityStore, IRegistryStore, ICheckInRo
 
     private static double FallbackVendorFileTierRank(SourceTier tier) => tier switch
     {
-        SourceTier.Primary    => 1.0,
-        SourceTier.Verified   => 0.8,
-        SourceTier.Reported   => 0.5,
-        SourceTier.Inferred   => 0.3,
-        SourceTier.Unverified => 0.2,
-        _                     => 0.0
+        SourceTier.Primary        => 1.0,
+        SourceTier.Verified       => 0.8,
+        SourceTier.Reported       => 0.5,
+        SourceTier.Inferred       => 0.3,
+        SourceTier.Unverified     => 0.2,
+        SourceTier.Correspondence => 0.25,
+        _                         => 0.0
     };
 
     // ── IRegistryStore — canonical vendor + alias persistence ─────────────────
