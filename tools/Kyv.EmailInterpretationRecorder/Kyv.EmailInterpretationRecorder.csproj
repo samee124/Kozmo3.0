@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>Kyv.EmailInterpretationRecorder</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- Tools are NOT the demo runtime — OpenAI client allowed here.
+         Ii.CandidateExtraction provides EmailParser + EmailInterpretationExtractor.
+         Km.Store provides Catalogue, used to load the claim key + metadata field catalogues. -->
+    <ProjectReference Include="..\..\subsystems\interpretation-inference\dotnet\Ii.CandidateExtraction\Ii.CandidateExtraction.csproj" />
+    <ProjectReference Include="..\..\subsystems\knowledge-memory\dotnet\Km.Store\Km.Store.csproj" />
+    <ProjectReference Include="..\..\libs\Kozmo.Llm\Kozmo.Llm.csproj" />
+    <ProjectReference Include="..\..\libs\Kozmo.Llm.OpenAi\Kozmo.Llm.OpenAi.csproj" />
+  </ItemGroup>
+</Project>

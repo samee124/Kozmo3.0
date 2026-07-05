@@ -36,6 +36,9 @@ public static class EmailInterpretationPrompt
     /// <summary>Max tokens for the email belief-extraction response — a handful of short facts.</summary>
     public const int BeliefMaxTokens = 600;
 
+    /// <summary>Max tokens for the email signal-extraction response — up to 5 short signals.</summary>
+    public const int SignalMaxTokens = 800;
+
     /// <summary>Max characters of email body included in the belief-pass user prompt. Emails are short.</summary>
     public const int MaxBodyChars = 8_000;
 
@@ -68,6 +71,14 @@ public static class EmailInterpretationPrompt
         Line("discusses, proposes, asks about, or negotiates one of these facts without a clear,");
         Line("explicit, agreed statement, DO NOT extract it — that is relationship context, handled");
         Line("elsewhere, not this extractor's job. When in doubt, leave it out.");
+        Line();
+        Line("A HEDGED NUMBER IS NEVER A FACT: watch for words like \"roughly\", \"approximately\",");
+        Line("\"estimated\", \"ballpark\", \"in the range of\", \"starting point\", or \"as we finalize\" —");
+        Line("these mark a PROPOSAL still being negotiated, not an agreed figure, even when a specific");
+        Line("dollar amount is stated right next to them (e.g. \"roughly $14.50/seat, approximately");
+        Line("$147,900 annually — this is a starting point\" is a pricing proposal, NOT a settled");
+        Line("annual_value or invoice_amount — omit it; that is a commitment/discussion signal,");
+        Line("handled elsewhere, not this extractor's job).");
         Line();
         Line("FACTS (criterion key -> what to look for -> raw value encoding):");
 

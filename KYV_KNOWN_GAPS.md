@@ -399,3 +399,23 @@ pre-Step-5 baseline).
   `AnsweringPrompt.FallbackTierCeiling` both gained a `SourceTier.Correspondence => 0.25` arm,
   consistent with `source_tiers.saas.v1.json`. Flagged at Step 1 (`5c3b27f`), carried forward at
   Step 3, closed here now that correspondence-tier beliefs are imminent (Step 5).
+- **`annual_value` has now attracted a wrong figure at FOUR separate build stages — the deny-list
+  pattern itself may be the problem, not any one keyword.** Chronology: (1) milestone/per-engagement
+  invoice amounts (IIVS's invoices, E1 Part 7 Step 3), (2) insurance/liability/indemnification policy
+  limits (the real IIVS MSA, E1 Part 7 Step 5), (3) both consolidated into ONE
+  `ContainsAnnualValueExclusionLanguage` guard (E1 Part 7 Step 7), (4) hedged/negotiation-in-progress
+  proposal figures (0006_pricing.eml, "roughly... approximately... starting point... as we finalize"
+  — E-signal Part 5 Step 5, `ContainsHedgedProposalLanguage`). Four independent real-world confusions,
+  four keyword additions to what is structurally the same fix each time: another way for a dollar
+  figure to look like an annual contract value without being one. **This is a signal the base
+  `annual_value` definition (catalogue: "an explicit contract price or subscription fee paid by the
+  customer") is too permissive — a growing DENY-list (reject known-bad phrasings) is chasing an
+  unbounded space of wrong-figure shapes one proven confusion at a time.** An ALLOW-list framing —
+  only extract when the evidence contains contract-value language itself ("annual contract value",
+  "ACV", "total contract value", "annual fee", "subscription price") rather than merely "a dollar
+  figure that isn't one of the four excluded kinds" — may be structurally more precise and stop
+  requiring a new guard per newly-discovered confusion. Not fixed now — a base-definition change is
+  bigger than a reactive guard and needs its own design pass (re-record every affected cassette,
+  re-verify recall on the full corpus). Deferred to E-docdepth or E2, captured here so it isn't lost
+  and so a fifth confusion doesn't just add a fifth keyword without anyone asking whether the pattern
+  itself has run its course.

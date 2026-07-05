@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using Kozmo.Contracts;
 using Kozmo.Contracts.Config;
 using Kozmo.Llm;
@@ -128,7 +129,7 @@ public sealed class DocumentBeliefExtractor
         var beliefResult = await _llm.CompleteJsonAsync(beliefSystem, beliefUser, BeliefExtractionPrompt.MaxTokens, ct);
 
         var beliefs = beliefResult.Answer is JsonElement beliefRoot
-            ? ParseBeliefs(beliefRoot, beliefResult.Confidence, docId, tier, schema.BeliefKeys)
+            ? ParseBeliefs(beliefRoot, beliefResult.Confidence, docId, tier, schema.BeliefKeys, _profile.ClaimKeyCatalogue)
             : Array.Empty<BeliefCandidate>();
 
         // ── Metadata passes — one call per declared group, unioned ──────────────────────
@@ -177,8 +178,23 @@ public sealed class DocumentBeliefExtractor
 
     // ── Belief parsing ─────────────────────────────────────────────────────────
 
-    private IReadOnlyList<BeliefCandidate> ParseBeliefs(
-        JsonElement root, double resultConfidence, string docId, SourceTier tier, IReadOnlyList<string> targetKeys)
+    /// <summary>
+    /// Parses the "facts" JSON array into <see cref="BeliefCandidate"/>s — abstain-and-filter,
+    /// deterministic-guard application, and confidence clamping. <c>internal static</c> (E-signal
+    /// Part 5 Step 5) so <c>EmailInterpretationExtractor</c> reuses the EXACT SAME guards
+    /// (<see cref="ContainsTerminationLanguage"/>, <see cref="ContainsAnnualValueExclusionLanguage"/>,
+    /// etc.) for email beliefs instead of a second, independently-maintained copy that could drift
+    /// — the same "one guard, not two dictionaries" discipline as the claim-key/rubric-criterion
+    /// consolidation (E1 Part 7 Step 7). <paramref name="catalogue"/> and
+    /// <paramref name="sourcePrefix"/> are explicit parameters (not <c>_profile</c>/a hardcoded
+    /// "doc:") purely so this method has no instance-state dependency and needs no document-path
+    /// behavior change: the existing call site passes <c>_profile.ClaimKeyCatalogue</c> and the
+    /// default "doc:" explicitly, so document extraction is byte-for-byte unchanged.
+    /// </summary>
+    internal static IReadOnlyList<BeliefCandidate> ParseBeliefs(
+        JsonElement root, double resultConfidence, string docId, SourceTier tier,
+        IReadOnlyList<string> targetKeys, IReadOnlyDictionary<string, ClaimKeyDefinition> catalogue,
+        string sourcePrefix = "doc:")
     {
         if (!root.TryGetProperty("facts", out var factsEl) || factsEl.ValueKind != JsonValueKind.Array)
             return Array.Empty<BeliefCandidate>();
@@ -198,7 +214,7 @@ public sealed class DocumentBeliefExtractor
             // else is dropped even if the model returns a well-formed object for it.
             if (!targetSet.Contains(criterion))
                 continue;
-            if (!_profile.ClaimKeyCatalogue.TryGetValue(criterion, out var ckDef))
+            if (!catalogue.TryGetValue(criterion, out var ckDef))
                 continue;
 
             // One claim per key per document — mirrors the VendorFilePdfLane convention.
@@ -245,6 +261,18 @@ public sealed class DocumentBeliefExtractor
                 ContainsTerminationLanguage(evidence!))
                 continue;
 
+            // E-signal Part 5 Step 5 — payment_terms evidence-shape guard. Real-corpus proof
+            // (0023_payment_0.eml, a plain "invoice #88208... is due on May 11, 2022" reminder):
+            // the model fabricated payment_terms=0 from a due DATE with no day-count language
+            // anywhere in the evidence — the belief's value_type is "integer days" but nothing in
+            // the quoted span states a period at all. Same class as the renewal_date invoice-date
+            // guard below: a value that is technically well-typed in isolation gets rejected once
+            // its own quoted context proves it was never actually stated. Requires an explicit
+            // "N days" or "Net N" pattern in the evidence; a bare due date is not a payment term.
+            if (string.Equals(criterion, "payment_terms", StringComparison.OrdinalIgnoreCase) &&
+                !ContainsExplicitDayCount(evidence!))
+                continue;
+
             // E1 Part 7 Step 7 — renewal_date invoice-date guard: an invoice's own due/invoice
             // date got read as a contract renewal_date on a real document
             // (Invoice_RGL-2023-002.txt: "Due Date: 14 August 2023" — a payment due date, not a
@@ -287,6 +315,20 @@ public sealed class DocumentBeliefExtractor
                 ContainsAnnualValueExclusionLanguage(evidence!))
                 continue;
 
+            // E-signal Part 5 Step 5 — hedged-proposal guard. Real-corpus proof (0006_pricing.eml,
+            // a genuine negotiation email: "initial pricing comes to roughly $14.50/seat/month...
+            // approximately $147,900 annually. This is a STARTING POINT and I'm sure we can find
+            // efficiencies AS WE FINALIZE seat counts."): the model extracted a settled annual_value
+            // belief from language that is explicitly a proposal-in-progress, not an agreed figure.
+            // Applies to BOTH annual_value and invoice_amount — a hedged dollar figure is never a
+            // settled transaction fact either way. The email prompt's abstain framing is the primary
+            // fix (EmailInterpretationPrompt.BuildBeliefSystem now calls out hedged language
+            // explicitly); this is defense-in-depth, same pattern as every other guard here.
+            if ((string.Equals(criterion, "annual_value", StringComparison.OrdinalIgnoreCase) ||
+                 string.Equals(criterion, "invoice_amount", StringComparison.OrdinalIgnoreCase)) &&
+                ContainsHedgedProposalLanguage(evidence!))
+                continue;
+
             var rawConf = fact.TryGetProperty("confidence", out var cf) && cf.ValueKind == JsonValueKind.Number
                 ? cf.GetDouble()
                 : resultConfidence;
@@ -304,7 +346,7 @@ public sealed class DocumentBeliefExtractor
                 Value:      value,
                 Confidence: confidence,
                 SourceTier: tier,
-                Derivation: $"doc:{docId} \"{Truncate(evidence!, 200)}\""));
+                Derivation: $"{sourcePrefix}{docId} \"{Truncate(evidence!, 200)}\""));
         }
 
         return candidates;
@@ -319,8 +361,8 @@ public sealed class DocumentBeliefExtractor
     /// (metadata values are free text, not scored magnitudes). Returns empty immediately when
     /// the schema requests no metadata fields — no "metadata" key is even expected in that case.
     /// </summary>
-    private IReadOnlyList<MetadataCandidate> ParseMetadata(
-        JsonElement root, string docId, IReadOnlyList<string> targetFields)
+    internal static IReadOnlyList<MetadataCandidate> ParseMetadata(
+        JsonElement root, string docId, IReadOnlyList<string> targetFields, string sourcePrefix = "doc:")
     {
         if (targetFields.Count == 0)
             return Array.Empty<MetadataCandidate>();
@@ -358,7 +400,7 @@ public sealed class DocumentBeliefExtractor
             results.Add(new MetadataCandidate(
                 FieldName:  field,
                 Value:      value!,
-                Derivation: $"doc:{docId} \"{Truncate(evidence!, 200)}\""));
+                Derivation: $"{sourcePrefix}{docId} \"{Truncate(evidence!, 200)}\""));
         }
 
         return results;
@@ -372,7 +414,7 @@ public sealed class DocumentBeliefExtractor
     private static readonly string[] TerminationLanguage =
         ["terminat", "cancel", "notice"];
 
-    private static bool ContainsTerminationLanguage(string evidence) =>
+    internal static bool ContainsTerminationLanguage(string evidence) =>
         TerminationLanguage.Any(kw => evidence.Contains(kw, StringComparison.OrdinalIgnoreCase));
 
     // ── renewal_date invoice-date guard (E1 Part 7 Step 7) ──────────────────────
@@ -384,7 +426,7 @@ public sealed class DocumentBeliefExtractor
     private static readonly string[] InvoiceDateLanguage =
         ["due date", "invoice date"];
 
-    private static bool ContainsInvoiceDateLanguage(string evidence) =>
+    internal static bool ContainsInvoiceDateLanguage(string evidence) =>
         InvoiceDateLanguage.Any(kw => evidence.Contains(kw, StringComparison.OrdinalIgnoreCase));
 
     // ── csat non-customer-quality guard ─────────────────────────────────────────
@@ -394,7 +436,7 @@ public sealed class DocumentBeliefExtractor
     private static readonly string[] NonCustomerQualityLanguage =
         ["study quality", "product quality"];
 
-    private static bool ContainsNonCustomerQualityLanguage(string evidence) =>
+    internal static bool ContainsNonCustomerQualityLanguage(string evidence) =>
         NonCustomerQualityLanguage.Any(kw => evidence.Contains(kw, StringComparison.OrdinalIgnoreCase));
 
     // ── annual_value exclusion guard (consolidated, E1 Part 7 Step 7) ───────────
@@ -411,8 +453,46 @@ public sealed class DocumentBeliefExtractor
     private static readonly string[] AnnualValueExclusionLanguage =
         ["milestone", "insurance", "liability", "indemnif"];
 
-    private static bool ContainsAnnualValueExclusionLanguage(string evidence) =>
+    internal static bool ContainsAnnualValueExclusionLanguage(string evidence) =>
         AnnualValueExclusionLanguage.Any(kw => evidence.Contains(kw, StringComparison.OrdinalIgnoreCase));
+
+    // ── hedged-proposal guard (E-signal Part 5 Step 5) ──────────────────────────
+
+    // Proven real confusion: 0006_pricing.eml, a genuine negotiation email ("initial pricing comes
+    // to roughly $14.50/seat/month... approximately $147,900 annually. This is a STARTING POINT
+    // and I'm sure we can find efficiencies AS WE FINALIZE seat counts.") — a settled annual_value
+    // belief extracted from language that is explicitly a proposal-in-progress. Applies to BOTH
+    // annual_value and invoice_amount (see call sites) — a hedged dollar figure is never a settled
+    // transaction fact either way. Documents (signed contracts, issued invoices) essentially never
+    // use this language for a final stated figure, so this is expected to be near-inert on the
+    // document corpus — proven, not assumed, by the full corpus-diff re-run.
+    private static readonly string[] HedgedProposalLanguage =
+        ["roughly", "approximately", "starting point", "as we finalize", "estimated", "ballpark", "in the range of"];
+
+    internal static bool ContainsHedgedProposalLanguage(string evidence) =>
+        HedgedProposalLanguage.Any(kw => evidence.Contains(kw, StringComparison.OrdinalIgnoreCase));
+
+    // ── payment_terms evidence-shape guard (E-signal Part 5 Step 5) ─────────────
+
+    // Proven real confusion: 0023_payment_0.eml, a plain "invoice #88208... is due on May 11, 2022"
+    // reminder — the model fabricated payment_terms=0 from a due DATE with no day-count language
+    // anywhere in the quoted evidence. payment_terms' value_type is "integer days"; requiring either
+    // the word "day"/"days" or an explicit "Net N" pattern somewhere in the evidence itself (not
+    // just a plausible-looking number) rejects a bare due date the same way ContainsInvoiceDateLanguage
+    // rejects a renewal_date drawn from an invoice's own due-date line — a value that is well-typed
+    // in isolation, rejected once its own quoted context proves the period was never actually
+    // stated. Deliberately loose (a bare substring check, not requiring the digit and "day"/"days"
+    // to be adjacent) — a real document's evidence phrases the digit and unit with intervening
+    // punctuation ("within thirty (30) days of the invoice date"), and rejecting on adjacency
+    // would incorrectly break that legitimate case (WriteService_AppliesTierCeiling and
+    // PaymentTermsTerminationGuardTests.RealInvoicePaymentTermsEvidence_StillPasses_GuardDoesNotOverDrop
+    // both depend on this staying permissive).
+    private static readonly Regex PaymentTermsNetPattern =
+        new(@"\bnet\s*\d+\b", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
+    internal static bool ContainsExplicitDayCount(string evidence) =>
+        evidence.Contains("day", StringComparison.OrdinalIgnoreCase) ||
+        PaymentTermsNetPattern.IsMatch(evidence);
 
     // ── JSON helpers ───────────────────────────────────────────────────────────
 

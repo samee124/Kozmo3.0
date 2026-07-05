@@ -1,0 +1,132 @@
+{
+  "40baed3798c7d3ad43f793a1820b3b1289a82f58bdfc969152f278bce41b7f1c": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Payment Terms: Net 30 days from invoice\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The email explicitly states the payment terms as \\u0027Net 30 days from invoice\\u0027.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "fa34de66fab5a289f737fcc4911980f1c80f0d689ed02009ca52976dd16123c1": {
+    "answerJson": "{\u0022metadata\u0022:[{\u0022field\u0022:\u0022commitment\u0022,\u0022value\u0022:\u0022suggesting a kick-off call to discuss the initial scope of work\u0022,\u0022evidence\u0022:\u0022As next steps, I would suggest scheduling a brief kick-off call to discuss the initial scope of work and to confirm test article submission timelines.\u0022},{\u0022field\u0022:\u0022request\u0022,\u0022value\u0022:\u0022asking to forward the W-9 and ACH banking form to Accounts Payable\u0022,\u0022evidence\u0022:\u0022Please also feel free to forward the W-9 and ACH banking form (which I have attached) to your Accounts Payable team at your earliest convenience so that we can be set up in your vendor system before the first invoice.\u0022},{\u0022field\u0022:\u0022sentiment\u0022,\u0022value\u0022:\u0022positive\u0022,\u0022evidence\u0022:\u0022We very much look forward to supporting Revolution Medicines\\u0027 in vitro toxicology programme.\u0022}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The email contains clear expressions of commitment, a request, and positive sentiment toward the vendor relationship.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "a284fa2e57d55c632c538edf6c4f4c71c4bfffc236bbb8367d7135b2d88b62d3": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:30,\u0022evidence\u0022:\u0022Due Date: 14 August 2022 (Net 30)\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022invoice_amount\u0022,\u0022value\u0022:33600,\u0022evidence\u0022:\u0022Amount Due: $33,600.00\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The email explicitly states the payment terms and the invoice amount.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "140bc9d488f2b1a9197024c88adda20123063af2ececeba446ae89a0bb94d563": {
+    "answerJson": "{\u0022metadata\u0022:[],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The email is purely transactional, providing invoice details and payment information without expressing any sentiment, commitments, issues, stakeholder changes, or requests.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "5b4321e9d3881f6abc20d87c89e3091702ac9be910d6ad4056a94aa98bd946cf": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022annual_value\u0022,\u0022value\u0022:92000,\u0022evidence\u0022:\u0022Total Value: $92,000\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:0,\u0022evidence\u0022:\u0022Please target shipping your compounds by 29 March 2023 to ensure the EpiOcular study initiates on schedule.\u0022,\u0022confidence\u0022:0.0}],\u0022confidence\u0022:0.5,\u0022reasoning\u0022:\u0022The email explicitly states the total value of the SOW, but does not provide any payment terms.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "d060aea37e24e1a529f8a192c582f302bbf906d1629c6ccdb88bc7250ae95a7f": {
+    "answerJson": "{\u0022metadata\u0022:[{\u0022field\u0022:\u0022sentiment\u0022,\u0022value\u0022:\u0022positive\u0022,\u0022evidence\u0022:\u0022Thank you for returning the executed SOW-02... thank you for arranging that promptly.\u0022},{\u0022field\u0022:\u0022commitment\u0022,\u0022value\u0022:\u0022shipping compounds by 29 March 2023\u0022,\u0022evidence\u0022:\u0022Please target shipping your compounds by 29 March 2023 to ensure the EpiOcular study initiates on schedule.\u0022},{\u0022field\u0022:\u0022request\u0022,\u0022value\u0022:\u0022shipping your compounds by 29 March 2023\u0022,\u0022evidence\u0022:\u0022Please target shipping your compounds by 29 March 2023 to ensure the EpiOcular study initiates on schedule.\u0022}],\u0022confidence\u0022:0.9,\u0022reasoning\u0022:\u0022The email expresses a positive sentiment and includes a clear commitment and request regarding the shipping of compounds.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "dc7628b85a109fc60e3e0db94a7f02f6d4b1484edf727afe83de04a9f13188ae": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:45,\u0022evidence\u0022:\u0022AP should be able to process within the standard Net 45 window.\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The email explicitly states the payment terms as \\u0027Net 45\\u0027.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "ca01a29e5d2fa90ab4dcf0d181bfdf0e27cd6d5a2e8042a165b708b3b7200ae4": {
+    "answerJson": "{\u0022metadata\u0022:[{\u0022field\u0022:\u0022request\u0022,\u0022value\u0022:\u0022A request for a supplemental timesheet or resource summary\u0022,\u0022evidence\u0022:\u0022Could you send a supplemental timesheet or resource summary for the period 01 April \\u2013 30 June 2022?\u0022},{\u0022field\u0022:\u0022stakeholder_signal\u0022,\u0022value\u0022:\u0022A request to copy a specific email address on future submissions\u0022,\u0022evidence\u0022:\u0022Also, please copy ap@prudential.com on all future invoice submissions to ensure they reach the right team directly.\u0022}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The email contains a clear request for additional documentation and a directive regarding future communications.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "dc6a14ab715f63a219d122c74e087be624b133739c067338022141f830cdd472": {
+    "answerJson": "{\u0022facts\u0022:[],\u0022confidence\u0022:0.0,\u0022reasoning\u0022:\u0022No explicit, settled facts regarding payment terms, renewal date, annual value, invoice amount, or SLA uptime were stated in the email.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "e0cd098cde9958d70d710be46e7977a0b6982c7684c0e0c7e22d9864f89b3966": {
+    "answerJson": "{\u0022metadata\u0022:[{\u0022field\u0022:\u0022issue_raised\u0022,\u0022value\u0022:\u0022There is a discrepancy in the payment terms stated in the invoice compared to what was discussed.\u0022,\u0022evidence\u0022:\u0022The invoice states Net 45 days, however our team believed we had discussed Net 30 during the initial negotiations.\u0022},{\u0022field\u0022:\u0022request\u0022,\u0022value\u0022:\u0022A request for confirmation of the applicable payment terms and clarification on the legal entity name on the invoices.\u0022,\u0022evidence\u0022:\u0022Could you confirm which payment terms apply under the MSA (MHS-MSA-2021-ABCT)? Also \\u2014 could you clarify the legal entity name on the invoices?\u0022}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The email clearly raises an issue regarding payment terms and requests confirmation and clarification from the vendor.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "598ea9c23eed1268447ecf702f5e126fa433709ff76a11587d69f3ff3203e976": {
+    "answerJson": "{\u0022facts\u0022:[],\u0022confidence\u0022:0.0,\u0022reasoning\u0022:\u0022No explicit, settled facts regarding payment terms, renewal date, annual value, invoice amount, or SLA uptime are stated in the email.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "3b585655a04fcca75965acef4661559ebfcfaec032728c6e415c939a19653b6f": {
+    "answerJson": "{\u0022metadata\u0022:[{\u0022field\u0022:\u0022stakeholder_signal\u0022,\u0022value\u0022:\u0022A new point of contact is introduced for day-to-day communication.\u0022,\u0022evidence\u0022:\u0022looping in James Okafor, our Workplace Operations Manager, who will be the day-to-day point of contact\u0022},{\u0022field\u0022:\u0022commitment\u0022,\u0022value\u0022:\u0022James is tasked with testing the sandbox and providing feedback.\u0022,\u0022evidence\u0022:\u0022James, can you take the sandbox for a spin and report back?\u0022}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The email clearly introduces a new contact and assigns a specific task with a request for feedback.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "4566b8dc56ad95bb6db62316ea395c345cf228adb9dec5431cb9c8f33f19029a": {
+    "answerJson": "{\u0022facts\u0022:[],\u0022confidence\u0022:0.0,\u0022reasoning\u0022:\u0022No explicit, settled facts regarding payment terms, renewal date, annual value, invoice amount, or SLA uptime were stated in the email.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "f3a731823d4f08cc704e6dfa14a82f09139fccd28f7429c93798f961c2e4f801": {
+    "answerJson": "{\u0022metadata\u0022:[{\u0022field\u0022:\u0022commitment\u0022,\u0022value\u0022:\u0022The sender commits to finding efficiencies in the pricing.\u0022,\u0022evidence\u0022:\u0022I\\u0027m sure we can find efficiencies as we finalize seat counts.\u0022}],\u0022confidence\u0022:0.9,\u0022reasoning\u0022:\u0022The sender explicitly mentions a commitment to finding efficiencies in the pricing as they finalize seat counts.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "27085110b91ef0cc356c02672d9c322813e3983b4bb13e3aeffbc14b7e54727a": {
+    "answerJson": "{\u0022facts\u0022:[{\u0022criterion\u0022:\u0022invoice_amount\u0022,\u0022value\u0022:10698.15,\u0022evidence\u0022:\u0022invoice #88208 for $10,698.15\u0022,\u0022confidence\u0022:1.0},{\u0022criterion\u0022:\u0022payment_terms\u0022,\u0022value\u0022:0,\u0022evidence\u0022:\u0022due on May 11, 2022\u0022,\u0022confidence\u0022:1.0}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The invoice amount and payment due date are explicitly stated in the email.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "42db5e5acc45a5055fadc0481aaa50ce655dedd932b31e986d931bf08c9862f1": {
+    "answerJson": "{\u0022metadata\u0022:[],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The email is purely transactional, serving as a reminder for an invoice due date, with no expressed sentiment, commitment, issue raised, stakeholder signal, or request.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "34f61cf7110f096e6d86294ed1ac230aeedc745360f990248436b7a8d50216d7": {
+    "answerJson": "{\u0022facts\u0022:[],\u0022confidence\u0022:0.0,\u0022reasoning\u0022:\u0022The email does not contain any explicit, settled facts regarding payment terms, renewal date, annual value, invoice amount, or SLA uptime.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "a22af693ef57559070d665cd4ef0494d932259d78e5c6445219643b0a2fb534e": {
+    "answerJson": "{\u0022metadata\u0022:[{\u0022field\u0022:\u0022stakeholder_signal\u0022,\u0022value\u0022:\u0022a handoff to Marcus\u0022,\u0022evidence\u0022:\u0022Thanks Sarah for the smooth handoff.\u0022},{\u0022field\u0022:\u0022commitment\u0022,\u0022value\u0022:\u0022Marcus will review the account history and reach out shortly\u0022,\u0022evidence\u0022:\u0022I\\u0027ll review the account history and reach out shortly to introduce myself properly.\u0022}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The email clearly expresses a handoff to Marcus and his commitment to review the account history and reach out.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "fbe6bdfbbdeaf9682414bfec86a4ecd3a86d7a433ec7e4e7403014e3dcd36cdd": {
+    "answerJson": "{\u0022facts\u0022:[],\u0022confidence\u0022:0.0,\u0022reasoning\u0022:\u0022No explicit, settled facts regarding payment terms, renewal date, annual value, invoice amount, or SLA uptime are stated in the email.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "038289192f706fc5d7c241ebc5fb2f5bee257b7fff28f4df93be8d7e68411da8": {
+    "answerJson": "{\u0022metadata\u0022:[{\u0022field\u0022:\u0022sentiment\u0022,\u0022value\u0022:\u0022strained\u0022,\u0022evidence\u0022:\u0022a 3-hour outage on a core module is well outside what we\\u0027d expect from an SLA standpoint\u0022},{\u0022field\u0022:\u0022issue_raised\u0022,\u0022value\u0022:\u0022a problem with a 3-hour outage on a core module\u0022,\u0022evidence\u0022:\u0022a 3-hour outage on a core module is well outside what we\\u0027d expect from an SLA standpoint. We\\u0027d like to discuss remediation.\u0022}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The email expresses a strained sentiment regarding the outage and raises an issue about the SLA expectations.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "c3169a2d6c5bb50a992298dafbc68bce94e9608c8b4869894ae759516fb82392": {
+    "answerJson": "{\u0022facts\u0022:[],\u0022confidence\u0022:0.0,\u0022reasoning\u0022:\u0022No explicit, settled facts regarding payment terms, renewal date, annual value, invoice amount, or SLA uptime are stated in the email.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "02938e7f0a500480dc7660a27b2a57025b1b1002079735feb0c9cba6c7dc7af6": {
+    "answerJson": "{\u0022metadata\u0022:[{\u0022field\u0022:\u0022issue_raised\u0022,\u0022value\u0022:\u0022SLA issues have been raised as a concern.\u0022,\u0022evidence\u0022:\u0022given some of the SLA issues this year\u0022},{\u0022field\u0022:\u0022request\u0022,\u0022value\u0022:\u0022A discussion about improved terms is requested.\u0022,\u0022evidence\u0022:\u0022Let\\u0027s discuss what improved terms could look like.\u0022}],\u0022confidence\u0022:0.9,\u0022reasoning\u0022:\u0022The email explicitly mentions SLA issues and requests a discussion about improved terms.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "86ef3f4670c43eec93c6b2e8a449f17524b7bd32b45599553f7cde86c0a3ac2b": {
+    "answerJson": "{\u0022facts\u0022:[],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022No explicit facts regarding payment terms, renewal date, annual value, invoice amount, or SLA uptime are stated in the email.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "0c8528444dacfe163725ae9430a3e33d9a1fd3eac9e601c4363836471dc16147": {
+    "answerJson": "{\u0022metadata\u0022:[{\u0022field\u0022:\u0022sentiment\u0022,\u0022value\u0022:\u0022positive\u0022,\u0022evidence\u0022:\u0022Appreciate the quick turnaround.\u0022}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The sender expresses appreciation for the quick turnaround, indicating a positive sentiment toward the vendor relationship.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "5623b5077953448e1d4a1d819625b95e63c862371c586b53a9955fa28966e873": {
+    "answerJson": "{\u0022facts\u0022:[],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The email does not contain any explicit, settled facts regarding payment terms, renewal dates, annual values, invoice amounts, or SLA uptime.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "aa66eab7f067e9fc6f2823849b321fc1791da2073d47dfa41e66d1a6a5617d92": {
+    "answerJson": "{\u0022metadata\u0022:[{\u0022field\u0022:\u0022stakeholder_signal\u0022,\u0022value\u0022:\u0022Change in contact for project communications\u0022,\u0022evidence\u0022:\u0022I\\u0027ve updated our internal records to route project communications to OIIT PMO going forward instead of the prior billing contact.\u0022}],\u0022confidence\u0022:1.0,\u0022reasoning\u0022:\u0022The email clearly indicates a change in who will be handling project communications, which qualifies as a stakeholder signal.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  }
+}
