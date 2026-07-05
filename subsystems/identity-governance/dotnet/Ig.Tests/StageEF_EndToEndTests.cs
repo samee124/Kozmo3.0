@@ -390,6 +390,12 @@ public sealed class StageEF_EndToEndTests : IDisposable
         Assert.Single(all); // Only the vendor (IIVS)
         Assert.DoesNotContain(all, v => v.CanonicalName.Contains("Revolution", StringComparison.OrdinalIgnoreCase));
         Assert.Contains(all,      v => v.CanonicalName.Contains("Vitro",       StringComparison.OrdinalIgnoreCase));
+
+        // E-signal Part 5 Step 3: EntityRole is no longer discarded at Stage F — the resolved
+        // IIVS vendor now carries the "vendor" role Stage C already computed, distinguishable
+        // from "customer"/"issuer"/"internal" downstream (e.g. email-from-vendor attribution).
+        var iivs = all.Single(v => v.CanonicalName.Contains("Vitro", StringComparison.OrdinalIgnoreCase));
+        Assert.Equal("vendor", iivs.EntityRole);
     }
 
     [Fact]

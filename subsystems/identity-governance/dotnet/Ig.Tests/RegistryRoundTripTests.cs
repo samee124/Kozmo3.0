@@ -36,7 +36,8 @@ public sealed class RegistryRoundTripTests : IDisposable
             Status:            RegistryStatus.Confirmed,
             RebrandMapRef:     "v-old-001",
             AcquisitionMapRef: null,
-            CreatedAt:         new DateTimeOffset(2025, 1, 15, 0, 0, 0, TimeSpan.Zero));
+            CreatedAt:         new DateTimeOffset(2025, 1, 15, 0, 0, 0, TimeSpan.Zero),
+            EntityRole:        "vendor");
 
         await _registry.SaveAsync(vendor);
 
@@ -51,6 +52,7 @@ public sealed class RegistryRoundTripTests : IDisposable
         Assert.Equal(RegistryStatus.Confirmed, retrieved.Status);
         Assert.Equal("v-old-001",         retrieved.RebrandMapRef);
         Assert.Null(retrieved.AcquisitionMapRef);
+        Assert.Equal("vendor",            retrieved.EntityRole);
         Assert.Equal(2, retrieved.Aliases.Count);
         Assert.Contains(retrieved.Aliases, a => a.RawName == "Acme Corp" && a.ProvenanceDocId == "doc-001");
         Assert.Contains(retrieved.Aliases, a => a.RawName == "Acme Corporation" && a.ProvenanceDocId == null);
@@ -79,6 +81,20 @@ public sealed class RegistryRoundTripTests : IDisposable
     {
         var result = await _registry.GetAsync(Guid.NewGuid());
         Assert.Null(result);
+    }
+
+    [Fact]
+    public async Task SaveAndGet_LegacyVendor_EntityRoleDefaultsNull()
+    {
+        // A vendor saved without EntityRole (the field's default) round-trips as null — the
+        // legacy shape, unaffected by E-signal Part 5 Step 3's addition.
+        var id = Guid.NewGuid();
+        await _registry.SaveAsync(MakeVendor(id, "Legacy Vendor Co", RegistryStatus.Confirmed));
+
+        var retrieved = await _registry.GetAsync(id);
+
+        Assert.NotNull(retrieved);
+        Assert.Null(retrieved.EntityRole);
     }
 
     private static CanonicalVendor MakeVendor(Guid id, string name, RegistryStatus status) =>

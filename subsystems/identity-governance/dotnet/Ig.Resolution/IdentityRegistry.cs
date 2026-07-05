@@ -31,7 +31,8 @@ public sealed class IdentityRegistry : IIdentityRegistry
             RebrandMapRef:        vendor.RebrandMapRef,
             AcquisitionMapRef:    vendor.AcquisitionMapRef,
             AbsorbedIntoVendorId: vendor.AbsorbedIntoVendorId,
-            ProgramRunId:         programRunId);
+            ProgramRunId:         programRunId,
+            EntityRole:           vendor.EntityRole);
 
         await _store.SaveRegistryVendorAsync(row, ct);
 
@@ -106,6 +107,7 @@ public sealed class IdentityRegistry : IIdentityRegistry
             RebrandMapRef:        row.RebrandMapRef,
             AcquisitionMapRef:    row.AcquisitionMapRef,
             CreatedAt:            row.CreatedAt,
-            AbsorbedIntoVendorId: row.AbsorbedIntoVendorId);
+            AbsorbedIntoVendorId: row.AbsorbedIntoVendorId,
+            EntityRole:           row.EntityRole);
     }
 }

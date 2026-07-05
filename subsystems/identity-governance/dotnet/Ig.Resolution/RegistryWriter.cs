@@ -77,6 +77,8 @@ public sealed class RegistryWriter
             Status:            status,
             RebrandMapRef:     null,                    // empty this phase
             AcquisitionMapRef: null,
-            CreatedAt:         now);
+            CreatedAt:         now,
+            EntityRole:        cluster.EntityRole);      // Stage C's role, carried through instead
+                                                          // of discarded (E-signal Part 5 Step 3)
     }
 }

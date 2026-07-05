@@ -544,6 +544,7 @@ public sealed class SqliteEntityStore : IEntityStore, IRegistryStore, ICheckInRo
             ("acquisition_map_ref",    "TEXT"),
             ("absorbed_into_vendor_id","TEXT"),
             ("program_run_id",         "TEXT"),
+            ("entity_role",            "TEXT"),
         };
         foreach (var (col, def) in vendorCols)
             TryAddColumn("vendors", col, def);
@@ -679,12 +680,12 @@ public sealed class SqliteEntityStore : IEntityStore, IRegistryStore, ICheckInRo
               (id, canonical_name, created_at,
                comparison_key, entity_type, confidence, flags, status,
                rebrand_map_ref, acquisition_map_ref, absorbed_into_vendor_id,
-               program_run_id)
+               program_run_id, entity_role)
             VALUES
               (@id, @name, @created_at,
                @comparison_key, @entity_type, @confidence, @flags, @status,
                @rebrand_map_ref, @acquisition_map_ref, @absorbed_into_vendor_id,
-               @program_run_id)
+               @program_run_id, @entity_role)
             """;
         cmd.Parameters.AddWithValue("@id",                      vendor.VendorId.ToString());
         cmd.Parameters.AddWithValue("@name",                    vendor.CanonicalName);
@@ -702,6 +703,7 @@ public sealed class SqliteEntityStore : IEntityStore, IRegistryStore, ICheckInRo
         cmd.Parameters.AddWithValue("@program_run_id",          vendor.ProgramRunId.HasValue
                                                                     ? vendor.ProgramRunId.Value.ToString()
                                                                     : (object)DBNull.Value);
+        cmd.Parameters.AddWithValue("@entity_role",             vendor.EntityRole ?? (object)DBNull.Value);
         cmd.ExecuteNonQuery();
         return Task.CompletedTask;
     }
@@ -730,7 +732,7 @@ public sealed class SqliteEntityStore : IEntityStore, IRegistryStore, ICheckInRo
         cmd.CommandText =
             "SELECT id, canonical_name, created_at, comparison_key, entity_type, " +
             "       confidence, flags, status, rebrand_map_ref, acquisition_map_ref, " +
-            "       absorbed_into_vendor_id, program_run_id " +
+            "       absorbed_into_vendor_id, program_run_id, entity_role " +
             "FROM vendors WHERE id = @id";
         cmd.Parameters.AddWithValue("@id", vendorId.ToString());
         using var reader = cmd.ExecuteReader();
@@ -763,7 +765,7 @@ public sealed class SqliteEntityStore : IEntityStore, IRegistryStore, ICheckInRo
         cmd.CommandText =
             "SELECT id, canonical_name, created_at, comparison_key, entity_type, " +
             "       confidence, flags, status, rebrand_map_ref, acquisition_map_ref, " +
-            "       absorbed_into_vendor_id, program_run_id " +
+            "       absorbed_into_vendor_id, program_run_id, entity_role " +
             "FROM vendors";
         var results = new List<RegistryVendorRow>();
         using var reader = cmd.ExecuteReader();
@@ -785,7 +787,8 @@ public sealed class SqliteEntityStore : IEntityStore, IRegistryStore, ICheckInRo
             RebrandMapRef:        reader.IsDBNull(8)  ? null : reader.GetString(8),
             AcquisitionMapRef:    reader.IsDBNull(9)  ? null : reader.GetString(9),
             AbsorbedIntoVendorId: reader.IsDBNull(10) ? null : Guid.Parse(reader.GetString(10)),
-            ProgramRunId:         reader.IsDBNull(11) ? null : Guid.Parse(reader.GetString(11)));
+            ProgramRunId:         reader.IsDBNull(11) ? null : Guid.Parse(reader.GetString(11)),
+            EntityRole:           reader.IsDBNull(12) ? null : reader.GetString(12));
 
     // ── ICheckInRowStore ──────────────────────────────────────────────────────
 

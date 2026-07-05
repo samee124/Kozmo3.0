@@ -38,5 +38,11 @@ public sealed record CanonicalVendor(
     string?               RebrandMapRef,
     string?               AcquisitionMapRef,
     DateTimeOffset        CreatedAt,
-    Guid?                 AbsorbedIntoVendorId = null
+    Guid?                 AbsorbedIntoVendorId = null,
+    // "vendor"|"customer"|"issuer"|"internal"|"unknown" — Stage C's CandidateCluster.EntityRole,
+    // carried through instead of discarded (E-signal Part 5 Step 3). Stage E already used this to
+    // gate NonVendor disposition before this field existed; this is the same value, now persisted
+    // alongside the vendor instead of thrown away after the gate check. Null for any vendor
+    // resolved before this field existed (legacy rows).
+    string?               EntityRole = null
 );
