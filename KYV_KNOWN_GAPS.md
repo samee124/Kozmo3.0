@@ -379,3 +379,28 @@ pre-Step-5 baseline).
   say it is. Worth eventually either writing the codegen script for real or updating the header
   comments / `STEP_1_0_contract_amendment.md` to describe the actual (manual, dual-file) discipline
   — not chased further now.
+- **Email threading is implicit, not header-based — the E-signal spec's thread-awareness section
+  assumes something the real corpus doesn't have.** Surveyed all 338 real `.eml` files while
+  building `EmailParser` (E-signal Part 5 Step 2, `fb28037`): zero files carry an `In-Reply-To` or
+  `References` header. `Scenario 07`'s 300 emails (the corpus this matters most for) are ordered by
+  filename (`0001_...`, `0002_...`) and by `Date`, not by MIME reference chains.
+  `Kozmo_Phase_E_Signal_Spec.md` §3.4/Part 5 Step 7 ("Thread awareness") is written assuming
+  reference-header-driven threading — that assumption doesn't hold here. **Spec-affecting, not just
+  a code gap:** before Step 7, decide one of (a) derive threading from filename sequence +
+  subject-line similarity + participant pair (corpus-specific, works today, brittle to a corpus that
+  numbers files differently), (b) support both real reference headers and the heuristic fallback
+  (more robust, more work), or (c) defer thread-relative signals (responsiveness-across-a-thread,
+  reply-relative sentiment) until real threading data exists, scoring only per-message signals for
+  now. `ParsedEmail.InReplyTo`/`References` are already on the struct and will be empty/null for
+  every message in this corpus — not a parsing bug, an honest reflection of the source data. Update
+  §3.4 before Step 7 starts.
+- **The two hardcoded tier-ceiling fallback switches still need a `Correspondence` case.**
+  `SqliteEntityStore.FallbackVendorFileTierRank` and `AnsweringPrompt.FallbackTierCeiling` (both
+  profile-less fallbacks, only reached when no `SaasProfile` is supplied — real runs read
+  `source_tiers.saas.v1.json` first via `TryGetValue` and never hit them) don't have a
+  `Correspondence` arm yet; each falls through to its `_ =>` default (`0.0` and `0.5` respectively),
+  which would be wrong if ever exercised for a correspondence-tier belief. Flagged at Step 1
+  (`5c3b27f`) as out of scope for "add the tier and prove it's inert"; carried forward here so it
+  isn't lost. Needs fixing at Step 4/5 (interpretation), when correspondence-tier beliefs first get
+  produced and could realistically reach a profile-less code path (e.g. a test harness or tool that
+  doesn't wire a `SaasProfile`).
