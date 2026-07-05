@@ -149,14 +149,14 @@ public static class VendorFileRenderer
             return;
         }
 
-        sb.AppendLine("| Claim Key | Dimension | Value | Tier | Confidence | Ver | Provenance | Expires |");
-        sb.AppendLine("|---|---|---|---|---|---|---|---|");
+        sb.AppendLine("| Claim Key | Dimension | Value | Basis | Tier | Confidence | Ver | Provenance | Expires |");
+        sb.AppendLine("|---|---|---|---|---|---|---|---|---|");
         foreach (var b in vfBeliefs)
         {
             var dim     = b.Dimension?.ToString() ?? "—";
             var prov    = b.Provenance?.Locator ?? "—";
             var expires = b.ValidUntil.HasValue ? b.ValidUntil.Value.ToString("yyyy-MM-dd") : "—";
-            sb.AppendLine($"| {b.ClaimKey} | {dim} | {FormatValue(b)} | {b.SourceTier} | {b.Confidence:F3} | {b.Version} | {prov} | {expires} |");
+            sb.AppendLine($"| {b.ClaimKey} | {dim} | {FormatValue(b)} | {FormatBasis(b)} | {b.SourceTier} | {b.Confidence:F3} | {b.Version} | {prov} | {expires} |");
         }
         sb.AppendLine();
         sb.AppendLine("---");
@@ -184,10 +184,10 @@ public static class VendorFileRenderer
             return;
         }
 
-        sb.AppendLine("| Claim Key | Value | Tier | Ver | Superseded By |");
-        sb.AppendLine("|---|---|---|---|---|");
+        sb.AppendLine("| Claim Key | Value | Basis | Tier | Ver | Superseded By |");
+        sb.AppendLine("|---|---|---|---|---|---|");
         foreach (var b in superseded)
-            sb.AppendLine($"| {b.ClaimKey} | {FormatValue(b)} | {b.SourceTier} | {b.Version} | `{b.SupersededBy}` |");
+            sb.AppendLine($"| {b.ClaimKey} | {FormatValue(b)} | {FormatBasis(b)} | {b.SourceTier} | {b.Version} | `{b.SupersededBy}` |");
         sb.AppendLine();
         sb.AppendLine("---");
         sb.AppendLine();
@@ -350,12 +350,34 @@ public static class VendorFileRenderer
 
     // ── Helpers ───────────────────────────────────────────────────────────────
 
-    private static string FormatValue(Belief b) =>
-        b.Value switch
+    // E1 Part 7 Step 7 Fix 5 (display only — never touches Belief.Value or scoring):
+    // renewal_date persists as a raw Unix timestamp (see DocumentBeliefExtractor/
+    // ClaimKeyDefinition "renewal_date" positive_example) — render it as a calendar date, not a
+    // ten-digit number. Every other claim key keeps the prior magnitude-based formatting; a
+    // scored claim key's Value (sla_uptime, csat) is the banded 0-1 rubric score, not a raw
+    // percentage/rating — FormatBasis below surfaces the real quoted fact for those.
+    private static string FormatValue(Belief b)
+    {
+        if (string.Equals(b.ClaimKey, "renewal_date", StringComparison.OrdinalIgnoreCase))
+        {
+            try { return DateTimeOffset.FromUnixTimeSeconds((long)b.Value).ToString("yyyy-MM-dd"); }
+            catch (ArgumentOutOfRangeException) { /* fall through to raw formatting below */ }
+        }
+
+        return b.Value switch
         {
             >= 10000 => b.Value.ToString("N0"),
             >= 100   => b.Value.ToString("F0"),
             >= 1.0   => b.Value.ToString("F2"),
             _        => b.Value.ToString("F3")
         };
+    }
+
+    // The human-readable fact behind Value — most useful for scored claim keys (sla_uptime,
+    // csat) whose Value is a banded 0-1 rubric score, not the raw percentage/rating a reader
+    // typed in (e.g. a csat Value of 1.00 came from "4.6 out of 5.0"). Derivation carries that
+    // quoted text already; this just surfaces it instead of leaving it invisible in the report.
+    // Escaped for the markdown table — evidence text can legitimately contain "|".
+    private static string FormatBasis(Belief b) =>
+        string.IsNullOrEmpty(b.Derivation) ? "—" : b.Derivation.Replace("|", "\\|");
 }

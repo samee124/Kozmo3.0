@@ -146,6 +146,20 @@ public sealed record ClaimKeyDefinition(
     // hand-authored prompt exactly (same cassette cache keys, zero re-record risk). Empty for
     // claim keys not projected into the extraction prompt.
     public string PromptFragment { get; init; } = "";
+
+    // E1 Part 7 Step 7 Fix 4 — the scoring_rubric.saas.v1.json key this claim key bands against,
+    // when it differs from the claim key itself (e.g. sla_uptime -> uptime_sla, csat -> csat_score).
+    // Null when the claim key name matches its rubric criterion name exactly. Single source of
+    // truth for the claim-key -> rubric-criterion translation, replacing the two independent
+    // hardcoded dictionaries previously in RulesExtractor and BeliefPersistenceStage.
+    public string? RubricCriterion { get; init; }
+
+    // E1 Part 7 Step 7 Fix 2 — vendor classes (as named in expected_belief_sets.saas.v1.json's
+    // vendor_classes map) for which this claim key is an expected slot. Catalogue.cs derives
+    // ExpectedBeliefSets from these tags directly, so the catalogue is the single source of truth
+    // for "which claim keys should exist for this vendor class" — no separately-maintained list to
+    // drift out of sync. Empty for claim keys that are not an expected slot for any vendor class.
+    public IReadOnlyList<string> ExpectedFor { get; init; } = Array.Empty<string>();
 };
 
 public sealed record ClassificationRule(

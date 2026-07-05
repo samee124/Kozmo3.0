@@ -90,7 +90,7 @@ var anchor          = new DateTimeOffset(2024, 11, 15, 0, 0, 0, TimeSpan.Zero);
 var trace1          = Guid.Parse("00000000-0000-0000-0000-000000000001");
 
 Belief Make(
-    string idStr, Guid entityId, Dimension dim, string criterion,
+    string idStr, Guid entityId, Dimension? dim, string criterion,
     double value, SourceTier tier, double confidence, string derivation) =>
     new(
         Id:            Guid.Parse(idStr),
@@ -111,33 +111,23 @@ Belief Make(
 IReadOnlyList<Belief> iivsBeliefs =
 [
     Make("b1000001-0000-0000-0000-000000000001", iivsVendorId,
-        Dimension.Operational, "uptime_sla_exists",
-        0.85, SourceTier.Primary, 0.90,
+        Dimension.Operational, "sla_uptime",
+        99.9, SourceTier.Primary, 0.90,
         "MSA Section 3.1 specifies 99.9% uptime SLA with measurement period of calendar month"),
 
-    Make("b1000002-0000-0000-0000-000000000002", iivsVendorId,
-        Dimension.Operational, "uptime_sla_percentage",
-        0.85, SourceTier.Primary, 0.90,
-        "Contracted uptime SLA is 99.9% as specified in the executed Master Services Agreement"),
-
-    Make("b1000003-0000-0000-0000-000000000003", iivsVendorId,
-        Dimension.Experiential, "sla_met_last_12_months",
-        0.80, SourceTier.Verified, 0.82,
-        "Monitoring platform reports 99.95% uptime over the past 12 months, exceeding the 99.9% SLA"),
-
     Make("b1000004-0000-0000-0000-000000000004", iivsVendorId,
-        Dimension.Experiential, "csat_score",
-        0.75, SourceTier.Inferred, 0.70,
+        Dimension.Experiential, "csat",
+        4.2, SourceTier.Inferred, 0.70,
         "CSAT score of 4.2 out of 5.0 recorded in Q3 2024 survey across 12 respondents"),
 
     Make("b1000005-0000-0000-0000-000000000005", iivsVendorId,
-        Dimension.Financial, "signed_contract_with_payment_terms",
-        0.90, SourceTier.Primary, 0.95,
+        Dimension.Financial, "payment_terms",
+        30, SourceTier.Primary, 0.95,
         "Master Services Agreement signed 2022-03-15 with net-30 payment terms and auto-renewal clause"),
 
     Make("b1000006-0000-0000-0000-000000000006", iivsVendorId,
-        Dimension.Financial, "annual_contract_value",
-        0.80, SourceTier.Primary, 0.95,
+        Dimension.Financial, "annual_value",
+        285000, SourceTier.Primary, 0.95,
         "Annual contract value is $285,000 USD as specified in executed Order Form OF-2022-003"),
 
     Make("b1000007-0000-0000-0000-000000000007", iivsVendorId,
@@ -146,21 +136,21 @@ IReadOnlyList<Belief> iivsBeliefs =
         "VP Engineering confirmed vendor roadmap aligns with platform modernisation initiative in Q4 2024 business review"),
 
     Make("b1000008-0000-0000-0000-000000000008", iivsVendorId,
-        Dimension.Strategic, "renewal_date",
-        0.80, SourceTier.Primary, 0.90,
+        null, "renewal_date",
+        1741910400, SourceTier.Primary, 0.90,
         "Contract renewal date is 2025-03-14 as specified in MSA Section 12.2"),
 ];
 
 IReadOnlyList<Belief> regulusBeliefs =
 [
     Make("b2000001-0000-0000-0000-000000000001", regulusVendorId,
-        Dimension.Financial, "signed_contract_with_payment_terms",
-        0.80, SourceTier.Primary, 0.88,
+        Dimension.Financial, "payment_terms",
+        60, SourceTier.Primary, 0.88,
         "Purchase Order PO-2023-047 signed with net-60 payment terms; total value $42,000"),
 
     Make("b2000002-0000-0000-0000-000000000002", regulusVendorId,
-        Dimension.Financial, "annual_contract_value",
-        0.65, SourceTier.Inferred, 0.72,
+        Dimension.Financial, "annual_value",
+        42000, SourceTier.Inferred, 0.72,
         "Estimated annual spend of $42,000 inferred from single executed purchase order"),
 ];
 

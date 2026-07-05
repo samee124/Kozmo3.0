@@ -28,12 +28,11 @@ public sealed class Catalogue : ICatalogue
         // Vendor file extensions — optional; silently absent pre-migration
         var claimKeys    = TryLoadJson(dir, "claim_key_catalogue.saas.v1.json");
         var docTypeMap   = TryLoadJson(dir, "doc_type_tier_map.saas.v1.json");
-        var expectedSets = TryLoadJson(dir, "expected_belief_sets.saas.v1.json");
         var extractionSchemas = TryLoadJson(dir, "extraction_schemas.saas.v1.json");
         var metadataFields    = TryLoadJson(dir, "metadata_field_catalogue.saas.v1.json");
 
         var profile = Assemble(dims, rubric, weights, bands, postures, tiers, classify, decay, entityRes,
-                               claimKeys, docTypeMap, expectedSets, extractionSchemas, metadataFields);
+                               claimKeys, docTypeMap, extractionSchemas, metadataFields);
         Validate(profile);
         return profile;
     }
@@ -59,7 +58,7 @@ public sealed class Catalogue : ICatalogue
     private static SaasProfile Assemble(
         JsonObject dims, JsonObject rubric, JsonObject weights, JsonObject bands,
         JsonObject postures, JsonObject tiers, JsonObject classify, JsonObject decay, JsonObject entityRes,
-        JsonObject? claimKeys, JsonObject? docTypeMap, JsonObject? expectedSets, JsonObject? extractionSchemas,
+        JsonObject? claimKeys, JsonObject? docTypeMap, JsonObject? extractionSchemas,
         JsonObject? metadataFields)
     {
         var version = weights["version"]?.GetValue<string>() ?? "unknown";
@@ -181,6 +180,9 @@ public sealed class Catalogue : ICatalogue
             {
                 var ck  = kv.Value!.AsObject();
                 var hld = ck["half_life_days"]?.GetValue<int?>();
+                var expectedFor = ck["expected_for"]?.AsArray()
+                    .Select(x => x!.GetValue<string>())
+                    .ToList() ?? new List<string>();
                 claimKeyDefs[kv.Key] = new ClaimKeyDefinition(
                     ClaimClass:     ck["class"]!.GetValue<string>(),
                     ValueType:      ck["value_type"]!.GetValue<string>(),
@@ -193,7 +195,9 @@ public sealed class Catalogue : ICatalogue
                     PositiveExample    = ck["positive_example"]?.GetValue<string>() ?? "",
                     NegativeExample    = ck["negative_example"]?.GetValue<string>() ?? "",
                     DeterministicGuard = ck["deterministic_guard"]?.GetValue<string>(),
-                    PromptFragment     = ck["prompt_fragment"]?.GetValue<string>() ?? ""
+                    PromptFragment     = ck["prompt_fragment"]?.GetValue<string>() ?? "",
+                    RubricCriterion    = ck["rubric_criterion"]?.GetValue<string>(),
+                    ExpectedFor        = expectedFor
                 };
             }
         }
@@ -204,17 +208,23 @@ public sealed class Catalogue : ICatalogue
             foreach (var kv in docTypeMap["map"]!.AsObject())
                 docTypeTierMap[kv.Key] = kv.Value!.GetValue<string>();
 
-        // Expected belief sets (vendor file extension)
+        // Expected belief sets (E1 Part 7 Step 7 Fix 2) — derived from each claim key's
+        // `expected_for` tags in claim_key_catalogue.saas.v1.json, not a separately-maintained
+        // file. The catalogue is the single source of truth for "which claim keys are expected
+        // for this vendor class"; there is nothing else to keep in sync.
         var expectedBeliefSets = new Dictionary<string, IReadOnlyList<string>>();
-        if (expectedSets != null)
-            foreach (var kv in expectedSets["vendor_classes"]!.AsObject())
+        foreach (var kv in claimKeyDefs)
+        {
+            foreach (var vendorClass in kv.Value.ExpectedFor)
             {
-                var vc   = kv.Value!.AsObject();
-                var keys = vc["expected_claim_keys"]!.AsArray()
-                            .Select(x => x!.GetValue<string>())
-                            .ToList();
-                expectedBeliefSets[kv.Key] = keys;
+                if (!expectedBeliefSets.TryGetValue(vendorClass, out var list))
+                {
+                    list = new List<string>();
+                    expectedBeliefSets[vendorClass] = list;
+                }
+                ((List<string>)list).Add(kv.Key);
             }
+        }
 
         // Document-type -> extraction-schema mapping (vendor file extension, E1 Part 7 Step 3/5/6)
         var defaultSchema       = new ExtractionSchema(Array.Empty<string>(), Array.Empty<MetadataFieldGroup>());

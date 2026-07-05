@@ -25,15 +25,6 @@ namespace Kyv.ProgramRunner;
 /// </summary>
 public sealed class BeliefPersistenceStage
 {
-    // Claim key (claim_key_catalogue.saas.v1.json) -> rubric criterion (scoring_rubric.saas.v1.json).
-    // Same underlying concept, different name across the two config files.
-    private static readonly IReadOnlyDictionary<string, string> ScoredClaimKeyToRubricCriterion =
-        new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-        {
-            ["sla_uptime"] = "uptime_sla",
-            ["csat"]       = "csat_score",
-        };
-
     private readonly VendorFileWriteService _writeService;
     private readonly SaasProfile            _profile;
 
@@ -99,13 +90,17 @@ public sealed class BeliefPersistenceStage
     /// <summary>
     /// Structural claim keys persist their raw magnitude unchanged. Scored claim keys are banded
     /// to 0-1 through the existing proven scoring_rubric config; a value outside that rubric's
-    /// domain returns null (abstain), never a guessed score.
+    /// domain returns null (abstain), never a guessed score. The claim-key -> rubric-criterion
+    /// translation (e.g. sla_uptime -> uptime_sla) comes from ClaimKeyDefinition.RubricCriterion —
+    /// the same catalogue-driven field RulesExtractor uses (E1 Part 7 Step 7 Fix 4) — not a
+    /// second, independently-maintained dictionary.
     /// </summary>
     private double? BandIfScored(string claimKey, double rawValue)
     {
-        if (!ScoredClaimKeyToRubricCriterion.TryGetValue(claimKey, out var rubricCriterion))
+        if (!_profile.ClaimKeyCatalogue.TryGetValue(claimKey, out var ckDef) || ckDef.ClaimClass != "scored")
             return rawValue; // structural — VendorFileWriteService zeroes confidence on write
 
+        var rubricCriterion = ckDef.RubricCriterion ?? claimKey;
         return ObservationModule.ScoreFromRubric(rubricCriterion, rawValue, _profile);
     }
 

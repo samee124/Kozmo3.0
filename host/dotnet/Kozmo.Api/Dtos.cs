@@ -85,6 +85,14 @@ public sealed record BeliefViewDto(
     double       Freshness,
     SignalRefDto? Signal)
 {
+    // E1 Part 7 Step 7 Fix 5 (display only — never a fingerprint input): the human-readable
+    // fact behind Value. For scored claim keys (sla_uptime, csat) Value is the banded 0-1 score,
+    // not the raw percentage/rating a reader typed in — Derivation carries the real quoted text
+    // (e.g. "4.6 out of 5.0") that Value alone cannot reconstruct. Null for signal-pipeline
+    // beliefs that never set Derivation.
+    public string? Derivation { get; init; } = null;
+
+
     // ── Confidence-anchor provenance — annotation only, never fingerprint inputs ─
 
     /// <summary>Confidence before the anchor was applied. Non-null when anchor fired.</summary>

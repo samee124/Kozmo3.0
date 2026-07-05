@@ -718,5 +718,85 @@
     "answerJson": "{\u0022answer\u0022:\u0022UNKNOWN\u0022,\u0022confidence\u0022:0.3,\u0022cited_belief_ids\u0022:[],\u0022reasoning\u0022:\u0022The beliefs do not provide a specific date for the contractual renewal of the vendor agreement.\u0022}",
     "confidence": 0.85,
     "reasoningSummary": ""
+  },
+  "3f0ccde473bba347c14f4e4f92fa4f29013291ba273e1d825310d3cf3ab4bffd": {
+    "answerJson": "{\u0022answer\u0022:\u0022UNKNOWN\u0022,\u0022confidence\u0022:0.3,\u0022cited_belief_ids\u0022:[],\u0022reasoning\u0022:\u0022There is no evidence provided regarding the vendor\\u0027s performance against the SLA over the past 12 months.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "ebec90c52a8a0e045812a011fe3e5a2abcd3bd00022e3b072e85b21cac6b4973": {
+    "answerJson": "{\u0022answer\u0022:\u00224.2\u0022,\u0022confidence\u0022:0.7,\u0022cited_belief_ids\u0022:[\u00222\u0022],\u0022reasoning\u0022:\u0022The CSAT score of 4.2 out of 5.0 is recorded in the Q3 2024 survey.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "20eab33820f0da280a734f62ad12438e9f7228df9f72498cfe732b80e4340986": {
+    "answerJson": "{\u0022answer\u0022:\u0022YES\u0022,\u0022confidence\u0022:0.95,\u0022cited_belief_ids\u0022:[\u00223\u0022],\u0022reasoning\u0022:\u0022There is a signed Master Services Agreement that includes defined payment terms.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "63a3e8c5293dbd2b98bda02826440655ea2fcf19ae85dc387d0ef765b4b9d4ec": {
+    "answerJson": "{\u0022answer\u0022:\u0022$285,000\u0022,\u0022confidence\u0022:0.95,\u0022cited_belief_ids\u0022:[\u00221\u0022],\u0022reasoning\u0022:\u0022The total annual contract value is explicitly stated as $285,000 USD in the executed Order Form.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "a41a94c45a62e4deb5b4cb67293adc7280fda0ee130c48ee36751ab3b2a5a2a3": {
+    "answerJson": "{\u0022answer\u0022:\u0022YES\u0022,\u0022confidence\u0022:0.9,\u0022cited_belief_ids\u0022:[\u00226\u0022],\u0022reasoning\u0022:\u0022The MSA specifies a 99.9% uptime SLA, indicating that the vendor has a documented uptime SLA.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "8824cc8318422de72bcca4eff36270b01a8d66c992f8d2a05f7a234260ec729b": {
+    "answerJson": "{\u0022answer\u0022:\u002299.9\u0022,\u0022confidence\u0022:0.9,\u0022cited_belief_ids\u0022:[\u00226\u0022],\u0022reasoning\u0022:\u0022The vendor\\u0027s contracted uptime SLA percentage is specified as 99.9% in MSA Section 3.1.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "48204adc288e04434d4cd45f1032555c8f44ba54925b7ffd1a31577479d87a30": {
+    "answerJson": "{\u0022answer\u0022:\u0022YES\u0022,\u0022confidence\u0022:0.6,\u0022cited_belief_ids\u0022:[\u00225\u0022],\u0022reasoning\u0022:\u0022The VP Engineering confirmed that the vendor\\u0027s roadmap aligns with the platform modernization initiative.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "5d4a0384d7e821caef5021d11ee2c7822c2993787d7247ec9244b309794eb1da": {
+    "answerJson": "{\u0022answer\u0022:\u00222025-03-14\u0022,\u0022confidence\u0022:0.9,\u0022cited_belief_ids\u0022:[\u00224\u0022],\u0022reasoning\u0022:\u0022The contractual renewal date is explicitly stated as 2025-03-14 in the Master Services Agreement.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "66c7fa0279d2b135cd732137fb7abacd573af1854b249bc1d1b05428b4999d5e": {
+    "answerJson": "{\u0022answer\u0022:\u0022UNKNOWN\u0022,\u0022confidence\u0022:0.3,\u0022cited_belief_ids\u0022:[],\u0022reasoning\u0022:\u0022The provided beliefs do not contain any information regarding the vendor\\u0027s performance against their contracted SLA.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "235dc43ec88b3d1689a9911414eaa19530d57a248213f9ef42b15adc85cdecbc": {
+    "answerJson": "{\u0022answer\u0022:\u0022UNKNOWN\u0022,\u0022confidence\u0022:0.3,\u0022cited_belief_ids\u0022:[],\u0022reasoning\u0022:\u0022The provided beliefs do not contain any information regarding the current CSAT or NPS score for the vendor.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "e9ce6587cde1dce9ca689b34c41548d4421103c8d353b74f6e1333e5333846af": {
+    "answerJson": "{\u0022answer\u0022:\u0022YES\u0022,\u0022confidence\u0022:0.88,\u0022cited_belief_ids\u0022:[\u00222\u0022],\u0022reasoning\u0022:\u0022There is a signed purchase order with defined payment terms of net-60.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "3a41efd57ed02f2e69b5e29daf2a84342ae7235d3e65a0f48e60bd71183c9ea1": {
+    "answerJson": "{\u0022answer\u0022:\u002242,000\u0022,\u0022confidence\u0022:0.88,\u0022cited_belief_ids\u0022:[\u00221\u0022,\u00222\u0022],\u0022reasoning\u0022:\u0022The total annual contract value is confirmed by the primary belief regarding the purchase order, which states a total value of $42,000.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "23b1890f2a55f0febcb74a505f4f9a10a2b53457329ff92f1e842e057770f824": {
+    "answerJson": "{\u0022answer\u0022:\u0022UNKNOWN\u0022,\u0022confidence\u0022:0.30,\u0022cited_belief_ids\u0022:[],\u0022reasoning\u0022:\u0022The provided beliefs do not contain any information regarding the vendor\\u0027s uptime SLA.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "c784362e497ef21c487db6a1ce24c04cfefdd10d1b55a4545ec483da157ef004": {
+    "answerJson": "{\u0022answer\u0022:\u0022UNKNOWN\u0022,\u0022confidence\u0022:0.30,\u0022cited_belief_ids\u0022:[],\u0022reasoning\u0022:\u0022The provided beliefs do not contain any information regarding the vendor\\u0027s contracted uptime SLA percentage.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "96e51a584f15548ce94625e8a404837a3371d496799e4d0f5a7f854d1677cf88": {
+    "answerJson": "{\u0022answer\u0022:\u0022UNKNOWN\u0022,\u0022confidence\u0022:0.30,\u0022cited_belief_ids\u0022:[],\u0022reasoning\u0022:\u0022The provided beliefs do not contain any information regarding the alignment of the vendor\\u0027s product roadmap with our strategic direction.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
+  },
+  "307ff624a8c92cf1043f9c4900d83ae32743e6f07e4f1ae76165ac0242ba8c1e": {
+    "answerJson": "{\u0022answer\u0022:\u0022UNKNOWN\u0022,\u0022confidence\u0022:0.30,\u0022cited_belief_ids\u0022:[],\u0022reasoning\u0022:\u0022The provided beliefs do not contain any information regarding the contractual renewal date for the vendor agreement.\u0022}",
+    "confidence": 0.85,
+    "reasoningSummary": ""
   }
 }

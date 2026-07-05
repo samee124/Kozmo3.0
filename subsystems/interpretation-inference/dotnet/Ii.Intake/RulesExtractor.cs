@@ -69,8 +69,12 @@ public sealed class RulesExtractor
 
     private double NormaliseValue(string claimKey, double rawValue, ClaimKeyDefinition ckDef)
     {
-        // For scored claims, apply the scoring rubric if present; else treat raw as 0–1 already
-        if (ckDef.ClaimClass == "scored" && _profile.ScoringRubric.TryGetValue(claimKey, out var rubric))
+        // For scored claims, apply the scoring rubric if present; else treat raw as 0–1 already.
+        // A claim key's rubric criterion name can differ from the claim key itself (e.g.
+        // sla_uptime -> uptime_sla) — ClaimKeyDefinition.RubricCriterion is the single catalogue-
+        // driven source of that translation (E1 Part 7 Step 7 Fix 4).
+        var rubricCriterion = ckDef.RubricCriterion ?? claimKey;
+        if (ckDef.ClaimClass == "scored" && _profile.ScoringRubric.TryGetValue(rubricCriterion, out var rubric))
         {
             if (rubric.Type == "numeric" && rubric.NumericThresholds != null)
             {

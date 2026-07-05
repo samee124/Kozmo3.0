@@ -141,7 +141,8 @@ internal static class DtoMapper
                         {
                             AnchorRawConfidence   = b.AnchorRawConfidence,
                             AnchorPredecessorId   = b.AnchorPredecessorId?.ToString(),
-                            AnchorPredecessorTier = b.AnchorPredecessorTier?.ToString()
+                            AnchorPredecessorTier = b.AnchorPredecessorTier?.ToString(),
+                            Derivation            = string.IsNullOrEmpty(b.Derivation) ? null : b.Derivation
                         };
                     })
                     .ToList();

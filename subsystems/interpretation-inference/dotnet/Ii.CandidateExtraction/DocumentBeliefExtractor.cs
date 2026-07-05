@@ -245,6 +245,18 @@ public sealed class DocumentBeliefExtractor
                 ContainsTerminationLanguage(evidence!))
                 continue;
 
+            // E1 Part 7 Step 7 — renewal_date invoice-date guard: an invoice's own due/invoice
+            // date got read as a contract renewal_date on a real document
+            // (Invoice_RGL-2023-002.txt: "Due Date: 14 August 2023" — a payment due date, not a
+            // renewal date — see KYV_KNOWN_GAPS.md, "New gap 1"). Surfaced by the invoice
+            // schema's composition change (Step 3), not by the multi-pass metadata work (Step 6
+            // doesn't touch belief extraction at all). Same class of fix as
+            // ContainsTerminationLanguage: a raw date that is unambiguous in isolation gets
+            // rejected once its own quoted context names it as an invoice/payment date instead.
+            if (string.Equals(criterion, "renewal_date", StringComparison.OrdinalIgnoreCase) &&
+                ContainsInvoiceDateLanguage(evidence!))
+                continue;
+
             // Narrow backstop for the same prompt rule (BeliefExtractionPrompt.System's csat
             // negative example): reject the two specific non-customer quality metrics a real
             // document confused with CSAT ("study quality scores" — see KYV_KNOWN_GAPS.md).
@@ -256,26 +268,23 @@ public sealed class DocumentBeliefExtractor
                 ContainsNonCustomerQualityLanguage(evidence!))
                 continue;
 
-            // E1 Part 7 Step 3 — annual_value periodicity guard (the deferred fix from
-            // KYV_KNOWN_GAPS.md's IIVS investigation): the invoice extraction schema now asks
-            // about invoice_amount instead of annual_value, which fixes the confusion at the
-            // root for documents classified as invoices. This is defense-in-depth for any other
-            // document type still asking about annual_value — a milestone/one-time payment line
-            // (e.g. an invoice table embedded in a non-invoice-classified document) never becomes
-            // an annual_value belief, regardless of what the model returned.
+            // E1 Part 7 Step 7 — annual_value exclusion guard (consolidated). annual_value has
+            // been a repeated magnet for wrong dollar figures on real documents — each real
+            // confusion found so far is a distinct exclusion, but they're ONE guard, not three
+            // ad-hoc patches, because they all enforce the same rule the prompt's own negative
+            // example already states ("Insurance requirements, liability caps, and
+            // indemnification ceilings are NOT fees") for a different phrase each time prose
+            // alone didn't reliably stop the model:
+            //   - milestone/periodic invoice language (IIVS's per-engagement invoices, "Milestone
+            //     M2 -- SOW-01" — Step 3; the invoice schema routing to invoice_amount fixes the
+            //     root cause for invoice-classified documents, this is defense-in-depth for any
+            //     other document type still asking about annual_value)
+            //   - insurance/liability/indemnification language (a CGL policy limit read as
+            //     annual_value on the real IIVS MSA — Step 5)
+            // See ContainsAnnualValueExclusionLanguage below for the full keyword set and the
+            // discipline for adding a new one.
             if (string.Equals(criterion, "annual_value", StringComparison.OrdinalIgnoreCase) &&
-                ContainsMilestoneLanguage(evidence!))
-                continue;
-
-            // E1 Part 7 Step 5 — annual_value insurance/liability guard: adding MSA metadata
-            // fields (insurance_requirements, liability_cap) surfaced a NEW real confusion on the
-            // real IIVS MSA — a Commercial General Liability Insurance policy limit
-            // ("not less than $1,000,000") got extracted as annual_value, exactly the "Insurance
-            // requirements... are NOT fees" case the prompt's own negative example already warns
-            // against, in prose the model still doesn't reliably follow. Same class of fix as
-            // ContainsMilestoneLanguage: enforced in code, not just prose.
-            if (string.Equals(criterion, "annual_value", StringComparison.OrdinalIgnoreCase) &&
-                ContainsInsuranceOrLiabilityLanguage(evidence!))
+                ContainsAnnualValueExclusionLanguage(evidence!))
                 continue;
 
             var rawConf = fact.TryGetProperty("confidence", out var cf) && cf.ValueKind == JsonValueKind.Number
@@ -366,6 +375,18 @@ public sealed class DocumentBeliefExtractor
     private static bool ContainsTerminationLanguage(string evidence) =>
         TerminationLanguage.Any(kw => evidence.Contains(kw, StringComparison.OrdinalIgnoreCase));
 
+    // ── renewal_date invoice-date guard (E1 Part 7 Step 7) ──────────────────────
+
+    // Narrow to the proven real confusion (an invoice's own "Due Date" line read as a contract
+    // renewal date — Invoice_RGL-2023-002.txt, see KYV_KNOWN_GAPS.md) — not a general "any date
+    // near billing language" filter, which would risk rejecting legitimate renewal_date evidence
+    // that happens to appear near payment terms in the same document.
+    private static readonly string[] InvoiceDateLanguage =
+        ["due date", "invoice date"];
+
+    private static bool ContainsInvoiceDateLanguage(string evidence) =>
+        InvoiceDateLanguage.Any(kw => evidence.Contains(kw, StringComparison.OrdinalIgnoreCase));
+
     // ── csat non-customer-quality guard ─────────────────────────────────────────
 
     // The exact negative-example phrases from BeliefExtractionPrompt.System's csat rule —
@@ -376,29 +397,22 @@ public sealed class DocumentBeliefExtractor
     private static bool ContainsNonCustomerQualityLanguage(string evidence) =>
         NonCustomerQualityLanguage.Any(kw => evidence.Contains(kw, StringComparison.OrdinalIgnoreCase));
 
-    // ── annual_value periodicity/milestone guard ────────────────────────────────
+    // ── annual_value exclusion guard (consolidated, E1 Part 7 Step 7) ───────────
 
-    // Narrow by design, matching the one proven real-document confusion (IIVS's per-engagement
-    // invoices: "Milestone M2 -- SOW-01" — see KYV_KNOWN_GAPS.md) — not a general "any dollar
-    // figure near billing language" filter, which would risk rejecting legitimate annual_value
-    // evidence phrased with adjacent invoice/billing context.
-    private static readonly string[] MilestoneLanguage =
-        ["milestone"];
+    // ONE guard, ONE keyword list, for every proven real-document confusion where a dollar
+    // figure that is NOT an annual contract value got extracted as annual_value anyway. Each
+    // keyword below is narrow by design, tied to a SPECIFIC proven confusion — not a general
+    // "any dollar figure near billing/legal language" filter, which would risk rejecting
+    // legitimate annual_value evidence phrased with adjacent context. Adding a new keyword here
+    // requires a real, observed confusion (a document where this fired incorrectly), the same
+    // discipline as every other guard in this file — never a speculative addition.
+    //   - "milestone"            — IIVS's per-engagement invoices, "Milestone M2 -- SOW-01" (Step 3)
+    //   - "insurance"/"liability"/"indemnif" — a CGL policy limit on the real IIVS MSA (Step 5)
+    private static readonly string[] AnnualValueExclusionLanguage =
+        ["milestone", "insurance", "liability", "indemnif"];
 
-    private static bool ContainsMilestoneLanguage(string evidence) =>
-        MilestoneLanguage.Any(kw => evidence.Contains(kw, StringComparison.OrdinalIgnoreCase));
-
-    // ── annual_value insurance/liability guard (E1 Part 7 Step 5) ───────────────
-
-    // Matches the prompt's own annual_value negative example ("Insurance requirements, liability
-    // caps, and indemnification ceilings are NOT fees") — narrow to the proven real confusion
-    // (a CGL policy limit read as annual_value on the real IIVS MSA), not a general "any dollar
-    // figure near legal language" filter.
-    private static readonly string[] InsuranceOrLiabilityLanguage =
-        ["insurance", "liability", "indemnif"];
-
-    private static bool ContainsInsuranceOrLiabilityLanguage(string evidence) =>
-        InsuranceOrLiabilityLanguage.Any(kw => evidence.Contains(kw, StringComparison.OrdinalIgnoreCase));
+    private static bool ContainsAnnualValueExclusionLanguage(string evidence) =>
+        AnnualValueExclusionLanguage.Any(kw => evidence.Contains(kw, StringComparison.OrdinalIgnoreCase));
 
     // ── JSON helpers ───────────────────────────────────────────────────────────
 

@@ -14,7 +14,9 @@
       "positive_example": "\"99.9% uptime\" -> value 99.9 (the percentage as given, not divided by 100)",
       "negative_example": "An uptime figure that is estimated, targeted, or implied rather than explicitly stated is not extracted.",
       "deterministic_guard": null,
-      "prompt_fragment": "- sla_uptime: an explicit committed or reported uptime/SLA percentage\n  (e.g. \"99.9% uptime\"). value = the percentage number as given (e.g. 99.9),\n  NOT divided by 100."
+      "prompt_fragment": "- sla_uptime: an explicit committed or reported uptime/SLA percentage\n  (e.g. \"99.9% uptime\"). value = the percentage number as given (e.g. 99.9),\n  NOT divided by 100.",
+      "expected_for": ["saas_vendor"],
+      "rubric_criterion": "uptime_sla"
     },
     "support_responsiveness": {
       "class": "scored",
@@ -35,7 +37,9 @@
       "positive_example": "\"Customer satisfaction survey: 4.6 out of 5.0\" -> value 4.6",
       "negative_example": "\"Study quality scores averaged 4.6 out of 5.0\" is a QA metric, not CSAT -- and neither is any other \"study quality score\", \"product quality score\", or operational/QA/technical quality metric not explicitly about customer sentiment toward the vendor relationship, even when it shares the same 1.0-5.0 shape. A CSAT figure given as a percentage or 0-100 scale (e.g. \"CSAT: 92%\") is also not extracted -- that is a different scale this fact does not cover.",
       "deterministic_guard": "DocumentBeliefExtractor.ContainsNonCustomerQualityLanguage",
-      "prompt_fragment": "- csat: an explicit CUSTOMER SATISFACTION score — from a customer survey, CSAT/NPS\n  program, or similar sentiment measure of the customer's satisfaction with the VENDOR\n  RELATIONSHIP — on a 1.0-5.0 rating scale ONLY (e.g. \"Customer satisfaction survey:\n  4.6 out of 5.0\", \"CSAT rating: 4.2/5\"). value = the score exactly as given (e.g. 4.6).\n  Do NOT extract a CSAT figure given as a percentage or on a 0-100 scale (e.g. \"CSAT: 92%\")\n  — that is a different scale this fact does not cover; omit it. Do NOT extract a \"study\n  quality score\", \"product quality score\", or any other operational/QA/technical quality\n  metric that is not explicitly about the customer's sentiment toward the vendor\n  relationship — a quality score on a study, deliverable, or product is NOT a customer\n  satisfaction score, even when it shares the same 1.0-5.0 shape (e.g. \"Study quality\n  scores averaged 4.6 out of 5.0\" is a QA metric, not CSAT — omit it)."
+      "prompt_fragment": "- csat: an explicit CUSTOMER SATISFACTION score — from a customer survey, CSAT/NPS\n  program, or similar sentiment measure of the customer's satisfaction with the VENDOR\n  RELATIONSHIP — on a 1.0-5.0 rating scale ONLY (e.g. \"Customer satisfaction survey:\n  4.6 out of 5.0\", \"CSAT rating: 4.2/5\"). value = the score exactly as given (e.g. 4.6).\n  Do NOT extract a CSAT figure given as a percentage or on a 0-100 scale (e.g. \"CSAT: 92%\")\n  — that is a different scale this fact does not cover; omit it. Do NOT extract a \"study\n  quality score\", \"product quality score\", or any other operational/QA/technical quality\n  metric that is not explicitly about the customer's sentiment toward the vendor\n  relationship — a quality score on a study, deliverable, or product is NOT a customer\n  satisfaction score, even when it shares the same 1.0-5.0 shape (e.g. \"Study quality\n  scores averaged 4.6 out of 5.0\" is a QA metric, not CSAT — omit it).",
+      "expected_for": ["saas_vendor"],
+      "rubric_criterion": "csat_score"
     },
     "usage_trend": {
       "class": "scored",
@@ -43,7 +47,8 @@
       "dimension": "Financial",
       "typical_tier": "VERIFIED",
       "half_life_days": 30,
-      "dimension_weight": 0.25
+      "dimension_weight": 0.25,
+      "expected_for": ["saas_vendor"]
     },
     "invoice_accuracy": {
       "class": "scored",
@@ -51,7 +56,8 @@
       "dimension": "Financial",
       "typical_tier": "VERIFIED",
       "half_life_days": 90,
-      "dimension_weight": 0.25
+      "dimension_weight": 0.25,
+      "expected_for": ["saas_vendor"]
     },
     "roadmap_alignment": {
       "class": "scored",
@@ -59,7 +65,8 @@
       "dimension": "Strategic",
       "typical_tier": "REPORTED",
       "half_life_days": 90,
-      "dimension_weight": 0.25
+      "dimension_weight": 0.25,
+      "expected_for": ["saas_vendor"]
     },
     "renewal_intent": {
       "class": "scored",
@@ -67,7 +74,8 @@
       "dimension": "Strategic",
       "typical_tier": "REPORTED",
       "half_life_days": 60,
-      "dimension_weight": 0.25
+      "dimension_weight": 0.25,
+      "expected_for": ["saas_vendor"]
     },
     "annual_value": {
       "class": "structural",
@@ -79,8 +87,9 @@
       "definition": "An explicit contract price or subscription fee paid by the customer.",
       "positive_example": "\"$250,000/year\" -> value 250000",
       "negative_example": "Insurance requirements, liability caps, and indemnification ceilings are not fees and are not extracted as annual_value. E1 Part 7 Step 3: a milestone/one-time invoice amount (e.g. \"Milestone M2 -- SOW-01: $18,500\") is also not annual_value -- that is invoice_amount, a distinct transaction fact.",
-      "deterministic_guard": "DocumentBeliefExtractor.ContainsMilestoneLanguage",
-      "prompt_fragment": "- annual_value: an explicit contract price or subscription fee paid by the customer.\n  value = the dollar amount as a plain number (e.g. 250000 for \"$250,000/year\").\n  Insurance requirements, liability caps, and indemnification ceilings are NOT fees."
+      "deterministic_guard": "DocumentBeliefExtractor.ContainsAnnualValueExclusionLanguage",
+      "prompt_fragment": "- annual_value: an explicit contract price or subscription fee paid by the customer.\n  value = the dollar amount as a plain number (e.g. 250000 for \"$250,000/year\").\n  Insurance requirements, liability caps, and indemnification ceilings are NOT fees.",
+      "expected_for": ["saas_vendor"]
     },
     "invoice_amount": {
       "class": "structural",
@@ -106,7 +115,8 @@
       "positive_example": "\"renews on September 1, 2026\" -> value the STRING \"2026-09-01\" (a plain calendar date formatted YYYY-MM-DD, NOT a Unix timestamp -- do not attempt to compute a timestamp yourself, the conversion happens deterministically downstream)",
       "negative_example": "An auto-renewal clause with no specific date is a rule, not a date -- omit renewal_date unless a concrete calendar date is stated.",
       "deterministic_guard": null,
-      "prompt_fragment": "- renewal_date: an explicit CALENDAR date the agreement renews or is next due for\n  renewal (e.g. \"renews on September 1, 2026\"). value = that date formatted as the\n  STRING \"YYYY-MM-DD\" (e.g. \"2026-09-01\") — a plain calendar date, NOT a Unix timestamp;\n  do not attempt to compute a timestamp yourself, the conversion happens deterministically\n  downstream. An auto-renewal clause with no specific date is a RULE, not a date — omit\n  renewal_date unless a concrete calendar date is stated."
+      "prompt_fragment": "- renewal_date: an explicit CALENDAR date the agreement renews or is next due for\n  renewal (e.g. \"renews on September 1, 2026\"). value = that date formatted as the\n  STRING \"YYYY-MM-DD\" (e.g. \"2026-09-01\") — a plain calendar date, NOT a Unix timestamp;\n  do not attempt to compute a timestamp yourself, the conversion happens deterministically\n  downstream. An auto-renewal clause with no specific date is a RULE, not a date — omit\n  renewal_date unless a concrete calendar date is stated.",
+      "expected_for": ["saas_vendor"]
     },
     "notice_period": {
       "class": "structural",
@@ -135,7 +145,8 @@
       "positive_example": "\"due within 30 days of invoice\" -> value 30",
       "negative_example": "Insurance, cancellation, or termination notice periods are not payment terms, even when phrased with a similar day count.",
       "deterministic_guard": "DocumentBeliefExtractor.ContainsTerminationLanguage",
-      "prompt_fragment": "- payment_terms: the invoice payment due period ONLY (e.g. \"due within 30 days of\n  invoice\"). value = integer days (e.g. 30). Do NOT use insurance, cancellation, or\n  termination notice periods for this fact."
+      "prompt_fragment": "- payment_terms: the invoice payment due period ONLY (e.g. \"due within 30 days of\n  invoice\"). value = integer days (e.g. 30). Do NOT use insurance, cancellation, or\n  termination notice periods for this fact.",
+      "expected_for": ["saas_vendor"]
     },
     "liability_cap": {
       "class": "structural",
@@ -151,7 +162,8 @@
       "dimension": "",
       "typical_tier": "PRIMARY",
       "half_life_days": null,
-      "dimension_weight": 0.0
+      "dimension_weight": 0.0,
+      "expected_for": ["saas_vendor"]
     }
   }
 }
