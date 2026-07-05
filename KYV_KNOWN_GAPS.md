@@ -364,3 +364,18 @@ pre-Step-5 baseline).
   (reverted) fix.** Flagged for a closer look someday — worth confirming they're still testing
   what their names/comments claim (the confidence-anchor chain-walk actually firing and mattering)
   rather than asserting an invariant that happens to hold true anyway. Not chased further now.
+- **The "generated" contracts' codegen script doesn't exist.** Every file under
+  `libs/Kozmo.Contracts/Generated/` (`Enums.cs`, `Belief.cs`, `EntityIndex.cs`, etc.) is headed
+  `// GENERATED — do not hand-edit; regenerate via tools/codegen/generate.ps1`, and
+  `STEP_1_0_contract_amendment.md` describes a schema-change → codegen → compile workflow. No such
+  script exists anywhere in the repo (`tools/codegen/` is absent) — these files are, in practice,
+  hand-maintained, and `schema/*.json` has already silently drifted from them independent of any
+  recent work: `schema/belief.schema.json`'s `SourceTier` enum list was missing `Primary` (present
+  in `Enums.cs` since some earlier phase) before the E-signal `Correspondence` addition touched
+  either file. Discovered while adding `Correspondence` to `SourceTier`
+  (`5c3b27f`) — both files were updated for the new member, consistent with each other, but the
+  pre-existing `Primary` gap was left alone (out of scope for that change). Same class of finding
+  as the golden-gate substring gap above: a documented mechanism that silently isn't what the docs
+  say it is. Worth eventually either writing the codegen script for real or updating the header
+  comments / `STEP_1_0_contract_amendment.md` to describe the actual (manual, dual-file) discipline
+  — not chased further now.
