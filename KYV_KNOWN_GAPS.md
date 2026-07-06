@@ -506,3 +506,95 @@ to email (the underlying `AnsweringPrompt`/`QuestionAnsweringStage` code is unto
 it looks like a pre-existing multi-belief-per-criterion presentation gap that simply had no real
 corroborating-tier data to expose it until now. Worth a closer look alongside the Commit-3 stopgap's
 already-acknowledged "not the proper fix" status.
+
+## Check-in loop verification (real HTTP, IIVS): answering a DIMENSION_GAP check-in processes but does NOT close the gap
+
+Verified the full check-in loop end-to-end against the actual running `Kozmo.Api` process (real HTTP,
+zero DI overrides, no new production code) on IIVS's real "does the vendor have a documented uptime
+SLA?" gap (`saas.op.l1.1`). The mechanical pipe works: raise → `GET /checkins` lists it → `POST
+/checkins/{id}/answer` returns `200 Ok` → the check-in transitions to `PROCESSED` → a new belief is
+written. But the belief that gets written is malformed, and completeness correctly refuses to close
+the gap on it.
+
+**Root cause:** `ProcessDimensionGapAsync` (`subsystems/workflow-coordination/dotnet/Wc.CheckIn/
+ProcessCheckInService.cs:143-173`) does:
+```csharp
+var claimKey = checkIn.TargetField ?? "human_answer";
+if (!string.IsNullOrEmpty(checkIn.TargetField)
+    && profile.ClaimKeyCatalogue.TryGetValue(checkIn.TargetField, out var ckDef)
+    && Enum.TryParse<Dimension>(ckDef.Dimension, ignoreCase: true, out var catalogueDim))
+    dimension = catalogueDim;
+```
+`checkIn.TargetField` is set by `GapCheckInStage.RaiseAsync` (`Ii.Completeness/GapCheckInStage.cs:66`)
+to `q.Id` — the **question ID** (`"saas.op.l1.1"`), not a claim key. `saas.op.l1.1` is never an entry
+in `claim_key_catalogue.saas.v1.json` (real entries look like `sla_uptime`, `csat`, `payment_terms`),
+so the catalogue lookup always misses. Result: `dimension` silently defaults to `Financial`
+(regardless of the question's real dimension — Operational, in this case), and `WriteBeliefAsync` is
+called with `claimKey = criterion = "saas.op.l1.1"`. Since that's not a catalogued key, it isn't
+flagged `structural`, so confidence is NOT zeroed (stays at the passed `0.5`), and no explicit
+`derivation:` argument is passed, so it falls back to `WriteBeliefAsync`'s generic template:
+`"vendor-file:saas.op.l1.1"`. Net belief written: `[Financial] saas.op.l1.1 = 1, tier=Reported,
+conf=0.5, derivation="vendor-file:saas.op.l1.1"` — nothing in any of these fields says "SLA," "uptime,"
+or "yes." When completeness re-runs (`AnsweringPrompt.SerializeBeliefs` shows the LLM exactly
+Dimension/Criterion/SourceTier/Confidence/Derivation, verified via a real live GPT-4o-mini call),
+there is zero semantic bridge from this belief back to "Does the vendor have a documented uptime
+SLA?" — the model correctly stays `UNKNOWN`, cites nothing, and `saas.op.l1.1` remains in
+`GapQuestionIds`, never moving to `AnsweredQuestionIds`.
+
+**Contrast, confirming the break is localized:** `saas.fin.l1.1` ("is there a signed contract with
+defined payment terms?"), grounded in a REAL catalogued `payment_terms` belief written by the normal
+KYV extraction path (not by `ProcessDimensionGapAsync`), answered `YES` at `conf=0.80` with a real
+citation throughout this same test run. The completeness/answering machinery itself is fine — the
+defect is specifically `ProcessDimensionGapAsync`'s claim-key resolution for DIMENSION_GAP answers,
+which has effectively never worked for any question whose ID isn't coincidentally also a valid
+catalogue key (none are).
+
+**Not fixed — logged for a fix-size assessment first**, since this touches the check-in answer path
+that the demo's check-in loop relies on. See the fix assessment below.
+
+### Follow-up: the derivation-only fix was tried and reverted — it fixes the semantic grounding, but a SEPARATE confidence-ceiling gate still keeps the gap open
+
+Tried the smallest safe fix: pass a real `derivation:` argument into `ProcessDimensionGapAsync`'s
+existing `WriteBeliefAsync` call — `$"Check-in answer to \"{checkIn.Question}\": {checkIn.ResponseValue}"`
+— instead of relying on the generic `"vendor-file:{claimKey}"` template. One call site, one new
+argument, no claim-key/dimension/value/schema change. Verified live against the real running API
+(same harness as the original verification):
+
+- **The semantic-grounding half of the fix worked exactly as predicted.** With the real derivation
+  text present, the completeness LLM correctly answered `saas.op.l1.1` (`"Does the vendor have a
+  documented uptime SLA?"`) as **`YES`, citing the check-in-derived belief by name** — a real
+  improvement over the prior `UNKNOWN`/uncited result. `Derivation` genuinely is the only field the
+  LLM needs; the mislabeled `Dimension=Financial` and opaque `Criterion="saas.op.l1.1"` did not stop
+  it from grounding once given real semantic content.
+- **The gap still did not close.** `saas.op.l1.1` stayed in `GapQuestionIds`, never moved to
+  `AnsweredQuestionIds`. Root cause is `CompletenessRubric.Compute`
+  (`Ii.Completeness/CompletenessRubric.cs:24`): a question counts as answered only when
+  `answer.Confidence >= question.RequiredConfidence`. Every L1 question requires `0.60`
+  (`SaasQuestionBank.cs`). `ProcessDimensionGapAsync` always writes DIMENSION_GAP-derived beliefs at
+  `SourceTier.Reported`, whose ceiling is `0.50` (`source_tiers.saas.v1.json`) — structurally below
+  the L1 bar. This is the SAME `REPORTED weight (0.50) < CRITICAL gate (0.60)` invariant CLAUDE.md
+  documents as Invariant #4 (confidence discipline) — working exactly as designed, just not in the
+  direction this feature needs: **a DIMENSION_GAP check-in answer can never, by architecture, clear
+  an L1 completeness question's confidence bar, no matter how well-grounded its content is.**
+  Contrast: `saas.fin.l1.1`'s `payment_terms` belief is `Verified`-tier (ceiling `0.80`), which clears
+  `0.60` easily — that's why it closes and this doesn't. No regression there — it answered `YES,
+  conf=0.80, cited=2` both before and after this fix, unchanged.
+
+**Reverted in full** (`ProcessCheckInService.cs` back to the original generic-template derivation,
+the additively-recorded cassette entries checked out) — the fix didn't clear the stated bar
+("`saas.op.l1.1` moves to `AnsweredQuestionIds`"), so per the decision rule it was pulled rather than
+partially kept. Full suite green, golden 26/26, CI 9/9 confirmed after revert.
+
+**Why this isn't a quick follow-up fix:** closing this properly means either (a) raising
+`SourceTier.Reported`'s ceiling above `0.60` — which isn't a check-in-path-local change, it's a
+catalogue-wide tier-ceiling change (`source_tiers.saas.v1.json`) that would also loosen every OTHER
+Reported-tier belief's ability to clear confidence gates across the whole system, a real scoring-
+discipline decision Invariant #4 was specifically written to prevent, not a bug; or (b) inventing a
+NEW, higher-trust source tier specifically for "human operator confirmed via check-in" (distinct from
+"someone reported this to us" Reported-tier), which is a genuine new business-rule/catalogue decision
+("ask, don't invent" territory) — not a mechanical fix. Both are out of scope for a demo-day change.
+**Net for the demo: DIMENSION_GAP check-ins process correctly (raise → list → answer → belief written,
+now with real semantic content) but will never visibly close a completeness gap in the current
+architecture — do not demo "answer a gap → watch it disappear" with a DIMENSION_GAP question. The
+payment-terms-style "real, already-catalogued evidence closes a gap" path is unaffected and remains
+the correct thing to demo.**
