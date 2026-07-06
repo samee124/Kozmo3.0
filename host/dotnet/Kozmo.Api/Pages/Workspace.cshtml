@@ -1621,70 +1621,37 @@ function toggleSidebar() {
 // ─────────────────────────────────────────────
 function loadVendors() {
   var tbody = document.getElementById('vendor-tbody');
-  var vendors = [
-    { name: 'Northstar CloudOps LLC', id: 'VND-004218', category: 'IT / SaaS',
-      cri: '<span class="cri-val" style="color:var(--caution)">71<span class="cri-trend" style="color:var(--urgent)">↓</span></span>',
-      enrichment: '<span class="bdg bdg-amber">Partial</span>', compliance: '<span class="bdg bdg-red">Stale</span>',
-      owner: 'Priya Menon',
-      strategy: '<span style="font-size:10.5px;color:var(--accent-ink);display:inline-flex;align-items:center;gap:4px"><svg class="glyph xs"><use href="#g-lock"></use></svg> Compliance Drive</span>',
-      status: '<span class="bdg" style="background:var(--caution-soft);color:var(--caution)">Watch</span>' },
-    { name: 'DataStream Partners', id: 'VND-003891', category: 'Analytics',
-      cri: '<span class="cri-val" style="color:var(--affirm)">84<span class="cri-trend" style="color:var(--affirm)">↑</span></span>',
-      enrichment: '<span class="bdg bdg-green">Complete</span>', compliance: '<span class="bdg bdg-amber">Expiring</span>',
-      owner: 'Daniel Cho',
-      strategy: '<span style="font-size:10.5px;color:var(--accent-ink);display:inline-flex;align-items:center;gap:4px"><svg class="glyph xs"><use href="#g-clipboard"></use></svg> Enrichment Drive</span>',
-      status: '<span class="bdg bdg-green">Active</span>' },
-    { name: 'Apex Systems Inc', id: 'VND-002244', category: 'Managed Services',
-      cri: '<span class="cri-val" style="color:var(--urgent)">58<span class="cri-trend" style="color:var(--urgent)">↓↓</span></span>',
-      enrichment: '<span class="bdg bdg-red">Incomplete</span>', compliance: '<span class="bdg bdg-red">Missing</span>',
-      owner: '<span style="color:var(--urgent)">Unassigned</span>',
-      strategy: '<span style="font-size:10.5px;color:var(--accent-ink);display:inline-flex;align-items:center;gap:4px"><svg class="glyph xs"><use href="#g-lock"></use></svg> Compliance Drive</span>',
-      status: '<span class="bdg bdg-red">At Risk</span>' },
-    { name: 'BlueSky Managed Services', id: 'VND-005103', category: 'IT Services',
-      cri: '<span class="cri-val">76</span>',
-      enrichment: '<span class="bdg bdg-amber">Partial</span>', compliance: '<span class="bdg bdg-green">Current</span>',
-      owner: 'Lisa Kim',
-      strategy: '<span style="font-size:10.5px;color:var(--accent-ink);display:inline-flex;align-items:center;gap:4px"><svg class="glyph xs"><use href="#g-clipboard"></use></svg> Enrichment Drive</span>',
-      status: '<span class="bdg bdg-green">Active</span>' },
-    { name: 'TechForce Solutions', id: 'VND-001887', category: 'Cloud Infra',
-      cri: '<span class="cri-val" style="color:var(--caution)">69<span class="cri-trend" style="color:var(--urgent)">↓</span></span>',
-      enrichment: '<span class="bdg bdg-amber">Partial</span>', compliance: '<span class="bdg bdg-red">Stale</span>',
-      owner: 'Priya Menon',
-      strategy: '<span style="font-size:10.5px;color:var(--accent-ink);display:inline-flex;align-items:center;gap:4px"><svg class="glyph xs"><use href="#g-lock"></use></svg> Compliance Drive</span>',
-      status: '<span class="bdg" style="background:var(--caution-soft);color:var(--caution)">Watch</span>' },
-    { name: 'Vertex Analytics', id: 'VND-006712', category: 'Analytics',
-      cri: '<span class="cri-val" style="color:var(--affirm)">88</span>',
-      enrichment: '<span class="bdg bdg-green">Complete</span>', compliance: '<span class="bdg bdg-green">Current</span>',
-      owner: 'Marcus Webb',
-      strategy: '<span style="font-size:10.5px;color:var(--ink-3)">—</span>',
-      status: '<span class="bdg bdg-green">Active</span>' },
-    { name: 'Legacy Systems Co', id: 'VND-000341', category: 'IT Legacy',
-      cri: '<span class="cri-val" style="color:var(--ink-3)">—</span>',
-      enrichment: '<span class="bdg bdg-red">Incomplete</span>', compliance: '<span class="bdg bdg-grey">N/A</span>',
-      owner: '<span style="color:var(--urgent)">Unassigned</span>',
-      strategy: '<span style="font-size:10.5px;color:var(--caution);display:inline-flex;align-items:center;gap:4px"><svg class="glyph xs"><use href="#g-moon-down"></use></svg> Sunset Campaign</span>',
-      status: '<span class="bdg bdg-grey">Idle 22mo</span>' },
-    { name: 'Meridian Cloud', id: 'VND-004990', category: 'Cloud Infra',
-      cri: '<span class="cri-val">72</span>',
-      enrichment: '<span class="bdg bdg-amber">Partial</span>', compliance: '<span class="bdg bdg-amber">Expiring</span>',
-      owner: 'Sarah Chen',
-      strategy: '<span style="font-size:10.5px;color:var(--accent-ink);display:inline-flex;align-items:center;gap:4px"><svg class="glyph xs"><use href="#g-clipboard"></use></svg> Enrichment Drive</span>',
-      status: '<span class="bdg bdg-green">Active</span>' }
-  ];
-  setTxt('vendor-count', '3,020 vendors in scope · Vendor Cleanup Program 2026');
-  var showingEl = document.getElementById('vendor-showing'); if (showingEl) showingEl.textContent = 'Showing ' + Math.min(8, vendors.length) + ' of 3,020 vendors';
-  tbody.innerHTML = vendors.map(function(v) {
-    return '<tr onclick="showVendorDetail(\'' + v.name.replace(/'/g, "\\'") + '\')">'
-      + '<td><div class="vt-name">' + v.name + '</div><div class="vt-id">' + v.id + '</div></td>'
-      + '<td><span style="font-size:var(--t-micro);color:var(--ink-2)">' + v.category + '</span></td>'
-      + '<td>' + v.cri + '</td>'
-      + '<td>' + v.enrichment + '</td>'
-      + '<td>' + v.compliance + '</td>'
-      + '<td><span style="font-size:var(--t-micro)">' + v.owner + '</span></td>'
-      + '<td>' + v.strategy + '</td>'
-      + '<td>' + v.status + '</td>'
-      + '</tr>';
-  }).join('');
+  var placeholder = '<span style="color:var(--ink-3)">—</span>';
+  fetch('/vendors')
+    .then(function(r) { return r.json(); })
+    .then(function(vendors) {
+      var count = vendors.length;
+      setTxt('vendor-count', count + ' vendor' + (count === 1 ? '' : 's') + ' in scope');
+      var showingEl = document.getElementById('vendor-showing');
+      if (showingEl) showingEl.textContent = 'Showing ' + count + ' of ' + count + ' vendors';
+
+      tbody.innerHTML = vendors.map(function(v) {
+        var band = v.band || 'Unknown';
+        var statusClass = band === 'Healthy' ? 'bdg-green'
+                         : band === 'Critical' ? 'bdg-red'
+                         : band === 'AtRisk' ? 'bdg-amber'
+                         : 'bdg-grey';
+        var shortId = (v.entityId || '').substring(0, 8);
+        return '<tr onclick="showVendorDetail(\'' + v.name.replace(/'/g, "\\'") + '\')">'
+          + '<td><div class="vt-name">' + v.name + '</div><div class="vt-id" title="' + v.entityId + '">' + shortId + '</div></td>'
+          + '<td>' + placeholder + '</td>'
+          + '<td>' + placeholder + '</td>'
+          + '<td>' + placeholder + '</td>'
+          + '<td>' + placeholder + '</td>'
+          + '<td>' + placeholder + '</td>'
+          + '<td>' + placeholder + '</td>'
+          + '<td><span class="bdg ' + statusClass + '">' + band + '</span></td>'
+          + '</tr>';
+      }).join('');
+    })
+    .catch(function(err) {
+      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--urgent);padding:20px">Failed to load vendors: ' + err.message + '</td></tr>';
+    });
 }
 
 function loadMoreVendors() {
