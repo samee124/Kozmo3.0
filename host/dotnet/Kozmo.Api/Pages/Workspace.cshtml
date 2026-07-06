@@ -1114,6 +1114,26 @@ body{
                   <button class="btn-s">Export</button>
                 </div>
               </div>
+
+              <div class="vendor-card" style="margin-bottom:var(--s5)">
+                <h4>Run Real Ingestion</h4>
+                <p style="color:var(--ink-3);font-size:13px;margin:6px 0 var(--s4)">
+                  Paste a Google Drive folder URL and run the real pipeline. Discovered vendors replace
+                  nothing — they're added to the list below alongside anything already known.
+                </p>
+                <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+                  <input id="drive-url" type="text" placeholder="Paste your Google Drive folder link…"
+                         style="flex:1;min-width:280px;background:var(--canvas);border:1px solid var(--line-1);border-radius:var(--r-md);padding:8px 12px;font-size:13px;color:var(--ink-1)">
+                  <button class="btn-s p" id="btn-run" onclick="runIngestion()" disabled>Run</button>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;margin-top:var(--s4)">
+                  <span class="log-status idle" id="log-status"><span class="ls-dot"></span><span id="log-status-text">Idle</span></span>
+                </div>
+                <div id="log-body" class="log-body" style="margin-top:var(--s3);border-radius:var(--r-md)">
+                  <div class="log-idle">No ingestion run yet.</div>
+                </div>
+              </div>
+
               <div class="vtbl-wrap">
                 <table class="vtbl">
                   <thead>
@@ -1479,6 +1499,11 @@ async function checkAuth() {
     S.email = d.email || null;
     S.connected = d.connected && !d.tokenExpired;
     applyUserUI();
+    // #drive-card and its connect/disconnect controls don't exist in this page's markup, so
+    // updateDriveCard() (which needs them) can't run — but #btn-run does exist and must reflect
+    // real connection state directly, or it stays permanently disabled even when truly connected.
+    var btnRun = document.getElementById('btn-run');
+    if (btnRun) btnRun.disabled = !S.connected || S.running;
     if (d.connected) {
       showAppHome();
     } else {
