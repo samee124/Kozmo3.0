@@ -59,6 +59,12 @@ public static class DocTypeInferrer
     /// </summary>
     public static string InferDocType(string fileName)
     {
+        // E-signal Part 5 Step 6: by extension, not filename content — an email's filename
+        // (e.g. "0006_pricing.eml") never contains the word "email". Checked first; never
+        // collides with a document, since no .pdf carries a .eml extension.
+        if (Path.GetExtension(fileName).Equals(".eml", StringComparison.OrdinalIgnoreCase))
+            return "email";
+
         var f = Path.GetFileNameWithoutExtension(fileName).ToLowerInvariant().Replace('_', ' ');
 
         if (f.Contains("invoice"))                                  return "invoice";

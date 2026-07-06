@@ -111,6 +111,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kozmo.Connector.GoogleDrive
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kyv.EmailInterpretationRecorder", "tools\Kyv.EmailInterpretationRecorder\Kyv.EmailInterpretationRecorder.csproj", "{04608C4B-BCA2-4955-AB1C-ADEFC71E899A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kyv.EmailCandidateRecorder", "tools\Kyv.EmailCandidateRecorder\Kyv.EmailCandidateRecorder.csproj", "{F2E81196-77F1-459D-A5DF-D442B3D2EA45}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -589,6 +591,18 @@ Global
 		{04608C4B-BCA2-4955-AB1C-ADEFC71E899A}.Release|x64.Build.0 = Release|Any CPU
 		{04608C4B-BCA2-4955-AB1C-ADEFC71E899A}.Release|x86.ActiveCfg = Release|Any CPU
 		{04608C4B-BCA2-4955-AB1C-ADEFC71E899A}.Release|x86.Build.0 = Release|Any CPU
+		{F2E81196-77F1-459D-A5DF-D442B3D2EA45}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F2E81196-77F1-459D-A5DF-D442B3D2EA45}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F2E81196-77F1-459D-A5DF-D442B3D2EA45}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{F2E81196-77F1-459D-A5DF-D442B3D2EA45}.Debug|x64.Build.0 = Debug|Any CPU
+		{F2E81196-77F1-459D-A5DF-D442B3D2EA45}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{F2E81196-77F1-459D-A5DF-D442B3D2EA45}.Debug|x86.Build.0 = Debug|Any CPU
+		{F2E81196-77F1-459D-A5DF-D442B3D2EA45}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F2E81196-77F1-459D-A5DF-D442B3D2EA45}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F2E81196-77F1-459D-A5DF-D442B3D2EA45}.Release|x64.ActiveCfg = Release|Any CPU
+		{F2E81196-77F1-459D-A5DF-D442B3D2EA45}.Release|x64.Build.0 = Release|Any CPU
+		{F2E81196-77F1-459D-A5DF-D442B3D2EA45}.Release|x86.ActiveCfg = Release|Any CPU
+		{F2E81196-77F1-459D-A5DF-D442B3D2EA45}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -643,5 +657,6 @@ Global
 		{F4000004-0000-0000-0000-000000000004} = {F4000002-0000-0000-0000-000000000002}
 		{EC73EB1E-DBEB-4288-90A7-F7F2232725C5} = {6C4D298B-81FB-2B6B-5AB6-46205EDDC72C}
 		{04608C4B-BCA2-4955-AB1C-ADEFC71E899A} = {F3A4B5C6-D7E8-9012-F3A4-B5C6D7E89012}
+		{F2E81196-77F1-459D-A5DF-D442B3D2EA45} = {F3A4B5C6-D7E8-9012-F3A4-B5C6D7E89012}
 	EndGlobalSection
 EndGlobal

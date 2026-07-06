@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>Kyv.EmailCandidateRecorder</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- Tools are NOT the demo runtime — OpenAI client allowed here.
+         Ii.CandidateExtraction provides EmailParser + DocumentCandidateExtractor — the SAME
+         identity-extraction path documents use (E-signal spec §2.4 Decision 3: email is ingested
+         through the existing DocumentCandidateExtractor/ClusteringStage path for identity
+         resolution only). Writes into the SAME candidate-extraction.cassette.json PDFs use — one
+         cassette, one IKozmoLlm instance serves both in the wired KyvProgramRunner. -->
+    <ProjectReference Include="..\..\subsystems\interpretation-inference\dotnet\Ii.CandidateExtraction\Ii.CandidateExtraction.csproj" />
+    <ProjectReference Include="..\..\subsystems\identity-governance\dotnet\Ig.Contracts\Ig.Contracts.csproj" />
+    <ProjectReference Include="..\..\libs\Kozmo.Llm\Kozmo.Llm.csproj" />
+    <ProjectReference Include="..\..\libs\Kozmo.Llm.OpenAi\Kozmo.Llm.OpenAi.csproj" />
+  </ItemGroup>
+</Project>

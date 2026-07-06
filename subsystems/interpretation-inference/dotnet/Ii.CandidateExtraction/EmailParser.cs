@@ -48,6 +48,33 @@ public static class EmailParser
     private static EmailParty? ToParty(MailboxAddress? mailbox) =>
         mailbox is null ? null : new EmailParty(mailbox.Name, mailbox.Address);
 
+    /// <summary>
+    /// E-signal Part 5 Step 6 — builds the text handed to <see cref="DocumentCandidateExtractor"/>
+    /// for identity resolution (spec §2.4 Decision 3: email reuses the existing
+    /// DocumentCandidateExtractor/ClusteringStage path, not a new mechanism). Prepending the
+    /// From/To/Cc header lines (not just the body) lets the SAME extraction prompt — which already
+    /// asks for "domain if visible in text" — pick up sender/recipient domains from the real
+    /// mailbox addresses, deterministically parsed by <see cref="EmailParser"/>, without any new
+    /// domain-parsing code. Shared by <c>Kyv.EmailCandidateRecorder</c> and
+    /// <c>Kyv.ProgramRunner</c> so the recorded cassette key matches the live pipeline's call
+    /// byte-for-byte.
+    /// </summary>
+    public static string BuildIdentityText(ParsedEmail email)
+    {
+        var sb = new StringBuilder();
+
+        if (email.From is not null)
+            sb.Append("From: ").Append(email.From.DisplayName).Append(" <").Append(email.From.Address).Append(">\n");
+        if (email.To.Count > 0)
+            sb.Append("To: ").Append(string.Join(", ", email.To.Select(t => $"{t.DisplayName} <{t.Address}>"))).Append('\n');
+        if (email.Cc.Count > 0)
+            sb.Append("Cc: ").Append(string.Join(", ", email.Cc.Select(c => $"{c.DisplayName} <{c.Address}>"))).Append('\n');
+        sb.Append("Subject: ").Append(email.Subject).Append("\n\n");
+        sb.Append(email.Body);
+
+        return sb.ToString();
+    }
+
     // Prefer the plain-text body; fall back to stripping tags from the HTML body (deterministic,
     // no LLM — MimeKit ships no direct HtmlToText converter, so tags are stripped by walking the
     // tokenizer and keeping only Data tokens) when no text/plain part exists. Neither part present

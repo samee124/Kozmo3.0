@@ -10,6 +10,7 @@ using Ii.Posture;
 using Ii.Rubric;
 using Ii.Spine;
 using Km.Store.Metadata;
+using Kozmo.Contracts;
 using Kozmo.Contracts.Config;
 using Kozmo.Contracts.Interfaces;
 using Kozmo.Llm;
@@ -20,10 +21,17 @@ namespace Kyv.ProgramRunner;
 
 /// <summary>
 /// Executes the declared KYV program sequence over a local folder:
-///   1 ingest           — enumerate PDFs, extract text (PdfTextExtractor)
-///   2 classify         — infer source tier per document (DocTypeInferrer)
-///   3 extract          — LLM party+role extraction (DocumentCandidateExtractor) +
-///                        LLM dimension-fact extraction (DocumentBeliefExtractor)
+///   1 ingest           — enumerate PDFs (extract text via PdfTextExtractor) AND .eml files
+///                        (parse via EmailParser, E-signal Part 5 Step 2) — email is additive,
+///                        not a new pipeline phase (E1 Part 7 Step 5's framing, carried forward)
+///   2 classify         — infer source tier per document (DocTypeInferrer); every email is fixed
+///                        SourceTier.Correspondence — never filename-inferred the way a
+///                        document's tier is
+///   3 extract          — LLM party+role extraction (DocumentCandidateExtractor, reused as-is for
+///                        email identity text — spec §2.4 Decision 3) + LLM dimension-fact
+///                        extraction (DocumentBeliefExtractor for documents,
+///                        EmailInterpretationExtractor for email beliefs + signals, E-signal
+///                        Part 5 Step 5)
 ///   4 filter           — deterministic post-filter (embedded in extractor)
 ///   5 resolve          — Stages A–F: normalize → entity-type classify → cluster →
 ///                        annotate → disposition → persist to registry (RegistryWriter)
@@ -48,6 +56,7 @@ public sealed class KyvProgramRunner
 {
     private readonly IKozmoLlm                     _llm;
     private readonly IKozmoLlm                     _beliefLlm;
+    private readonly IKozmoLlm                     _emailInterpretationLlm;
     private readonly EntityTypeClassificationStage _stageB;
     private readonly ClusteringStage               _stageC;
     private readonly CollisionStage                _stageD;
@@ -65,6 +74,7 @@ public sealed class KyvProgramRunner
     private readonly OcrExtractor                  _ocrExtractor;
     private readonly CompletenessOrchestrator?     _completeness;
     private readonly EntityRegistry                _spineRegistry;
+    private readonly bool                          _processEmail;
 
     // Declared stage sequence — names match the KYV program specification.
     private static readonly string[] DeclaredStages =
@@ -81,8 +91,23 @@ public sealed class KyvProgramRunner
         string                     owner         = "kyv@kozmo",
         CompletenessOrchestrator?  completeness  = null,
         EntityRegistry?            spineRegistry = null,
-        IMetadataStore?            metadataStore = null)
+        IMetadataStore?            metadataStore = null,
+        IKozmoLlm?                 emailInterpretationLlm = null,
+        bool                       processEmail  = false)
     {
+        // E-signal Part 5 Step 6 — OFF by default, same opt-in shape as metadataStore/completeness
+        // below. Real-corpus proof: turning email on unconditionally surfaced a genuine
+        // identity-resolution precision gap (Scenario 07's email-only role hints are inconsistent
+        // enough that "Brookfield" — a customer — sometimes aggregates to role=unknown rather than
+        // "customer" and isn't filtered by IdentityGate.IsNonVendorRole, which only drops
+        // customer/issuer/internal). That broke TWO pre-existing, document-corpus-calibrated tests
+        // (ProgramRun_All6Scenarios_VendorSet_NoTimeout's "Brookfield must never appear" assertion;
+        // ProgramRun_AbcIdentityAnswerYes_MergesLive_Absorbed_NotDeleted's "first IDENTITY_CONFIRM
+        // check-in is the ABC pair" assumption, now competing with email-sourced near-miss noise).
+        // Existing callers stay byte-for-byte unaffected until they explicitly opt in — the
+        // identity-role-reliability gap is logged (KYV_KNOWN_GAPS.md) and deferred, not papered
+        // over by silently degrading pre-existing regression coverage.
+        _processEmail   = processEmail;
         _llm            = llm;
         // Identity extraction (DocumentCandidateExtractor) and belief extraction
         // (DocumentBeliefExtractor) use different system prompts, hence different cassette cache
@@ -90,6 +115,13 @@ public sealed class KyvProgramRunner
         // reusing 'llm' (correct for a live, non-cassette-restricted client); pass a distinct
         // cassette-backed client here when 'llm' only has identity-extraction entries.
         _beliefLlm      = beliefLlm ?? llm;
+        // E-signal Part 5 Step 6 — email interpretation (EmailInterpretationPrompt's belief AND
+        // signal system prompts) uses a THIRD, distinct cassette key space from both identity
+        // extraction and document belief extraction. Email IDENTITY extraction, by contrast,
+        // reuses '_llm' directly (no separate parameter) — DocumentCandidateExtractor's prompt is
+        // identical for documents and email identity text (spec §2.4 Decision 3: the existing
+        // path, not a new one), so both share the SAME candidate-extraction cassette.
+        _emailInterpretationLlm = emailInterpretationLlm ?? beliefLlm ?? llm;
         _stageB         = new EntityTypeClassificationStage(entityClassifier);
         _stageC         = new ClusteringStage();
         _stageD         = new CollisionStage();
@@ -125,19 +157,30 @@ public sealed class KyvProgramRunner
         var unreadable     = new List<UnreadableDocument>();
         var extractor      = new DocumentCandidateExtractor(_llm);
         var beliefExtractor = new DocumentBeliefExtractor(_beliefLlm, _profile);
+        var emailExtractor  = new EmailInterpretationExtractor(_emailInterpretationLlm, _profile);
 
-        // ── Stage 1: ingest — enumerate PDFs, read bytes ──────────────────────
+        // ── Stage 1: ingest — enumerate PDFs, read bytes; AND .eml files ──────
         var pdfPaths = Directory
             .EnumerateFiles(workspacePath, "*.pdf", SearchOption.AllDirectories)
             .OrderBy(p => p, StringComparer.OrdinalIgnoreCase)
             .ToList();
+        // E-signal Part 5 Step 6 — additive, not a new pipeline phase: email is "just another
+        // ingested document" for stage-count purposes, same framing MetadataPersistenceStage
+        // already uses for signal persistence. Gated behind _processEmail (opt-in, off by
+        // default) — existing callers never enumerate .eml files at all, not even to find zero.
+        var emlPaths = _processEmail
+            ? Directory
+                .EnumerateFiles(workspacePath, "*.eml", SearchOption.AllDirectories)
+                .OrderBy(p => p, StringComparer.OrdinalIgnoreCase)
+                .ToList()
+            : new List<string>();
 
         // ── Stage 2: classify — infer source tier per document ────────────────
         var classified = pdfPaths
             .Select(p => (Path: p, Tier: DocTypeInferrer.InferTier(Path.GetFileName(p))))
             .ToList();
-        executions.Add(new(1, "ingest",    now, pdfPaths.Count));
-        executions.Add(new(2, "classify",  now, classified.Count));
+        executions.Add(new(1, "ingest",    now, pdfPaths.Count + emlPaths.Count));
+        executions.Add(new(2, "classify",  now, classified.Count + emlPaths.Count));
 
         // ── Stage 3+4: extract + filter (both inside DocumentCandidateExtractor)
         var allCandidates           = new List<CandidateIdentityBelief>();
@@ -205,6 +248,56 @@ public sealed class KyvProgramRunner
                 metadataCandidatesByDoc.Add((docId, Array.Empty<MetadataCandidate>()));
             }
         }
+
+        // ── Stage 3+4 (email) — identity (reused DocumentCandidateExtractor path, spec §2.4
+        // Decision 3) + interpretation (EmailInterpretationExtractor, E-signal Part 5 Step 5) ──
+        foreach (var emlPath in emlPaths)
+        {
+            var docId = Path.GetFileName(emlPath);
+
+            ParsedEmail email;
+            try
+            {
+                email = EmailParser.ParseFile(emlPath);
+            }
+            catch (Exception ex)
+            {
+                unreadable.Add(new UnreadableDocument(
+                    RelativePath: Path.GetRelativePath(workspacePath, emlPath),
+                    Reason:       $"email parse failed: {ex.Message}"));
+                continue;
+            }
+
+            // Identity extraction — every email is SourceTier.Correspondence, never
+            // filename-inferred the way DocTypeInferrer.InferTier infers a document's tier.
+            var identityText = EmailParser.BuildIdentityText(email);
+            try
+            {
+                var candidates = await extractor.ExtractAsync(identityText, docId, SourceTier.Correspondence, ct);
+                allCandidates.AddRange(candidates);
+            }
+            catch (LlmCacheMissException)
+            {
+                // No recorded identity-extraction entry for this email — it contributes no
+                // identity candidates and so never enters resolution, but every other email and
+                // every document is unaffected (same tolerance as the PDF loop above).
+            }
+
+            // Belief + signal interpretation — a cassette miss degrades this email to zero
+            // beliefs/signals rather than failing the whole run (same tolerance as documents).
+            try
+            {
+                var extraction = await emailExtractor.ExtractAsync(email, ct);
+                factCandidatesByDoc.Add((docId, extraction.Beliefs));
+                metadataCandidatesByDoc.Add((docId, extraction.Metadata));
+            }
+            catch (LlmCacheMissException)
+            {
+                factCandidatesByDoc.Add((docId, Array.Empty<BeliefCandidate>()));
+                metadataCandidatesByDoc.Add((docId, Array.Empty<MetadataCandidate>()));
+            }
+        }
+
         executions.Add(new(3, "extract", now, allCandidates.Count));
         executions.Add(new(4, "filter",  now, allCandidates.Count));
 

@@ -450,3 +450,59 @@ pre-Step-5 baseline).
   (permissive claim-key definitions relying on guards to narrow them after the fact), same
   recommended fix shape (make the definition precise up front), same deferral target (E-docdepth
   or E2).
+
+## E-signal Part 5 Step 6: email-only identity resolution has a real precision gap — Brookfield/OfficeSpace
+
+Wiring `.eml` ingestion unconditionally into `KyvProgramRunner` (before the `processEmail` opt-in
+flag was added) broke two pre-existing, document-corpus-calibrated regression tests:
+`ProgramRun_All6Scenarios_VendorSet_NoTimeout` (asserted "Brookfield" — a customer, not a vendor —
+never appears in the resolved vendor set) and
+`ProgramRun_AbcIdentityAnswerYes_MergesLive_Absorbed_NotDeleted` (assumed the first
+`IDENTITY_CONFIRM` check-in is the ABC pair).
+
+**Root cause, confirmed on real data (Scenario 07, 300 emails, email-only):**
+- `ClusteringStage.AggregateEntityRole`'s highest-tier-members-vote mechanism depends on the LLM's
+  per-email role hints being consistent. Email-only correspondents get their role inferred purely
+  from free-text party/role extraction (`DocumentCandidateExtractor`, reused as-is for email
+  identity per spec §2.4 Decision 3) — there is no filename/doc-type signal the way documents have.
+  Across 300 real emails between OfficeSpace Software (vendor) and Brookfield (customer), enough of
+  Brookfield's role hints come back `unknown` rather than `customer` that the aggregate vote lands
+  on `unknown` for the cluster as a whole.
+- `IdentityGate.IsNonVendorRole` only filters `customer`/`issuer`/`internal` — **not** `unknown` —
+  so a customer that role-aggregates to `unknown` is never excluded and surfaces as a resolved
+  vendor. This is arguably correct conservative behavior for a genuinely ambiguous entity, but it
+  is wrong here because the true role (`customer`) is knowable from the corpus; the aggregation
+  step is losing the signal, not the underlying data lacking it.
+- Separately, name variance ("Office Space Software" vs "OfficeSpace") across different emails
+  fragments what should be one vendor cluster into two (`Office Space Software` role=unknown,
+  `OfficeSpace` role=vendor in the Step 6 full-wire dump) — a fuzzy-match miss at
+  `ClusteringStage`'s `MergeThreshold=0.90` for this specific name pair.
+
+**Not fixed — deferred by design.** `Ig.Resolution` (Clustering/IdentityGate) is Dev A's
+heavily-tested core identity logic, calibrated against the document-only corpus; patching its
+vote/threshold behavior reactively for one email scenario risks silently degrading the document
+path it was proven against. Instead, email processing was gated behind a `processEmail` opt-in
+constructor parameter (`KyvProgramRunner`, default `false`) so every existing document-only caller
+is provably unaffected (verified: `Kyv.ProgramRunner.Tests` 17/17 green, including both previously
+broken by the unconditional wiring; a before/after diff of the full document-only real corpus dump
+is byte-identical modulo one cosmetic blank line — see the Step 6 report). The real fix — either
+teaching `AggregateEntityRole`/`IdentityGate` to treat `unknown` more conservatively for
+correspondence-tier-only clusters, or tightening fuzzy-match for common SaaS-vendor name
+abbreviations — is out of scope for Step 6 and needs its own design pass against BOTH corpora
+(document and email), not just Scenario 07.
+
+## E-signal Part 5 Step 6: multi-tier corroboration on the SAME criterion revives the Commit-3 UNKNOWN answer
+
+The "Commit 3" section above documents `AnsweringPrompt.PresentationConfidence` fixing
+`saas.fin.l1.1` ("is there a signed contract with defined payment terms?") to answer `YES` for IIVS
+once a single `Verified`-tier `payment_terms` belief was present. Re-running the same question on
+IIVS's Step 6 combined belief set (the SAME `Verified` doc belief **plus** a corroborating
+`Correspondence`-tier `payment_terms=30` email belief, both citing "Net 30") produced `UNKNOWN`
+again, on a real live GPT-4o-mini call — not the previously-fixed `YES`. Two candidate beliefs for
+the same criterion, at different tiers, appears to have reintroduced the ambiguity the presentation-
+confidence fix was meant to close, rather than reinforcing the answer as corroboration should.
+Not investigated further — flagged here so it isn't mistaken for a completeness regression specific
+to email (the underlying `AnsweringPrompt`/`QuestionAnsweringStage` code is untouched by Step 6);
+it looks like a pre-existing multi-belief-per-criterion presentation gap that simply had no real
+corroborating-tier data to expose it until now. Worth a closer look alongside the Commit-3 stopgap's
+already-acknowledged "not the proper fix" status.
