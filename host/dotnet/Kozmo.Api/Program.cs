@@ -591,8 +591,8 @@ app.MapGet("/auth/google/callback", async (
         await storeInst.SaveOAuthTokenAsync(
             "google", token.AccessToken, token.RefreshToken, token.ExpiresAt, token.UserEmail);
 
-        // Redirect to the workspace after successful authorization
-        return Results.Redirect("/workspace");
+        // Redirect to the connect page after successful authorization
+        return Results.Redirect("/connect");
     }
     catch (Exception ex)
     {

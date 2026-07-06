@@ -1,0 +1,646 @@
+@page "/ingest"
+@{
+    Layout = null;
+}
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Kozmo · Preparing Workspace</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{min-height:100%;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased;background:#F8FAFE}
+a{color:inherit;text-decoration:none}
+button{font:inherit;cursor:pointer;border:0;background:transparent;color:inherit;padding:0}
+
+@@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+@@keyframes spin{to{transform:rotate(360deg)}}
+@@keyframes slideIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+
+/* ══════════════════ PAGE ══════════════════ */
+.page{
+  min-height:100vh;
+  background:linear-gradient(160deg,#F0F4FF 0%,#FAF7FF 40%,#F0F9FF 100%);
+  display:flex;flex-direction:column;
+}
+.page-body{
+  flex:1;max-width:920px;width:100%;
+  margin:0 auto;padding:52px 40px 120px;
+}
+
+/* Header */
+.pg-eyebrow{
+  font-size:10.5px;font-weight:700;letter-spacing:.12em;
+  text-transform:uppercase;color:#0D9488;margin-bottom:14px;
+  animation:fadeUp .3s ease both;
+}
+.pg-title{
+  font-size:30px;font-weight:700;color:#111827;
+  letter-spacing:-.025em;line-height:1.25;margin-bottom:10px;
+  animation:fadeUp .3s ease .05s both;
+}
+.pg-sub{
+  font-size:14px;color:#6B7280;line-height:1.65;max-width:580px;
+  margin-bottom:32px;
+  animation:fadeUp .3s ease .1s both;
+}
+
+/* Two-column layout */
+.cols{
+  display:grid;grid-template-columns:1fr 280px;gap:16px;
+  margin-bottom:20px;
+  animation:fadeUp .3s ease .15s both;
+}
+
+/* ── LEFT CARD — progress ── */
+.prog-card{
+  background:#FFFFFF;border:1px solid #E5E7EB;border-radius:12px;
+  padding:24px 26px;
+}
+.pc-stage-lbl{
+  font-size:10px;font-weight:700;letter-spacing:.1em;
+  text-transform:uppercase;color:#6B7280;margin-bottom:12px;
+  display:flex;align-items:center;gap:8px;
+}
+.pc-stage-dot{
+  width:7px;height:7px;border-radius:50%;background:#4573D2;
+  animation:pulse 2.4s ease infinite;
+}
+.pc-pct{
+  font-size:56px;font-weight:700;color:#111827;
+  letter-spacing:-.04em;line-height:1;margin-bottom:6px;
+}
+.pc-pct-suffix{font-size:32px;font-weight:400;color:#6B7280}
+.pc-desc{font-size:13px;color:#6B7280;margin-bottom:16px}
+
+/* Progress bar */
+.prog-track{
+  height:5px;background:#E5E7EB;border-radius:999px;
+  margin-bottom:18px;overflow:hidden;
+}
+.prog-fill{
+  height:100%;background:linear-gradient(90deg,#4573D2,#4F46E5);
+  border-radius:999px;transition:width .6s ease;width:0%;
+}
+
+/* Counts row */
+.counts-row{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:0;
+  border-top:1px solid #F3F4F6;padding-top:14px;
+}
+.count-col{text-align:center;border-right:1px solid #F3F4F6}
+.count-col:last-child{border-right:none}
+.count-val{font-size:18px;font-weight:700;color:#111827;letter-spacing:-.02em}
+.count-lbl{font-size:10.5px;color:#9CA3AF;margin-top:2px}
+
+/* ── RIGHT CARD — agents ── */
+.agents-card{
+  background:#FFFFFF;border:1px solid #E5E7EB;border-radius:12px;
+  padding:20px 22px;
+}
+.agents-title{
+  font-size:10.5px;font-weight:700;letter-spacing:.1em;
+  text-transform:uppercase;color:#9CA3AF;margin-bottom:16px;
+}
+.agent-row{
+  display:flex;align-items:flex-start;gap:11px;
+  margin-bottom:18px;
+}
+.agent-row:last-child{margin-bottom:0}
+.ag-dot-wrap{padding-top:3px}
+.ag-dot{
+  width:10px;height:10px;border-radius:50%;border:2px solid #E5E7EB;
+  background:#E5E7EB;transition:all .3s ease;flex-shrink:0;
+}
+.ag-dot.active{
+  background:#4573D2;border-color:#4573D2;
+  animation:pulse 2.4s ease infinite;
+}
+.ag-dot.done{background:#10B981;border-color:#10B981}
+.ag-info{flex:1;min-width:0}
+.ag-name{font-size:13px;font-weight:600;color:#374151;margin-bottom:2px}
+.ag-name.active{color:#111827}
+.ag-name.waiting{color:#9CA3AF}
+.ag-desc{font-size:11.5px;color:#9CA3AF;line-height:1.4}
+.ag-desc.active{color:#6B7280}
+.ag-right{font-size:11.5px;color:#9CA3AF;white-space:nowrap;padding-top:2px}
+.ag-right.active{color:#4573D2;font-weight:500}
+
+/* Stage tracker */
+.stage-track{
+  display:grid;grid-template-columns:repeat(5,1fr);gap:10px;
+  margin-bottom:24px;
+  animation:fadeUp .3s ease .2s both;
+}
+.stage-col{
+  background:#FFFFFF;border:1px solid #E5E7EB;border-radius:8px;
+  padding:12px 14px;position:relative;
+  transition:border-color .3s;
+}
+.stage-col.complete{border-color:#A7F3D0;background:#F0FDF4}
+.stage-col.running{border-color:#BFDBFE;background:#EFF6FF}
+.stage-col.pending{opacity:.55}
+.stage-num{font-size:10px;color:#9CA3AF;margin-bottom:3px}
+.stage-name{font-size:12px;font-weight:600;color:#374151}
+.stage-col.complete .stage-name{color:#059669}
+.stage-col.running .stage-name{color:#1D4ED8}
+.stage-col.pending .stage-name{color:#9CA3AF}
+.stage-sub{
+  font-size:10.5px;color:#9CA3AF;margin-top:4px;
+}
+.stage-col.complete .stage-sub{color:#6EE7B7}
+.stage-col.running .stage-sub{color:#93C5FD}
+.stage-bar{
+  height:3px;background:#E5E7EB;border-radius:999px;
+  margin-top:10px;overflow:hidden;
+}
+.stage-bar-fill{
+  height:100%;background:#4573D2;border-radius:999px;
+  transition:width .5s ease;width:0%;
+}
+.stage-col.complete .stage-bar-fill{background:#10B981;width:100%}
+
+/* Live activity */
+.activity-card{
+  background:#FFFFFF;border:1px solid #E5E7EB;border-radius:12px;
+  overflow:hidden;
+  animation:fadeUp .3s ease .25s both;
+}
+.act-hdr{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 18px;border-bottom:1px solid #E5E7EB;
+  background:#FAFAFA;
+}
+.act-hdr-title{font-size:13px;font-weight:600;color:#111827}
+.act-hdr-right{font-size:11.5px;color:#9CA3AF}
+.act-body{
+  max-height:200px;min-height:100px;overflow-y:auto;
+  padding:10px 18px;
+}
+.act-empty{font-size:12.5px;color:#9CA3AF;padding:12px 0;font-style:italic}
+.act-row{
+  display:flex;align-items:flex-start;gap:10px;
+  padding:5px 0;border-bottom:1px solid #F9FAFB;
+  font-size:12.5px;line-height:1.5;
+  animation:slideIn .2s ease both;
+}
+.act-row:last-child{border-bottom:none}
+.act-time{color:#9CA3AF;flex-shrink:0;font-size:11.5px;font-family:ui-monospace,"Cascadia Code",monospace;padding-top:1px}
+.act-bullet{color:#D1D5DB;flex-shrink:0}
+.act-msg{color:#374151;flex:1}
+.act-msg.ok{color:#059669;font-weight:500}
+.act-msg.warn{color:#92400E}
+
+/* Footer */
+.page-footer{
+  position:fixed;bottom:0;left:0;right:0;
+  background:#FFFFFF;border-top:1px solid #E5E7EB;
+  padding:14px 40px;
+  display:flex;align-items:center;justify-content:space-between;
+  z-index:100;
+}
+.footer-note{font-size:12.5px;color:#9CA3AF}
+.footer-nav{display:flex;align-items:center;gap:12px}
+.btn-back{
+  font-size:13px;font-weight:500;color:#6B7280;padding:8px 18px;
+  border-radius:8px;border:1px solid #E5E7EB;
+  transition:background .12s,border-color .12s;
+}
+.btn-back:hover{background:#F9FAFB;border-color:#D1D5DB}
+.btn-next{
+  display:inline-flex;align-items:center;gap:8px;
+  background:#9CA3AF;color:#FFFFFF;
+  padding:10px 22px;border-radius:8px;
+  font-size:13px;font-weight:600;
+  transition:background .2s;pointer-events:none;
+}
+.btn-next.ready{background:#312E81;pointer-events:auto;cursor:pointer}
+.btn-next.ready:hover{background:#1E1B4B}
+.btn-spinner{
+  width:14px;height:14px;border-radius:50%;
+  border:2px solid rgba(255,255,255,.35);
+  border-top-color:#FFFFFF;
+  animation:spin .7s linear infinite;display:none;
+}
+.btn-next:not(.ready) .btn-spinner{display:inline-block}
+.btn-next.ready .btn-spinner{display:none}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="page-body">
+
+    <p class="pg-eyebrow">Ingestion</p>
+    <h1 class="pg-title">Kozmo is preparing your workspace.</h1>
+    <p class="pg-sub">
+      Agents are reading your sources, classifying signals, normalizing vendors,
+      and indexing everything for inquiry. You can leave this page &mdash; we&rsquo;ll
+      email you when it&rsquo;s ready.
+    </p>
+
+    <!-- Two-column progress + agents -->
+    <div class="cols">
+
+      <!-- Progress card -->
+      <div class="prog-card">
+        <div class="pc-stage-lbl">
+          <span class="pc-stage-dot" id="stage-dot"></span>
+          <span id="stage-lbl">STAGE 1 OF 5 &middot; DISCOVER</span>
+        </div>
+        <div class="pc-pct"><span id="pct-num">0</span><span class="pc-pct-suffix">%</span></div>
+        <div class="pc-desc" id="pc-desc">Starting pipeline&hellip;</div>
+        <div class="prog-track">
+          <div class="prog-fill" id="prog-fill"></div>
+        </div>
+        <div class="counts-row">
+          <div class="count-col">
+            <div class="count-val" id="cnt-files">0</div>
+            <div class="count-lbl">files</div>
+          </div>
+          <div class="count-col">
+            <div class="count-val" id="cnt-signals">0</div>
+            <div class="count-lbl">signals</div>
+          </div>
+          <div class="count-col">
+            <div class="count-val" id="cnt-vendors">0</div>
+            <div class="count-lbl">vendors</div>
+          </div>
+          <div class="count-col">
+            <div class="count-val" id="cnt-layers">0</div>
+            <div class="count-lbl">inquiry layers</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Agents card -->
+      <div class="agents-card">
+        <div class="agents-title">Agents Working</div>
+
+        <div class="agent-row" id="ag-intake">
+          <div class="ag-dot-wrap"><div class="ag-dot"></div></div>
+          <div class="ag-info">
+            <div class="ag-name">Intake Agent</div>
+            <div class="ag-desc">Reading folders &amp; connectors</div>
+          </div>
+          <div class="ag-right">Waiting</div>
+        </div>
+
+        <div class="agent-row" id="ag-docmgr">
+          <div class="ag-dot-wrap"><div class="ag-dot"></div></div>
+          <div class="ag-info">
+            <div class="ag-name">Document Manager</div>
+            <div class="ag-desc">Classifying by area &amp; type</div>
+          </div>
+          <div class="ag-right">Waiting</div>
+        </div>
+
+        <div class="agent-row" id="ag-commgr">
+          <div class="ag-dot-wrap"><div class="ag-dot"></div></div>
+          <div class="ag-info">
+            <div class="ag-name">Commercial Manager</div>
+            <div class="ag-desc">Drafting first inquiry layers</div>
+          </div>
+          <div class="ag-right">Waiting</div>
+        </div>
+
+        <div class="agent-row" id="ag-contmgr">
+          <div class="ag-dot-wrap"><div class="ag-dot"></div></div>
+          <div class="ag-info">
+            <div class="ag-name">Contract Manager</div>
+            <div class="ag-desc">Identifying renewal &amp; risk structure</div>
+          </div>
+          <div class="ag-right">Waiting</div>
+        </div>
+
+      </div>
+    </div><!-- /cols -->
+
+    <!-- Stage tracker -->
+    <div class="stage-track" id="stage-track">
+      <div class="stage-col running" id="stg-1">
+        <div class="stage-num">Stage 1</div>
+        <div class="stage-name">Discover</div>
+        <div class="stage-sub" id="stg-1-sub">Starting&hellip;</div>
+        <div class="stage-bar"><div class="stage-bar-fill" id="stg-1-fill"></div></div>
+      </div>
+      <div class="stage-col pending" id="stg-2">
+        <div class="stage-num">Stage 2</div>
+        <div class="stage-name">Parse</div>
+        <div class="stage-sub" id="stg-2-sub">Pending</div>
+        <div class="stage-bar"><div class="stage-bar-fill" id="stg-2-fill"></div></div>
+      </div>
+      <div class="stage-col pending" id="stg-3">
+        <div class="stage-num">Stage 3</div>
+        <div class="stage-name">Classify</div>
+        <div class="stage-sub" id="stg-3-sub">Pending</div>
+        <div class="stage-bar"><div class="stage-bar-fill" id="stg-3-fill"></div></div>
+      </div>
+      <div class="stage-col pending" id="stg-4">
+        <div class="stage-num">Stage 4</div>
+        <div class="stage-name">Index</div>
+        <div class="stage-sub" id="stg-4-sub">Pending</div>
+        <div class="stage-bar"><div class="stage-bar-fill" id="stg-4-fill"></div></div>
+      </div>
+      <div class="stage-col pending" id="stg-5">
+        <div class="stage-num">Stage 5</div>
+        <div class="stage-name">Verify</div>
+        <div class="stage-sub" id="stg-5-sub">Pending</div>
+        <div class="stage-bar"><div class="stage-bar-fill" id="stg-5-fill"></div></div>
+      </div>
+    </div>
+
+    <!-- Live activity -->
+    <div class="activity-card">
+      <div class="act-hdr">
+        <span class="act-hdr-title">Live activity</span>
+        <span class="act-hdr-right">stream &middot; last 8 events</span>
+      </div>
+      <div class="act-body" id="act-body">
+        <div class="act-empty" id="act-empty">Waiting for pipeline to start&hellip;</div>
+      </div>
+    </div>
+
+  </div><!-- /page-body -->
+</div><!-- /page -->
+
+<!-- Footer -->
+<div class="page-footer">
+  <span class="footer-note">Safe to leave this page &mdash; we&rsquo;ll email when ready</span>
+  <div class="footer-nav">
+    <a href="/connect" class="btn-back">Back to mapping</a>
+    <a href="/workspace" class="btn-next" id="btn-continue">
+      <span class="btn-spinner"></span>
+      <span id="btn-lbl">Indexing&hellip; 0%</span>
+      &#8594;
+    </a>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  var TOTAL  = 13;   // expected signal count from seed
+  var count  = 0;    // signals processed so far
+  var done   = false;
+  var vendors = {};  // entityId -> name
+
+  // Stage boundaries (signals that complete each stage)
+  var STAGES = [
+    { end:  2, name: 'Discover' },
+    { end:  6, name: 'Parse'    },
+    { end:  9, name: 'Classify' },
+    { end: 11, name: 'Index'    },
+    { end: 13, name: 'Verify'   }
+  ];
+
+  // Agent active windows [first_signal_inclusive, last_signal_inclusive]
+  var AGENTS = {
+    'ag-intake':  [1,  4 ],
+    'ag-docmgr':  [3,  8 ],
+    'ag-commgr':  [7,  11],
+    'ag-contmgr': [10, 13]
+  };
+
+  var AGENT_COUNTS = {
+    'ag-intake':  function(n){ return n + ' files'; },
+    'ag-docmgr':  function(n){ return Math.min(n, 8) + ' / ' + TOTAL; },
+    'ag-commgr':  function(n){ return 'Waiting'; },
+    'ag-contmgr': function(n){ return 'Waiting'; }
+  };
+
+  // ── helpers ──────────────────────────────────────────────
+
+  function esc(s) {
+    return String(s)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function now8() {
+    return new Date().toTimeString().slice(0, 8);
+  }
+
+  function getStageIdx(n) {
+    for (var i = 0; i < STAGES.length; i++) {
+      if (n <= STAGES[i].end) return i;
+    }
+    return STAGES.length - 1;
+  }
+
+  // ── DOM update: percentage + bar ────────────────────────
+
+  function updatePct(n) {
+    var pct = Math.min(100, Math.round((n / TOTAL) * 100));
+    document.getElementById('pct-num').textContent  = pct;
+    document.getElementById('prog-fill').style.width = pct + '%';
+    document.getElementById('btn-lbl').textContent  = 'Indexing\u2026 ' + pct + '%';
+    // counts
+    document.getElementById('cnt-files').textContent   = n;
+    document.getElementById('cnt-signals').textContent = n;
+    var vcount = Math.min(Object.keys(vendors).length || 1, Math.ceil(n / 4));
+    document.getElementById('cnt-vendors').textContent = vcount;
+    document.getElementById('cnt-layers').textContent  = Math.floor(n * 0.3);
+  }
+
+  // ── DOM update: stage display ────────────────────────────
+
+  function updateStages(n) {
+    var si = getStageIdx(n);
+
+    for (var i = 0; i < STAGES.length; i++) {
+      var el   = document.getElementById('stg-' + (i+1));
+      var sub  = document.getElementById('stg-' + (i+1) + '-sub');
+      var fill = document.getElementById('stg-' + (i+1) + '-fill');
+      el.className = 'stage-col';
+
+      if (i < si) {
+        // complete
+        el.classList.add('complete');
+        sub.textContent = 'Complete';
+        fill.style.width = '100%';
+      } else if (i === si) {
+        // running
+        el.classList.add('running');
+        var prog = i === 0 ? n / STAGES[0].end :
+          (n - STAGES[i-1].end) / (STAGES[i].end - STAGES[i-1].end);
+        fill.style.width = Math.min(100, Math.round(prog * 100)) + '%';
+        sub.textContent = STAGES[i].name === 'Parse'
+          ? 'Parsing ' + n + ' / ' + TOTAL
+          : STAGES[i].name.toLowerCase() + 'ing ' + n + ' / ' + TOTAL;
+      } else {
+        // pending
+        el.classList.add('pending');
+        sub.textContent = 'Pending';
+        fill.style.width = '0%';
+      }
+    }
+
+    // Stage label in progress card
+    var stageName = STAGES[si].name.toUpperCase();
+    document.getElementById('stage-lbl').textContent =
+      'STAGE ' + (si+1) + ' OF 5 \u00b7 ' + stageName;
+    document.getElementById('pc-desc').textContent =
+      stageName.charAt(0) + stageName.slice(1).toLowerCase() +
+      'ing signal ' + n + ' of ' + TOTAL + ' \u00b7 est. ' +
+      Math.max(1, Math.round((TOTAL - n) * 0.4)) + 's remaining';
+  }
+
+  // ── DOM update: agents ───────────────────────────────────
+
+  function updateAgents(n) {
+    Object.keys(AGENTS).forEach(function(id) {
+      var range = AGENTS[id];
+      var row   = document.getElementById(id);
+      var dot   = row.querySelector('.ag-dot');
+      var name  = row.querySelector('.ag-name');
+      var right = row.querySelector('.ag-right');
+
+      if (n >= range[0] && n <= range[1]) {
+        dot.className  = 'ag-dot active';
+        name.className = 'ag-name active';
+        right.className = 'ag-right active';
+        // Contextual count
+        if (id === 'ag-intake') right.textContent = n + ' files';
+        else if (id === 'ag-docmgr') right.textContent = n + ' / ' + TOTAL;
+        else right.textContent = 'Running';
+      } else if (n > range[1]) {
+        dot.className  = 'ag-dot done';
+        name.className = 'ag-name';
+        right.className = 'ag-right';
+        right.textContent = 'Done';
+      } else {
+        dot.className  = 'ag-dot';
+        name.className = 'ag-name waiting';
+        right.className = 'ag-right';
+        right.textContent = 'Waiting';
+      }
+    });
+  }
+
+  // ── Activity log ─────────────────────────────────────────
+
+  var MAX_LOG = 8;
+
+  function addLog(msg, cls) {
+    var body   = document.getElementById('act-body');
+    var empty  = document.getElementById('act-empty');
+    if (empty) empty.remove();
+
+    // Trim to MAX_LOG
+    var rows = body.querySelectorAll('.act-row');
+    if (rows.length >= MAX_LOG) rows[rows.length - 1].remove();
+
+    var d = document.createElement('div');
+    d.className = 'act-row';
+    d.innerHTML =
+      '<span class="act-time">' + now8() + '</span>' +
+      '<span class="act-bullet">&middot;</span>' +
+      '<span class="act-msg' + (cls ? ' ' + cls : '') + '">' + esc(msg) + '</span>';
+    body.insertBefore(d, body.firstChild);
+  }
+
+  // Agent narrative for each stage
+  var NARRATIVES = [
+    function(vname){ return 'Intake Agent connected source \u00b7 reading ' + vname + ' signal'; },
+    function(vname){ return 'Intake Agent read ' + vname + ' data \u00b7 queued for classification'; },
+    function(vname, data){ return 'Document Manager classified ' + vname + ' as ' + (data&&data.index&&data.index.band||'pending') + ' risk'; },
+    function(vname){ return 'Document Manager flagged ' + vname + ' dimensions \u00b7 scoring'; },
+    function(vname){ return 'Commercial Manager prepared inquiry for ' + vname; },
+    function(vname){ return 'Commercial Manager identified renewal pressure \u00b7 ' + vname; },
+    function(vname, data){ return 'Commercial Manager updated ' + vname + ' stance: ' + (data&&data.stance||'pending'); },
+    function(vname){ return 'Contract Manager identified renewal structure \u00b7 ' + vname; },
+    function(vname){ return 'Contract Manager flagged ' + vname + ' contract obligations'; },
+    function(vname){ return 'Indexing ' + vname + ' beliefs \u00b7 computing fingerprint'; },
+    function(vname){ return 'Index complete for ' + vname + ' \u00b7 posture updated'; },
+    function(vname){ return 'Verifying ' + vname + ' \u00b7 determinism check'; },
+    function(vname){ return 'Vendor ' + vname + ' ready \u00b7 all signals processed'; }
+  ];
+
+  // ── SSE event handler ────────────────────────────────────
+
+  function handleEvent(e) {
+    var msg;
+    try { msg = JSON.parse(e.data); } catch(ex){ return; }
+
+    if (msg.type === 'replay-step') {
+      count++;
+      var data   = msg.data || {};
+      var vid    = data.entityId || '';
+      var vname  = vendors[vid] || vid.slice(0,8) || 'Vendor';
+      var narIdx = Math.min(count - 1, NARRATIVES.length - 1);
+      var text   = NARRATIVES[narIdx](vname, data);
+
+      addLog(text);
+      updatePct(count);
+      updateStages(count);
+      updateAgents(count);
+    } else if (msg.type === 'replay-complete') {
+      finishReplay();
+    }
+  }
+
+  function finishReplay() {
+    if (done) return;
+    done = true;
+
+    updatePct(TOTAL);
+    updateStages(TOTAL);
+    updateAgents(TOTAL);
+
+    // All stages complete
+    for (var i = 1; i <= 5; i++) {
+      var el = document.getElementById('stg-' + i);
+      el.className = 'stage-col complete';
+      document.getElementById('stg-' + i + '-sub').textContent = 'Complete';
+      document.getElementById('stg-' + i + '-fill').style.width = '100%';
+    }
+
+    document.getElementById('stage-lbl').textContent = 'STAGE 5 OF 5 \u00b7 COMPLETE';
+    document.getElementById('pc-desc').textContent   = 'Pipeline complete \u00b7 3 vendors indexed \u00b7 13 signals';
+    document.getElementById('stage-dot').style.animation = 'none';
+    document.getElementById('stage-dot').style.background = '#10B981';
+    document.getElementById('cnt-vendors').textContent = Object.keys(vendors).length || '3';
+    document.getElementById('cnt-layers').textContent  = '4';
+
+    addLog('Indexing complete \u00b7 3 vendors \u00b7 13 signals processed', 'ok');
+    addLog('All fingerprints verified \u00b7 determinism confirmed', 'ok');
+
+    // Enable continue button
+    var btn = document.getElementById('btn-continue');
+    btn.classList.add('ready');
+    document.getElementById('btn-lbl').textContent = 'Continue to workspace';
+  }
+
+  // ── Bootstrap ────────────────────────────────────────────
+
+  async function boot() {
+    // 1. Pre-load vendor names
+    try {
+      var r    = await fetch('/vendors');
+      var list = await r.json();
+      list.forEach(function(v){ vendors[v.id] = v.name; });
+    } catch(e) { /* continue without names */ }
+
+    // 2. Open SSE connection first
+    var es = new EventSource('/events');
+    es.onmessage = handleEvent;
+    es.onerror   = function() {
+      if (!done) addLog('SSE connection interrupted \u00b7 retrying\u2026', 'warn');
+    };
+
+    // 3. Fire replay (the server resets + replays all seed signals)
+    try {
+      await fetch('/demo/replay', { method: 'POST' });
+    } catch(e) {
+      addLog('Failed to start replay: ' + e.message, 'warn');
+    }
+  }
+
+  boot();
+})();
+</script>
+</body>
+</html>

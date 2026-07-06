@@ -313,11 +313,11 @@ body{
 .avbtn:hover{background:var(--accent-hover)}
 
 /* Views */
-.view{display:none;flex:1;flex-direction:column;overflow:hidden}
+.view{display:none;flex:1;flex-direction:column;overflow:hidden;min-height:0}
 .view.on{display:flex}
 
 /* ── PROGRAM VIEW ── */
-.pv-content{flex:1;overflow:hidden;display:flex;flex-direction:column}
+.pv-content{flex:1;overflow:hidden;display:flex;flex-direction:column;min-height:0}
 .page-hdr{
   padding:var(--s7) var(--s7) 0;background:var(--surface);
   border-bottom:1px solid var(--line-1);flex-shrink:0;
@@ -330,12 +330,15 @@ body{
 .status-pill{
   display:inline-flex;align-items:center;gap:7px;
   font-size:var(--t-small);font-weight:500;padding:5px 12px;border-radius:var(--r-pill);
+  background:var(--caution-soft);color:var(--caution-ink);
 }
 .status-pill.conn{background:var(--affirm-soft);color:var(--affirm-ink)}
 .status-pill.disc{background:var(--surface-soft);color:var(--ink-3)}
 .sp-dot{width:6px;height:6px;border-radius:50%}
 .status-pill.conn .sp-dot{background:var(--affirm);animation:pulse 2.4s ease infinite}
 .status-pill.disc .sp-dot{background:var(--ink-5)}
+.status-pill-dot{width:6px;height:6px;border-radius:50%;background:var(--caution);animation:pulse 2.4s ease infinite}
+.phdr-meta{font-size:var(--t-small);color:var(--ink-3)}
 .tab-bar{display:flex;align-items:center;padding:0 var(--s7);gap:0;margin-top:var(--s3)}
 .tab-btn{
   font-size:var(--t-small);font-weight:500;color:var(--ink-3);
@@ -345,8 +348,8 @@ body{
 }
 .tab-btn:hover{color:var(--ink-1)}
 .tab-btn.on{color:var(--accent);font-weight:600;border-bottom-color:var(--accent)}
-.tab-panels{flex:1;overflow:hidden;background:var(--canvas)}
-.tab-panel{display:none;height:100%;overflow-y:auto}
+.tab-panels{flex:1;overflow:hidden;background:var(--canvas);min-height:0}
+  .tab-panel{display:none;height:100%;overflow-y:auto;min-height:0}
 .tab-panel.on{display:block}
 
 /* ── INGESTION PANEL ── */
@@ -454,14 +457,197 @@ body{
 .vt-name{font-weight:600;color:var(--ink-0)}
 .vt-id{font-family:var(--font-mono);font-size:var(--t-micro);color:var(--ink-4);margin-top:2px}
 .score-val{font-family:var(--font-display);font-weight:700;font-size:15px;letter-spacing:-.01em}
-
-/* Badges */
+.cri-val{font-family:var(--font-display);font-weight:700;font-size:15px;letter-spacing:-.01em}
+.cri-trend{font-size:11px;font-weight:400;margin-left:3px}
 .bdg{display:inline-flex;align-items:center;font-size:var(--t-micro);font-weight:600;letter-spacing:.02em;padding:3px 10px;border-radius:var(--r-pill);line-height:1.55}
 .bdg-green{background:var(--affirm-soft);color:var(--affirm-ink)}
 .bdg-amber{background:var(--caution-soft);color:var(--caution-ink)}
 .bdg-red{background:var(--urgent-soft);color:var(--urgent-ink)}
-.bdg-grey{background:var(--surface-soft);color:var(--ink-2)}
 .bdg-blue{background:var(--watch-soft);color:var(--watch-ink)}
+.bdg-accent{background:var(--accent-soft);color:var(--accent-ink)}
+.bdg-grey{background:var(--surface-soft);color:var(--ink-2)}
+.vlist-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:var(--s6);gap:var(--s5)}
+.vlist-title{font-family:var(--font-display);font-size:var(--t-title);font-weight:700;color:var(--ink-0);letter-spacing:-.02em;line-height:1.15}
+.vlist-sub{font-size:var(--t-small);color:var(--ink-3);margin-top:var(--s2)}
+.vlist-actions{display:flex;gap:var(--s2);align-items:center}
+.srch{flex:1;max-width:440px;height:32px;padding:0 var(--s4);display:flex;align-items:center;gap:var(--s2);border-radius:var(--r-md);background:var(--canvas);border:1px solid var(--line-1);font-size:var(--t-small);color:var(--ink-3);cursor:text;transition:border-color var(--tr),background var(--tr)}
+.srch:hover{border-color:var(--line-3);background:var(--surface)}
+.srch:focus-within{border-color:var(--accent);background:var(--surface)}
+.srch input{border:none;outline:none;background:transparent;font:inherit;color:inherit;width:100%}
+
+/* Program Overview */
+  .overview-body{padding:var(--s7);display:grid;grid-template-columns:minmax(0,1.6fr) minmax(320px,0.85fr);gap:var(--s6);min-height:0;overflow:auto;flex:1}
+  .overview-main{display:flex;flex-direction:column;gap:var(--s6);min-height:0}
+  .program-summary-card{background:var(--surface);border:1px solid var(--line-1);border-radius:var(--r-lg);padding:var(--s6);box-shadow:var(--shadow-sm);display:flex;flex-direction:column;gap:var(--s5)}
+  .summary-top{display:flex;align-items:flex-start;justify-content:space-between;gap:var(--s5);flex-wrap:wrap}
+  .summary-meta{display:flex;align-items:center;gap:var(--s2);flex-wrap:wrap}
+  .summary-chip{font-size:12px;font-weight:600;padding:7px 12px;border-radius:999px;background:var(--surface-soft);color:var(--ink-2);border:1px solid var(--line-1)}
+  .summary-chip.accent{background:#FFF0F0;color:var(--urgent-ink);border-color:rgba(224,41,106,.12)}
+  .summary-chip.success{background:#EEF8F4;color:var(--affirm-ink);border-color:rgba(20,160,133,.16)}
+  .summary-chip.warning{background:#FFFAEE;color:#A4680D;border-color:rgba(201,123,23,.18)}
+  .summary-list{margin:var(--s4) 0 0 0;padding-left:20px;color:var(--ink-2);line-height:1.75;}
+  .summary-list li{margin-bottom:10px}
+  .summary-actions{display:flex;gap:var(--s3);flex-wrap:wrap;margin-top:var(--s4)}
+  .overview-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--s5);margin-top:var(--s5)}
+  .metric-card{background:var(--surface);border:1px solid var(--line-1);border-radius:var(--r-lg);padding:var(--s5);box-shadow:var(--shadow-sm)}
+  .metric-title{font-size:var(--t-micro);font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-3);margin-bottom:var(--s2)}
+  .metric-value{font-size:30px;font-weight:700;color:var(--ink-0);line-height:1;margin-bottom:var(--s2)}
+  .metric-sub{font-size:13px;color:var(--ink-3)}
+  .metric-tag{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:600;padding:5px 12px;border-radius:999px;background:var(--surface-soft);color:var(--ink-3);margin-top:var(--s3)}
+  .metric-tag.red{background:var(--urgent-soft);color:var(--urgent-ink)}
+  .stage-section{display:flex;flex-direction:column;gap:var(--s4)}
+  .stage-heading{font-size:var(--t-micro);font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-4);margin-bottom:var(--s4)}
+  .stage-group{display:flex;flex-direction:column;gap:var(--s4)}
+  .stage-card{background:var(--surface);border:1px solid var(--line-1);border-radius:var(--r-lg);padding:var(--s5);display:flex;justify-content:space-between;gap:var(--s5);box-shadow:var(--shadow-sm)}
+  .stage-left{flex:1;min-width:0}
+  .stage-label{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:700;text-transform:uppercase;color:var(--accent);margin-bottom:var(--s2)}
+  .stage-title{font-size:var(--t-h4);font-weight:700;color:var(--ink-0);margin-bottom:var(--s3)}
+  .stage-desc{font-size:14px;color:var(--ink-3);line-height:1.8;margin-bottom:var(--s4)}
+  .stage-pills{display:flex;flex-wrap:wrap;gap:var(--s2)}
+  .stage-pill{font-size:12px;font-weight:600;padding:7px 12px;border-radius:999px;background:var(--surface-soft);color:var(--ink-3);border:1px solid var(--line-1)}
+  .stage-pill.green{background:#E8F7EE;color:var(--affirm-ink);border-color:rgba(20,160,133,.2)}
+  .stage-pill.blue{background:#EBF7FF;color:var(--watch-ink);border-color:rgba(69,115,210,.2)}
+  .stage-pill.red{background:#FDE6EB;color:var(--urgent-ink);border-color:rgba(232,56,79,.18)}
+  .stage-right{display:flex;flex-direction:column;align-items:flex-end;justify-content:flex-start;gap:var(--s2);white-space:nowrap}
+  .stage-status{font-size:12px;font-weight:700;padding:6px 12px;border-radius:999px;background:var(--surface-soft);color:var(--ink-4)}
+  .stage-status.complete{color:#137333;background:#E6F4F0;border:1px solid rgba(20,160,133,.15)}
+  .stage-status.inprogress{color:#A66C18;background:#FEF5DE;border:1px solid rgba(201,123,23,.16)}
+  .stage-status.pending{color:#3A6E8C;background:#EEF5FB;border:1px solid rgba(69,115,210,.2)}
+  .overview-sidebar{display:flex;flex-direction:column;gap:var(--s5);min-height:0}
+  .tab-panels{flex:1;display:flex;flex-direction:column;overflow:hidden;min-height:0}
+  .tab-panel{display:none;flex:1;overflow:hidden;min-height:0}
+  .tab-panel.on{display:flex;flex-direction:column}
+  .vendors-panel{padding:var(--s7);overflow:hidden;height:100%;display:flex;flex-direction:column;min-height:0}
+  .vendor-search-row{display:flex;align-items:center;justify-content:space-between;gap:var(--s3);margin-bottom:var(--s4);flex-wrap:wrap}
+  .vendor-table{width:100%;border-collapse:collapse;font-size:13px}
+  .vendor-table th{font-size:var(--t-micro);font-weight:700;color:var(--ink-4);text-transform:uppercase;padding:18px 16px;letter-spacing:.08em;text-align:left;border-bottom:1px solid var(--line-1);background:var(--surface-soft)}
+  .vendor-table td{padding:18px;border-bottom:1px solid var(--line-2);color:var(--ink-2);vertical-align:middle}
+  .vendor-table tbody tr{cursor:pointer;transition:background var(--tr)}
+  .vendor-table tbody tr:hover td{background:var(--surface-hover)}
+  .vendor-table .vt-name{font-weight:700;color:var(--ink-0)}
+  .vendor-table .vt-id{font-size:12px;color:var(--ink-4);margin-top:4px}
+  .vendor-header{display:flex;align-items:flex-start;justify-content:space-between;gap:var(--s4);margin-bottom:var(--s4);flex-wrap:wrap}
+  .vendor-name{font-size:26px;font-weight:700;color:var(--ink-0);line-height:1.1}
+  .vendor-badges{display:flex;flex-wrap:wrap;gap:var(--s2);margin-top:var(--s2)}
+  .vendor-card{background:var(--surface);border:1px solid var(--line-1);border-radius:var(--r-lg);padding:var(--s6);box-shadow:var(--shadow-sm);min-height:0}
+  .vendor-notice{background:#F5F7FF;border:1px solid #DDE6FD;border-radius:var(--r-md);padding:18px 20px;margin-bottom:var(--s5)}
+  .vendor-notice strong{display:block;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-4);margin-bottom:var(--s2)}
+  .vendor-tab-bar{display:flex;align-items:center;gap:var(--s3);padding:0 var(--s7);border-bottom:1px solid var(--line-1);margin-bottom:var(--s5)}
+  .vendor-tab-btn{font-size:var(--t-small);font-weight:500;color:var(--ink-3);padding:12px 16px;border-bottom:2px solid transparent;cursor:pointer;background:none;transition:color var(--tr),border-color var(--tr)}
+  .vendor-tab-btn.on{color:var(--accent);border-bottom-color:var(--accent);font-weight:600}
+  /* Ensure detail panels can scroll independently inside the app container */
+  .vendor-detail-panels{flex:1;display:flex;flex-direction:column;gap:var(--s5);min-height:0;overflow:visible}
+  .vendor-detail-panel{display:none;flex:1;overflow:auto;min-height:0;-webkit-overflow-scrolling:touch}
+  .vendor-detail-panel.on{display:block}
+  .vendor-panel-body{flex:1;overflow:auto;min-height:0;-webkit-overflow-scrolling:touch;padding:0 var(--s7)}
+  .vendor-count-line{font-size:13px;color:var(--ink-3);margin-bottom:var(--s4)}
+  .vendor-header{display:flex;align-items:flex-start;justify-content:space-between;gap:var(--s4);margin-bottom:var(--s4);flex-wrap:wrap}
+  .vendor-name{font-size:24px;font-weight:700;color:var(--ink-0);line-height:1.1}
+  .vendor-badges{display:flex;flex-wrap:wrap;gap:var(--s2);margin-top:var(--s2)}
+  .vendor-badge{font-size:12px;font-weight:600;padding:4px 10px;border-radius:999px;background:var(--surface-soft);color:var(--ink-3);border:1px solid var(--line-1)}
+  .vendor-badge.watch{background:var(--watch-soft);color:var(--caution-ink);border-color:rgba(201,123,23,.12)}
+  .vendor-badge.active{background:var(--affirm-soft);color:var(--affirm-ink);border-color:rgba(20,160,133,.12)}
+  .vendor-badge.at-risk{background:var(--urgent-soft);color:var(--urgent-ink);border-color:rgba(232,56,79,.12)}
+  .vendor-badge.critical{background:var(--urgent-soft);color:var(--urgent-ink);border-color:rgba(232,56,79,.12)}
+  .vendor-tab-bar{display:flex;align-items:center;gap:var(--s3);padding:0 var(--s7);border-bottom:1px solid var(--line-1);margin-bottom:var(--s5)}
+  .vendor-tab-btn{font-size:var(--t-small);font-weight:500;color:var(--ink-3);padding:12px 16px;border-bottom:2px solid transparent;cursor:pointer;background:none;transition:color var(--tr),border-color var(--tr)}
+  .vendor-tab-btn:hover{color:var(--ink-1)}
+  .vendor-tab-btn.on{color:var(--accent);border-bottom-color:var(--accent);font-weight:600}
+  .vendor-subtab-bar{display:flex;align-items:center;gap:var(--s2);padding:0 var(--s7);border-bottom:1px solid var(--line-1);margin-bottom:var(--s5);flex-wrap:wrap}
+  .vendor-subtab-btn{font-size:13px;font-weight:500;color:var(--ink-3);padding:10px 14px;border-bottom:2px solid transparent;cursor:pointer;background:none;border-left:none;border-right:none;border-top:none;transition:color var(--tr),border-color var(--tr)}
+  .vendor-subtab-btn:hover{color:var(--ink-1)}
+  .vendor-subtab-btn.on{color:var(--accent);border-bottom-color:var(--accent);font-weight:600}
+  .vendor-detail-subpanels{flex:1;overflow:auto;min-height:0}
+  .vendor-detail-subpanel{display:none}
+  .vendor-detail-subpanel.on{display:block}
+  .vendor-detail-panels{flex:1;display:flex;flex-direction:column;gap:var(--s5);min-height:0}
+  .vendor-detail-panel{display:none;flex:1;overflow:hidden;min-height:0}
+  .vendor-detail-panel.on{display:block}
+  .vendor-overview-grid{display:grid;grid-template-columns:1.7fr 1fr;gap:var(--s5);align-items:start}
+  .vendor-card{background:var(--surface);border:1px solid var(--line-1);border-radius:var(--r-lg);padding:var(--s6);box-shadow:var(--shadow-sm)}
+  .vendor-card h4{font-size:var(--t-h3);font-weight:700;color:var(--ink-0);margin-bottom:var(--s3)}
+  .vendor-card p{color:var(--ink-3);line-height:1.75}
+  .vendor-card small{display:block;color:var(--ink-4);margin-top:var(--s2)}
+  .vendor-status-line{display:grid;grid-template-columns:1fr auto;gap:var(--s4);align-items:center}
+  .progress-bar{height:8px;border-radius:999px;background:var(--line-1);overflow:hidden;margin-top:var(--s3)}
+  .progress-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,#F06A6A,#FF8A8A)}
+  .vendor-snapshot{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s5)}
+  .snapshot-row{display:flex;align-items:center;justify-content:space-between;gap:var(--s4);padding:var(--s3) 0;border-bottom:1px solid var(--line-1)}
+  .snapshot-row:last-child{border-bottom:none}
+  .snapshot-label{font-size:13px;font-weight:600;color:var(--ink-3)}
+  .snapshot-value{font-size:15px;font-weight:700;color:var(--ink-0)}
+  .vendor-table{width:100%;border-collapse:collapse}
+  .vendor-table th{font-size:var(--t-micro);font-weight:700;color:var(--ink-4);text-transform:uppercase;padding:18px 16px;letter-spacing:.08em;text-align:left;border-bottom:1px solid var(--line-1);background:var(--surface-soft)}
+  .vendor-table td{padding:18px;border-bottom:1px solid var(--line-2);color:var(--ink-2)}
+  .vendor-table tr:hover td{background:var(--surface-hover)}
+  .vendor-flag{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:4px 8px;border-radius:999px;background:#FEF5F5;color:#B81B33;border:1px solid rgba(232,56,79,.12)}
+  .vendor-panel-body{overflow-y:auto;max-height:100%}
+  .gaps-item{display:flex;align-items:center;gap:var(--s3);padding:var(--s3) 0;border-bottom:1px solid var(--line-2)}
+  .gaps-item:last-child{border-bottom:none}
+  .gaps-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+  .gaps-dot.med{background:var(--caution)}
+  .gaps-dot.watch{background:var(--watch)}
+  .gaps-dot.low{background:var(--ink-4)}
+  .gaps-text{flex:1;font-size:13px;color:var(--ink-2);line-height:1.6}
+  .gaps-text em{font-style:normal;color:var(--accent);font-size:11px;margin-left:4px}
+  .gaps-link{font-size:12px;font-weight:600;color:var(--accent);cursor:pointer;white-space:nowrap;background:none;border:none;flex-shrink:0}
+  .qa-block{padding:var(--s4) 0;border-bottom:1px solid var(--line-2)}
+  .qa-block:last-child{border-bottom:none}
+  .qa-q{font-size:14px;font-weight:700;color:var(--ink-0);margin-bottom:var(--s2)}
+  .qa-a{font-size:13px;color:var(--ink-2);line-height:1.7;margin-bottom:var(--s2)}
+  .qa-meta{display:flex;flex-wrap:wrap;gap:var(--s3);font-size:11.5px;color:var(--ink-3)}
+  .scores-row{display:flex;flex-wrap:wrap;gap:var(--s6)}
+  .score-item{min-width:90px}
+  .score-value{font-family:var(--font-display);font-weight:700;font-size:24px;color:var(--ink-0)}
+  .score-value.warn{color:var(--caution)}
+  .score-value.good{color:var(--affirm)}
+  .score-label{font-size:11.5px;color:var(--ink-3);margin-top:2px}
+  .artifact-row{display:flex;align-items:center;gap:var(--s4);padding:var(--s4) 0;border-bottom:1px solid var(--line-2)}
+  .artifact-row:last-child{border-bottom:none}
+  .artifact-icon{width:36px;height:36px;border-radius:var(--r-md);background:var(--surface-soft);display:flex;align-items:center;justify-content:center;color:var(--ink-3);flex-shrink:0}
+  .artifact-name{font-size:13px;font-weight:600;color:var(--ink-0)}
+  .artifact-meta{font-size:11.5px;color:var(--ink-3);margin-top:2px}
+  .artifact-actions{display:flex;align-items:center;gap:var(--s2);margin-left:auto;flex-shrink:0}
+  .plan-item{display:flex;gap:var(--s4);padding:var(--s3) 0;border-bottom:1px solid var(--line-2)}
+  .plan-item:last-child{border-bottom:none}
+  .plan-num{width:22px;height:22px;border-radius:50%;background:var(--surface-soft);color:var(--ink-2);font-size:11.5px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .plan-task{font-size:13px;font-weight:600;color:var(--ink-0)}
+  .plan-meta{font-size:11.5px;color:var(--ink-3);margin-top:2px}
+  .comm-card{padding:var(--s4);background:var(--surface-soft);border-radius:var(--r-md);margin-bottom:var(--s3)}
+  .comm-card:last-child{margin-bottom:0}
+  .comm-desc{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-3)}
+  .comm-subject{font-size:13px;font-weight:600;color:var(--ink-0);margin-top:var(--s2)}
+  .comm-meta{font-size:12px;color:var(--ink-3);margin-top:var(--s2)}
+  .comm-actions{display:flex;gap:var(--s2);margin-top:var(--s3)}
+  .decision-card{padding:var(--s4);border:1px solid var(--line-1);border-radius:var(--r-md);margin-bottom:var(--s3)}
+  .decision-card:last-child{margin-bottom:0}
+  .decision-status{display:inline-flex;font-size:11px;font-weight:600;padding:3px 9px;border-radius:999px;margin-bottom:var(--s2)}
+  .decision-status.recorded{background:var(--affirm-soft);color:var(--affirm-ink)}
+  .decision-status.pending{background:var(--caution-soft);color:var(--caution-ink)}
+  .decision-title{font-size:13px;font-weight:600;color:var(--ink-0)}
+  .decision-detail{font-size:12px;color:var(--ink-3);margin-top:var(--s2);line-height:1.6}
+  .ledger-item{display:flex;gap:var(--s4);padding:var(--s2) 0;border-bottom:1px solid var(--line-2);font-size:12.5px}
+  .ledger-item:last-child{border-bottom:none}
+  .ledger-date{width:52px;flex-shrink:0;color:var(--ink-3);font-weight:500}
+  .ledger-text{color:var(--ink-2);line-height:1.6}
+  .vendor-notice{background:#F5F7FF;border:1px solid #DDE6FD;border-radius:var(--r-md);padding:18px 20px;margin-bottom:var(--s5)}
+  .vendor-notice p{color:var(--ink-2);line-height:1.75}
+  .vendor-notice a{color:var(--accent);font-weight:600}
+  .detail-grid{display:grid;grid-template-columns:1.8fr 1fr;gap:var(--s5)}
+  .detail-card{background:var(--surface);border:1px solid var(--line-1);border-radius:var(--r-lg);padding:var(--s6);box-shadow:var(--shadow-sm);margin-bottom:var(--s5)}
+  .detail-row{display:flex;justify-content:space-between;gap:var(--s4);margin-top:var(--s4);font-size:14px;color:var(--ink-2)}
+  .detail-key{font-weight:600;color:var(--ink-3)}
+  .detail-value{font-weight:700;color:var(--ink-0)}
+  .detail-big{font-size:28px;font-weight:700;color:var(--ink-0);margin-top:var(--s4);margin-bottom:var(--s3)}
+  .assistant-panel{background:var(--surface);border:1px solid var(--line-1);border-radius:var(--r-lg);overflow:hidden}
+  .assistant-header{display:flex;align-items:center;justify-content:space-between;padding:var(--s5);border-bottom:1px solid var(--line-1)}
+  .assistant-title{font-size:13px;font-weight:700;color:var(--ink-0)}
+  .assistant-status{display:inline-flex;align-items:center;gap:8px;font-size:12px;color:var(--affirm-ink)}
+  .assistant-status-dot{width:8px;height:8px;border-radius:50%;background:var(--affirm)}
+  .assistant-body{padding:var(--s5);font-size:14px;color:var(--ink-2);line-height:1.8}
+  .assistant-footer{padding:var(--s5);border-top:1px solid var(--line-1);display:flex;gap:var(--s2);flex-wrap:wrap}
+  .assistant-btn{font-size:12px;font-weight:600;padding:8px 12px;border-radius:999px;border:1px solid var(--line-1);background:var(--surface);color:var(--ink-1);cursor:pointer;transition:background var(--tr)}
+  .assistant-btn:hover{background:var(--surface-hover)}
 
 /* Icons */
 .glyph{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;vertical-align:middle;display:inline-block}
@@ -524,6 +710,12 @@ body{
   <symbol id="g-sign-out" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></symbol>
   <symbol id="g-prog" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></symbol>
   <symbol id="g-folder" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></symbol>
+  <symbol id="g-lock" viewBox="0 0 24 24"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></symbol>
+  <symbol id="g-clipboard" viewBox="0 0 24 24"><rect x="6" y="4" width="12" height="17" rx="2"/><rect x="9" y="2" width="6" height="4" rx="1"/><path d="M9 11h6M9 15h6M9 19h4"/></symbol>
+  <symbol id="g-moon-down" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 4v2M12 18v2M4 12h2M18 12h2M6 6l1.5 1.5M16.5 16.5L18 18M6 18l1.5-1.5M16.5 7.5L18 6"/><path d="M3 20h18"/></symbol>
+  <symbol id="g-chart" viewBox="0 0 24 24"><path d="M4 20V4M4 20h16M8 16V11M12 16V7M16 16v-3M20 16v-2"/></symbol>
+  <symbol id="g-mail" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 7 9-7"/></symbol>
+  <symbol id="g-note" viewBox="0 0 24 24"><path d="M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v9l-4 5H6a2 2 0 0 1-2-2zM8 9h8M8 13h6M14 20v-4h4"/></symbol>
 </defs>
 </svg>
 
@@ -570,7 +762,7 @@ body{
   <div class="h-body">
     <div class="h-hdr">
       <div class="h-eyebrow">Workspace</div>
-      <div class="h-title" id="home-greeting">Programs</div>
+      <div class="h-title" id="home-greeting-full">Programs</div>
       <div class="h-sub">Select a program to start analyzing vendor intelligence.</div>
     </div>
     <div class="prog-grid">
@@ -627,7 +819,7 @@ body{
 
     <!-- Program switcher -->
     <div class="sb-prog">
-      <button class="sb-prog-btn" onclick="goHome()">
+      <button class="sb-prog-btn" onclick="showAppHome()">
         <span class="sb-prog-ico">
           <svg class="glyph xs"><use href="#g-building"/></svg>
         </span>
@@ -638,21 +830,39 @@ body{
 
     <!-- Nav -->
     <ul class="nav-list">
-      <li class="nv on" onclick="switchTab('ingest',this)" data-tab-nav="ingest" data-tip="Ingestion">
-        <span class="ni"><svg class="glyph"><use href="#g-drive"/></svg></span>
-        <span class="nl">Ingestion</span>
+      <li class="nv" data-nav="home" onclick="showAppHome()" data-tip="Home">
+        <span class="ni"><svg class="glyph"><use href="#g-home"/></svg></span>
+        <span class="nl">Home</span>
       </li>
-      <li class="nv" onclick="switchTab('vendors',this)" data-tab-nav="vendors" data-tip="Vendors">
+      <li class="nv on" data-nav="program" onclick="enterProgram('vcp','Vendor Cleanup Program')" data-tip="Program">
+        <span class="ni"><svg class="glyph"><use href="#g-building"/></svg></span>
+        <span class="nl">Program</span>
+      </li>
+      <!-- Drive removed from sidebar navigation per request -->
+      <li class="nv" data-tab-nav="vendors" onclick="switchTab('vendors',this)" data-tip="Vendors">
         <span class="ni"><svg class="glyph"><use href="#g-building"/></svg></span>
         <span class="nl">Vendors</span>
+      </li>
+      <li class="nv" data-nav="strategies" onclick="alert('Strategies view not implemented')" data-tip="Strategies">
+        <span class="ni">📈</span>
+        <span class="nl">Strategies</span>
+      </li>
+      <li class="nv" data-nav="reports" onclick="alert('Reports view not implemented')" data-tip="Reports">
+        <span class="ni">📄</span>
+        <span class="nl">Reports</span>
+      </li>
+      <li class="nv" data-nav="activity" onclick="alert('Activity view not implemented')" data-tip="Activity">
+        <span class="ni">↺</span>
+        <span class="nl">Activity</span>
+      </li>
+      <li class="nv" data-nav="admin" onclick="alert('Admin view not implemented')" data-tip="Admin">
+        <span class="ni">⚙️</span>
+        <span class="nl">Admin</span>
       </li>
     </ul>
 
     <div class="sb-bot">
-      <button class="col-btn" onclick="goHome()" title="Home">
-        <span class="col-ico"><svg class="glyph xs"><use href="#g-home"/></svg></span>
-        <span class="col-lbl">Home</span>
-      </button>
+      <!-- bottom Home button removed to avoid duplicate navigation -->
       <div class="sb-user" onclick="signOut()" title="Sign out">
         <div class="sb-av" id="sb-av"></div>
         <span class="sb-uname" id="sb-uname">Loading…</span>
@@ -666,7 +876,11 @@ body{
       <div class="breadcrumb" id="breadcrumb">
         <span class="bc-link" onclick="goHome()">Home</span>
         <span class="bc-sep">›</span>
-        <span class="bc-cur" id="bc-prog">Vendor Cleanup Program</span>
+        <span class="bc-link" onclick="switchTab('overview', null, true)" id="bc-prog">Vendor Cleanup Program</span>
+        <span class="bc-sep" id="bc-sep-vendors" style="display:none">›</span>
+        <span class="bc-link" id="bc-vendors" style="display:none" onclick="switchTab('vendors', null, false)">Vendors</span>
+        <span class="bc-sep" id="bc-sep-vendor" style="display:none">›</span>
+        <span class="bc-cur" id="bc-vendor" style="display:none"></span>
       </div>
       <div class="trr">
         <button class="ibtn" onclick="refreshAll()" title="Refresh">
@@ -677,126 +891,474 @@ body{
     </div>
 
     <!-- VIEW: PROGRAM -->
-    <div class="view on" id="view-prog">
+    <div class="view" id="view-home">
       <div class="pv-content">
-
-        <!-- Page header -->
         <div class="page-hdr">
           <div class="phdr-top">
             <div>
-              <div class="phdr-eyebrow">Program</div>
-              <div class="phdr-title" id="prog-title">Vendor Cleanup</div>
-              <div class="phdr-sub">Ingest documents from Google Drive, run the vendor intelligence pipeline, and monitor posture in real time.</div>
+              <div class="phdr-eyebrow">Workspace</div>
+              <div class="phdr-title" id="home-greeting-app">Programs</div>
+              <div class="phdr-sub">Select a program to start analyzing vendor intelligence.</div>
+            </div>
+          </div>
+        </div>
+        <div class="tab-panels">
+          <div class="tab-panel on">
+            <div class="h-body">
+              <div class="prog-grid">
+                <div class="prog-tile" onclick="enterProgram('vcp','Vendor Cleanup Program')">
+                  <div class="prog-ico">
+                    <svg class="glyph lg"><use href="#g-building"/></svg>
+                  </div>
+                  <div class="prog-name">Vendor Cleanup Program</div>
+                  <div class="prog-desc">Ingest vendor documents directly from Google Drive. Classify signals, compute risk posture, and surface renewal obligations across your entire vendor portfolio.</div>
+                  <div class="prog-foot"><span class="prog-badge active">Active</span><span class="prog-arrow"><svg class="glyph lg"><use href="#g-arrow-right"/></svg></span></div>
+                </div>
+                <div class="prog-tile inactive">
+                  <div class="prog-ico"><svg class="glyph lg"><use href="#g-prog"/></svg></div>
+                  <div class="prog-name">Contract Intelligence</div>
+                  <div class="prog-desc">Automated contract review — extract SLA terms, flag anomalies, and surface renewal obligations across all vendor agreements.</div>
+                  <div class="prog-foot"><span class="prog-badge soon">Coming soon</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="view on" id="view-prog">
+      <div class="pv-content">
+        <div class="page-hdr" id="prog-page-hdr">
+          <div class="phdr-top">
+            <div>
+              <div class="phdr-eyebrow">Kozmo · Vendor Cleanup Program · Last updated May 15, 2026</div>
+              <div class="phdr-title">Vendor Cleanup Program 2026</div>
+              <div class="phdr-sub">Deduplicate, validate, and enrich the full vendor master — one clean, complete, and trusted record for every active vendor relationship.</div>
             </div>
             <div class="phdr-right">
-              <div class="status-pill disc" id="drive-pill">
-                <span class="sp-dot"></span>
-                <span id="drive-pill-text">Not connected</span>
-              </div>
+              <div class="status-pill"><span class="status-pill-dot"></span>Active — Enrichment In Progress</div>
+              <div class="phdr-meta">3,020 vendors in scope · Program Manager: Sarah Chen</div>
             </div>
           </div>
           <div class="tab-bar">
-            <button class="tab-btn on" data-tab="ingest" onclick="switchTab('ingest',this)">Ingestion</button>
-            <button class="tab-btn" data-tab="vendors" onclick="switchTab('vendors',this)">Vendors</button>
+            <button class="tab-btn on" data-tab="overview" onclick="switchTab('overview', this, false)">Overview</button>
+            <button class="tab-btn" data-tab="detail" onclick="switchTab('detail', this, false)">Program Detail</button>
           </div>
         </div>
 
-        <!-- Tab panels -->
         <div class="tab-panels">
-
-          <!-- ── INGESTION TAB ── -->
-          <div class="tab-panel on" id="panel-ingest">
-            <div class="ingest-panel">
-
-              <!-- Drive connection card -->
-              <div class="drive-card disc" id="drive-card">
-                <div class="drive-card-hdr">
-                  <div class="drive-card-ico disc" id="drive-ico">
-                    <svg style="width:22px;height:22px" viewBox="0 0 87 78"><path d="M6.1 66l4.1 7.1c.9 1.5 2.1 2.7 3.5 3.6L27.5 53H0c0 1.7.4 3.4 1.3 4.9L6.1 66z" fill="#0066DA"/><path d="M43.5 25L29.7 1.3C28.3 2.2 27 3.4 26.1 4.9L1.3 48.1c-.8 1.5-1.3 3.1-1.3 4.9h27.5L43.5 25z" fill="#00AC47"/><path d="M73.3 76.7c1.5-.9 2.7-2.1 3.5-3.6l1.7-2.9 8.2-14.2c.8-1.5 1.3-3.2 1.3-4.9H60.5L73.3 76.7z" fill="#EA4335"/><path d="M43.5 25l13.8-23.7C55.8.4 54.1 0 52.3 0H34.7c-1.8 0-3.5.4-5 1.3L43.5 25z" fill="#00832D"/><path d="M60.5 53H27.5L13.7 76.7c1.5.8 3.2 1.3 5 1.3h47.6c1.8 0 3.5-.4 5-1.3L60.5 53z" fill="#2684FC"/><path d="M73.1 25.5L59.9 2.9C59 1.4 57.8.2 56.3.4L43.5 25 60.5 53h27.4c0-1.7-.4-3.4-1.3-4.9L73.1 25.5z" fill="#FFBA00"/></svg>
+          <div class="tab-panel on" id="panel-overview">
+            <div class="overview-body">
+              <div class="overview-main">
+                <div class="program-summary-card">
+                  <div class="summary-top">
+                    <div>
+                      <div class="overview-pill">Orchestrator · Program Intelligence</div>
+                      <div style="margin-top:var(--s3);color:var(--ink-3);line-height:1.75;max-width:720px;">
+                        The Vendor Cleanup Program is active and mid-execution. <strong>1,847 of 3,020 vendor records</strong> have been resolved and deduplicated, reaching 61% of the resolution target. Enrichment coverage sits at 48%, with 889 vendors now carrying complete identity, spend, and compliance data against a target of 80%.
+                      </div>
+                    </div>
+                    <div class="summary-meta">
+                      <span class="summary-chip success">Records Resolved 61%</span>
+                      <span class="summary-chip blue">Enrichment 48%</span>
+                      <span class="summary-chip accent">Compliance At Risk</span>
+                    </div>
                   </div>
-                  <div class="drive-card-info">
-                    <div class="drive-card-title">Google Drive</div>
-                    <div class="drive-card-email" id="drive-email">Not connected — authorize to ingest documents</div>
+                  <ul class="summary-list">
+                    <li><strong>Duplicate review</strong> has 412 candidate pairs awaiting human confirmation — 180 are below the auto-merge confidence threshold and cannot proceed without a decision.</li>
+                    <li><strong>Compliance data</strong> is missing or stale on 634 vendors, preventing risk scores from being computed for those records.</li>
+                    <li><strong>Owner assignment</strong> is incomplete for 519 vendors, blocking check-in campaigns and spend validation for that cohort.</li>
+                    <li>4 strategies are active — Data Enrichment Drive (287 queued), Compliance Certification Drive (140 pending), Corporate Roll-up (38 clusters), Sanctions Scrub (23 flagged).</li>
+                  </ul>
+                  <div class="summary-actions">
+                    <button class="btn-s p">Ask about this →</button>
+                    <button class="btn-s">What to do next →</button>
+                    <button class="btn-s" onclick="switchTab('vendors', null, false)">View all vendors →</button>
                   </div>
-                  <div class="drive-card-actions">
-                    <a href="/auth/google" class="btn-s p" id="btn-connect">
-                      <svg class="glyph sm"><use href="#g-link"/></svg>
-                      Connect Google Account
-                    </a>
-                    <button class="btn-s danger" id="btn-disconnect" style="display:none" onclick="disconnectDrive()">
-                      Disconnect
-                    </button>
+                </div>
+
+                <div class="overview-metrics">
+                  <div class="metric-card">
+                    <div class="metric-title">Vendor Resolution</div>
+                    <div class="metric-value">1,847/3,020</div>
+                    <div class="metric-sub">61% complete · target 80%</div>
+                  </div>
+                  <div class="metric-card">
+                    <div class="metric-title">Enrichment Coverage</div>
+                    <div class="metric-value">889/3,020</div>
+                    <div class="metric-sub">48% complete · target 80%</div>
+                  </div>
+                  <div class="metric-card">
+                    <div class="metric-title">Compliance Currency</div>
+                    <div class="metric-value">634 vendors</div>
+                    <div class="metric-sub">Missing or stale · at risk</div>
+                    <div class="metric-tag red">via Compliance Certification Drive →</div>
+                  </div>
+                </div>
+
+                <div class="stage-section">
+                  <div class="stage-heading">FIVE-STAGE PROGRAM PROGRESS</div>
+                  <div class="stage-group">
+                    <div class="stage-card">
+                      <div class="stage-left">
+                        <div class="stage-label">STAGE 1</div>
+                        <div class="stage-title">Scope &amp; Goals</div>
+                        <div class="stage-desc">Program scope confirmed. Resolution target 80% of 3,020 vendor records. Enrichment target 80% across identity, spend, compliance, and ownership. Stakeholder sign-off Feb 3, 2026.</div>
+                        <div class="stage-pills">
+                          <span class="stage-pill green">Inventory target: 80%</span>
+                          <span class="stage-pill green">Enrichment target: 80%</span>
+                          <span class="stage-pill green">Scope signed off</span>
+                        </div>
+                      </div>
+                      <div class="stage-right">
+                        <div class="stage-status complete">Complete</div>
+                      </div>
+                    </div>
+                    <div class="stage-card">
+                      <div class="stage-left">
+                        <div class="stage-label">STAGE 2</div>
+                        <div class="stage-title">Source Intake &amp; Candidate Formation</div>
+                        <div class="stage-desc">All source systems ingested. 3,020 raw vendor candidates extracted from ERP, AP exports, contract repository, procurement records, and manual uploads.</div>
+                        <div class="stage-pills">
+                          <span class="stage-pill green">3,020 candidates formed</span>
+                          <span class="stage-pill green">6 source systems</span>
+                          <span class="stage-pill green">Confidence scored</span>
+                        </div>
+                      </div>
+                      <div class="stage-right">
+                        <div class="stage-status complete">Complete</div>
+                      </div>
+                    </div>
+                    <div class="stage-card">
+                      <div class="stage-left">
+                        <div class="stage-label">STAGE 3</div>
+                        <div class="stage-title">Deduplication &amp; Entity Resolution</div>
+                        <div class="stage-desc">1,847 records resolved. 412 pairs in the human review queue — 180 below the auto-merge confidence threshold. 761 records pending first-pass matching.</div>
+                        <div class="stage-pills">
+                          <span class="stage-pill green">1,847 resolved</span>
+                          <span class="stage-pill warning">412 in review</span>
+                          <span class="stage-pill blue">761 pending</span>
+                        </div>
+                      </div>
+                      <div class="stage-right">
+                        <div class="stage-status inprogress">In Progress</div>
+                      </div>
+                    </div>
+                    <div class="stage-card">
+                      <div class="stage-left">
+                        <div class="stage-label">STAGE 4</div>
+                        <div class="stage-title">Profile Enrichment</div>
+                        <div class="stage-desc">889 records fully enriched. Compliance gaps (634) and owner assignment (519) are the primary blockers across the five enrichment dimensions.</div>
+                        <div class="stage-pills">
+                          <span class="stage-pill green">889 enriched</span>
+                          <span class="stage-pill red">634 compliance gaps</span>
+                          <span class="stage-pill warning">519 no owner</span>
+                        </div>
+                      </div>
+                      <div class="stage-right">
+                        <div class="stage-status inprogress">In Progress</div>
+                      </div>
+                    </div>
+                    <div class="stage-card">
+                      <div class="stage-left">
+                        <div class="stage-label">STAGE 5</div>
+                        <div class="stage-title">Validation &amp; Handoff</div>
+                        <div class="stage-desc">Quality review, stakeholder sign-off, and delivery of the clean vendor master to downstream systems — ERP, procurement, risk, and finance.</div>
+                        <div class="stage-pills">
+                          <span class="stage-pill blue">Not yet started</span>
+                        </div>
+                      </div>
+                      <div class="stage-right">
+                        <div class="stage-status pending">Not Yet Started</div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
 
-              <!-- Ingestion form -->
-              <div class="ingest-form">
-                <div class="if-title">Run Ingestion</div>
-                <div class="if-sub">
-                  Paste a Google Drive folder or file link below. Kozmo will download all supported documents (PDF, Google Docs, Sheets, Slides) and run the full vendor intelligence pipeline.
-                </div>
-                <div class="if-row">
-                  <input type="text" class="if-input" id="drive-url"
-                         placeholder="Paste a Drive folder URL or file URL (folders/… or file/d/…)" />
-                  <button class="btn-s p" id="btn-run" onclick="runIngestion()" disabled>
-                    <svg class="glyph sm"><use href="#g-play"/></svg>
-                    Run
-                  </button>
-                </div>
-              </div>
-
-              <!-- Live ingestion log -->
-              <div class="log-card">
-                <div class="log-hdr">
-                  <svg class="glyph sm" style="color:var(--ink-3)"><use href="#g-trend"/></svg>
-                  <span class="log-hdr-title">Ingestion Log</span>
-                  <div class="log-status idle" id="log-status">
-                    <span class="ls-dot"></span>
-                    <span id="log-status-text">Idle</span>
+              <div class="overview-sidebar">
+                <div class="assistant-panel">
+                  <div class="assistant-header">
+                    <div>
+                      <div class="assistant-title">Kozmo</div>
+                      <div style="font-size:12px;color:var(--ink-4);">Program Orchestrator</div>
+                    </div>
+                    <div class="assistant-status"><span class="assistant-status-dot"></span>Live</div>
+                  </div>
+                  <div class="assistant-body">
+                    The duplicate review queue has 412 pairs waiting. 180 are below the confidence threshold — I can't auto-merge them without a human decision. Want me to surface the top 20 by estimated spend impact first?
+                  </div>
+                  <div class="assistant-footer">
+                    <button class="assistant-btn">Show top 20 pairs →</button>
+                    <button class="assistant-btn">Draft summary</button>
+                    <button class="assistant-btn">Browse vendors</button>
                   </div>
                 </div>
-                <div class="log-body" id="log-body">
-                  <div class="log-idle">Waiting for ingestion to start…</div>
-                </div>
               </div>
-
             </div>
           </div>
 
-          <!-- ── VENDORS TAB ── -->
           <div class="tab-panel" id="panel-vendors">
             <div class="vendors-panel">
-              <div class="v-hdr">
+              <div class="vlist-header">
                 <div>
-                  <div class="v-title">Vendor Portfolio</div>
-                  <div class="v-sub" id="vendor-count">Loading…</div>
+                  <div class="vlist-title">Vendors</div>
+                  <div class="vlist-sub" id="vendor-count">3,020 vendors in scope · Vendor Cleanup Program 2026</div>
                 </div>
-                <button class="btn-s" onclick="loadVendors()">
-                  <svg class="glyph sm"><use href="#g-refresh"/></svg>
-                  Refresh
-                </button>
+                <div class="vlist-actions">
+                  <div class="srch" style="max-width:220px">
+                    <svg width="11" height="11" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.5"></circle><path d="M11 11l3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path></svg>
+                    <input id="vendor-search" oninput="filterVendorTable()" placeholder="Filter vendors…" />
+                  </div>
+                  <button class="btn-s">Export</button>
+                </div>
               </div>
               <div class="vtbl-wrap">
                 <table class="vtbl">
                   <thead>
                     <tr>
                       <th>Vendor</th>
-                      <th>Band</th>
-                      <th>Stance</th>
-                      <th>Confidence</th>
-                      <th>As Of</th>
+                      <th>Category</th>
+                      <th>CRI</th>
+                      <th>Enrichment</th>
+                      <th>Compliance</th>
+                      <th>Owner</th>
+                      <th>Strategy</th>
+                      <th>Status</th>
                     </tr>
                   </thead>
                   <tbody id="vendor-tbody">
-                    <tr><td colspan="5" style="text-align:center;color:var(--ink-4);padding:var(--s8)">Loading vendors…</td></tr>
                   </tbody>
                 </table>
+              </div>
+              <div style="margin-top:12px;font-size:var(--t-micro);color:var(--ink-3);padding:0 2px"><span id="vendor-showing">Showing 8 of 3,020 vendors</span> · <a href="#" onclick="loadMoreVendors();return false;" style="color:var(--accent);cursor:pointer;text-decoration:none">Load more →</a></div>
+            </div>
+          </div>
+
+          <div class="tab-panel" id="panel-vendor-detail">
+            <div class="vendors-panel vendor-panel-body">
+              <div class="vendor-header">
+                <div>
+                  <div class="vendor-name" id="detail-vendor-name">Northstar CloudOps LLC</div>
+                  <div class="vendor-badges" id="detail-vendor-badges">
+                    <span class="vendor-badge">IT / SaaS</span>
+                    <span class="vendor-badge">Managed Support</span>
+                    <span class="vendor-badge">Standard Tier</span>
+                    <span class="vendor-badge watch">Watch</span>
+                    <span class="vendor-badge">VND-004218</span>
+                    <span class="vendor-badge at-risk">Vendor Cleanup Program</span>
+                  </div>
+                  <div class="v-sub" id="detail-vendor-sub">Program status · profile and evidence summary</div>
+                </div>
+                <button class="btn-s" onclick="switchTab('vendors', null, true)">Back to vendors</button>
+              </div>
+              <div class="vendor-tab-bar">
+                <button class="vendor-tab-btn on" data-vendortab="overview" onclick="setVendorDetailTab('overview', this)">Overview</button>
+                <button class="vendor-tab-btn" data-vendortab="details" onclick="setVendorDetailTab('details', this)">Details</button>
+              </div>
+              <div class="vendor-detail-panels">
+                <div class="vendor-detail-panel on" id="vendor-detail-overview">
+                  <div class="vendor-notice" id="detail-vendor-action">
+                    <strong id="detail-action-title">NEXT BEST ACTION</strong>
+                    <p id="detail-action-text">Request a formal support remediation plan from Northstar CloudOps before the Q2 renewal review begins on May 15.</p>
+                    <div id="detail-action-meta" style="margin-top:var(--s3);font-size:13px;color:var(--ink-4);display:flex;gap:var(--s4);flex-wrap:wrap">
+                      <span>Mercer</span><span>Medium confidence</span><span>Due this week</span><span>3 evidence items</span>
+                    </div>
+                    <div id="detail-action-links" style="margin-top:var(--s3);display:flex;gap:var(--s3);flex-wrap:wrap">
+                      <a href="#" style="color:var(--accent);font-weight:600">Create Task</a>
+                      <a href="#" style="color:var(--accent);font-weight:600">View Evidence</a>
+                      <a href="#" style="color:var(--ink-3);font-weight:600">Dismiss</a>
+                    </div>
+                  </div>
+                  <div class="vendor-card" style="margin-bottom:var(--s5);background:#F5F7FF;border-color:#DDE6FD;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:var(--s3)">
+                      <div style="max-width:72%;">
+                        <div style="font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-4);margin-bottom:var(--s2)">This vendor is included in</div>
+                        <div style="font-size:13px;color:var(--ink-3);line-height:1.8">Compliance Certification Drive and Data Enrichment Drive.</div>
+                      </div>
+                      <a href="#" style="color:var(--accent);font-weight:600;white-space:nowrap">View strategies →</a>
+                    </div>
+                  </div>
+                  <div class="vendor-overview-grid">
+                    <div class="vendor-card">
+                      <h4>Program status</h4>
+                      <div id="detail-stage" style="font-size:13px;color:var(--ink-3);margin-bottom:var(--s3)">Stage 4 of 5 — Profile Enrichment</div>
+                      <div class="vendor-status-line">
+                        <div style="font-size:13px;color:var(--ink-3)">Progress</div>
+                        <div id="detail-progress-text" style="font-weight:700;color:var(--ink-0)">48%</div>
+                      </div>
+                      <div class="progress-bar"><div class="progress-fill" id="detail-progress-bar" style="width:48%"></div></div>
+                      <div style="margin-top:var(--s4);font-size:13px;color:var(--ink-3);line-height:1.8">
+                        <div id="detail-blocked">Blocked: 1 item — missing March support export</div>
+                        <div id="detail-next-review" style="margin-top:var(--s2)">Next review: May 15, 2026</div>
+                      </div>
+                    </div>
+                    <div class="vendor-card">
+                      <h4>Vendor snapshot</h4>
+                      <div class="vendor-snapshot" id="detail-snapshot-grid">
+                        <div class="snapshot-row"><span class="snapshot-label">CRI score</span><span class="snapshot-value" id="detail-cri">71 / 100 <span id="detail-cri-delta" style="color:#C97B17;font-size:12px;">↓ 3</span></span></div>
+                        <div class="snapshot-row"><span class="snapshot-label">Contract renewal</span><span class="snapshot-value" id="detail-contract">Sep 1, 2026 · 120 days</span></div>
+                        <div class="snapshot-row"><span class="snapshot-label">Spend YTD</span><span class="snapshot-value" id="detail-spend-ytd">$39,300</span></div>
+                        <div class="snapshot-row"><span class="snapshot-label">Annualized spend</span><span class="snapshot-value" id="detail-annual-spend">$118,000</span></div>
+                        <div class="snapshot-row"><span class="snapshot-label">SLA compliance</span><span class="snapshot-value" id="detail-sla">88%</span></div>
+                        <div class="snapshot-row"><span class="snapshot-label">Avg. response time</span><span class="snapshot-value" id="detail-response">9.6 hrs <span id="detail-response-target" style="color:#C97B17;font-size:12px;">target 6 hrs</span></span></div>
+                        <div class="snapshot-row"><span class="snapshot-label">Open tasks</span><span class="snapshot-value" id="detail-open-tasks">4 overdue</span></div>
+                        <div class="snapshot-row"><span class="snapshot-label">Compliance status</span><span class="snapshot-value" id="detail-compliance-status">Stale — 5 months</span></div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="vendor-card" style="margin-top:var(--s5)">
+                    <h4>Gaps &amp; Highlights</h4>
+                    <ul class="gaps-list" id="detail-gaps" style="list-style:none;padding:0;margin:0"></ul>
+                  </div>
+                </div>
+                <div class="vendor-detail-panel" id="vendor-detail-details">
+                  <div class="vendor-subtab-bar">
+                    <button class="vendor-subtab-btn on" data-vendorsubtab="inputs" onclick="setVendorSubtab('inputs')">Inputs &amp; Evidence</button>
+                    <button class="vendor-subtab-btn" data-vendorsubtab="analysis" onclick="setVendorSubtab('analysis')">Analysis &amp; Findings</button>
+                    <button class="vendor-subtab-btn" data-vendorsubtab="artifacts" onclick="setVendorSubtab('artifacts')">Artifacts</button>
+                    <button class="vendor-subtab-btn" data-vendorsubtab="plan" onclick="setVendorSubtab('plan')">Plan &amp; Actions</button>
+                    <button class="vendor-subtab-btn" data-vendorsubtab="memory" onclick="setVendorSubtab('memory')">Memory &amp; State</button>
+                  </div>
+                  <div class="vendor-detail-subpanels">
+                    <div class="vendor-detail-subpanel on" id="vendor-detail-sub-inputs">
+                      <div class="vendor-card">
+                        <h4>Files &amp; Artifacts</h4>
+                        <div style="margin-top:var(--s4);overflow:auto;max-height:280px">
+                          <table class="vendor-table">
+                            <thead>
+                              <tr>
+                                <th>File</th>
+                                <th>Type</th>
+                                <th>Source</th>
+                                <th>Status</th>
+                                <th>Updated</th>
+                              </tr>
+                            </thead>
+                            <tbody id="detail-files-body">
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                      <div class="vendor-card" style="margin-top:var(--s5)">
+                        <h4>Signals</h4>
+                        <ul id="detail-signals" style="padding-left:20px;color:var(--ink-2);line-height:1.8">
+                        </ul>
+                      </div>
+                      <div class="vendor-card" style="margin-top:var(--s5)">
+                        <h4>Data &amp; Signals</h4>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--s4)">
+                          <div>
+                            <div class="snapshot-row"><span class="snapshot-label">SPEND YTD</span><span class="snapshot-value" id="detail-spend-data">$39,300</span></div>
+                            <div class="snapshot-row"><span class="snapshot-label">AVG. RESPONSE TIME</span><span class="snapshot-value" id="detail-response-data">9.6 hrs</span></div>
+                            <div class="snapshot-row"><span class="snapshot-label">USER SENTIMENT</span><span class="snapshot-value" id="detail-sentiment-data">Mixed</span></div>
+                          </div>
+                          <div>
+                            <div class="snapshot-row"><span class="snapshot-label">ANNUALIZED SPEND</span><span class="snapshot-value" id="detail-annual-data">$118,000</span></div>
+                            <div class="snapshot-row"><span class="snapshot-label">AVG. RESOLUTION TIME</span><span class="snapshot-value" id="detail-resolution-data">2.8 days</span></div>
+                            <div class="snapshot-row"><span class="snapshot-label">INVOICE STATUS</span><span class="snapshot-value" id="detail-invoice-data">Current</span></div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="vendor-detail-subpanel" id="vendor-detail-sub-analysis">
+                      <div class="vendor-card">
+                        <h4>Questions &amp; Answers</h4>
+                        <div id="detail-qa"></div>
+                      </div>
+                      <div class="vendor-card" style="margin-top:var(--s5)">
+                        <h4>Scores &amp; Metrics</h4>
+                        <div class="scores-row" id="detail-scores"></div>
+                      </div>
+                      <div class="vendor-card" style="margin-top:var(--s5)">
+                        <h4>Findings &amp; Gaps</h4>
+                        <ul class="gaps-list" id="detail-findings" style="list-style:none;padding:0;margin:0"></ul>
+                      </div>
+                    </div>
+                    <div class="vendor-detail-subpanel" id="vendor-detail-sub-artifacts">
+                      <div class="vendor-card">
+                        <h4>Generated Artifacts</h4>
+                        <div id="detail-artifacts"></div>
+                      </div>
+                    </div>
+                    <div class="vendor-detail-subpanel" id="vendor-detail-sub-plan">
+                      <div class="vendor-card">
+                        <h4>Action Plan</h4>
+                        <ol class="plan-list" id="detail-plan" style="list-style:none;padding:0;margin:0"></ol>
+                      </div>
+                      <div class="vendor-card" style="margin-top:var(--s5)">
+                        <h4>Tasks &amp; Approvals</h4>
+                        <div style="overflow:auto">
+                          <table class="vendor-table">
+                            <thead><tr><th>Task</th><th>Owner</th><th>Due</th><th>Review</th><th>Status</th></tr></thead>
+                            <tbody id="detail-tasks"></tbody>
+                          </table>
+                        </div>
+                      </div>
+                      <div class="vendor-card" style="margin-top:var(--s5)">
+                        <h4>Communications</h4>
+                        <div id="detail-comms"></div>
+                      </div>
+                    </div>
+                    <div class="vendor-detail-subpanel" id="vendor-detail-sub-memory">
+                      <div class="vendor-card">
+                        <h4>Current State</h4>
+                        <div class="vendor-snapshot" id="detail-memory-state"></div>
+                      </div>
+                      <div class="vendor-card" style="margin-top:var(--s5)">
+                        <h4>Decisions &amp; Outcomes</h4>
+                        <div id="detail-decisions"></div>
+                      </div>
+                      <div class="vendor-card" style="margin-top:var(--s5)">
+                        <h4>Activity Ledger</h4>
+                        <div id="detail-ledger"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
 
-        </div><!-- /tab-panels -->
+          <div class="tab-panel" id="panel-detail">
+            <div class="vendors-panel">
+              <div class="v-hdr">
+                <div>
+                  <div class="v-title">Program detail</div>
+                  <div class="v-sub">Execution plan, coverage, and next milestones for the vendor cleanup effort.</div>
+                </div>
+                <button class="btn-s" onclick="switchTab('overview', null, true)">Back to overview</button>
+              </div>
+              <div class="overview-body">
+                <div>
+                  <div class="overview-card">
+                    <div class="overview-pill">Program health</div>
+                    <h3 style="margin-top:var(--s4);">Clean-up progress is on track, but data gaps remain in compliance and ownership.</h3>
+                    <p style="margin-top:var(--s4);color:var(--ink-3);line-height:1.75;">Operating rhythm is strong: the enrichment drive is running daily, but manual owner assignment is the current bottleneck. Risk posture updates will continue weekly until the June stakeholder review.</p>
+                  </div>
+                  <div class="overview-metrics" style="margin-top:var(--s5);">
+                    <div class="metric-card">
+                      <div class="metric-title">Clusters resolved</div>
+                      <div class="metric-value">287</div>
+                      <div class="metric-sub">Target 380</div>
+                    </div>
+                    <div class="metric-card">
+                      <div class="metric-title">Compliance reviews</div>
+                      <div class="metric-value">84%</div>
+                      <div class="metric-sub">Coverage of high-risk vendors</div>
+                    </div>
+                    <div class="metric-card">
+                      <div class="metric-title">Owner alignment</div>
+                      <div class="metric-value">76%</div>
+                      <div class="metric-sub">Pending validation</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div><!-- /pv-content -->
     </div><!-- /view-prog -->
 
@@ -854,7 +1416,8 @@ function show(name) {
 }
 
 function goHome() {
-  show('home');
+  // Show the in-app Home with sticky sidebar instead of the full-screen home
+  showAppHome();
   stopSse();
 }
 
@@ -867,8 +1430,36 @@ function enterProgram(id, name) {
   var sbName = document.getElementById('sb-prog-name');
   if (sbName) sbName.textContent = name || 'Program';
   show('app');
-  switchTab('ingest', null, true);
-  updateDriveCard();
+  setSidebarActive('program');
+  document.querySelectorAll('.view').forEach(function(v) {
+    v.classList.remove('on');
+  });
+  var vp = document.getElementById('view-prog');
+  if (vp) vp.classList.add('on');
+}
+
+// Keep sidebar selection in sync when navigating
+function setSidebarActive(navKey) {
+  document.querySelectorAll('.nav-list .nv').forEach(function(n) {
+    var key = n.dataset.nav || n.dataset.tabNav;
+    n.classList.toggle('on', key === navKey);
+  });
+}
+
+// Show the in-app Home view (keep sidebar visible)
+function showAppHome() {
+  show('app');
+  setSidebarActive('home');
+  // Activate the home view inside the app and hide program view
+  document.querySelectorAll('.view').forEach(function(v) {
+    v.classList.remove('on');
+  });
+  var vh = document.getElementById('view-home');
+  if (vh) vh.classList.add('on');
+  // Ensure the tab-panel inside view-home is visible
+  document.querySelectorAll('#view-home .tab-panel').forEach(function(p) {
+    p.classList.add('on');
+  });
 }
 
 function signOut() {
@@ -888,7 +1479,11 @@ async function checkAuth() {
     S.email = d.email || null;
     S.connected = d.connected && !d.tokenExpired;
     applyUserUI();
-    show(d.connected ? 'home' : 'login');
+    if (d.connected) {
+      showAppHome();
+    } else {
+      show('login');
+    }
   } catch(e) {
     show('login');
   }
@@ -904,7 +1499,8 @@ function applyUserUI() {
   if (e) {
     var hr = new Date().getHours();
     var greet = hr < 12 ? 'Good morning' : hr < 17 ? 'Good afternoon' : 'Good evening';
-    setTxt('home-greeting', greet + ', ' + e.split('@@')[0]);
+    setTxt('home-greeting-full', greet + ', ' + e.split('@@')[0]);
+    setTxt('home-greeting-app', greet + ', ' + e.split('@@')[0]);
   }
 
   // Sidebar / topbar
@@ -922,6 +1518,10 @@ function updateDriveCard() {
   var btnConn  = document.getElementById('btn-connect');
   var btnDisc  = document.getElementById('btn-disconnect');
   var btnRun   = document.getElementById('btn-run');
+
+  if (!card || !ico || !email || !pill || !pillTxt || !btnConn || !btnDisc) {
+    return;
+  }
 
   if (S.connected && S.email) {
     card.className      = 'drive-card conn';
@@ -962,12 +1562,48 @@ function switchTab(name, triggerEl, silent) {
   document.querySelectorAll('[data-tab-nav]').forEach(function(n) {
     n.classList.toggle('on', n.dataset.tabNav === name);
   });
+  // Sidebar nav highlighting: ensure only the matching nav item is shown as active.
+  // Items may use either data-tab-nav (tab-driven) or data-nav (persistent views).
+  document.querySelectorAll('.nv').forEach(function(n) {
+    var tabNav = n.dataset.tabNav;
+    var nav = n.dataset.nav;
+    if (name === 'vendor-detail') {
+      // When viewing a vendor detail, highlight the Program entry (single app-level context)
+      n.classList.toggle('on', nav === 'program');
+    } else {
+      n.classList.toggle('on', (tabNav && tabNav === name) || (nav && nav === name));
+    }
+  });
   document.querySelectorAll('.tab-panel').forEach(function(p) {
     p.classList.remove('on');
   });
   var panel = document.getElementById('panel-' + name);
   if (panel) panel.classList.add('on');
+  var progHdr = document.getElementById('prog-page-hdr');
+  if (progHdr) progHdr.style.display = (name === 'overview' || name === 'detail') ? '' : 'none';
   if (name === 'vendors' && !silent) loadVendors();
+  if (name === 'vendor-detail') {
+    // Show breadcrumb vendor links when entering vendor-detail
+    var sepV = document.getElementById('bc-sep-vendors');
+    var bcVendors = document.getElementById('bc-vendors');
+    var sepVendor = document.getElementById('bc-sep-vendor');
+    var bcVendor = document.getElementById('bc-vendor');
+    if (sepV) sepV.style.display = 'inline';
+    if (bcVendors) bcVendors.style.display = 'inline';
+    if (sepVendor) sepVendor.style.display = 'inline';
+    if (bcVendor) bcVendor.style.display = 'inline';
+  }
+  else {
+    // Hide vendor breadcrumb pieces when not on vendor-detail
+    var sepV = document.getElementById('bc-sep-vendors');
+    var bcVendors = document.getElementById('bc-vendors');
+    var sepVendor = document.getElementById('bc-sep-vendor');
+    var bcVendor = document.getElementById('bc-vendor');
+    if (sepV) sepV.style.display = 'none';
+    if (bcVendors) bcVendors.style.display = 'none';
+    if (sepVendor) sepVendor.style.display = 'none';
+    if (bcVendor) bcVendor.style.display = 'none';
+  }
 }
 
 // ─────────────────────────────────────────────
@@ -983,40 +1619,657 @@ function toggleSidebar() {
 // ─────────────────────────────────────────────
 //  VENDORS
 // ─────────────────────────────────────────────
-async function loadVendors() {
+function loadVendors() {
   var tbody = document.getElementById('vendor-tbody');
-  tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--ink-4);padding:40px">Loading…</td></tr>';
-  try {
-    var r = await fetch('/kyv/vendors');
-    var vendors = await r.json();
-    setTxt('vendor-count', vendors.length + ' vendor' + (vendors.length !== 1 ? 's' : '') + ' discovered');
-    if (!vendors.length) {
-      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--ink-4);padding:40px">No vendors discovered yet. Connect a Google Drive folder and run ingestion.</td></tr>';
-      return;
-    }
-    tbody.innerHTML = vendors.map(function(v) {
-      var band  = (v.band || '').toLowerCase();
-      var bdg   = band === 'healthy' ? 'bdg-green' : band === 'atrisk' ? 'bdg-amber' : band === 'critical' ? 'bdg-red' : 'bdg-grey';
-      // confidence is 0-1; show as % or '—' for unscored KYV vendors
-      var conf  = (v.confidence != null && v.confidence > 0)
-                    ? (v.confidence * 100).toFixed(0) + '%' : '—';
-      return '<tr>'
-        + '<td><div class="vt-name">' + esc(v.name) + '</div>'
-        +     '<div class="vt-id">'   + esc(v.entityId) + '</div></td>'
-        + '<td><span class="bdg ' + bdg + '">' + esc(v.band || 'Unknown') + '</span></td>'
-        + '<td>' + esc(v.stance || 'Unknown') + '</td>'
-        + '<td><span class="score-val">' + conf + '</span></td>'
-        + '<td>' + esc(v.asOf ? new Date(v.asOf).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'2-digit'}) : '—') + '</td>'
-        + '</tr>';
-    }).join('');
-  } catch(e) {
-    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--urgent-ink);padding:40px">Error loading vendors. Is the server running?</td></tr>';
-  }
+  var vendors = [
+    { name: 'Northstar CloudOps LLC', id: 'VND-004218', category: 'IT / SaaS',
+      cri: '<span class="cri-val" style="color:var(--caution)">71<span class="cri-trend" style="color:var(--urgent)">↓</span></span>',
+      enrichment: '<span class="bdg bdg-amber">Partial</span>', compliance: '<span class="bdg bdg-red">Stale</span>',
+      owner: 'Priya Menon',
+      strategy: '<span style="font-size:10.5px;color:var(--accent-ink);display:inline-flex;align-items:center;gap:4px"><svg class="glyph xs"><use href="#g-lock"></use></svg> Compliance Drive</span>',
+      status: '<span class="bdg" style="background:var(--caution-soft);color:var(--caution)">Watch</span>' },
+    { name: 'DataStream Partners', id: 'VND-003891', category: 'Analytics',
+      cri: '<span class="cri-val" style="color:var(--affirm)">84<span class="cri-trend" style="color:var(--affirm)">↑</span></span>',
+      enrichment: '<span class="bdg bdg-green">Complete</span>', compliance: '<span class="bdg bdg-amber">Expiring</span>',
+      owner: 'Daniel Cho',
+      strategy: '<span style="font-size:10.5px;color:var(--accent-ink);display:inline-flex;align-items:center;gap:4px"><svg class="glyph xs"><use href="#g-clipboard"></use></svg> Enrichment Drive</span>',
+      status: '<span class="bdg bdg-green">Active</span>' },
+    { name: 'Apex Systems Inc', id: 'VND-002244', category: 'Managed Services',
+      cri: '<span class="cri-val" style="color:var(--urgent)">58<span class="cri-trend" style="color:var(--urgent)">↓↓</span></span>',
+      enrichment: '<span class="bdg bdg-red">Incomplete</span>', compliance: '<span class="bdg bdg-red">Missing</span>',
+      owner: '<span style="color:var(--urgent)">Unassigned</span>',
+      strategy: '<span style="font-size:10.5px;color:var(--accent-ink);display:inline-flex;align-items:center;gap:4px"><svg class="glyph xs"><use href="#g-lock"></use></svg> Compliance Drive</span>',
+      status: '<span class="bdg bdg-red">At Risk</span>' },
+    { name: 'BlueSky Managed Services', id: 'VND-005103', category: 'IT Services',
+      cri: '<span class="cri-val">76</span>',
+      enrichment: '<span class="bdg bdg-amber">Partial</span>', compliance: '<span class="bdg bdg-green">Current</span>',
+      owner: 'Lisa Kim',
+      strategy: '<span style="font-size:10.5px;color:var(--accent-ink);display:inline-flex;align-items:center;gap:4px"><svg class="glyph xs"><use href="#g-clipboard"></use></svg> Enrichment Drive</span>',
+      status: '<span class="bdg bdg-green">Active</span>' },
+    { name: 'TechForce Solutions', id: 'VND-001887', category: 'Cloud Infra',
+      cri: '<span class="cri-val" style="color:var(--caution)">69<span class="cri-trend" style="color:var(--urgent)">↓</span></span>',
+      enrichment: '<span class="bdg bdg-amber">Partial</span>', compliance: '<span class="bdg bdg-red">Stale</span>',
+      owner: 'Priya Menon',
+      strategy: '<span style="font-size:10.5px;color:var(--accent-ink);display:inline-flex;align-items:center;gap:4px"><svg class="glyph xs"><use href="#g-lock"></use></svg> Compliance Drive</span>',
+      status: '<span class="bdg" style="background:var(--caution-soft);color:var(--caution)">Watch</span>' },
+    { name: 'Vertex Analytics', id: 'VND-006712', category: 'Analytics',
+      cri: '<span class="cri-val" style="color:var(--affirm)">88</span>',
+      enrichment: '<span class="bdg bdg-green">Complete</span>', compliance: '<span class="bdg bdg-green">Current</span>',
+      owner: 'Marcus Webb',
+      strategy: '<span style="font-size:10.5px;color:var(--ink-3)">—</span>',
+      status: '<span class="bdg bdg-green">Active</span>' },
+    { name: 'Legacy Systems Co', id: 'VND-000341', category: 'IT Legacy',
+      cri: '<span class="cri-val" style="color:var(--ink-3)">—</span>',
+      enrichment: '<span class="bdg bdg-red">Incomplete</span>', compliance: '<span class="bdg bdg-grey">N/A</span>',
+      owner: '<span style="color:var(--urgent)">Unassigned</span>',
+      strategy: '<span style="font-size:10.5px;color:var(--caution);display:inline-flex;align-items:center;gap:4px"><svg class="glyph xs"><use href="#g-moon-down"></use></svg> Sunset Campaign</span>',
+      status: '<span class="bdg bdg-grey">Idle 22mo</span>' },
+    { name: 'Meridian Cloud', id: 'VND-004990', category: 'Cloud Infra',
+      cri: '<span class="cri-val">72</span>',
+      enrichment: '<span class="bdg bdg-amber">Partial</span>', compliance: '<span class="bdg bdg-amber">Expiring</span>',
+      owner: 'Sarah Chen',
+      strategy: '<span style="font-size:10.5px;color:var(--accent-ink);display:inline-flex;align-items:center;gap:4px"><svg class="glyph xs"><use href="#g-clipboard"></use></svg> Enrichment Drive</span>',
+      status: '<span class="bdg bdg-green">Active</span>' }
+  ];
+  setTxt('vendor-count', '3,020 vendors in scope · Vendor Cleanup Program 2026');
+  var showingEl = document.getElementById('vendor-showing'); if (showingEl) showingEl.textContent = 'Showing ' + Math.min(8, vendors.length) + ' of 3,020 vendors';
+  tbody.innerHTML = vendors.map(function(v) {
+    return '<tr onclick="showVendorDetail(\'' + v.name.replace(/'/g, "\\'") + '\')">'
+      + '<td><div class="vt-name">' + v.name + '</div><div class="vt-id">' + v.id + '</div></td>'
+      + '<td><span style="font-size:var(--t-micro);color:var(--ink-2)">' + v.category + '</span></td>'
+      + '<td>' + v.cri + '</td>'
+      + '<td>' + v.enrichment + '</td>'
+      + '<td>' + v.compliance + '</td>'
+      + '<td><span style="font-size:var(--t-micro)">' + v.owner + '</span></td>'
+      + '<td>' + v.strategy + '</td>'
+      + '<td>' + v.status + '</td>'
+      + '</tr>';
+  }).join('');
+}
+
+function loadMoreVendors() {
+  alert('Load more (demo) — in a real app this would fetch additional pages.');
 }
 
 function refreshAll() {
   var active = document.querySelector('.tab-panel.on');
   if (active && active.id === 'panel-vendors') loadVendors();
+}
+
+function setVendorDetailTab(tabName, triggerEl) {
+  document.querySelectorAll('.vendor-tab-btn').forEach(function(b) {
+    b.classList.toggle('on', b.dataset.vendortab === tabName);
+  });
+  document.querySelectorAll('.vendor-detail-panel').forEach(function(panel) {
+    panel.classList.toggle('on', panel.id === 'vendor-detail-' + tabName);
+  });
+  if (tabName === 'details') setVendorSubtab('inputs');
+}
+
+function setVendorSubtab(subtab) {
+  document.querySelectorAll('.vendor-subtab-btn').forEach(function(b) {
+    b.classList.toggle('on', b.dataset.vendorsubtab === subtab);
+  });
+  document.querySelectorAll('.vendor-detail-subpanel').forEach(function(panel) {
+    panel.classList.toggle('on', panel.id === 'vendor-detail-sub-' + subtab);
+  });
+}
+
+function filterVendorTable() {
+  var query = (document.getElementById('vendor-search').value || '').toLowerCase().trim();
+  document.querySelectorAll('#vendor-tbody tr').forEach(function(row) {
+    var text = row.textContent.toLowerCase();
+    row.style.display = query && text.indexOf(query) === -1 ? 'none' : '';
+  });
+}
+
+// ─────────────────────────────────────────────
+//  VENDOR DETAIL — DEEP SECTIONS (generic fallback + renderers)
+// ─────────────────────────────────────────────
+function criNumber(criStr) {
+  var m = /(\d+)/.exec(criStr || '');
+  return m ? parseInt(m[1], 10) : null;
+}
+
+function genericSections(detail, vendorName) {
+  var n = criNumber(detail.cri);
+  return {
+    gaps: [
+      { type: 'med', text: (detail.blocked || '').replace(/^Blocked:\s*/, '') || 'No blocking items identified' },
+      { type: 'watch', text: 'Compliance status: ' + (detail.complianceStatus || 'unknown') },
+      { type: 'low', text: (detail.nextReview || '').replace(/^Next review:\s*/, 'Next review scheduled for ') || 'No review scheduled' }
+    ],
+    qa: [
+      { q: 'What is the current priority for ' + vendorName + '?', a: detail.actionText || 'No recommended action on file yet.', meta: (detail.actionMeta || []).slice() },
+      { q: 'Is this vendor on track for its program stage?', a: (detail.stage || 'Stage not set') + '. ' + (detail.blocked || 'No blockers recorded.'), meta: ['Generated from program status'] }
+    ],
+    scores: [
+      { value: n === null ? '—' : String(n), label: 'CRI / 100', cls: n === null ? '' : n < 60 ? 'warn' : n >= 80 ? 'good' : '' },
+      { value: detail.sla || '—', label: 'SLA Compliance', cls: '' },
+      { value: detail.openTasks || '—', label: 'Open Tasks', cls: '' }
+    ],
+    findings: [
+      { type: 'med', text: detail.actionText || 'No findings generated for this vendor yet.' }
+    ],
+    artifacts: [
+      { icon: 'g-chart', name: vendorName + ' Summary', meta: 'Not yet generated', badge: 'Not started', badgeCls: 'grey', actions: [{ label: 'Generate', cls: 'p' }] }
+    ],
+    plan: [
+      { task: detail.actionText || 'Review vendor status', meta: (detail.actionMeta || []).join(' · ') || 'No owner assigned yet' }
+    ],
+    tasks: [
+      [(detail.actionText || 'Review vendor').split('.')[0], 'Unassigned', '—', 'Optional', 'Not Started', 'grey']
+    ],
+    comms: [],
+    memoryState: [
+      { label: 'Vendor State', value: detail.complianceStatus || 'Active' },
+      { label: 'Current CRI', value: detail.cri || '—' },
+      { label: 'Next Review', value: (detail.nextReview || '').replace(/^Next review:\s*/, '') || '—' }
+    ],
+    decisions: [],
+    ledger: [],
+    sentiment: '—',
+    invoiceStatus: '—'
+  };
+}
+
+function renderGapsList(containerId, items, withLink) {
+  var el = document.getElementById(containerId);
+  if (!el) return;
+  if (!items || !items.length) { el.innerHTML = '<li class="gaps-item" style="color:var(--ink-3)">No items to show.</li>'; return; }
+  el.innerHTML = items.map(function(g) {
+    var via = g.via ? ' <em>via ' + g.via + '</em>' : '';
+    var link = withLink ? '<button class="gaps-link" onclick="setVendorDetailTab(\'details\', document.querySelectorAll(\'.vendor-tab-btn\')[1]); setVendorSubtab(\'' + (g.target || 'analysis') + '\')">→ Details</button>' : '';
+    return '<li class="gaps-item"><span class="gaps-dot ' + g.type + '"></span><span class="gaps-text">' + g.text + via + '</span>' + link + '</li>';
+  }).join('');
+}
+
+function renderQa(containerId, items) {
+  var el = document.getElementById(containerId);
+  if (!el) return;
+  if (!items || !items.length) { el.innerHTML = '<p style="color:var(--ink-3)">No questions answered yet.</p>'; return; }
+  el.innerHTML = items.map(function(qa) {
+    return '<div class="qa-block"><div class="qa-q">' + qa.q + '</div><div class="qa-a">' + qa.a + '</div><div class="qa-meta">' + qa.meta.map(function(m) { return '<span>' + m + '</span>'; }).join('') + '</div></div>';
+  }).join('');
+}
+
+function renderScores(containerId, items) {
+  var el = document.getElementById(containerId);
+  if (!el) return;
+  el.innerHTML = (items || []).map(function(s) {
+    return '<div class="score-item"><div class="score-value ' + (s.cls || '') + '">' + s.value + '</div><div class="score-label">' + s.label + '</div></div>';
+  }).join('');
+}
+
+function renderArtifacts(containerId, items) {
+  var el = document.getElementById(containerId);
+  if (!el) return;
+  if (!items || !items.length) { el.innerHTML = '<p style="color:var(--ink-3)">No artifacts generated yet.</p>'; return; }
+  el.innerHTML = items.map(function(a) {
+    var actions = (a.actions || []).map(function(act) { return '<button class="btn-s ' + (act.cls || '') + '">' + act.label + '</button>'; }).join('');
+    return '<div class="artifact-row"><div class="artifact-icon"><svg class="glyph"><use href="#' + a.icon + '"></use></svg></div><div style="flex:1;min-width:0"><div class="artifact-name">' + a.name + '</div><div class="artifact-meta">' + a.meta + '</div></div><div class="artifact-actions"><span class="bdg bdg-' + a.badgeCls + '">' + a.badge + '</span>' + actions + '</div></div>';
+  }).join('');
+}
+
+function renderPlan(containerId, items) {
+  var el = document.getElementById(containerId);
+  if (!el) return;
+  if (!items || !items.length) { el.innerHTML = '<li class="plan-item" style="color:var(--ink-3)">No planned actions yet.</li>'; return; }
+  el.innerHTML = items.map(function(p, i) {
+    return '<li class="plan-item"><div class="plan-num">' + (i + 1) + '</div><div><div class="plan-task">' + p.task + '</div><div class="plan-meta">' + p.meta + '</div></div></li>';
+  }).join('');
+}
+
+function renderTasks(containerId, rows) {
+  var el = document.getElementById(containerId);
+  if (!el) return;
+  if (!rows || !rows.length) { el.innerHTML = '<tr><td colspan="5" style="color:var(--ink-3)">No tasks yet.</td></tr>'; return; }
+  el.innerHTML = rows.map(function(r) {
+    return '<tr><td>' + r[0] + '</td><td>' + r[1] + '</td><td>' + r[2] + '</td><td>' + r[3] + '</td><td><span class="bdg bdg-' + r[5] + '">' + r[4] + '</span></td></tr>';
+  }).join('');
+}
+
+function renderComms(containerId, items) {
+  var el = document.getElementById(containerId);
+  if (!el) return;
+  if (!items || !items.length) { el.innerHTML = '<p style="color:var(--ink-3)">No communications drafted yet.</p>'; return; }
+  el.innerHTML = items.map(function(c) {
+    var actions = (c.actions || []).map(function(a, i) { return '<button class="btn-s ' + (i === 0 ? 'p' : '') + '">' + a + '</button>'; }).join('');
+    return '<div class="comm-card"><div class="comm-desc">' + c.desc + '</div><div class="comm-subject">' + c.subject + '</div><div class="comm-meta">' + c.meta + '</div><div class="comm-actions">' + actions + '</div></div>';
+  }).join('');
+}
+
+function renderMemoryState(containerId, items) {
+  var el = document.getElementById(containerId);
+  if (!el) return;
+  el.innerHTML = (items || []).map(function(m) {
+    var style = m.color ? ' style="color:' + m.color + '"' : '';
+    return '<div class="snapshot-row"><span class="snapshot-label">' + m.label + '</span><span class="snapshot-value"' + style + '>' + m.value + '</span></div>';
+  }).join('');
+}
+
+function renderDecisions(containerId, items) {
+  var el = document.getElementById(containerId);
+  if (!el) return;
+  if (!items || !items.length) { el.innerHTML = '<p style="color:var(--ink-3)">No decisions recorded yet.</p>'; return; }
+  el.innerHTML = items.map(function(d) {
+    return '<div class="decision-card"><span class="decision-status ' + d.status + '">' + (d.status === 'recorded' ? 'Recorded' : 'Pending') + '</span><div class="decision-title">' + d.title + '</div><div class="decision-detail">' + d.detail + '</div></div>';
+  }).join('');
+}
+
+function renderLedger(containerId, items) {
+  var el = document.getElementById(containerId);
+  if (!el) return;
+  if (!items || !items.length) { el.innerHTML = '<p style="color:var(--ink-3)">No activity recorded yet.</p>'; return; }
+  el.innerHTML = items.map(function(l) {
+    return '<div class="ledger-item"><div class="ledger-date">' + l.date + '</div><div class="ledger-text">' + l.text + '</div></div>';
+  }).join('');
+}
+
+function showVendorDetail(vendorName) {
+  switchTab('vendor-detail', null, true);
+  setVendorDetailTab('overview');
+  setTxt('detail-vendor-name', vendorName);
+  setVendorSubtab('inputs');
+
+  var details = {
+    'Northstar CloudOps LLC': {
+      id: 'VND-004218',
+      badges: ['IT / SaaS','Managed Support','Standard Tier','Watch','VND-004218','Vendor Cleanup Program'],
+      actionTitle: 'NEXT BEST ACTION',
+      actionText: 'Request a formal support remediation plan from Northstar CloudOps before the Q2 renewal review begins on May 15.',
+      actionMeta: ['Mercer','Medium confidence','Due this week','3 evidence items'],
+      stage: 'Stage 4 of 5 — Profile Enrichment',
+      progress: '48%',
+      progressWidth: '48%',
+      blocked: 'Blocked: 1 item — missing March support export',
+      nextReview: 'Next review: May 15, 2026',
+      cri: '71 / 100',
+      criDelta: '↓ 3',
+      contract: 'Sep 1, 2026 · 120 days',
+      spendYtd: '$39,300',
+      annualSpend: '$118,000',
+      sla: '88%',
+      response: '9.6 hrs',
+      responseTarget: 'target 6 hrs',
+      openTasks: '4 overdue',
+      complianceStatus: 'Stale — 5 months',
+      files: [
+        ['Northstar MSA.pdf','Contract','eContracts','Used','Aug 31, 2025'],
+        ['Support SOW 2025.pdf','SOW','eContracts','Used','Sep 1, 2025'],
+        ['SLA Exhibit A.pdf','Exhibit','eContracts','Used','Sep 1, 2025'],
+        ['Security Questionnaire.pdf','Compliance','SharePoint','Stale','Nov 12, 2025'],
+        ['Q1 Vendor Review Notes.docx','Notes','Upload','Used','Mar 29, 2026'],
+        ['March SLA Report.xlsx','Report','Support Sys','Missing','—']
+      ],
+      signals: [
+        'Apr 22 — Email: Northstar Account Mgr — Re: March SLA report request',
+        'Apr 19 — Check-in: Priya Menon · IT Ops — "Support is slower than last quarter."',
+        'Apr 14 — Status Post: IT Operations — Sev-2 ticket open >48h, escalated',
+        'Mar 31 — Check-in: IT Helpdesk Lead — 3 priority tickets breached response SLA'
+      ],
+      sentiment: 'Mixed',
+      invoiceStatus: 'Current',
+      resolution: '2.8 days',
+      gaps: [
+        { type: 'med', text: 'Support responsiveness deteriorating — priority SLA missed 3× in Q1', target: 'analysis' },
+        { type: 'watch', text: 'Renewal decision approaching — 120 days, performance conditions unresolved', via: 'Compliance Drive', target: 'analysis' },
+        { type: 'med', text: 'Security questionnaire stale — last completed Nov 2025', via: 'Compliance Drive', target: 'inputs' },
+        { type: 'low', text: 'March SLA report missing — blocking renewal readiness artifact', target: 'inputs' }
+      ],
+      qa: [
+        { q: 'Is the vendor meeting current SLA expectations?', a: 'Partially. Most tickets resolve within acceptable time, but the priority response SLA was missed 3 times in Q1. Average response time is 9.6 hrs against a contracted 6 hr target.', meta: ['◆ Mercer', 'Medium confidence', 'Partial completeness', 'Evidence: SLA Exhibit A · Q1 SLA Report'] },
+        { q: 'Is this vendor creating renewal risk?', a: 'Not yet critical, but renewal planning should begin. Service responsiveness is declining in the 90-day window before renewal and performance conditions have not been formally established.', meta: ['▲ Arden', 'Medium confidence', 'Sufficient completeness', 'Evidence: MSA § 11.2 · Q1 Review Notes'] },
+        { q: 'Is spend justified by current usage and business value?', a: 'Likely acceptable at current levels. Usage remains steady across IT Operations. Value may erode if support responsiveness continues to decline without a remediation commitment.', meta: ['◆ Mercer', 'Medium confidence', 'Sufficient completeness', 'Evidence: Spend export · Usage telemetry'] }
+      ],
+      scores: [
+        { value: '71', label: 'CRI / 100', cls: 'warn' },
+        { value: '61', label: 'Responsiveness', cls: 'warn' },
+        { value: '78', label: 'Commercial Value', cls: '' },
+        { value: '74', label: 'Risk &amp; Compliance', cls: '' },
+        { value: '66', label: 'Relationship Trend', cls: 'warn' },
+        { value: '88%', label: 'SLA Compliance', cls: 'good' },
+        { value: '82%', label: 'Issue Resolution', cls: 'good' }
+      ],
+      findings: [
+        { type: 'med', text: 'Support responsiveness deteriorating — recommend requesting formal remediation plan (3 evidence items)' },
+        { type: 'watch', text: 'Renewal decision should not be deferred — 120 days out, start renewal readiness review (2 evidence items)' }
+      ],
+      artifacts: [
+        { icon: 'g-chart', name: 'Q1 SLA Performance Summary — Northstar CloudOps', meta: '◆ Mercer · Brief · PDF · 6 pages · Apr 24, 2026', badge: 'Final', badgeCls: 'green', actions: [{ label: 'Open' }, { label: 'Share' }] },
+        { icon: 'g-clipboard', name: 'Pre-Renewal Posture Assessment', meta: '▲ Arden · Brief · DOCX · 9 pages · Apr 22, 2026', badge: 'Review', badgeCls: 'amber', actions: [{ label: 'Approve', cls: 'p' }, { label: 'Open' }] },
+        { icon: 'g-mail', name: 'Request for Support Response Improvement Plan', meta: '● Vector · Email draft · To: Account Mgr · Apr 21, 2026', badge: 'Drafted', badgeCls: 'accent', actions: [{ label: 'Send', cls: 'p' }, { label: 'Open' }] },
+        { icon: 'g-note', name: 'Renewal Readiness Summary — IT Ops &amp; Procurement', meta: '◆ Mercer · Note · 3 pages · Apr 20, 2026 · Pending March export', badge: 'Blocked', badgeCls: 'red', actions: [{ label: 'Resolve' }] }
+      ],
+      plan: [
+        { task: 'Collect missing March support export from Northstar', meta: 'IT Operations Analyst · Due Apr 30, 2026 · In Progress · via Data Enrichment Drive' },
+        { task: 'Request vendor remediation plan for priority-ticket responsiveness', meta: 'Priya Menon · Due May 3, 2026 · Not started' },
+        { task: 'Obtain updated security questionnaire from Northstar', meta: 'Priya Menon · Due May 10, 2026 · Not started · via Compliance Certification Drive' },
+        { task: 'Schedule internal renewal-readiness review with Procurement', meta: 'Procurement · Due May 15, 2026 · Not started' }
+      ],
+      tasks: [
+        ['Request March support export', 'IT Ops Analyst', 'Apr 30', 'None', 'In Progress', 'blue'],
+        ['Request vendor remediation plan', 'Priya Menon', 'May 3', 'Optional', 'Not Started', 'grey'],
+        ['Prepare renewal readiness summary', 'Commercial Manager', 'May 10', 'Required', 'Blocked', 'red']
+      ],
+      comms: [
+        { desc: 'External Draft · To: Northstar Account Manager', subject: 'Request for Support Response Improvement Plan', meta: 'Tone: Professional · Collaborative · Review: Optional · Drafted by Vector', actions: ['Send', 'Open draft', 'View evidence'] },
+        { desc: 'Internal Note · To: IT Operations &amp; Procurement', subject: 'Northstar Renewal Readiness Summary', meta: 'Pending: missing March support export · Review: Required', actions: ['Open draft', 'View evidence'] }
+      ],
+      memoryState: [
+        { label: 'Vendor State', value: 'Active · Watch', color: 'var(--caution)' },
+        { label: 'Current CRI', value: '71 / 100' },
+        { label: 'Trend', value: '↓ Slightly Declining', color: 'var(--urgent)' },
+        { label: 'Blocked Items', value: '1 — missing support export', color: 'var(--urgent)' },
+        { label: 'Next Review', value: 'May 15, 2026' },
+        { label: 'Playbook', value: 'Vendor Performance Watch' }
+      ],
+      decisions: [
+        { status: 'recorded', title: 'Continue vendor relationship through current contract term', detail: 'Feb 10, 2026 · Service value acceptable; no critical compliance issues. Q1 issue backlog reduced from 14 → 7 after internal follow-up.' },
+        { status: 'pending', title: 'Enter renewal negotiation with performance conditions attached', detail: 'Under consideration — depends on remediation plan response. Renewal deadline: Sep 1, 2026.' }
+      ],
+      ledger: [
+        { date: 'Apr 24', text: '◆ Commercial Manager recalculated CRI from 74 to 71 based on Q1 SLA report.' },
+        { date: 'Apr 22', text: '▢ SLA report uploaded and classified by Doc agent.' },
+        { date: 'Apr 12', text: '● Action Manager created support trend review task — via Data Enrichment Drive.' },
+        { date: 'Mar 29', text: 'Q1 Vendor Review Notes uploaded manually by Priya Menon.' },
+        { date: 'Mar 15', text: 'Compliance Certification Drive added this vendor to its scope — questionnaire stale 4+ months.' }
+      ]
+    },
+    'DataStream Partners': {
+      id: 'VND-003891',
+      badges: ['Analytics','Data Pipeline','Premium Tier','Active','VND-003891','Vendor Cleanup Program'],
+      actionTitle: 'RECOMMENDED ACTION',
+      actionText: 'Validate the expiring SLA evidence and confirm the next renewal window with Daniel Cho by the end of the week.',
+      actionMeta: ['Mercer','High confidence','Due in 3 days','2 evidence items'],
+      stage: 'Stage 5 of 5 — Validation & Handoff',
+      progress: '78%',
+      progressWidth: '78%',
+      blocked: 'Blocked: final executive sign-off pending',
+      nextReview: 'Next review: May 18, 2026',
+      cri: '84 / 100',
+      criDelta: '↑ 4',
+      contract: 'Oct 12, 2026 · 140 days',
+      spendYtd: '$72,400',
+      annualSpend: '$250,500',
+      sla: '92%',
+      response: '4.2 hrs',
+      responseTarget: 'target 4 hrs',
+      openTasks: '2 due',
+      complianceStatus: 'Expiring — 1 month',
+      files: [
+        ['DataStream MSA.pdf','Contract','eContracts','Used','Jul 8, 2025'],
+        ['Renewal Worksheet.xlsx','Report','CRM','Used','Apr 2, 2026'],
+        ['SLA Compliance Summary.pdf','Compliance','SharePoint','Current','Apr 13, 2026'],
+        ['Vendor Assessment Notes.docx','Notes','Upload','Used','Mar 16, 2026']
+      ],
+      signals: [
+        'Apr 21 — Check-in: Daniel Cho — "Team is ready for renewal discussions."',
+        'Apr 10 — Status Post: Procurement — Invoice terms within target',
+        'Mar 25 — Email: Account Mgr — SLA update request',
+        'Mar 05 — Check-in: Finance — Spend outlook approved'
+      ]
+    },
+    'Apex Systems Inc': {
+      id: 'VND-002244',
+      badges: ['Managed Services','Infrastructure','Standard Tier','At Risk','VND-002244','Vendor Cleanup Program'],
+      actionTitle: 'IMMEDIATE ACTION',
+      actionText: 'Escalate the missing support documentation and assign an owner to close the data gap for Apex Systems before the next review.',
+      actionMeta: ['Mercer','Low confidence','Due today','5 evidence items'],
+      stage: 'Stage 3 of 5 — Deduplication & Entity Resolution',
+      progress: '34%',
+      progressWidth: '34%',
+      blocked: 'Blocked: missing contract ID and duplicate candidate match',
+      nextReview: 'Next review: May 10, 2026',
+      cri: '58 / 100',
+      criDelta: '↓↓ 5',
+      contract: 'Jun 20, 2026 · 47 days',
+      spendYtd: '$24,100',
+      annualSpend: '$95,600',
+      sla: '74%',
+      response: '12.4 hrs',
+      responseTarget: 'target 6 hrs',
+      openTasks: '8 overdue',
+      complianceStatus: 'Missing — 6 months',
+      files: [
+        ['Apex SOW.pdf','SOW','eContracts','Incomplete','Feb 18, 2026'],
+        ['Security Checklist.pdf','Compliance','SharePoint','Missing','—'],
+        ['Support Ticket Log.xlsx','Report','Support Sys','Used','Apr 28, 2026']
+      ],
+      signals: [
+        'Apr 26 — Status Post: IT Ops — Ticket queue is growing',
+        'Apr 17 — Check-in: Technical Lead — Support has slowed significantly',
+        'Apr 01 — Email: Vendor Admin — Missing contract details',
+        'Mar 22 — Check-in: Procurement — Review risk exposure'
+      ]
+    },
+    'BlueSky Managed Services': {
+      id: 'VND-005103',
+      badges: ['IT Services', 'Managed Support', 'Standard Tier', 'Active', 'VND-005103', 'Vendor Cleanup Program'],
+      actionTitle: 'RECOMMENDED ACTION',
+      actionText: 'Confirm the enrichment drive has captured BlueSky’s updated ownership and spend data before the next sync.',
+      actionMeta: ['Vector', 'High confidence', 'Due in 5 days', '1 evidence item'],
+      stage: 'Stage 4 of 5 — Profile Enrichment',
+      progress: '62%',
+      progressWidth: '62%',
+      blocked: 'Blocked: none',
+      nextReview: 'Next review: May 20, 2026',
+      cri: '76 / 100',
+      criDelta: '',
+      contract: 'Nov 3, 2026 · 152 days',
+      spendYtd: '$54,200',
+      annualSpend: '$132,000',
+      sla: '90%',
+      response: '5.1 hrs',
+      responseTarget: 'target 6 hrs',
+      openTasks: '1 due',
+      complianceStatus: 'Current',
+      files: [
+        ['BlueSky MSA.pdf', 'Contract', 'eContracts', 'Used', 'Jun 2, 2025'],
+        ['Support SLA 2025.pdf', 'Exhibit', 'eContracts', 'Used', 'Jun 2, 2025']
+      ],
+      signals: [
+        'Apr 20 — Check-in: Lisa Kim — "Support has been solid this quarter."',
+        'Apr 05 — Status Post: IT Services — Enrichment coverage updated'
+      ]
+    },
+    'TechForce Solutions': {
+      id: 'VND-001887',
+      badges: ['Cloud Infra', 'Managed Support', 'Standard Tier', 'Watch', 'VND-001887', 'Vendor Cleanup Program'],
+      actionTitle: 'NEXT BEST ACTION',
+      actionText: 'Follow up on the stale compliance questionnaire for TechForce before the next compliance review cycle.',
+      actionMeta: ['Mercer', 'Medium confidence', 'Due this week', '2 evidence items'],
+      stage: 'Stage 4 of 5 — Profile Enrichment',
+      progress: '44%',
+      progressWidth: '44%',
+      blocked: 'Blocked: 1 item — compliance questionnaire overdue',
+      nextReview: 'Next review: May 16, 2026',
+      cri: '69 / 100',
+      criDelta: '↓ 2',
+      contract: 'Aug 14, 2026 · 102 days',
+      spendYtd: '$31,600',
+      annualSpend: '$104,000',
+      sla: '81%',
+      response: '8.9 hrs',
+      responseTarget: 'target 6 hrs',
+      openTasks: '3 overdue',
+      complianceStatus: 'Stale — 4 months',
+      files: [
+        ['TechForce SOW.pdf', 'SOW', 'eContracts', 'Used', 'Jan 15, 2026'],
+        ['Security Questionnaire.pdf', 'Compliance', 'SharePoint', 'Stale', 'Dec 20, 2025']
+      ],
+      signals: [
+        'Apr 18 — Check-in: Priya Menon — "Compliance docs are overdue again."',
+        'Apr 02 — Email: TechForce Account Mgr — Renewal terms inquiry'
+      ]
+    },
+    'Vertex Analytics': {
+      id: 'VND-006712',
+      badges: ['Analytics', 'Data Pipeline', 'Premium Tier', 'Active', 'VND-006712', 'Vendor Cleanup Program'],
+      actionTitle: 'RECOMMENDED ACTION',
+      actionText: 'No action needed — Vertex Analytics is fully enriched and compliant. Continue routine monitoring.',
+      actionMeta: ['Arden', 'High confidence', 'No due date', '0 evidence items'],
+      stage: 'Stage 5 of 5 — Validation & Handoff',
+      progress: '95%',
+      progressWidth: '95%',
+      blocked: 'Blocked: none',
+      nextReview: 'Next review: Jun 1, 2026',
+      cri: '88 / 100',
+      criDelta: '',
+      contract: 'Dec 4, 2026 · 183 days',
+      spendYtd: '$88,900',
+      annualSpend: '$301,000',
+      sla: '96%',
+      response: '3.1 hrs',
+      responseTarget: 'target 4 hrs',
+      openTasks: '0 due',
+      complianceStatus: 'Current',
+      files: [
+        ['Vertex MSA.pdf', 'Contract', 'eContracts', 'Used', 'May 10, 2025'],
+        ['Annual Compliance Cert.pdf', 'Compliance', 'SharePoint', 'Used', 'Mar 1, 2026']
+      ],
+      signals: [
+        'Apr 09 — Check-in: Marcus Webb — "Everything is running smoothly."'
+      ]
+    },
+    'Legacy Systems Co': {
+      id: 'VND-000341',
+      badges: ['IT Legacy', 'Idle', 'Idle 22mo', 'VND-000341', 'Vendor Cleanup Program'],
+      actionTitle: 'IMMEDIATE ACTION',
+      actionText: 'Confirm Legacy Systems Co has no active spend or contracts before retiring the record via the Sunset Campaign.',
+      actionMeta: ['Vector', 'Low confidence', 'Due today', '0 evidence items'],
+      stage: 'Stage 3 of 5 — Deduplication & Entity Resolution',
+      progress: '18%',
+      progressWidth: '18%',
+      blocked: 'Blocked: no assigned owner to confirm retirement',
+      nextReview: 'Next review: unscheduled',
+      cri: '— / 100',
+      criDelta: '',
+      contract: 'No active contract',
+      spendYtd: '$0',
+      annualSpend: '$0',
+      sla: '—',
+      response: '—',
+      responseTarget: '',
+      openTasks: '0 due',
+      complianceStatus: 'N/A',
+      files: [
+        ['Legacy Vendor Record.pdf', 'Notes', 'ERP export', 'Missing', '—']
+      ],
+      signals: [
+        'Mar 18 — Status Post: Procurement — No spend detected in 18+ months'
+      ]
+    },
+    'Meridian Cloud': {
+      id: 'VND-004990',
+      badges: ['Cloud Infra', 'Managed Support', 'Standard Tier', 'Active', 'VND-004990', 'Vendor Cleanup Program'],
+      actionTitle: 'RECOMMENDED ACTION',
+      actionText: 'Renew the expiring compliance certificate for Meridian Cloud ahead of the upcoming enrichment milestone.',
+      actionMeta: ['Mercer', 'Medium confidence', 'Due in 2 weeks', '1 evidence item'],
+      stage: 'Stage 4 of 5 — Profile Enrichment',
+      progress: '58%',
+      progressWidth: '58%',
+      blocked: 'Blocked: none',
+      nextReview: 'Next review: May 25, 2026',
+      cri: '72 / 100',
+      criDelta: '',
+      contract: 'Jul 22, 2026 · 84 days',
+      spendYtd: '$46,700',
+      annualSpend: '$140,500',
+      sla: '85%',
+      response: '6.4 hrs',
+      responseTarget: 'target 6 hrs',
+      openTasks: '2 due',
+      complianceStatus: 'Expiring — 3 weeks',
+      files: [
+        ['Meridian MSA.pdf', 'Contract', 'eContracts', 'Used', 'Sep 2, 2025'],
+        ['Compliance Cert.pdf', 'Compliance', 'SharePoint', 'Expiring', 'Feb 25, 2026']
+      ],
+      signals: [
+        'Apr 15 — Check-in: Sarah Chen — "Renewal terms look favorable."',
+        'Mar 30 — Email: Meridian Account Mgr — Compliance cert renewal notice'
+      ]
+    }
+  };
+
+  var detail = details[vendorName] || details['Northstar CloudOps LLC'];
+  setTxt('detail-vendor-id', detail.id);
+  setTxt('detail-vendor-sub', 'Program status · profile and evidence summary');
+
+  var badges = document.getElementById('detail-vendor-badges');
+  if (badges) {
+    badges.innerHTML = detail.badges.map(function(text) {
+      var cls = text === 'Watch' ? 'vendor-badge watch' : text === 'Active' ? 'vendor-badge active' : text === 'At Risk' ? 'vendor-badge at-risk' : 'vendor-badge';
+      return '<span class="' + cls + '">' + text + '</span>';
+    }).join(' ');
+  }
+
+  document.getElementById('bc-sep-vendors').style.display = 'inline';
+  document.getElementById('bc-vendors').style.display = 'inline';
+  document.getElementById('bc-sep-vendor').style.display = 'inline';
+  document.getElementById('bc-vendor').style.display = 'inline';
+  document.getElementById('bc-vendor').textContent = vendorName;
+
+  setTxt('detail-action-title', detail.actionTitle);
+  setTxt('detail-action-text', detail.actionText);
+  var actionMeta = document.getElementById('detail-action-meta');
+  if (actionMeta) actionMeta.innerHTML = detail.actionMeta.map(function(item) { return '<span>' + item + '</span>'; }).join(' ');
+
+  setTxt('detail-stage', detail.stage);
+  setTxt('detail-progress-text', detail.progress);
+  var bar = document.getElementById('detail-progress-bar');
+  if (bar) bar.style.width = detail.progressWidth;
+  setTxt('detail-blocked', detail.blocked);
+  setTxt('detail-next-review', detail.nextReview);
+  setTxt('detail-cri', detail.cri);
+  setTxt('detail-cri-delta', detail.criDelta);
+  setTxt('detail-contract', detail.contract);
+  setTxt('detail-spend-ytd', detail.spendYtd);
+  setTxt('detail-annual-spend', detail.annualSpend);
+  setTxt('detail-sla', detail.sla);
+  setTxt('detail-response', detail.response);
+  setTxt('detail-response-target', detail.responseTarget);
+  setTxt('detail-open-tasks', detail.openTasks);
+  setTxt('detail-compliance-status', detail.complianceStatus);
+
+  var filesBody = document.getElementById('detail-files-body');
+  if (filesBody) {
+    filesBody.innerHTML = detail.files.map(function(row) {
+      return '<tr><td>' + row[0] + '</td><td>' + row[1] + '</td><td>' + row[2] + '</td><td>' + (row[3] === 'Used' ? '<span class="vendor-badge active">Used</span>' : '<span class="vendor-flag">' + row[3] + '</span>') + '</td><td>' + row[4] + '</td></tr>';
+    }).join('');
+  }
+
+  var detailSpend = document.getElementById('detail-spend-data');
+  if (detailSpend) detailSpend.textContent = detail.spendYtd;
+  var detailResponseData = document.getElementById('detail-response-data');
+  if (detailResponseData) detailResponseData.textContent = detail.response;
+  var detailAnnualData = document.getElementById('detail-annual-data');
+  if (detailAnnualData) detailAnnualData.textContent = detail.annualSpend;
+  var detailResolutionData = document.getElementById('detail-resolution-data');
+  if (detailResolutionData) detailResolutionData.textContent = detail.resolution || '2.8 days';
+
+  var signals = document.getElementById('detail-signals');
+  if (signals) {
+    signals.innerHTML = detail.signals.map(function(signal) {
+      return '<li style="margin-bottom:12px"><strong>' + signal.split(' — ')[0] + '</strong> — ' + signal.split(' — ').slice(1).join(' — ') + '</li>';
+    }).join('');
+  }
+
+  var generic = genericSections(detail, vendorName);
+  setTxt('detail-sentiment-data', detail.sentiment || generic.sentiment);
+  setTxt('detail-invoice-data', detail.invoiceStatus || generic.invoiceStatus);
+
+  renderGapsList('detail-gaps', detail.gaps || generic.gaps, true);
+  renderQa('detail-qa', detail.qa || generic.qa);
+  renderScores('detail-scores', detail.scores || generic.scores);
+  renderGapsList('detail-findings', detail.findings || generic.findings, false);
+  renderArtifacts('detail-artifacts', detail.artifacts || generic.artifacts);
+  renderPlan('detail-plan', detail.plan || generic.plan);
+  renderTasks('detail-tasks', detail.tasks || generic.tasks);
+  renderComms('detail-comms', detail.comms || generic.comms);
+  renderMemoryState('detail-memory-state', detail.memoryState || generic.memoryState);
+  renderDecisions('detail-decisions', detail.decisions || generic.decisions);
+  renderLedger('detail-ledger', detail.ledger || generic.ledger);
 }
 
 // ─────────────────────────────────────────────
