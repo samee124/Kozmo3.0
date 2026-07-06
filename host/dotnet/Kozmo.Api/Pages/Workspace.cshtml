@@ -1637,7 +1637,7 @@ function loadVendors() {
                          : band === 'AtRisk' ? 'bdg-amber'
                          : 'bdg-grey';
         var shortId = (v.entityId || '').substring(0, 8);
-        return '<tr onclick="showVendorDetail(\'' + v.name.replace(/'/g, "\\'") + '\')">'
+        return '<tr onclick="showVendorDetail(\'' + v.name.replace(/'/g, "\\'") + '\', \'' + v.entityId + '\')">'
           + '<td><div class="vt-name">' + v.name + '</div><div class="vt-id" title="' + v.entityId + '">' + shortId + '</div></td>'
           + '<td>' + placeholder + '</td>'
           + '<td>' + placeholder + '</td>'
@@ -1833,7 +1833,7 @@ function renderLedger(containerId, items) {
   }).join('');
 }
 
-function showVendorDetail(vendorName) {
+function showVendorDetail(vendorName, vendorId) {
   switchTab('vendor-detail', null, true);
   setVendorDetailTab('overview');
   setTxt('detail-vendor-name', vendorName);
@@ -2237,6 +2237,67 @@ function showVendorDetail(vendorName) {
   renderMemoryState('detail-memory-state', detail.memoryState || generic.memoryState);
   renderDecisions('detail-decisions', detail.decisions || generic.decisions);
   renderLedger('detail-ledger', detail.ledger || generic.ledger);
+
+  // Real data overwrite — only for vendors clicked from the real /vendors list (has a real GUID).
+  // Everything above this point is still the mock fallback (Q&A, scores, artifacts, plan, tasks,
+  // comms, memory, ledger, files) — intentionally untouched; only completeness/gaps (P1) and
+  // check-ins (P2) are wired to real data today.
+  if (vendorId) loadRealVendorDetail(vendorId);
+}
+
+// Overwrites the completeness/gaps banner and the activity list with REAL data for the clicked
+// vendor. Does not fabricate: fields the backend doesn't provide are blanked to "—", not guessed.
+function loadRealVendorDetail(vendorId) {
+  ['detail-cri', 'detail-cri-delta', 'detail-contract', 'detail-spend-ytd', 'detail-annual-spend',
+   'detail-sla', 'detail-response', 'detail-response-target', 'detail-open-tasks', 'detail-compliance-status']
+    .forEach(function(id) { setTxt(id, '—'); });
+  setTxt('detail-vendor-sub', 'Real ingested vendor — profile reflects actual pipeline data, not a mock');
+
+  var linksEl = document.getElementById('detail-action-links');
+  if (linksEl) linksEl.innerHTML = '';
+
+  fetch('/vendors/' + vendorId + '/vendor-file')
+    .then(function(r) { return r.json(); })
+    .then(function(vf) {
+      var comp = vf.completeness || { ratio: 0, filledKeys: [], gapKeys: [] };
+      var pct  = Math.round((comp.ratio || 0) * 100);
+
+      setTxt('detail-action-title', 'REAL COMPLETENESS');
+      setTxt('detail-action-text',
+        pct + '% complete — ' + (comp.filledKeys || []).length + ' known field(s), ' +
+        (comp.gapKeys || []).length + ' gap(s). This is the vendor’s actual ingested state, not a target.');
+      var metaEl = document.getElementById('detail-action-meta');
+      if (metaEl) metaEl.innerHTML =
+        '<span>' + (vf.evidenceCount || 0) + ' evidence document(s)</span><span>' + (vf.claimsCount || 0) + ' tracked claim(s)</span>';
+
+      var items = (comp.filledKeys || []).map(function(k) { return { type: 'low', text: '✓ Known: ' + k }; })
+        .concat((comp.gapKeys || []).map(function(k) { return { type: 'low', text: '○ Gap: ' + k }; }));
+      renderGapsList('detail-gaps', items, false);
+    })
+    .catch(function(err) {
+      setTxt('detail-action-title', 'COMPLETENESS UNAVAILABLE');
+      setTxt('detail-action-text', 'Could not load real completeness: ' + err.message);
+      renderGapsList('detail-gaps', [], false);
+    });
+
+  fetch('/checkins')
+    .then(function(r) { return r.json(); })
+    .then(function(all) {
+      var mine = all.filter(function(c) { return c.vendorId === vendorId; });
+      var signals = document.getElementById('detail-signals');
+      if (!signals) return;
+      if (!mine.length) {
+        signals.innerHTML = '<li style="color:var(--ink-3)">No open check-ins for this vendor.</li>';
+        return;
+      }
+      signals.innerHTML = mine.map(function(c) {
+        return '<li style="margin-bottom:12px"><strong>' + esc(c.kind) + ' (' + esc(c.responseShape) + ')</strong> — ' + esc(c.question) + '</li>';
+      }).join('');
+    })
+    .catch(function() {
+      var signals = document.getElementById('detail-signals');
+      if (signals) signals.innerHTML = '<li style="color:var(--ink-3)">Could not load check-ins.</li>';
+    });
 }
 
 // ─────────────────────────────────────────────
