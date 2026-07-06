@@ -47,6 +47,7 @@ public static class DocTypeInferrer
         SourceTier.Inferred       => 0.60,
         SourceTier.Unverified     => 0.40,
         SourceTier.Correspondence => 0.25,
+        SourceTier.Confirmed      => 0.65,
         _                         => 0.80,
     };
 

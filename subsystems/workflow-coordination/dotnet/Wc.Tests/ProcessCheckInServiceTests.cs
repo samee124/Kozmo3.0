@@ -196,7 +196,11 @@ public sealed class ProcessCheckInServiceTests
             new TrackingFacade(), EmptyProfile, Now);
 
         var belief = Assert.Single(entityStore.AllBeliefs);
-        Assert.Equal(SourceTier.Reported, belief.SourceTier);
+        // Confirmed (0.65), not Reported (0.50) — a DIMENSION_GAP answer is a human operator
+        // directly confirming THIS question, deliberately above the 0.60 L1 critical confidence
+        // gate so answering a gap can actually close it (Reported alone never clears that gate —
+        // Invariant #4, a ceiling on unverified third-party reports, not on a direct confirmation).
+        Assert.Equal(SourceTier.Confirmed, belief.SourceTier);
         Assert.NotNull(belief.Provenance);
         Assert.Equal(ciId, belief.Provenance!.EvidenceId);
     }

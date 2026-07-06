@@ -156,19 +156,31 @@ public sealed class ProcessCheckInService
         var claimKey = checkIn.TargetField ?? "human_answer";
 
         // Human confirmed the field → rawValue = 1.0 (present/positive signal).
-        // Tier = Reported; ceiling clamping is applied by the store on AppendBeliefAsync.
-        // Provenance cites the check-in ID so the audit trail links back to the question.
+        // Tier = Confirmed (weight/ceiling 0.65) — deliberately ABOVE the 0.60 L1 critical
+        // confidence gate (CompletenessRubric.Compute requires answer.Confidence >=
+        // question.RequiredConfidence), unlike Reported (0.50), which can never clear it
+        // (Invariant #4: REPORTED weight < CRITICAL gate — a DELIBERATE ceiling on unverified
+        // third-party reports, not on a human operator directly confirming a specific question
+        // through the check-in loop). Confirmed sits below Verified (0.80, a system fact) —
+        // a human's direct answer is stronger evidence than someone else's report, weaker than
+        // a system export. Provenance cites the check-in ID so the audit trail links back.
+        //
+        // Derivation names the actual question and the actual answer, not the generic
+        // "vendor-file:{claimKey}" template — AnsweringPrompt.BeliefView never serializes Value
+        // to the completeness LLM (only Dimension/Criterion/SourceTier/Confidence/Derivation), so
+        // Derivation is the ONLY field carrying real semantic content back to completeness.
         await writeService.WriteBeliefAsync(
             vendorId:            checkIn.VendorId,
             claimKey:            claimKey,
             dimension:           dimension,
             criterion:           claimKey,
             rawValue:            1.0,
-            tier:                SourceTier.Reported,
-            extractorConfidence: 0.5,
+            tier:                SourceTier.Confirmed,
+            extractorConfidence: 0.65,
             observedAt:          now,
             provenance:          new BeliefProvenance(checkIn.CheckInId, $"check-in:{checkIn.Kind}"),
             ingestedAt:          now,
+            derivation:          $"Check-in answer to \"{checkIn.Question}\": {checkIn.ResponseValue}",
             ct:                  ct);
     }
 }

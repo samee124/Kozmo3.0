@@ -124,6 +124,7 @@ public static class AnsweringPrompt
         SourceTier.Inferred       => 0.3,
         SourceTier.Unverified     => 0.2,
         SourceTier.Correspondence => 0.25,
+        SourceTier.Confirmed      => 0.65,
         _                         => 0.5,
     };
 

@@ -32,6 +32,11 @@
       "weight": 0.25,
       "ceiling": 0.25,
       "description": "Informal correspondence — email; strictly the weakest tier, always defers to documented evidence"
+    },
+    "Confirmed": {
+      "weight": 0.65,
+      "ceiling": 0.65,
+      "description": "Human-confirmed via check-in response — above the 0.60 critical confidence gate, below Verified (0.8) system fact"
     }
   }
 }

@@ -17,7 +17,8 @@ public enum SourceTier
     Reported      = 2,
     Unverified    = 3,
     Primary       = 4,  // of-record, executed — vendor file only
-    Correspondence = 5  // informal correspondence (email) — strictly weakest; E-signal Part 5 Step 1
+    Correspondence = 5, // informal correspondence (email) — strictly weakest; E-signal Part 5 Step 1
+    Confirmed     = 6   // human-confirmed via check-in response — above the 0.60 critical gate, below Verified
 }
 
 public enum DocType
