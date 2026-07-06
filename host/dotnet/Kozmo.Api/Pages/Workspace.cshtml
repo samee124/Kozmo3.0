@@ -442,6 +442,65 @@ body{
 .log-msg.dl{color:#58A6FF}
 .log-idle{color:#3D444D;font-style:italic;padding:var(--s2) 0}
 
+/* ── PIPELINE STAGES ── */
+.pipe-stages{display:flex;align-items:flex-start;gap:0;margin-bottom:var(--s6)}
+.pipe-stage{flex:1;display:flex;flex-direction:column;align-items:center;position:relative}
+.pipe-stage:not(:last-child)::after{
+  content:'';position:absolute;top:18px;left:50%;width:100%;height:2px;
+  background:var(--line-2);z-index:0;
+}
+.pipe-stage.ps-done:not(:last-child)::after{background:var(--affirm)}
+.ps-icon{
+  width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  background:var(--surface-soft);border:2px solid var(--line-2);
+  font-size:13px;font-weight:700;color:var(--ink-4);position:relative;z-index:1;
+  transition:all .3s ease;flex-shrink:0;
+}
+.pipe-stage.ps-done .ps-icon{background:var(--affirm-soft);border-color:var(--affirm);color:var(--affirm-ink)}
+.pipe-stage.ps-running .ps-icon{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.pipe-stage.ps-running .ps-icon::after{
+  content:'';position:absolute;inset:-4px;border-radius:50%;
+  border:2px solid var(--accent);border-top-color:transparent;
+  animation:kspin .8s linear infinite;
+}
+@@keyframes kspin{to{transform:rotate(360deg)}}
+.ps-label{font-size:10px;font-weight:600;color:var(--ink-4);margin-top:var(--s2);text-align:center;letter-spacing:.04em;text-transform:uppercase;line-height:1.3}
+.pipe-stage.ps-done .ps-label{color:var(--affirm-ink)}
+.pipe-stage.ps-running .ps-label{color:var(--accent)}
+
+/* ── ACTIVITY LOG (nice cards, not terminal) ── */
+.act-log-wrap{background:var(--surface);border:1px solid var(--line-1);border-radius:var(--r-lg);overflow:hidden}
+.act-log-hdr{display:flex;align-items:center;gap:var(--s3);padding:var(--s4) var(--s5);border-bottom:1px solid var(--line-1);background:var(--surface-soft)}
+.act-log-title{font-size:var(--t-small);font-weight:600;color:var(--ink-0)}
+.act-log-status{margin-left:auto;display:flex;align-items:center;gap:6px;font-size:11px;font-weight:600;letter-spacing:.03em;color:var(--ink-4)}
+.act-log-status.running{color:var(--accent)}
+.act-log-status.done{color:var(--affirm-ink)}
+.act-log-status.error{color:var(--urgent-ink)}
+.als-dot{width:6px;height:6px;border-radius:50%;background:currentColor;display:inline-block}
+.act-log-status.running .als-dot{animation:pulse 1.8s ease infinite}
+.act-log-body{padding:var(--s4);display:flex;flex-direction:column;gap:var(--s2);min-height:180px;max-height:300px;overflow-y:auto}
+.act-log-body::-webkit-scrollbar{width:4px}
+.act-log-body::-webkit-scrollbar-thumb{background:var(--line-2);border-radius:4px}
+.act-entry{display:flex;align-items:flex-start;gap:var(--s3);padding:var(--s3) var(--s4);background:var(--canvas);border:1px solid var(--line-2);border-radius:var(--r-md);animation:fadeIn .2s ease}
+.ae-icon{width:28px;height:28px;border-radius:var(--r-md);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px}
+.ae-icon.info{background:#EBF4FF;color:var(--watch-ink)}
+.ae-icon.ok{background:var(--affirm-soft);color:var(--affirm-ink)}
+.ae-icon.warn{background:var(--caution-soft);color:var(--caution-ink)}
+.ae-icon.err{background:var(--urgent-soft);color:var(--urgent-ink)}
+.ae-icon.stage{background:var(--accent-soft);color:var(--accent-ink)}
+.ae-icon.dl{background:var(--surface-soft);color:var(--ink-3)}
+.ae-body{flex:1;min-width:0}
+.ae-msg{font-size:13px;color:var(--ink-1);line-height:1.5;word-break:break-word}
+.ae-meta{display:flex;align-items:center;gap:var(--s3);margin-top:3px}
+.ae-ts{font-size:11px;color:var(--ink-4)}
+.ae-tag{font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:1px 7px;border-radius:var(--r-pill);background:var(--surface-soft);color:var(--ink-3)}
+.ae-tag.info{background:#EBF4FF;color:var(--watch-ink)}
+.ae-tag.ok{background:var(--affirm-soft);color:var(--affirm-ink)}
+.ae-tag.warn{background:var(--caution-soft);color:var(--caution-ink)}
+.ae-tag.err{background:var(--urgent-soft);color:var(--urgent-ink)}
+.ae-tag.stage{background:var(--accent-soft);color:var(--accent-ink)}
+.act-empty{text-align:center;padding:var(--s6) 0;color:var(--ink-4);font-size:13px;font-style:italic}
+
 /* ── VENDORS TAB ── */
 .vendors-panel{padding:var(--s7);overflow-y:auto;height:100%}
 .v-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--s5)}
@@ -839,7 +898,7 @@ body{
         <span class="nl">Program</span>
       </li>
       <!-- Drive removed from sidebar navigation per request -->
-      <li class="nv" data-tab-nav="vendors" onclick="switchTab('vendors',this)" data-tip="Vendors">
+      <li class="nv" data-tab-nav="vendors" onclick="enterProgramTab('vendors',this)" data-tip="Vendors">
         <span class="ni"><svg class="glyph"><use href="#g-building"/></svg></span>
         <span class="nl">Vendors</span>
       </li>
@@ -944,6 +1003,7 @@ body{
           <div class="tab-bar">
             <button class="tab-btn on" data-tab="overview" onclick="switchTab('overview', this, false)">Overview</button>
             <button class="tab-btn" data-tab="detail" onclick="switchTab('detail', this, false)">Program Detail</button>
+            <button class="tab-btn" data-tab="ingest" onclick="switchTab('ingest', this, false)">Ingest from Drive</button>
           </div>
         </div>
 
@@ -1358,6 +1418,71 @@ body{
               </div>
             </div>
           </div>
+
+          <!-- INGEST TAB PANEL -->
+          <div class="tab-panel" id="panel-ingest">
+            <div class="ingest-panel">
+
+              <!-- Drive connection card -->
+              <div class="drive-card disc" id="drive-card">
+                <div class="drive-card-hdr">
+                  <div class="drive-card-ico disc" id="drive-ico">
+                    <svg viewBox="0 0 87 78" width="22" height="22"><path d="M6.1 66l4.1 7.1c.9 1.5 2.1 2.7 3.5 3.6L27.5 53H0c0 1.7.4 3.4 1.3 4.9L6.1 66z" fill="#0066DA"/><path d="M43.5 25L29.7 1.3C28.3 2.2 27 3.4 26.1 4.9L1.3 48.1c-.8 1.5-1.3 3.1-1.3 4.9h27.5L43.5 25z" fill="#00AC47"/><path d="M73.3 76.7c1.5-.9 2.7-2.1 3.5-3.6l1.7-2.9 8.2-14.2c.8-1.5 1.3-3.2 1.3-4.9H60.5L73.3 76.7z" fill="#EA4335"/><path d="M43.5 25l13.8-23.7C55.8.4 54.1 0 52.3 0H34.7c-1.8 0-3.5.4-5 1.3L43.5 25z" fill="#00832D"/><path d="M60.5 53H27.5L13.7 76.7c1.5.8 3.2 1.3 5 1.3h47.6c1.8 0 3.5-.4 5-1.3L60.5 53z" fill="#2684FC"/><path d="M73.1 25.5L59.9 2.9C59 1.4 57.8.2 56.3.4L43.5 25 60.5 53h27.4c0-1.7-.4-3.4-1.3-4.9L73.1 25.5z" fill="#FFBA00"/></svg>
+                  </div>
+                  <div class="drive-card-info">
+                    <div class="drive-card-title">Google Drive</div>
+                    <div class="drive-card-email" id="drive-email">Not connected — authorize to ingest documents</div>
+                  </div>
+                  <div class="drive-card-actions">
+                    <span class="status-pill disc" id="drive-pill"><span id="drive-pill-text">Not connected</span></span>
+                    <a href="/auth/google" class="btn-s p" id="btn-connect">Connect</a>
+                    <button class="btn-s danger" id="btn-disconnect" style="display:none" onclick="disconnectDrive()">Disconnect</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Drive URL + Run -->
+              <div class="ingest-form">
+                <div class="if-title">Ingest from Google Drive</div>
+                <div class="if-sub">Paste a shared Google Drive folder or file link. Kozmo will download, classify, and index all vendor documents automatically.</div>
+                <div class="if-row">
+                  <input class="if-input" id="drive-url" type="url" placeholder="https://drive.google.com/drive/folders/…" autocomplete="off"/>
+                  <button class="btn-s p" id="btn-run" onclick="runIngestion()" disabled>
+                    <svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor"><path d="M3 2.5l10 5.5-10 5.5V2.5z"/></svg>
+                    Run
+                  </button>
+                </div>
+              </div>
+
+              <!-- Pipeline stages -->
+              <div class="ingest-form" id="pipe-wrap" style="display:none">
+                <div class="if-title" style="margin-bottom:var(--s5)">Pipeline Progress</div>
+                <div class="pipe-stages">
+                  <div class="pipe-stage" id="ps-0"><div class="ps-icon">1</div><div class="ps-label">Connect</div></div>
+                  <div class="pipe-stage" id="ps-1"><div class="ps-icon">2</div><div class="ps-label">Discover</div></div>
+                  <div class="pipe-stage" id="ps-2"><div class="ps-icon">3</div><div class="ps-label">Extract</div></div>
+                  <div class="pipe-stage" id="ps-3"><div class="ps-icon">4</div><div class="ps-label">Classify</div></div>
+                  <div class="pipe-stage" id="ps-4"><div class="ps-icon">5</div><div class="ps-label">Index</div></div>
+                </div>
+              </div>
+
+              <!-- Activity log -->
+              <div class="act-log-wrap" id="act-log-wrap" style="display:none">
+                <div class="act-log-hdr">
+                  <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M5 8h6M5 5.5h6M5 10.5h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                  <span class="act-log-title">Activity</span>
+                  <div class="act-log-status idle" id="act-status">
+                    <span class="als-dot"></span><span id="act-status-text">Idle</span>
+                  </div>
+                </div>
+                <div class="act-log-body" id="act-log-body">
+                  <div class="act-empty" id="act-empty">No activity yet — run an ingestion to see live updates.</div>
+                </div>
+              </div>
+
+            </div>
+          </div><!-- /panel-ingest -->
+
         </div>
       </div><!-- /pv-content -->
     </div><!-- /view-prog -->
@@ -1431,11 +1556,28 @@ function enterProgram(id, name) {
   if (sbName) sbName.textContent = name || 'Program';
   show('app');
   setSidebarActive('program');
-  document.querySelectorAll('.view').forEach(function(v) {
-    v.classList.remove('on');
-  });
+  document.querySelectorAll('.view').forEach(function(v) { v.classList.remove('on'); });
   var vp = document.getElementById('view-prog');
   if (vp) vp.classList.add('on');
+  // Always reset to overview tab when entering program
+  document.querySelectorAll('#view-prog .tab-panel').forEach(function(p) { p.classList.remove('on'); });
+  var po = document.getElementById('panel-overview');
+  if (po) po.classList.add('on');
+  document.querySelectorAll('.tab-btn').forEach(function(b) {
+    b.classList.toggle('on', b.dataset.tab === 'overview');
+  });
+  var progHdr = document.getElementById('prog-page-hdr');
+  if (progHdr) progHdr.style.display = '';
+}
+
+// Enter program and switch directly to a specific tab (used by sidebar Vendors nav)
+function enterProgramTab(tab, triggerEl) {
+  S.programName = S.programName || 'Vendor Cleanup Program';
+  show('app');
+  document.querySelectorAll('.view').forEach(function(v) { v.classList.remove('on'); });
+  var vp = document.getElementById('view-prog');
+  if (vp) vp.classList.add('on');
+  switchTab(tab, triggerEl, false);
 }
 
 // Keep sidebar selection in sync when navigating
@@ -1450,24 +1592,16 @@ function setSidebarActive(navKey) {
 function showAppHome() {
   show('app');
   setSidebarActive('home');
-  // Activate the home view inside the app and hide program view
-  document.querySelectorAll('.view').forEach(function(v) {
-    v.classList.remove('on');
-  });
+  document.querySelectorAll('.view').forEach(function(v) { v.classList.remove('on'); });
   var vh = document.getElementById('view-home');
   if (vh) vh.classList.add('on');
-  // Ensure the tab-panel inside view-home is visible
-  document.querySelectorAll('#view-home .tab-panel').forEach(function(p) {
-    p.classList.add('on');
-  });
+  // Restore any tab-panels inside home view
+  document.querySelectorAll('#view-home .tab-panel').forEach(function(p) { p.classList.add('on'); });
+  // Reset program tab-btns so they don't stay highlighted
+  document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('on'); });
 }
 
-function signOut() {
-  S.email = null;
-  S.connected = false;
-  stopSse();
-  show('login');
-}
+ 
 
 // ─────────────────────────────────────────────
 //  AUTH CHECK
@@ -1492,6 +1626,7 @@ async function checkAuth() {
 function applyUserUI() {
   var e = S.email || '';
   var initials = e ? (e[0] || '?').toUpperCase() : '?';
+  updateDriveCard();
 
   // Home
   setTxt('home-email', e);
@@ -1556,31 +1691,39 @@ function disconnectDrive() {
 //  TAB SWITCHING
 // ─────────────────────────────────────────────
 function switchTab(name, triggerEl, silent) {
+  // Ensure view-prog is visible whenever switching program tabs
+  var progTabs = ['overview','detail','ingest','vendors','vendor-detail'];
+  if (progTabs.indexOf(name) !== -1) {
+    document.querySelectorAll('.view').forEach(function(v) { v.classList.remove('on'); });
+    var vp = document.getElementById('view-prog');
+    if (vp) vp.classList.add('on');
+  }
+
   document.querySelectorAll('.tab-btn').forEach(function(b) {
     b.classList.toggle('on', b.dataset.tab === name);
   });
   document.querySelectorAll('[data-tab-nav]').forEach(function(n) {
     n.classList.toggle('on', n.dataset.tabNav === name);
   });
-  // Sidebar nav highlighting: ensure only the matching nav item is shown as active.
-  // Items may use either data-tab-nav (tab-driven) or data-nav (persistent views).
+  // Sidebar nav highlighting
   document.querySelectorAll('.nv').forEach(function(n) {
     var tabNav = n.dataset.tabNav;
     var nav = n.dataset.nav;
-    if (name === 'vendor-detail') {
-      // When viewing a vendor detail, highlight the Program entry (single app-level context)
+    if (name === 'vendor-detail' || name === 'overview' || name === 'detail' || name === 'ingest') {
       n.classList.toggle('on', nav === 'program');
     } else {
       n.classList.toggle('on', (tabNav && tabNav === name) || (nav && nav === name));
     }
   });
-  document.querySelectorAll('.tab-panel').forEach(function(p) {
-    p.classList.remove('on');
-  });
+  // Only toggle tab-panels inside view-prog, not global panels (keeps home view intact)
+  var vProg = document.getElementById('view-prog');
+  if (vProg) {
+    vProg.querySelectorAll('.tab-panel').forEach(function(p) { p.classList.remove('on'); });
+  }
   var panel = document.getElementById('panel-' + name);
   if (panel) panel.classList.add('on');
   var progHdr = document.getElementById('prog-page-hdr');
-  if (progHdr) progHdr.style.display = (name === 'overview' || name === 'detail') ? '' : 'none';
+  if (progHdr) progHdr.style.display = (name === 'overview' || name === 'detail' || name === 'ingest') ? '' : 'none';
   if (name === 'vendors' && !silent) loadVendors();
   if (name === 'vendor-detail') {
     // Show breadcrumb vendor links when entering vendor-detail
@@ -2275,28 +2418,61 @@ function showVendorDetail(vendorName) {
 // ─────────────────────────────────────────────
 //  INGESTION
 // ─────────────────────────────────────────────
+// ── ICONS for activity log ──────────────────────────────────────────────────
+var ACT_ICONS = {
+  info:  '&#8505;',   // ℹ
+  ok:    '&#10003;',  // ✓
+  warn:  '&#9888;',   // ⚠
+  err:   '&#10005;',  // ✕
+  stage: '&#9654;',   // ▶
+  dl:    '&#128279;'  // 🔗
+};
+var ACT_LABELS = {info:'Info',ok:'Done',warn:'Warning',err:'Error',stage:'Stage',dl:'Source'};
+
 function addLog(msg, type) {
-  var body = document.getElementById('log-body');
-  // Clear idle message on first real line
-  var idle = body.querySelector('.log-idle');
-  if (idle) idle.remove();
-  var ts   = new Date().toLocaleTimeString('en-GB', {hour:'2-digit',minute:'2-digit',second:'2-digit'});
-  var line = document.createElement('div');
-  line.className = 'log-line';
-  line.innerHTML = '<span class="log-ts">' + ts + '</span><span class="log-msg ' + esc(type || 'info') + '">' + esc(msg) + '</span>';
-  body.appendChild(line);
+  var t = type || 'info';
+  var body = document.getElementById('act-log-body');
+  if (!body) return;
+  var empty = document.getElementById('act-empty');
+  if (empty) empty.remove();
+  var ts = new Date().toLocaleTimeString('en-GB', {hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  var entry = document.createElement('div');
+  entry.className = 'act-entry';
+  entry.innerHTML =
+    '<div class="ae-icon ' + esc(t) + '">' + (ACT_ICONS[t] || '&#8505;') + '</div>' +
+    '<div class="ae-body">' +
+      '<div class="ae-msg">' + esc(msg) + '</div>' +
+      '<div class="ae-meta">' +
+        '<span class="ae-ts">' + ts + '</span>' +
+        '<span class="ae-tag ' + esc(t) + '">' + (ACT_LABELS[t] || t) + '</span>' +
+      '</div>' +
+    '</div>';
+  body.appendChild(entry);
   body.scrollTop = body.scrollHeight;
 }
 
 function clearLog() {
-  var body = document.getElementById('log-body');
-  body.innerHTML = '';
+  var body = document.getElementById('act-log-body');
+  if (!body) return;
+  body.innerHTML = '<div class="act-empty" id="act-empty">No activity yet — run an ingestion to see live updates.</div>';
 }
 
 function setLogStatus(state, text) {
-  var el  = document.getElementById('log-status');
-  el.className = 'log-status ' + state;
-  setTxt('log-status-text', text);
+  var el = document.getElementById('act-status');
+  if (el) el.className = 'act-log-status ' + state;
+  setTxt('act-status-text', text);
+}
+
+// Pipeline stage helpers
+var PIPE_STAGE_NAMES = ['Connect','Discover','Extract','Classify','Index'];
+function setPipeStage(idx, state) {
+  // state: 'ps-running' | 'ps-done' | ''
+  var el = document.getElementById('ps-' + idx);
+  if (!el) return;
+  el.className = 'pipe-stage ' + state;
+}
+function resetPipeStages() {
+  for (var i = 0; i < 5; i++) setPipeStage(i, '');
 }
 
 async function runIngestion() {
@@ -2306,13 +2482,39 @@ async function runIngestion() {
 
   S.running = true;
   document.getElementById('btn-run').disabled = true;
+
+  // Show pipe + log panels
+  var pw = document.getElementById('pipe-wrap');
+  var lw = document.getElementById('act-log-wrap');
+  if (pw) pw.style.display = '';
+  if (lw) lw.style.display = '';
+
   clearLog();
+  resetPipeStages();
   setLogStatus('running', 'Running…');
+
+  // Animate stage 0 (Connect) immediately
+  setPipeStage(0, 'ps-running');
 
   startSse();
 
   addLog('Starting ingestion…', 'info');
   addLog('Drive URL: ' + url, 'dl');
+
+  // Simulate stage progression while request is in flight
+  var stageTimer = null;
+  var curStage = 0;
+  function advanceStage() {
+    if (curStage < 4) {
+      setPipeStage(curStage, 'ps-done');
+      curStage++;
+      setPipeStage(curStage, 'ps-running');
+      addLog(PIPE_STAGE_NAMES[curStage] + ' — in progress…', 'stage');
+      stageTimer = setTimeout(advanceStage, 1800);
+    }
+  }
+  setPipeStage(0, 'ps-running');
+  stageTimer = setTimeout(advanceStage, 1800);
 
   try {
     var r = await fetch('/kyv/run', {
@@ -2322,30 +2524,37 @@ async function runIngestion() {
     });
     var data = await r.json();
 
+    clearTimeout(stageTimer);
+
     if (!r.ok) {
       var errMsg = data.detail || data.error || ('HTTP ' + r.status);
       addLog('Failed: ' + errMsg, 'err');
       setLogStatus('error', 'Failed');
+      setPipeStage(curStage, '');
     } else {
+      // Mark all stages done based on response
+      var completedCount = (data.stages && data.stages.length) ? Math.min(data.stages.length, 5) : 5;
+      for (var i = 0; i < completedCount; i++) setPipeStage(i, 'ps-done');
       if (data.stages && data.stages.length) {
         data.stages.forEach(function(s) {
-          addLog('Stage ' + s.order + '  ' + s.name + '  (' + s.itemsProcessed + ' items processed)', 'stage');
+          addLog(s.name + ' — ' + s.itemsProcessed + ' items processed', 'stage');
         });
       }
       if (data.unreadableDocuments && data.unreadableDocuments.length) {
         data.unreadableDocuments.forEach(function(u) {
-          addLog('Skipped  ' + (u.path || u.relativePath) + '  — ' + u.reason, 'warn');
+          addLog('Skipped: ' + (u.path || u.relativePath) + ' — ' + u.reason, 'warn');
         });
       }
-      addLog('Run ID: ' + data.runId, 'ok');
+      addLog('Run completed · ID: ' + data.runId, 'ok');
       addLog('Status: ' + (data.status || 'Completed'), 'ok');
       setLogStatus('done', 'Complete');
-      // Switch to Vendors tab to show results
-      setTimeout(function() { switchTab('vendors', null, false); }, 1200);
+      setTimeout(function() { switchTab('vendors', null, false); }, 1500);
     }
   } catch(e) {
+    clearTimeout(stageTimer);
     addLog('Request error: ' + e.message, 'err');
     setLogStatus('error', 'Error');
+    setPipeStage(curStage, '');
   } finally {
     S.running = false;
     document.getElementById('btn-run').disabled = !S.connected;
