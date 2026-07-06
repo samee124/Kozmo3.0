@@ -2259,16 +2259,31 @@ function loadRealVendorDetail(vendorId) {
   fetch('/vendors/' + vendorId + '/vendor-file')
     .then(function(r) { return r.json(); })
     .then(function(vf) {
-      var comp = vf.completeness || { ratio: 0, filledKeys: [], gapKeys: [] };
-      var pct  = Math.round((comp.ratio || 0) * 100);
+      var comp   = vf.completeness || { ratio: 0, filledKeys: [], gapKeys: [] };
+      var known  = (comp.filledKeys || []).length;
+      var gaps   = (comp.gapKeys || []).length;
+      var total  = known + gaps;
+      var pct    = Math.round((comp.ratio || 0) * 100);
 
-      setTxt('detail-action-title', 'REAL COMPLETENESS');
+      setTxt('detail-action-title', 'REAL COMPLETENESS — WHAT WE ACTUALLY KNOW');
       setTxt('detail-action-text',
-        pct + '% complete — ' + (comp.filledKeys || []).length + ' known field(s), ' +
-        (comp.gapKeys || []).length + ' gap(s). This is the vendor’s actual ingested state, not a target.');
+        pct + '% complete (' + known + ' of ' + total + ' tracked fields known). ' +
+        (gaps > 0
+          ? 'The remaining ' + gaps + ' field(s) are honest blind spots — not yet extracted from any document or check-in.'
+          : 'Every tracked field for this vendor is currently known.'));
       var metaEl = document.getElementById('detail-action-meta');
       if (metaEl) metaEl.innerHTML =
         '<span>' + (vf.evidenceCount || 0) + ' evidence document(s)</span><span>' + (vf.claimsCount || 0) + ' tracked claim(s)</span>';
+
+      // Real completeness bar (was a fabricated "Stage 4 of 5" pipeline narrative + fake %).
+      setTxt('detail-stage', 'Vendor profile — ' + known + '/' + total + ' fields known');
+      setTxt('detail-progress-text', pct + '%');
+      var bar = document.getElementById('detail-progress-bar');
+      if (bar) bar.style.width = pct + '%';
+      // No real "blocked item" or "next review date" signal exists yet for a freshly ingested
+      // vendor — blank rather than show the fabricated Northstar text next to real numbers.
+      setTxt('detail-blocked', gaps > 0 ? gaps + ' field(s) not yet known' : 'No known gaps');
+      setTxt('detail-next-review', '—');
 
       var items = (comp.filledKeys || []).map(function(k) { return { type: 'low', text: '✓ Known: ' + k }; })
         .concat((comp.gapKeys || []).map(function(k) { return { type: 'low', text: '○ Gap: ' + k }; }));
@@ -2277,6 +2292,12 @@ function loadRealVendorDetail(vendorId) {
     .catch(function(err) {
       setTxt('detail-action-title', 'COMPLETENESS UNAVAILABLE');
       setTxt('detail-action-text', 'Could not load real completeness: ' + err.message);
+      setTxt('detail-stage', '—');
+      setTxt('detail-progress-text', '—');
+      var bar2 = document.getElementById('detail-progress-bar');
+      if (bar2) bar2.style.width = '0%';
+      setTxt('detail-blocked', '—');
+      setTxt('detail-next-review', '—');
       renderGapsList('detail-gaps', [], false);
     });
 
