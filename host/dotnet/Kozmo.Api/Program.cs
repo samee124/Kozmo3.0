@@ -797,6 +797,13 @@ static async Task LoadPersistedVendorsAsync(SqliteEntityStore store, EntityRegis
     var persisted = await store.LoadVendorsAsync();
     foreach (var (id, name, renewalDate) in persisted)
         registry.Register(id, name, renewalDate);
+
+    // KYV-discovered vendors are excluded from LoadVendorsAsync by design (run isolation), but
+    // still need to survive a process restart — otherwise a vendor ingested by a prior process
+    // instance vanishes from /vendors even though its beliefs/checkins remain in SQLite.
+    var kyvVendors = await store.LoadAllKyvVendorsAsync();
+    foreach (var (id, name, renewalDate) in kyvVendors)
+        registry.Register(id, name, renewalDate);
 }
 
 static EntityRegistry BuildRegistry()

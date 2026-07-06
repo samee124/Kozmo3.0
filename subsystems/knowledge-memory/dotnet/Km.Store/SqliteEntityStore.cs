@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Text.Json;
 using Kozmo.Contracts;
 using Kozmo.Contracts.Config;
@@ -411,6 +412,49 @@ public sealed class SqliteEntityStore : IEntityStore, IRegistryStore, ICheckInRo
             results.Add((id, name, renewal));
         }
         return Task.FromResult<IReadOnlyList<(Guid, string, DateTimeOffset?)>>(results);
+    }
+
+    /// <summary>
+    /// Load every KYV-discovered vendor (program_run_id IS NOT NULL) across all runs, for
+    /// boot-time re-registration into EntityRegistry — without this, a vendor discovered by a
+    /// prior process instance vanishes from /vendors on restart even though its beliefs/checkins
+    /// remain in SQLite (LoadVendorsAsync deliberately excludes them; see its doc comment).
+    /// Rows are deduped per comparison_key (falling back to canonical_name), preferring whichever
+    /// duplicate has beliefs recorded — a re-run can leave behind an empty duplicate row, and that
+    /// one should never win over the real one just for being newer.
+    /// </summary>
+    public Task<IReadOnlyList<(Guid Id, string Name, DateTimeOffset? RenewalDate)>> LoadAllKyvVendorsAsync()
+    {
+        using var cmd = _conn.CreateCommand();
+        cmd.CommandText = @"
+            SELECT v.id, v.canonical_name, v.renewal_date, v.comparison_key, v.created_at,
+                   (SELECT COUNT(*) FROM beliefs b WHERE b.entity_id = v.id) AS belief_count
+            FROM vendors v
+            WHERE v.program_run_id IS NOT NULL";
+
+        var rows = new List<(Guid Id, string Name, DateTimeOffset? Renewal, string GroupKey, DateTimeOffset CreatedAt, long BeliefCount)>();
+        using (var reader = cmd.ExecuteReader())
+        {
+            while (reader.Read())
+            {
+                var id           = Guid.Parse(reader.GetString(0));
+                var name         = reader.GetString(1);
+                var renewalRaw   = reader.IsDBNull(2) ? null : reader.GetString(2);
+                DateTimeOffset? renewal = renewalRaw is null ? null : DateTimeOffset.Parse(renewalRaw);
+                var comparisonKey = reader.IsDBNull(3) ? name : reader.GetString(3);
+                var createdAt    = DateTimeOffset.Parse(reader.GetString(4));
+                var beliefCount  = reader.GetInt64(5);
+                rows.Add((id, name, renewal, comparisonKey, createdAt, beliefCount));
+            }
+        }
+
+        var deduped = rows
+            .GroupBy(r => r.GroupKey, StringComparer.OrdinalIgnoreCase)
+            .Select(g => g.OrderByDescending(r => r.BeliefCount).ThenByDescending(r => r.CreatedAt).First())
+            .Select(r => (r.Id, r.Name, r.Renewal))
+            .ToList();
+
+        return Task.FromResult<IReadOnlyList<(Guid, string, DateTimeOffset?)>>(deduped);
     }
 
     // ── Reset ─────────────────────────────────────────────────────────────────
