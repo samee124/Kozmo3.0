@@ -28,22 +28,30 @@ public sealed class CompletenessOrchestrator
     private readonly ICheckInStore          _checkInStore;
     private readonly DepthLevel             _maxDepth;
     private readonly string                 _owner;
+    private readonly ICheckInTransport?     _transport;
 
     // Permanent gap state — in-memory for Phase 0; resets on process restart (one extra re-nag per gap per restart, acceptable).
     private readonly Dictionary<Guid, HashSet<string>> _permanentGapSets = [];
 
+    /// <param name="transport">
+    /// Optional — forwarded to GapCheckInStage.RaiseAsync so a newly raised check-in is also sent
+    /// through a real channel (e.g. email). Defaults to null (in-app only, the prior behavior);
+    /// every existing caller that doesn't pass one is unaffected.
+    /// </param>
     public CompletenessOrchestrator(
         QuestionAnsweringStage answering,
         GapCheckInStage        gapStage,
         ICheckInStore          checkInStore,
         DepthLevel             maxDepth,
-        string                 owner)
+        string                 owner,
+        ICheckInTransport?     transport = null)
     {
         _answering    = answering;
         _gapStage     = gapStage;
         _checkInStore = checkInStore;
         _maxDepth     = maxDepth;
         _owner        = owner;
+        _transport    = transport;
     }
 
     /// <summary>
@@ -88,7 +96,8 @@ public sealed class CompletenessOrchestrator
             _owner,
             Guid.NewGuid(),
             now,
-            ct);
+            ct,
+            _transport);
 
         return profile;
     }

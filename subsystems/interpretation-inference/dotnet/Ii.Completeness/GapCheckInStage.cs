@@ -26,6 +26,11 @@ public sealed class GapCheckInStage
     /// Raise DIMENSION_GAP check-ins for every gap question that is not permanent and not
     /// already pending for this vendor in the store. Returns the newly raised check-ins.
     /// </summary>
+    /// <param name="transport">
+    /// Optional — when supplied, each newly raised check-in is also sent through it (e.g. a real
+    /// email). Defaults to null (no send), so every existing caller is unaffected; the in-app
+    /// Pending queue read (ICheckInStore.GetOpenAsync) never depended on a transport firing.
+    /// </param>
     public async Task<IReadOnlyList<CheckIn>> RaiseAsync(
         Guid                    vendorId,
         IReadOnlyList<string>   gapQuestionIds,
@@ -35,7 +40,8 @@ public sealed class GapCheckInStage
         string                  owner,
         Guid                    runId,
         DateTimeOffset          now,
-        CancellationToken       ct = default)
+        CancellationToken       ct = default,
+        ICheckInTransport?      transport = null)
     {
         var byId = allQuestions.ToDictionary(q => q.Id, StringComparer.Ordinal);
 
@@ -74,6 +80,24 @@ public sealed class GapCheckInStage
 
             await checkInStore.SaveAsync(checkIn, ct);
             raised.Add(checkIn);
+
+            // Fault-isolated: a transport failure (auth, network, provider outage) must not
+            // stop the check-in from being raised, and must not abort raising the REMAINING
+            // gaps in this loop. The check-in is already durably persisted above — it is
+            // real and answerable in-app (Stage 1) regardless of whether the email send
+            // underneath it succeeds. One bad send degrades to "this one gap didn't also get
+            // emailed," not "none of this vendor's gaps got raised."
+            if (transport != null)
+            {
+                try
+                {
+                    await transport.SendAsync(checkIn, ct);
+                }
+                catch (Exception)
+                {
+                    // Send failed — the check-in stays raised and answerable in-app either way.
+                }
+            }
         }
 
         return raised.AsReadOnly();

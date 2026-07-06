@@ -33,6 +33,14 @@ var JsonOpts = new JsonSerializerOptions
     Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) }
 };
 
+// ── ASP.NET Core setup ────────────────────────────────────────────────────
+// Built early (before "compose the demo stack") so builder.Configuration — which picks up
+// user-secrets automatically in Development, per Kozmo.Api's own <UserSecretsId> — is available
+// to BuildCheckInTransport below. WebApplication.CreateBuilder only reads args + default config
+// sources; nothing below it depends on ordering relative to this line.
+
+var builder = WebApplication.CreateBuilder(args);
+
 // ── Compose the demo stack ─────────────────────────────────────────────────
 
 var catalogueDir  = FindCatalogueDir();
@@ -44,13 +52,10 @@ await LoadPersistedVendorsAsync(store, registry);
 var liveCachePath         = FindLlmCachePath();         // resolved once; used for both replay and live-classify
 var completenessCache     = FindCompletenessCachePath(); // separate cassette for Q&A answering
 var checkInRepo           = new CheckInRepository(store);
-var (facade, kyvCompleteness) = BuildKyvFacade(store, profile, registry, liveCachePath, checkInRepo, completenessCache);
+var checkInTransport      = BuildCheckInTransport(builder.Configuration);
+var (facade, kyvCompleteness) = BuildKyvFacade(store, profile, registry, liveCachePath, checkInRepo, completenessCache, checkInTransport);
 var sseHub                = new SseHub();
 var kyvTracker            = new KyvVendorTracker();
-
-// ── ASP.NET Core setup ────────────────────────────────────────────────────
-
-var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.ConfigureHttpJsonOptions(o =>
 {
@@ -72,7 +77,7 @@ builder.Services.AddSingleton(sseHub);
 builder.Services.AddSingleton(store);
 builder.Services.AddSingleton<ICheckInRowStore>(store);
 builder.Services.AddSingleton<ICheckInStore>(checkInRepo);
-builder.Services.AddSingleton<ICheckInTransport>(new InAppCheckInTransport());
+builder.Services.AddSingleton<ICheckInTransport>(checkInTransport);
 builder.Services.AddSingleton(kyvTracker);
 
 // Live LLM factory: record-mode CachingLlmClient wrapping real OpenAiLlmClient.
@@ -816,7 +821,8 @@ static EntityRegistry BuildRegistry()
 // a second one against the same cassette.
 static (IiFacade Facade, CompletenessOrchestrator? Completeness) BuildKyvFacade(
     IEntityStore  store, SaasProfile profile, EntityRegistry registry,
-    string?       llmCachePath, ICheckInStore checkInStore, string? completenessCache)
+    string?       llmCachePath, ICheckInStore checkInStore, string? completenessCache,
+    ICheckInTransport? transport = null)
 {
     IKozmoLlm? llm = null;
     if (llmCachePath != null)
@@ -838,7 +844,8 @@ static (IiFacade Facade, CompletenessOrchestrator? Completeness) BuildKyvFacade(
                 new GapCheckInStage(),
                 checkInStore,
                 DepthLevel.L1,
-                "kyv@kozmo");
+                "kyv@kozmo",
+                transport);
         }
     }
 
@@ -855,6 +862,44 @@ static (IiFacade Facade, CompletenessOrchestrator? Completeness) BuildKyvFacade(
         completeness);
 
     return (facade, completeness);
+}
+
+// Real email when Brevo:SmtpKey/Brevo:SenderEmail (config — user-secrets in Development,
+// courtesy of Kozmo.Api's own <UserSecretsId> — or BREVO_SMTP_KEY/BREVO_SENDER_EMAIL env vars as
+// a fallback) are configured; otherwise the existing in-app no-op — same seam
+// InAppCheckInTransport's own doc comment predicted ("a real-email implementation swaps in here
+// with no changes to the loop or processing code"). The SMTP key and sender are the only secrets
+// here — config/env only, NEVER hardcoded, NEVER written to a file this repo tracks (user-secrets
+// lives outside the repo entirely, under %APPDATA%\Microsoft\UserSecrets\<UserSecretsId>\). Host/
+// port/login are not secret (Brevo account identifiers) but stay overridable for flexibility.
+static ICheckInTransport BuildCheckInTransport(IConfiguration config)
+{
+    var smtpHost  = Environment.GetEnvironmentVariable("BREVO_SMTP_HOST")  ?? "smtp-relay.brevo.com";
+    var smtpPort  = int.TryParse(Environment.GetEnvironmentVariable("BREVO_SMTP_PORT"), out var p) ? p : 587;
+    var smtpLogin = config["Brevo:SmtpUser"]
+                     ?? Environment.GetEnvironmentVariable("BREVO_SMTP_LOGIN")
+                     ?? "9f924d001@smtp-brevo.com"; // not secret — Brevo account's fixed SMTP login
+    var smtpKey   = config["Brevo:SmtpKey"]    ?? Environment.GetEnvironmentVariable("BREVO_SMTP_KEY");
+
+    var senderEmail    = config["Brevo:SenderEmail"] ?? Environment.GetEnvironmentVariable("BREVO_SENDER_EMAIL");
+    var senderName     = Environment.GetEnvironmentVariable("BREVO_SENDER_NAME") ?? "Kozmo Check-ins";
+    // Not a secret — a test recipient address, given directly for demo-day verification.
+    var recipientEmail = Environment.GetEnvironmentVariable("CHECKIN_TEST_RECIPIENT_EMAIL") ?? "samee_a@optimusbt.net";
+    var recipientName  = Environment.GetEnvironmentVariable("CHECKIN_TEST_RECIPIENT_NAME") ?? "Kozmo Demo";
+
+    if (string.IsNullOrWhiteSpace(smtpKey)
+        || string.IsNullOrWhiteSpace(senderEmail)
+        || string.IsNullOrWhiteSpace(recipientEmail))
+    {
+        Console.WriteLine("[checkin-transport] Brevo:SmtpKey/SenderEmail (or CHECKIN_TEST_RECIPIENT_EMAIL) " +
+                           "not fully configured -> using InAppCheckInTransport (no real email will be sent).");
+        return new InAppCheckInTransport();
+    }
+
+    Console.WriteLine($"[checkin-transport] Brevo SMTP transport selected — sender={senderEmail}, " +
+                       $"recipient={recipientEmail}, host={smtpHost}:{smtpPort}.");
+    return new BrevoCheckInTransport(
+        smtpHost, smtpPort, smtpLogin, smtpKey, senderEmail, senderName, recipientEmail, recipientName);
 }
 
 static string? FindLlmCachePath()

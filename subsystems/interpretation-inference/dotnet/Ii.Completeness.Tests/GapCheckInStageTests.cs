@@ -216,10 +216,56 @@ public sealed class GapCheckInStageTests
         Assert.All(raised, ci => Assert.Equal(CheckInKind.DIMENSION_GAP, ci.Kind));
     }
 
+    // ── Transport fault isolation ────────────────────────────────────────────────
+    // A transport failure (auth, network, provider outage) must not stop the check-in from
+    // being raised/persisted, and must not abort raising the REMAINING gaps in the same call.
+
+    [Fact]
+    public async Task All_gaps_are_raised_even_when_every_transport_send_throws()
+    {
+        var store     = new InMemoryCheckInStore();
+        var stage     = new GapCheckInStage();
+        var gaps      = L1Questions.Select(q => q.Id).ToList();
+        var transport = new AlwaysThrowingTransport();
+
+        var raised = await stage.RaiseAsync(VendorA, gaps, L1Questions, EmptySet,
+            store, "owner@test", Guid.NewGuid(), AnchorNow, transport: transport);
+
+        Assert.Equal(gaps.Count, raised.Count);
+        Assert.Equal(gaps.Count, (await store.GetOpenAsync()).Count);
+        Assert.Equal(gaps.Count, transport.AttemptedSends);
+    }
+
+    [Fact]
+    public async Task Transport_send_is_attempted_for_each_newly_raised_check_in()
+    {
+        var store     = new InMemoryCheckInStore();
+        var stage     = new GapCheckInStage();
+        var q         = L1Questions.First();
+        var transport = new AlwaysThrowingTransport();
+
+        await stage.RaiseAsync(VendorA, [q.Id], L1Questions, EmptySet,
+            store, "owner@test", Guid.NewGuid(), AnchorNow, transport: transport);
+
+        Assert.Equal(1, transport.AttemptedSends);
+    }
+
     // ── Helpers ─────────────────────────────────────────────────────────────────
 
     private static readonly IReadOnlySet<string> EmptySet =
         new HashSet<string>(StringComparer.Ordinal);
+}
+
+// ── Fake transport that always fails, to prove send failures don't block raising ────
+file sealed class AlwaysThrowingTransport : ICheckInTransport
+{
+    public int AttemptedSends { get; private set; }
+
+    public Task SendAsync(CheckIn checkIn, CancellationToken ct = default)
+    {
+        AttemptedSends++;
+        throw new InvalidOperationException("Simulated transport failure.");
+    }
 }
 
 // ── Minimal in-memory ICheckInStore for unit tests ──────────────────────────────
