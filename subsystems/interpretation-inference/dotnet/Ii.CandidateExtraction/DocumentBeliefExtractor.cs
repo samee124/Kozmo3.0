@@ -273,6 +273,17 @@ public sealed class DocumentBeliefExtractor
                 !ContainsExplicitDayCount(evidence!))
                 continue;
 
+            // E-signal Part 5 Step 5 (Fix 3) — payment_terms semantic-direction guard. Real-corpus
+            // proof (01_Contract_Kickoff_Mar2021.eml: "Our standard invoice cycle is monthly,
+            // submitted within the first 5 business days of the following month"): the model
+            // extracted payment_terms=5 from language describing when the VENDOR ISSUES invoices,
+            // not how many days the CUSTOMER has to PAY one — a third confusion class the day-count
+            // guard doesn't catch, since it checks day-count SHAPE, not semantic DIRECTION. Same
+            // "right number, wrong role" shape as the invoice-amount aggregate guard below.
+            if (string.Equals(criterion, "payment_terms", StringComparison.OrdinalIgnoreCase) &&
+                ContainsInvoiceIssuanceCadenceLanguage(evidence!))
+                continue;
+
             // E1 Part 7 Step 7 — renewal_date invoice-date guard: an invoice's own due/invoice
             // date got read as a contract renewal_date on a real document
             // (Invoice_RGL-2023-002.txt: "Due Date: 14 August 2023" — a payment due date, not a
@@ -283,6 +294,17 @@ public sealed class DocumentBeliefExtractor
             // rejected once its own quoted context names it as an invoice/payment date instead.
             if (string.Equals(criterion, "renewal_date", StringComparison.OrdinalIgnoreCase) &&
                 ContainsInvoiceDateLanguage(evidence!))
+                continue;
+
+            // E-signal Part 5 Step 5 (Fix 5) — renewal_date execution-date guard. Real-corpus proof
+            // (01_MSA_Execution_Confirmation_Apr2022.eml: "has been fully executed as of 24 April
+            // 2025"): a fresh call extracted this MSA's EXECUTION/signing date as its renewal_date —
+            // same third-failure-class as Fix 3 (a real, well-formed date, but the wrong semantic
+            // role: when a contract was SIGNED is not when it RENEWS). Same class of fix as
+            // ContainsInvoiceDateLanguage above: an unambiguous-looking date rejected once its own
+            // quoted context names it as an execution date instead.
+            if (string.Equals(criterion, "renewal_date", StringComparison.OrdinalIgnoreCase) &&
+                ContainsExecutionDateLanguage(evidence!))
                 continue;
 
             // Narrow backstop for the same prompt rule (BeliefExtractionPrompt.System's csat
@@ -327,6 +349,18 @@ public sealed class DocumentBeliefExtractor
             if ((string.Equals(criterion, "annual_value", StringComparison.OrdinalIgnoreCase) ||
                  string.Equals(criterion, "invoice_amount", StringComparison.OrdinalIgnoreCase)) &&
                 ContainsHedgedProposalLanguage(evidence!))
+                continue;
+
+            // E-signal Part 5 Step 5 (Fix 4a — reject) — invoice_amount single-vs-aggregate guard.
+            // Real-corpus proof (05_Year_End_Review_Dec2022.eml: "Total invoiced: $153,950 (per
+            // submitted invoices RGL-2022-001 through RGL-2022-004)"): the model extracted a
+            // period-total across four invoices as if it were one invoice's amount — invoice_amount
+            // is defined as "a single invoice or milestone payment," not a multi-invoice/year
+            // aggregate. Rejecting here means this genuine fact (a period spend total) is correctly
+            // ABSTAINED, not mis-filed under the wrong claim key — it has no claim-key home today;
+            // see KYV_KNOWN_GAPS.md for the candidate future key.
+            if (string.Equals(criterion, "invoice_amount", StringComparison.OrdinalIgnoreCase) &&
+                ContainsMultiInvoiceAggregateLanguage(evidence!))
                 continue;
 
             var rawConf = fact.TryGetProperty("confidence", out var cf) && cf.ValueKind == JsonValueKind.Number
@@ -429,6 +463,22 @@ public sealed class DocumentBeliefExtractor
     internal static bool ContainsInvoiceDateLanguage(string evidence) =>
         InvoiceDateLanguage.Any(kw => evidence.Contains(kw, StringComparison.OrdinalIgnoreCase));
 
+    // ── renewal_date execution-date guard (E-signal Part 5 Step 5, Fix 5) ───────
+
+    // Proven real confusion: 01_MSA_Execution_Confirmation_Apr2022.eml ("has been fully executed
+    // as of 24 April 2025") — a fresh call extracted the MSA's EXECUTION/signing date as its
+    // renewal_date. Same class as ContainsInvoiceDateLanguage above (a real, well-typed date
+    // rejected once its own quoted context names it as a different kind of date) — third
+    // failure-class instance (KYV_KNOWN_GAPS.md), alongside Fix 3 (payment_terms) and Fix 4a
+    // (invoice_amount): the value is real, the semantic ROLE is wrong. Deliberately narrow to
+    // execution/signing/effective-date phrasing, not a bare "as of" (which would risk rejecting a
+    // genuine renewal date phrased "renews as of January 1, 2027").
+    private static readonly string[] ExecutionDateLanguage =
+        ["executed as of", "effective as of", "signed on", "fully executed", "execution date"];
+
+    internal static bool ContainsExecutionDateLanguage(string evidence) =>
+        ExecutionDateLanguage.Any(kw => evidence.Contains(kw, StringComparison.OrdinalIgnoreCase));
+
     // ── csat non-customer-quality guard ─────────────────────────────────────────
 
     // The exact negative-example phrases from BeliefExtractionPrompt.System's csat rule —
@@ -493,6 +543,43 @@ public sealed class DocumentBeliefExtractor
     internal static bool ContainsExplicitDayCount(string evidence) =>
         evidence.Contains("day", StringComparison.OrdinalIgnoreCase) ||
         PaymentTermsNetPattern.IsMatch(evidence);
+
+    // ── payment_terms semantic-direction guard (E-signal Part 5 Step 5, Fix 3) ──
+
+    // Proven real confusion: 01_Contract_Kickoff_Mar2021.eml ("Our standard invoice cycle is
+    // monthly, submitted within the first 5 business days of the following month") — the model
+    // extracted payment_terms=5 from language describing when the VENDOR issues invoices, not how
+    // many days the CUSTOMER has to pay one. This evidence has the right SHAPE (a digit + "days")
+    // so ContainsExplicitDayCount alone doesn't catch it — this guard checks semantic direction
+    // instead: does the evidence describe invoice issuance/submission cadence rather than a
+    // payment-due period?
+    private static readonly string[] InvoiceIssuanceCadenceLanguage =
+        ["invoice cycle", "submitted within", "issued within", "invoicing cycle", "bill within"];
+
+    internal static bool ContainsInvoiceIssuanceCadenceLanguage(string evidence) =>
+        InvoiceIssuanceCadenceLanguage.Any(kw => evidence.Contains(kw, StringComparison.OrdinalIgnoreCase));
+
+    // ── invoice_amount single-vs-aggregate guard (E-signal Part 5 Step 5, Fix 4a) ─
+
+    // Proven real confusion: 05_Year_End_Review_Dec2022.eml ("Total invoiced: $153,950 (per
+    // submitted invoices RGL-2022-001 through RGL-2022-004)") — the model extracted a year-total
+    // SUM across four invoices as if it were one invoice's amount. invoice_amount is defined as "a
+    // single invoice or milestone payment," not a multi-invoice/period aggregate — a real fact
+    // (period spend total) with no current claim-key home (KYV_KNOWN_GAPS.md), correctly abstained
+    // here rather than mis-filed under the wrong key.
+    private static readonly string[] MultiInvoiceAggregateLanguage =
+        ["total invoiced", "year-to-date", "year to date"];
+
+    private static readonly Regex InvoiceRangePattern =
+        new(@"invoices?\s+\S+\s+through\s+\S+", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
+    private static readonly Regex AcrossNInvoicesPattern =
+        new(@"across\s+\d+\s+invoices?", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
+    internal static bool ContainsMultiInvoiceAggregateLanguage(string evidence) =>
+        MultiInvoiceAggregateLanguage.Any(kw => evidence.Contains(kw, StringComparison.OrdinalIgnoreCase)) ||
+        InvoiceRangePattern.IsMatch(evidence) ||
+        AcrossNInvoicesPattern.IsMatch(evidence);
 
     // ── JSON helpers ───────────────────────────────────────────────────────────
 

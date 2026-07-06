@@ -5,11 +5,15 @@
 // record the full 338 until the sample's belief-vs-signal routing has been reviewed:
 //   OPENAI_API_KEY=sk-... dotnet run --project tools/Kyv.EmailInterpretationRecorder -- --sample
 //
+// FIX-VERIFY (requires OPENAI_API_KEY) — the small targeted set for confirming Fix 3/Fix 4 (the
+// invoice-issuance-cadence and multi-invoice-total guards) without re-recording the full 338:
+//   OPENAI_API_KEY=sk-... dotnet run --project tools/Kyv.EmailInterpretationRecorder -- --fix-verify
+//
 // FULL (requires OPENAI_API_KEY) — all 338 real .eml files. Only after the sample review passes:
 //   OPENAI_API_KEY=sk-... dotnet run --project tools/Kyv.EmailInterpretationRecorder
 //
 // VERIFY (no API key — replays from cassette):
-//   dotnet run --project tools/Kyv.EmailInterpretationRecorder -- --verify [--sample]
+//   dotnet run --project tools/Kyv.EmailInterpretationRecorder -- --verify [--sample|--fix-verify]
 //
 // Optional flags:
 //   --cassette <path>    Override cassette file (default: fixtures/kyv/email-interpretation.cassette.json)
@@ -42,6 +46,24 @@ string[] sampleFiles =
     @"Scenario 05 — Missing Financial Data\emails\18_contact_update.eml",
 ];
 
+// The Fix 3/Fix 4 targeted verification set — the 2 emails the full-338 audit flagged, plus
+// must-still-pass spot checks (clean payment_terms, settled annual_value, real single-invoice
+// invoice_amount, renewal_date) — confirms both guards without re-recording the full corpus.
+string[] fixVerifyFiles =
+[
+    @"Scenario 04 — Conflicting Information\Emails\01_Contract_Kickoff_Mar2021.eml",
+    @"Scenario 03 — Scattered Evidence\Emails (vendor name in email signature only)\05_Year_End_Review_Dec2022.eml",
+    @"Scenario 01 — Golden Vendor\Emails\01_MSA_Execution_Confirmation_Apr2022.eml",
+    @"Scenario 01 — Golden Vendor\Emails\03_Invoice_IIVS-INV-2022-0001_Jul2022.eml",
+    @"Scenario 03 — Scattered Evidence\Emails (vendor name in email signature only)\03_Invoice_Query_Jul2022.eml",
+    @"Scenario 01 — Golden Vendor\Emails\05_SOW02_Initiation_PO_Confirmation_Mar2023.eml",
+    @"Scenario 01 — Golden Vendor\Emails\08_MSA_Auto_Renewal_Year3_Apr2024.eml",
+    @"Scenario 07 — Email-Driven Relationship\300 .eml files spanning 3 years\0023_payment_0.eml",
+    @"Scenario 07 — Email-Driven Relationship\300 .eml files spanning 3 years\0034_payment_1.eml",
+    @"Scenario 07 — Email-Driven Relationship\300 .eml files spanning 3 years\0043_payment_2.eml",
+    @"Scenario 07 — Email-Driven Relationship\300 .eml files spanning 3 years\0077_payment_5.eml",
+];
+
 var flags        = ParseFlags(args);
 var repoRoot     = FindRepoRoot();
 var cassette     = flags.Cassette  ?? Path.Combine(repoRoot, "fixtures", "kyv", "email-interpretation.cassette.json");
@@ -58,10 +80,12 @@ if (!Directory.Exists(workspace))
 
 var profile = new Catalogue().Load(catalogueDir);
 
-var allFiles = flags.Sample
-    ? sampleFiles.Select(rel => Path.Combine(workspace, rel)).ToList()
-    : Directory.EnumerateFiles(workspace, "*.eml", SearchOption.AllDirectories)
-        .OrderBy(p => p, StringComparer.OrdinalIgnoreCase).ToList();
+var allFiles = flags.FixVerify
+    ? fixVerifyFiles.Select(rel => Path.Combine(workspace, rel)).ToList()
+    : flags.Sample
+        ? sampleFiles.Select(rel => Path.Combine(workspace, rel)).ToList()
+        : Directory.EnumerateFiles(workspace, "*.eml", SearchOption.AllDirectories)
+            .OrderBy(p => p, StringComparer.OrdinalIgnoreCase).ToList();
 
 var missing = allFiles.Where(p => !File.Exists(p)).ToList();
 if (missing.Count > 0)
@@ -74,7 +98,8 @@ if (missing.Count > 0)
 Console.WriteLine($"[email-interpretation-recorder] workspace : {workspace}");
 Console.WriteLine($"[email-interpretation-recorder] cassette  : {cassette}");
 Console.WriteLine($"[email-interpretation-recorder] mode      : {(flags.Verify ? "verify (replay)" : "record")}");
-Console.WriteLine($"[email-interpretation-recorder] scope     : {(flags.Sample ? $"SAMPLE ({allFiles.Count})" : $"FULL ({allFiles.Count})")}");
+var scopeLabel = flags.FixVerify ? "FIX-VERIFY" : flags.Sample ? "SAMPLE" : "FULL";
+Console.WriteLine($"[email-interpretation-recorder] scope     : {scopeLabel} ({allFiles.Count})");
 Console.WriteLine();
 
 if (!flags.Verify && string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("OPENAI_API_KEY")))
@@ -201,21 +226,22 @@ return errorLog.Count > 0 ? 1 : 0;
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
-static (string? Cassette, string? Workspace, bool Verify, bool Sample) ParseFlags(string[] args)
+static (string? Cassette, string? Workspace, bool Verify, bool Sample, bool FixVerify) ParseFlags(string[] args)
 {
     string? cassette = null, workspace = null;
-    bool verify = false, sample = false;
+    bool verify = false, sample = false, fixVerify = false;
     for (int i = 0; i < args.Length; i++)
     {
         switch (args[i].ToLowerInvariant())
         {
-            case "--cassette":  if (i + 1 < args.Length) cassette  = args[++i]; break;
-            case "--workspace": if (i + 1 < args.Length) workspace = args[++i]; break;
-            case "--verify":    verify = true; break;
-            case "--sample":    sample = true; break;
+            case "--cassette":   if (i + 1 < args.Length) cassette  = args[++i]; break;
+            case "--workspace":  if (i + 1 < args.Length) workspace = args[++i]; break;
+            case "--verify":     verify = true; break;
+            case "--sample":     sample = true; break;
+            case "--fix-verify": fixVerify = true; break;
         }
     }
-    return (cassette, workspace, verify, sample);
+    return (cassette, workspace, verify, sample, fixVerify);
 }
 
 static string FindRepoRoot()

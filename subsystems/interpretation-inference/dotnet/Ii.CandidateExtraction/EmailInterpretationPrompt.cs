@@ -80,6 +80,25 @@ public static class EmailInterpretationPrompt
         Line("annual_value or invoice_amount — omit it; that is a commitment/discussion signal,");
         Line("handled elsewhere, not this extractor's job).");
         Line();
+        Line("GET THE ROLE RIGHT, NOT JUST THE NUMBER — two facts are easy to extract from the wrong");
+        Line("sentence because a plausible-looking number sits right there:");
+        Line("  - payment_terms is how many days the CUSTOMER has to PAY an invoice once received.");
+        Line("    A vendor's invoice CYCLE, billing cadence, or invoicing schedule (e.g. \"our");
+        Line("    standard invoice cycle is monthly, submitted within the first 5 business days of");
+        Line("    the following month\") describes when THE VENDOR issues invoices — a completely");
+        Line("    different fact this key does NOT cover, even though a day-count is right there.");
+        Line("  - invoice_amount is the total on ONE invoice or milestone payment. A cumulative or");
+        Line("    aggregate figure across multiple invoices or a time period (e.g. \"Total invoiced:");
+        Line("    $153,950 per submitted invoices RGL-2022-001 through RGL-2022-004\", a");
+        Line("    year-to-date total) is NOT one invoice's amount — omit it; this key does not cover");
+        Line("    period aggregates.");
+        Line("  - renewal_date is when the agreement RENEWS, EXPIRES, or is next due for renewal —");
+        Line("    NOT when it was signed, executed, or became effective. \"has been fully executed");
+        Line("    as of 24 April 2025\" or \"effective as of March 1, 2024\" states an EXECUTION date,");
+        Line("    a completely different fact this key does NOT cover, even though it is a clean,");
+        Line("    explicit calendar date. Only a date tied to renewal, expiry, or the next renewal");
+        Line("    decision qualifies.");
+        Line();
         Line("FACTS (criterion key -> what to look for -> raw value encoding):");
 
         foreach (var key in targetCriteriaOrder)

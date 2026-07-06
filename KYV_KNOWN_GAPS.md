@@ -419,3 +419,34 @@ pre-Step-5 baseline).
   re-verify recall on the full corpus). Deferred to E-docdepth or E2, captured here so it isn't lost
   and so a fifth confusion doesn't just add a fifth keyword without anyone asking whether the pattern
   itself has run its course.
+- **Email belief extraction has a THIRD failure class distinct from the two above: semantic-field
+  confusion — the right number, extracted under the wrong claim key's role.** Unlike hedging
+  (Fix 1/2, a number that's real but not yet settled) or a missing/wrong value (Fix 2, a number
+  that isn't stated at all), this is a number that IS settled and real, but answers a different
+  question than the claim key asks. Two proven instances from the full-338 audit, both fixed
+  reactively (Fixes 3/4a): (a) `01_Contract_Kickoff_Mar2021.eml` — "our standard invoice cycle is
+  monthly, submitted within the first 5 business days" gave `payment_terms=5`, but this describes
+  when the VENDOR issues invoices, not how long the CUSTOMER has to pay one; (b)
+  `05_Year_End_Review_Dec2022.eml` — "Total invoiced: $153,950 (per submitted invoices
+  RGL-2022-001 through RGL-2022-004)" gave `invoice_amount=153950`, but this is a year-total
+  across four invoices, not one invoice's amount. A third, incidental instance surfaced during
+  Fix 3/4 verification (not yet guarded): a fresh live call on `01_MSA_Execution_Confirmation_
+  Apr2022.eml` — an email whose three PRIOR independent extractions (both Step 5 sample rounds
+  and the full-338 run) never produced a `renewal_date` — this time extracted
+  `renewal_date=1745452800` from "has been fully executed as of 24 April 2025", which states the
+  MSA's EXECUTION/signing date, not a renewal date. Whether this specific case needs its own
+  guard (extending `ContainsInvoiceDateLanguage`'s pattern to "executed as of"/"fully executed"
+  language) is undecided — flagged here, not fixed, pending a decision on whether to keep patching
+  per-instance or address the pattern directly (see below). Not caught by the day-count or
+  hedged-language guards because the SHAPE is correct — a real digit, a real dollar figure, a real
+  date — only the semantic ROLE is wrong. **Keyword guards patch this reactively, and the deny-list
+  will keep growing one confusion at a time** (the same dynamic as the `annual_value` entry above,
+  now proven for a different reason — wrong role, not wrong settledness). The more durable fix is
+  a semantically-explicit prompt per claim key (e.g. spelling out payment_terms as "the CUSTOMER's
+  obligation, never the VENDOR's billing cadence," invoice_amount as "ONE transaction, never a
+  period total," renewal_date as "when the agreement renews or is next due for renewal, never when
+  it was first signed") rather than another negative-example keyword after each new instance is
+  found. Deferred alongside the `annual_value` base-definition rethink — same root cause
+  (permissive claim-key definitions relying on guards to narrow them after the fact), same
+  recommended fix shape (make the definition precise up front), same deferral target (E-docdepth
+  or E2).
