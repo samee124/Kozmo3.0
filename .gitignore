@@ -2,6 +2,7 @@
 .env
 *.env
 **/appsettings.*.local.json
+**/Properties/launchSettings.json
 
 # .NET build output
 bin/
