@@ -654,3 +654,36 @@ production email data (not this synthetic corpus's filename tags), using the dia
 EmailThreadGrouper stage in Ii.CandidateExtraction, keyed on (participant pair, normalized subject),
 disambiguated by temporal proximity, ordered by Date with sequence-number fallback — contained,
 never touching Belief/Metadata shapes or completeness/scoring.
+
+## DECISION: processEmail stays OFF by default — identity resolution is not ready (2026-07-07)
+
+Diagnosis (real corpus, cassette-replayed, no live calls): turning processEmail:true against the
+full 151-PDF + 338-email corpus does not just trigger the two previously-known regression tests
+(Brookfield customer leak, ABC cluster assumption) — it demonstrably destabilizes vendors that were
+already CORRECT in the email-off baseline:
+
+- Institute for In Vitro Sciences, Inc.: Confirmed → Triage, with NO check-in raised to recover it.
+- Salesforce, Inc.: Confirmed → Triage, via a fresh collision against "Salesforce Professional
+  Services" that only appears once email is on.
+- OfficeSpace fragments silently into two unmerged entries with no IDENTITY_CONFIRM check-in raised
+  at all (not ambiguous — silent).
+- New customer bleed-through beyond Brookfield: "Nova"/"Nova University"/"OIIT" also resolve as
+  vendor-like entities.
+
+Root cause: THREE independent, interacting failure modes in the same clustering pass — a role-filter
+gap (unknown role isn't treated as non-vendor), a fuzzy-match threshold miss (0.90 doesn't catch
+"Office Space Software" vs "OfficeSpace"), and email-derived short-name variants creating fresh
+collisions against solid document-derived clusters (with at least one, IIVS, not even surfacing a
+check-in to resolve it). These interact — patching one risks masking or shifting the others.
+
+DECISION: processEmail remains OFF by default. This is NOT a quick unlock — it requires a real design
+pass against both corpora together (Dev A's core Ig.Resolution matching logic), not a contained patch.
+The support_response_time extraction mechanism (built and proven this session) is real and ready, but
+cannot safely reach a live email-sourced vendor until this identity-resolution work is done.
+
+SCOPE NOTE: bank/insurer entity bleed-through (Citibank, JPMorgan, TD Bank, First National, Marsh USA)
+is a PRE-EXISTING, SEPARATE issue already present in the email-off baseline — not introduced by email,
+not addressed by this decision.
+
+REVISIT: as a dedicated identity-resolution phase, owned with Dev A (Ig.Resolution), addressing role-
+filtering, fuzzy-match calibration, and email-derived collision handling together — not piecemeal.
