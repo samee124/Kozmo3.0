@@ -1648,7 +1648,7 @@ function toggleSidebar() {
 function loadVendors() {
   var tbody = document.getElementById('vendor-tbody');
   var placeholder = '<span style="color:var(--ink-3)">—</span>';
-  fetch('/vendors')
+  fetch('/kyv/vendors')
     .then(function(r) { return r.json(); })
     .then(function(vendors) {
       var count = vendors.length;

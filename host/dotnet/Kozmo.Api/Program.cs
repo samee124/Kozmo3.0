@@ -758,13 +758,16 @@ app.MapPost("/kyv/run", async (
     }
 });
 
-// GET /kyv/vendors — vendors discovered through KYV ingestion (excludes seeded demo data)
-app.MapGet("/kyv/vendors", async (IIiFacade f, EntityRegistry reg, SaasProfile prof, KyvVendorTracker tracker) =>
+// GET /kyv/vendors — vendors discovered through KYV ingestion (excludes seeded demo data).
+// Sourced from the vendors table's program_run_id column (non-null only for KYV-discovered rows,
+// always absent for seeds — see LoadAllKyvVendorsAsync), not in-memory run tracking, so this stays
+// correct across a process restart instead of going empty until the next /kyv/run call.
+app.MapGet("/kyv/vendors", async (IIiFacade f, EntityRegistry reg, SqliteEntityStore storeInst) =>
 {
-    if (!tracker.HasRun) return Results.Ok(Array.Empty<VendorSummaryDto>());
-    var now     = DemoClock.AsOf;
-    var vendors = new List<VendorSummaryDto>();
-    foreach (var id in tracker.DiscoveredIds)
+    var now        = DemoClock.AsOf;
+    var vendors    = new List<VendorSummaryDto>();
+    var discovered = await storeInst.LoadAllKyvVendorsAsync();
+    foreach (var (id, _, _) in discovered)
     {
         var entity = reg.GetEntity(id);
         if (entity is null) continue;
