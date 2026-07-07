@@ -1269,6 +1269,11 @@ body{
                         </ul>
                       </div>
                       <div class="vendor-card" style="margin-top:var(--s5)">
+                        <h4>Contract Evidence</h4>
+                        <ul id="detail-evidence" style="list-style:none;padding:0;margin:0;color:var(--ink-2);line-height:1.8">
+                        </ul>
+                      </div>
+                      <div class="vendor-card" style="margin-top:var(--s5)">
                         <h4>Data &amp; Signals</h4>
                         <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--s4)">
                           <div>
@@ -2325,6 +2330,43 @@ function loadRealVendorDetail(vendorId) {
     });
 
   loadVendorCheckins(vendorId);
+  loadVendorEvidence(vendorId);
+}
+
+// Real contract clauses (E1 metadata) for one vendor — quoted derivations, never fabricated.
+function loadVendorEvidence(vendorId) {
+  var el = document.getElementById('detail-evidence');
+  if (!el) return;
+  el.innerHTML = '<li style="color:var(--ink-3)">Loading…</li>';
+
+  fetch('/vendors/' + vendorId + '/metadata')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var clauses = data.clauses || [];
+      if (!clauses.length) {
+        el.innerHTML = '<li style="color:var(--ink-3)">No contract clauses extracted for this vendor yet.</li>';
+        return;
+      }
+      el.innerHTML = clauses.map(function(c) { return vendorEvidenceItem(c); }).join('');
+    })
+    .catch(function(err) {
+      el.innerHTML = '<li style="color:var(--urgent)">Could not load contract evidence: ' + esc(err.message) + '</li>';
+    });
+}
+
+function evidenceFieldLabel(field) {
+  return (field || '').split('_').map(function(w) {
+    return w.charAt(0).toUpperCase() + w.slice(1);
+  }).join(' ');
+}
+
+function vendorEvidenceItem(c) {
+  var source = c.documentType ? ' <span style="color:var(--ink-4);font-size:12px">(' + esc(c.documentType) + ')</span>' : '';
+  return '<li style="margin-bottom:14px;list-style:none">'
+    + '<div style="font-weight:600;color:var(--ink-0);margin-bottom:2px">' + esc(evidenceFieldLabel(c.field)) + source + '</div>'
+    + '<div style="font-size:13px;color:var(--ink-2)">' + esc(c.value) + '</div>'
+    + '<div style="font-size:12px;color:var(--ink-4);margin-top:4px;font-style:italic">' + esc(c.derivation) + '</div>'
+    + '</li>';
 }
 
 // Real, interactive check-ins for one vendor — raise -> answer -> resolved, live in the detail
