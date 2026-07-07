@@ -2279,10 +2279,22 @@ function loadRealVendorDetail(vendorId) {
   ['detail-cri', 'detail-cri-delta', 'detail-contract', 'detail-spend-ytd', 'detail-annual-spend',
    'detail-sla', 'detail-response', 'detail-response-target', 'detail-open-tasks', 'detail-compliance-status']
     .forEach(function(id) { setTxt(id, '—'); });
-  setTxt('detail-vendor-sub', 'Real ingested vendor — profile reflects actual pipeline data, not a mock');
+  setTxt('detail-vendor-sub',
+    'Real ingested vendor — completeness, check-ins, and contract evidence below reflect actual ' +
+    'pipeline data. Files & Artifacts, tags, and other sections are placeholder content, not yet ' +
+    'wired to real data.');
 
   var linksEl = document.getElementById('detail-action-links');
   if (linksEl) linksEl.innerHTML = '';
+
+  // Source documents are deleted after processing (by design — see KYV pipeline), so there is no
+  // real file list to show. Overwrite the mock Files & Artifacts rows with an honest empty state
+  // instead of leaving fabricated filenames/sources under a banner that claims real data.
+  var filesBody = document.getElementById('detail-files-body');
+  if (filesBody) {
+    filesBody.innerHTML = '<tr><td colspan="5" style="color:var(--ink-3)">' +
+      'No stored files for this vendor — source documents are not retained after processing.</td></tr>';
+  }
 
   fetch('/vendors/' + vendorId + '/vendor-file')
     .then(function(r) { return r.json(); })
