@@ -10,6 +10,7 @@ using Ii.Posture;
 using Ii.Rubric;
 using Ii.Spine;
 using Km.Store;
+using Km.Store.Metadata;
 using Kozmo.Api;
 using Kozmo.Contracts;
 using Kozmo.Contracts.Config;
@@ -47,6 +48,9 @@ var catalogueDir  = FindCatalogueDir();
 var profile       = new Catalogue().Load(catalogueDir);
 var dbPath        = Path.Combine(AppContext.BaseDirectory, "kozmo-demo.db");
 var store         = new SqliteEntityStore($"Data Source={dbPath}", profile);
+// E1 Part 7 Step 5 wiring — same db file as SqliteEntityStore, own table (document_metadata), own
+// connection. Never read by scoring/completeness (CI-enforced metadata wall); agent-facing only.
+var metadataStore = new SqliteMetadataStore($"Data Source={dbPath}");
 var registry      = BuildRegistry();
 await LoadPersistedVendorsAsync(store, registry);
 var liveCachePath         = FindLlmCachePath();         // resolved once; used for both replay and live-classify
@@ -75,6 +79,7 @@ builder.Services.AddSingleton(profile);
 builder.Services.AddSingleton(registry);
 builder.Services.AddSingleton(sseHub);
 builder.Services.AddSingleton(store);
+builder.Services.AddSingleton<IMetadataStore>(metadataStore);
 builder.Services.AddSingleton<ICheckInRowStore>(store);
 builder.Services.AddSingleton<ICheckInStore>(checkInRepo);
 builder.Services.AddSingleton<ICheckInTransport>(checkInTransport);
@@ -506,6 +511,33 @@ app.MapGet("/vendors/{id}/vendor-file", async (
     });
 });
 
+// GET /vendors/{id}/metadata — retained, non-scored clauses (E1 metadata) for a vendor.
+// Agent-facing only: never confidence-scored, never read by scoring/completeness (CI-enforced
+// metadata wall in Kozmo.Architecture.Tests).
+app.MapGet("/vendors/{id}/metadata", async (
+    string          id,
+    EntityRegistry  reg,
+    IMetadataStore  metadataStore) =>
+{
+    if (!Guid.TryParse(id, out var guid)) return Results.BadRequest("Invalid GUID");
+    if (reg.GetEntity(guid) is null) return Results.NotFound();
+
+    var knowledge = await metadataStore.GetForEntityAsync(guid);
+
+    return Results.Ok(new
+    {
+        vendorId = guid,
+        clauses  = knowledge.Metadata.Select(m => new
+        {
+            field        = m.FieldName,
+            value        = m.Value,
+            derivation   = m.Derivation,
+            documentType = m.DocumentType,
+            observedAt   = m.ObservedAt
+        })
+    });
+});
+
 // GET /checkins — list all OPEN check-ins for the in-app pending view
 app.MapGet("/checkins", async (ICheckInStore checkInStore) =>
 {
@@ -623,7 +655,8 @@ app.MapPost("/kyv/run", async (
     KyvVendorTracker       kyvTracker,
     Func<IKozmoLlm?>       liveLlmFactory,
     SaasProfile            profile,
-    CompletenessHolder     completenessHolder) =>
+    CompletenessHolder     completenessHolder,
+    IMetadataStore         metadataStore) =>
 {
     if (string.IsNullOrWhiteSpace(request.DriveUrl))
         return Results.BadRequest(new { error = "driveUrl must not be empty." });
@@ -701,7 +734,8 @@ app.MapPost("/kyv/run", async (
             entityStore:      storeInst,
             profile:          profile,
             completeness:     completenessHolder.Value,
-            spineRegistry:    entityRegistry);
+            spineRegistry:    entityRegistry,
+            metadataStore:    metadataStore);
 
         var run = await runner.RunAsync(tempFolder, DateTimeOffset.UtcNow);
 
