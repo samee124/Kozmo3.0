@@ -598,3 +598,59 @@ now with real semantic content) but will never visibly close a completeness gap 
 architecture — do not demo "answer a gap → watch it disappear" with a DIMENSION_GAP question. The
 payment-terms-style "real, already-catalogued evidence closes a gap" path is unaffected and remains
 the correct thing to demo.**
+
+## DECISION: Posture/Index gap — resolution direction (2026-07-07)
+
+**Problem:** IndexModule.Aggregate returns null whenever every dimension has zero
+ContributingBeliefIds — checked before any confidence math runs. Real ingested vendors' beliefs
+(e.g. invoice_amount, payment_terms) live in claim_key_catalogue.saas.v1.json (the completeness
+key space) but do not exist in scoring_rubric.saas.v1.json (uptime_sla, incident_volume, mttr,
+support_response_time, etc.). RubricModule never scores a criterion it doesn't recognize, so these
+beliefs can never trigger an Index, regardless of confidence. Not a threshold problem — a
+criteria-mismatch between two catalogues.
+
+**Decision: Option B — extend extraction, not the rubric.**
+Do NOT add financial-only criteria to scoring_rubric.saas.v1.json. The rubric's meaning (a posture
+reflects genuine operational/service assessment) stays intact. Instead, extend extraction —
+starting with E-docdepth's belief-catalogue growth (5→30+ types) — to look for the rubric's
+EXISTING criteria (uptime_sla, incident_volume, mttr, support_response_time) within documents
+already being processed (e.g. MSAs, SOWs), where such language may already exist but isn't being
+extracted for today.
+
+**Rationale:** preserves "abstain over guess" — a vendor with zero operational evidence should stay
+honestly "not assessed," not receive a diluted posture just because financial data exists. Contracts
+like OfficeSpace's MSA (26 real clauses: indemnification, liability cap, notice period, etc.)
+plausibly contain SLA/support language never extracted because extraction wasn't built to look for
+it — worth checking before concluding evidence is absent.
+
+**Practical effect:** E-docdepth's catalogue growth should be PRIORITIZED by the rubric's unmet
+criteria, not grown arbitrarily. Vendors with genuinely no operational content in their source
+documents (e.g. IIVS — invoices/QBRs only) will correctly remain "not assessed" — this is expected,
+honest behavior, not a bug.
+
+**Revisit condition:** if, after E-docdepth genuinely attempts this mapping, some vendors still have
+real evidence that structurally cannot map to any rubric criterion (e.g. invoice-only relationships
+with no contract at all), consider a narrower, explicitly-labeled "Financial-only" posture tier as a
+deliberate product decision — not before then, and not as a shortcut.
+
+## DECISION: E-signal Step 7 — threading DEFERRED (2026-07-07)
+
+Diagnosis confirmed: zero In-Reply-To/References headers across the 338-email corpus. A filename+
+subject heuristic is workable (participant-pair + normalized subject + temporal-proximity
+disambiguation) but requires a judgment-call threshold with no real consumer to validate against, and
+partially depends on synthetic-corpus-specific filename conventions that won't generalize to a real
+inbox.
+
+Confirmed via code: EmailInterpretationExtractor already extracts beliefs/signals per-message with
+no thread input; the one feature needing threading (responsiveness) is contractually inert
+(metadata_field_catalogue explicitly forbids it from firing); signals never enter scoring (Part 6,
+reserved for a Phase H momentum consumer that doesn't exist).
+
+DECISION: DEFER. Nothing today regresses or breaks. Cost is pure opportunity cost (responsiveness/
+thread-sentiment stay unbuilt) until a real consumer needs them.
+
+REVISIT WHEN: Phase H builds a momentum/responsiveness consumer. At that point, build against real
+production email data (not this synthetic corpus's filename tags), using the diagnosed approach:
+EmailThreadGrouper stage in Ii.CandidateExtraction, keyed on (participant pair, normalized subject),
+disambiguated by temporal proximity, ordered by Date with sequence-number fallback — contained,
+never touching Belief/Metadata shapes or completeness/scoring.

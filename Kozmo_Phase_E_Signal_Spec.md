@@ -1,6 +1,6 @@
 # Kozmo Phase E-signal — Email & Signal Intake
 
-**Status:** Specification — **FINALIZED** (three subsystem decisions diagnosed against the codebase and decided — §2.4). Ready to build.
+**Status:** **CLOSED** (2026-07-07) — Steps 1–6 built and passing acceptance on real data; Step 7 (thread awareness) explicitly deferred per logged decision; Step 8 acceptance dry-run clean. See closure note at the end of this file.
 **Depends on:** E1 (document-type-aware extraction + metadata store — CLOSED). Reuses E1's typed-intake framework.
 **Precedes:** E-sheet (spreadsheet intake), E-docdepth (invoice/PO document depth), and eventually the other signal sources (Slack, third-party integrations) which reuse this phase's framework.
 **Owner:** Sam (deterministic core / intake), integration boundary with Ritiesh frozen
@@ -225,3 +225,37 @@ The three subsystem-shaping questions (correspondence tier, signal storage, emai
 3. **Signal-shape fit in `Km.Store.Metadata`:** §2.4 Decision 2 reuses `Km.Store.Metadata`; confirm during build that the `EmailSignal`/`RelationshipKnowledge` shape fits cleanly as a type within it. If it strains the shape, fall back to a distinct store **extending the same wall lane** (not a new lane). Low risk, worth a quick check at first write.
 4. **Cost/cassette economics:** 338 emails × interpretation calls. Emails are short (likely 1-2 passes each), but 338 live calls to record is more than any prior corpus. Batch/scope the recording; consider whether all 338 need recording or a representative subset for dev.
 5. **Signal-type vocabulary refinement:** the §3.2 set (responsiveness/sentiment/commitment/issue_raised/stakeholder_signal/request) is a starting set; refine against what the real Scenario 07 corpus actually contains.
+
+---
+
+## Closure note (2026-07-07) — E-signal CLOSED
+
+**Step 7 (thread awareness): DEFERRED**, not built. Diagnosed and decided — full reasoning logged in
+`KYV_KNOWN_GAPS.md` ("DECISION: E-signal Step 7 — threading DEFERRED"). Summary: zero
+`In-Reply-To`/`References` headers across the real 338-email corpus (confirmed exhaustively, no
+exceptions); a filename+subject heuristic is workable but needs a judgment-call disambiguation
+threshold with no real consumer yet to validate against, and partly depends on this synthetic
+corpus's filename conventions rather than anything that would generalize to a real inbox.
+`EmailInterpretationExtractor` already extracts beliefs/signals per-message with no thread input;
+the one feature that needs threading (`responsiveness`) is contractually inert in
+`metadata_field_catalogue.saas.v1.json` (explicitly forbidden from firing until code computes it);
+signals never enter scoring regardless (Part 6), and the Phase H momentum consumer that would read
+thread-relative signals does not exist yet. Nothing today regresses from deferring — pure opportunity
+cost. Revisit when Phase H builds a real responsiveness/momentum consumer.
+
+**Step 8 (acceptance dry-run): CLEAN.**
+
+| Check | Result |
+|---|---|
+| `dotnet build Kozmo.sln -c Release` | 0 warnings, 0 errors |
+| `dotnet test Kozmo.sln -c Release` | 0 failed, 0 skipped across all 9 test projects (Ii.Tests 191 — includes `EmailParserRealCorpusTests`, 338/338 real `.eml` parse; Kyv.ProgramRunner.Tests 16 — includes the real-document completeness proofs; plus Kozmo.Llm.Tests, Wc.Tests, Ig.Tests, Ii.Completeness.Tests, Kozmo.Architecture.Tests, Kozmo.VendorFile.Tests, Kozmo.Api.Tests all green) |
+| `dotnet test --filter "Golden"` | 26/26 |
+| `ci/check-invariants.sh` | 9/9 invariant-lane tests, clean build |
+
+All `Skipped` counts are 0, confirming the real corpus at the workspace path was found and every
+real-data test actually exercised the corpus rather than short-circuiting.
+
+**Net: E-signal is CLOSED.** Steps 1–6 pass acceptance on real data (correspondence tier inert until
+used, per-message belief/signal extraction working, cross-source corroboration/gap-fill proven),
+Step 7 is explicitly deferred per the logged decision above, and nothing regresses — document-only
+corpus, golden fingerprints, and all 5 CI invariant lanes are untouched.
