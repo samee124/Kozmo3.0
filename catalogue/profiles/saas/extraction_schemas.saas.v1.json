@@ -37,7 +37,7 @@
       "metadata_field_groups": []
     },
     "email": {
-      "claim_keys": ["payment_terms", "renewal_date", "annual_value", "invoice_amount", "sla_uptime"],
+      "claim_keys": ["payment_terms", "renewal_date", "annual_value", "invoice_amount", "sla_uptime", "support_responsiveness"],
       "metadata_field_groups": [
         {
           "name": "relationship_signals",

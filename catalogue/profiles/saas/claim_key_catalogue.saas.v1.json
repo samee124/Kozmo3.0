@@ -20,11 +20,18 @@
     },
     "support_responsiveness": {
       "class": "scored",
-      "value_type": "metric",
+      "value_type": "duration",
       "dimension": "Operational",
       "typical_tier": "VERIFIED",
       "half_life_days": 30,
-      "dimension_weight": 0.25
+      "dimension_weight": 0.25,
+      "definition": "An explicit, ALREADY-OBSERVED support ticket response time in hours -- how long the vendor actually took to give an initial response to a support request, as measured, reported, or complained about after the fact. Not a marketed or promised future target.",
+      "positive_example": "\"each take over 8 hours for an initial response\" -> value 8",
+      "negative_example": "A forward-looking commitment or promised target response time that has not yet been observed (e.g. \"we will guarantee a 2-hour response going forward\") is not extracted -- that is an unverified promise, not a measured fact this key covers. A general uptime/SLA percentage is a different fact -- see sla_uptime.",
+      "deterministic_guard": "DocumentBeliefExtractor.ContainsFutureCommitmentLanguage",
+      "prompt_fragment": "- support_responsiveness: an explicit, ALREADY-OBSERVED support ticket response\n  time in HOURS -- how long the vendor actually took to give an initial response to a support\n  request, as measured, reported, or complained about (e.g. \"each take over 8 hours for an\n  initial response\"). value = the number of hours as given (e.g. 8). This is a fact about what\n  ACTUALLY HAPPENED, never a promised or marketed future target -- do NOT extract a forward-\n  looking commitment (e.g. \"we will guarantee a 2-hour response going forward\") as this fact;\n  that is an unverified promise, a different thing this key does not cover.",
+      "expected_for": ["saas_vendor"],
+      "rubric_criterion": "support_response_time"
     },
     "csat": {
       "class": "scored",
