@@ -517,7 +517,8 @@ body{
   .tab-panels{flex:1;display:flex;flex-direction:column;overflow:hidden;min-height:0}
   .tab-panel{display:none;flex:1;overflow:hidden;min-height:0}
   .tab-panel.on{display:flex;flex-direction:column}
-  .vendors-panel{padding:var(--s7);overflow:hidden;height:100%;display:flex;flex-direction:column;min-height:0}
+  .vendors-panel{padding:var(--s7);overflow-y:auto;height:100%;display:flex;flex-direction:column;min-height:0}
+  .vtbl-wrap{flex:1;overflow-y:auto;min-height:240px}
   .vendor-search-row{display:flex;align-items:center;justify-content:space-between;gap:var(--s3);margin-bottom:var(--s4);flex-wrap:wrap}
   .vendor-table{width:100%;border-collapse:collapse;font-size:13px}
   .vendor-table th{font-size:var(--t-micro);font-weight:700;color:var(--ink-4);text-transform:uppercase;padding:18px 16px;letter-spacing:.08em;text-align:left;border-bottom:1px solid var(--line-1);background:var(--surface-soft)}
@@ -1152,7 +1153,7 @@ body{
                   </tbody>
                 </table>
               </div>
-              <div style="margin-top:12px;font-size:var(--t-micro);color:var(--ink-3);padding:0 2px"><span id="vendor-showing">Showing 8 of 3,020 vendors</span> · <a href="#" onclick="loadMoreVendors();return false;" style="color:var(--accent);cursor:pointer;text-decoration:none">Load more →</a></div>
+              <div style="margin-top:12px;font-size:var(--t-micro);color:var(--ink-3);padding:0 2px"><span id="vendor-showing">Loading vendors…</span></div>
             </div>
           </div>
 
@@ -1677,10 +1678,6 @@ function loadVendors() {
     .catch(function(err) {
       tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--urgent);padding:20px">Failed to load vendors: ' + err.message + '</td></tr>';
     });
-}
-
-function loadMoreVendors() {
-  alert('Load more (demo) — in a real app this would fetch additional pages.');
 }
 
 function refreshAll() {
