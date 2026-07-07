@@ -49,10 +49,12 @@ var dbPath        = Path.Combine(AppContext.BaseDirectory, "kozmo-demo.db");
 var store         = new SqliteEntityStore($"Data Source={dbPath}", profile);
 var registry      = BuildRegistry();
 await LoadPersistedVendorsAsync(store, registry);
+await store.ExpireDuplicatePendingCheckInsAsync(); // one-time dedup migration (no-op when clean)
 var liveCachePath         = FindLlmCachePath();         // resolved once; used for both replay and live-classify
 var completenessCache     = FindCompletenessCachePath(); // separate cassette for Q&A answering
 var checkInRepo           = new CheckInRepository(store);
-var checkInTransport      = BuildCheckInTransport(builder.Configuration);
+var checkInTokenOptions   = BuildCheckInTokenOptions(builder.Configuration);
+var checkInTransport      = BuildCheckInTransport(builder.Configuration, store, checkInTokenOptions);
 var (facade, kyvCompleteness) = BuildKyvFacade(store, profile, registry, liveCachePath, checkInRepo, completenessCache, checkInTransport);
 var sseHub                = new SseHub();
 var kyvTracker            = new KyvVendorTracker();
@@ -78,6 +80,7 @@ builder.Services.AddSingleton(store);
 builder.Services.AddSingleton<ICheckInRowStore>(store);
 builder.Services.AddSingleton<ICheckInStore>(checkInRepo);
 builder.Services.AddSingleton<ICheckInTransport>(checkInTransport);
+builder.Services.AddSingleton(checkInTokenOptions);
 builder.Services.AddSingleton(kyvTracker);
 
 // Live LLM factory: record-mode CachingLlmClient wrapping real OpenAiLlmClient.
@@ -535,10 +538,14 @@ app.MapPost("/checkins/{id}/answer", async (
         return Results.BadRequest(new { error = "Invalid check-in ID." });
 
     var answerSvc = new AnswerCheckInService();
-    var answer    = await answerSvc.AnswerAsync(guid, req.ResponseValue ?? string.Empty, DateTimeOffset.UtcNow, checkInStore);
+    var writeSvc  = new VendorFileWriteService(storeInst, profile);
+    var result    = await answerSvc.ProcessAnswerAsync(
+        guid, req.ResponseValue, DateTimeOffset.UtcNow,
+        checkInStore, writeSvc, profile, f,
+        new IdentityRegistry(storeInst));
 
-    if (answer.Outcome != AnswerOutcome.Ok)
-        return answer.Outcome switch
+    if (result.Outcome != AnswerOutcome.Ok)
+        return result.Outcome switch
         {
             AnswerOutcome.NotFound        => Results.NotFound(new { error = "Check-in not found." }),
             AnswerOutcome.AlreadyAnswered => Results.Conflict(new { error = "Check-in is already answered." }),
@@ -546,19 +553,7 @@ app.MapPost("/checkins/{id}/answer", async (
             _                             => Results.Problem("Unexpected outcome.")
         };
 
-    // Process the now-ANSWERED check-in inline.
-    // Real IdentityRegistry backed by SqliteEntityStore (which implements IRegistryStore).
-    // IDENTITY_CONFIRM merge is correct in unit tests (registry pre-populated by the test).
-    // Live path: end-to-end-inert pending Phase 4 — the KYV resolution pipeline (Stage F)
-    // must persist CanonicalVendor rows into registry_vendors before a merge fires in production.
-    // DIMENSION_GAP and the wrong-match guard are unaffected by this gap.
-    var processSvc = new ProcessCheckInService();
-    var writeSvc   = new VendorFileWriteService(storeInst, profile);
-    await processSvc.ProcessAsync(
-        guid, checkInStore, new IdentityRegistry(storeInst), writeSvc, f, profile,
-        DateTimeOffset.UtcNow);
-
-    return Results.Ok(new { outcome = "Ok", checkInId = answer.Updated!.CheckInId });
+    return Results.Ok(new { outcome = "Ok", checkInId = result.Updated!.CheckInId });
 });
 
 // ── Google Drive OAuth2 endpoints ─────────────────────────────────────────
@@ -701,7 +696,8 @@ app.MapPost("/kyv/run", async (
             entityStore:      storeInst,
             profile:          profile,
             completeness:     completenessHolder.Value,
-            spineRegistry:    entityRegistry);
+            spineRegistry:    entityRegistry,
+            transport:        checkInTransport);
 
         var run = await runner.RunAsync(tempFolder, DateTimeOffset.UtcNow);
 
@@ -871,6 +867,23 @@ static (IiFacade Facade, CompletenessOrchestrator? Completeness) BuildKyvFacade(
     return (facade, completeness);
 }
 
+// Builds CheckInTokenOptions from config/env. The secret is required when Brevo SMTP is active.
+// TtlDays defaults to 7 if not set. UiBaseUrl defaults to http://localhost:3000.
+// ApiBaseUrl defaults to http://localhost:5000 (the ASP.NET Core host serving Razor Pages).
+static CheckInTokenOptions BuildCheckInTokenOptions(IConfiguration config)
+{
+    var secret     = config["CheckIn:TokenSecret"]
+                     ?? Environment.GetEnvironmentVariable("KOZMO_CHECKIN_TOKEN_SECRET")
+                     ?? "dev-secret-change-in-production";
+    var ttlDays    = int.TryParse(
+                         config["CheckIn:LinkTtlDays"]
+                         ?? Environment.GetEnvironmentVariable("KOZMO_CHECKIN_LINK_TTL_DAYS"),
+                         out var d) ? d : 7;
+    var uiBaseUrl  = Environment.GetEnvironmentVariable("KOZMO_UI_BASE_URL")  ?? "http://localhost:3000";
+    var apiBaseUrl = Environment.GetEnvironmentVariable("KOZMO_API_BASE_URL") ?? "http://localhost:5000";
+    return new CheckInTokenOptions(secret, ttlDays, uiBaseUrl, apiBaseUrl);
+}
+
 // Real email when Brevo:SmtpKey/Brevo:SenderEmail (config — user-secrets in Development,
 // courtesy of Kozmo.Api's own <UserSecretsId> — or BREVO_SMTP_KEY/BREVO_SENDER_EMAIL env vars as
 // a fallback) are configured; otherwise the existing in-app no-op — same seam
@@ -879,34 +892,48 @@ static (IiFacade Facade, CompletenessOrchestrator? Completeness) BuildKyvFacade(
 // here — config/env only, NEVER hardcoded, NEVER written to a file this repo tracks (user-secrets
 // lives outside the repo entirely, under %APPDATA%\Microsoft\UserSecrets\<UserSecretsId>\). Host/
 // port/login are not secret (Brevo account identifiers) but stay overridable for flexibility.
-static ICheckInTransport BuildCheckInTransport(IConfiguration config)
+// Logs a warning if Brevo is active but KOZMO_CHECKIN_TOKEN_SECRET is still the dev placeholder.
+// The page model resolves CheckInTokenOptions from DI (where the fixture can override it),
+// so the guard is advisory rather than a hard throw.
+static ICheckInTransport BuildCheckInTransport(
+    IConfiguration config, SqliteEntityStore store, CheckInTokenOptions tokenOptions)
 {
     var smtpHost  = Environment.GetEnvironmentVariable("BREVO_SMTP_HOST")  ?? "smtp-relay.brevo.com";
     var smtpPort  = int.TryParse(Environment.GetEnvironmentVariable("BREVO_SMTP_PORT"), out var p) ? p : 587;
     var smtpLogin = config["Brevo:SmtpUser"]
                      ?? Environment.GetEnvironmentVariable("BREVO_SMTP_LOGIN")
                      ?? "9f924d001@smtp-brevo.com"; // not secret — Brevo account's fixed SMTP login
-    var smtpKey   = config["Brevo:SmtpKey"]    ?? Environment.GetEnvironmentVariable("BREVO_SMTP_KEY");
+    var smtpKey   = config["Brevo:SmtpKey"] ?? Environment.GetEnvironmentVariable("BREVO_SMTP_KEY");
 
-    var senderEmail    = config["Brevo:SenderEmail"] ?? Environment.GetEnvironmentVariable("BREVO_SENDER_EMAIL");
-    var senderName     = Environment.GetEnvironmentVariable("BREVO_SENDER_NAME") ?? "Kozmo Check-ins";
-    // Not a secret — a test recipient address, given directly for demo-day verification.
-    var recipientEmail = Environment.GetEnvironmentVariable("CHECKIN_TEST_RECIPIENT_EMAIL") ?? "samee_a@optimusbt.net";
-    var recipientName  = Environment.GetEnvironmentVariable("CHECKIN_TEST_RECIPIENT_NAME") ?? "Kozmo Demo";
+    var senderEmail = config["Brevo:SenderEmail"] ?? Environment.GetEnvironmentVariable("BREVO_SENDER_EMAIL");
+    var senderName  = Environment.GetEnvironmentVariable("BREVO_SENDER_NAME") ?? "Kozmo Check-ins";
+    var recipientName = Environment.GetEnvironmentVariable("CHECKIN_RECIPIENT_NAME") ?? "Kozmo Demo";
 
-    if (string.IsNullOrWhiteSpace(smtpKey)
-        || string.IsNullOrWhiteSpace(senderEmail)
-        || string.IsNullOrWhiteSpace(recipientEmail))
+    if (string.IsNullOrWhiteSpace(smtpKey) || string.IsNullOrWhiteSpace(senderEmail))
     {
-        Console.WriteLine("[checkin-transport] Brevo:SmtpKey/SenderEmail (or CHECKIN_TEST_RECIPIENT_EMAIL) " +
-                           "not fully configured -> using InAppCheckInTransport (no real email will be sent).");
+        Console.WriteLine("[checkin-transport] Brevo:SmtpKey/SenderEmail not configured " +
+                           "-> using InAppCheckInTransport (no real email will be sent).");
         return new InAppCheckInTransport();
     }
 
+    // Warn if the secret is still the dev placeholder — in production this MUST be overridden.
+    // We log rather than throw so WebApplicationFactory test runs (which replace the DI singleton)
+    // are not blocked; the page model always resolves CheckInTokenOptions from DI, not from here.
+    if (tokenOptions.Secret == "dev-secret-change-in-production")
+        Console.WriteLine("[checkin-transport] WARNING: KOZMO_CHECKIN_TOKEN_SECRET is not set. " +
+                           "Links will use the insecure dev placeholder — change for production. " +
+                           "Set via user-secrets (CheckIn:TokenSecret) or KOZMO_CHECKIN_TOKEN_SECRET env var.");
+
+    // Recipient resolved dynamically at send time from the logged-in Google account.
+    // If no user is connected yet the send is a no-op (returns without error).
+    Func<CancellationToken, Task<string?>> recipientResolver =
+        async ct => (await store.GetOAuthTokenAsync("google", ct))?.UserEmail;
+
     Console.WriteLine($"[checkin-transport] Brevo SMTP transport selected — sender={senderEmail}, " +
-                       $"recipient={recipientEmail}, host={smtpHost}:{smtpPort}.");
+                       $"recipient=<logged-in Google account>, host={smtpHost}:{smtpPort}.");
     return new BrevoCheckInTransport(
-        smtpHost, smtpPort, smtpLogin, smtpKey, senderEmail, senderName, recipientEmail, recipientName);
+        smtpHost, smtpPort, smtpLogin, smtpKey, senderEmail, senderName,
+        recipientResolver, recipientName, tokenOptions);
 }
 
 static string? FindLlmCachePath()

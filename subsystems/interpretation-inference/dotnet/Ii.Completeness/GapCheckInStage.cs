@@ -80,23 +80,20 @@ public sealed class GapCheckInStage
 
             await checkInStore.SaveAsync(checkIn, ct);
             raised.Add(checkIn);
+        }
 
-            // Fault-isolated: a transport failure (auth, network, provider outage) must not
-            // stop the check-in from being raised, and must not abort raising the REMAINING
-            // gaps in this loop. The check-in is already durably persisted above — it is
-            // real and answerable in-app (Stage 1) regardless of whether the email send
-            // underneath it succeeds. One bad send degrades to "this one gap didn't also get
-            // emailed," not "none of this vendor's gaps got raised."
-            if (transport != null)
+        // One digest send per RaiseAsync call — all newly raised check-ins for this vendor/run
+        // in a single envelope. Fault-isolated: a transport failure must not stop check-ins from
+        // being visible in-app; they are already persisted above regardless of send outcome.
+        if (transport != null && raised.Count > 0)
+        {
+            try
             {
-                try
-                {
-                    await transport.SendAsync(checkIn, ct);
-                }
-                catch (Exception)
-                {
-                    // Send failed — the check-in stays raised and answerable in-app either way.
-                }
+                await transport.SendAsync(raised.AsReadOnly(), ct);
+            }
+            catch (Exception)
+            {
+                // Send failed — every check-in already persisted and answerable in-app.
             }
         }
 

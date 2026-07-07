@@ -221,7 +221,7 @@ public sealed class GapCheckInStageTests
     // being raised/persisted, and must not abort raising the REMAINING gaps in the same call.
 
     [Fact]
-    public async Task All_gaps_are_raised_even_when_every_transport_send_throws()
+    public async Task All_gaps_are_raised_even_when_transport_batch_send_throws()
     {
         var store     = new InMemoryCheckInStore();
         var stage     = new GapCheckInStage();
@@ -231,13 +231,15 @@ public sealed class GapCheckInStageTests
         var raised = await stage.RaiseAsync(VendorA, gaps, L1Questions, EmptySet,
             store, "owner@test", Guid.NewGuid(), AnchorNow, transport: transport);
 
+        // All check-ins are persisted regardless of transport failure.
         Assert.Equal(gaps.Count, raised.Count);
         Assert.Equal(gaps.Count, (await store.GetOpenAsync()).Count);
-        Assert.Equal(gaps.Count, transport.AttemptedSends);
+        // One batch call (not one per check-in) — the transport throws once for the whole batch.
+        Assert.Equal(1, transport.AttemptedSends);
     }
 
     [Fact]
-    public async Task Transport_send_is_attempted_for_each_newly_raised_check_in()
+    public async Task Transport_send_is_attempted_once_per_raise_call()
     {
         var store     = new InMemoryCheckInStore();
         var stage     = new GapCheckInStage();
@@ -248,6 +250,21 @@ public sealed class GapCheckInStageTests
             store, "owner@test", Guid.NewGuid(), AnchorNow, transport: transport);
 
         Assert.Equal(1, transport.AttemptedSends);
+    }
+
+    [Fact]
+    public async Task Three_gaps_produce_one_transport_call_with_batch_of_three()
+    {
+        var store     = new InMemoryCheckInStore();
+        var stage     = new GapCheckInStage();
+        var gaps      = L1Questions.Take(3).Select(q => q.Id).ToList();
+        var transport = new CapturingTransport();
+
+        await stage.RaiseAsync(VendorA, gaps, L1Questions, EmptySet,
+            store, "owner@test", Guid.NewGuid(), AnchorNow, transport: transport);
+
+        Assert.Equal(1, transport.CallCount);
+        Assert.Equal(3, transport.LastBatch!.Count);
     }
 
     // ── Helpers ─────────────────────────────────────────────────────────────────
@@ -261,10 +278,24 @@ file sealed class AlwaysThrowingTransport : ICheckInTransport
 {
     public int AttemptedSends { get; private set; }
 
-    public Task SendAsync(CheckIn checkIn, CancellationToken ct = default)
+    public Task SendAsync(IReadOnlyList<CheckIn> checkIns, CancellationToken ct = default)
     {
         AttemptedSends++;
         throw new InvalidOperationException("Simulated transport failure.");
+    }
+}
+
+// ── Fake transport that captures the batch, to prove one-call-per-raise batching ──
+file sealed class CapturingTransport : ICheckInTransport
+{
+    public int CallCount { get; private set; }
+    public IReadOnlyList<CheckIn>? LastBatch { get; private set; }
+
+    public Task SendAsync(IReadOnlyList<CheckIn> checkIns, CancellationToken ct = default)
+    {
+        CallCount++;
+        LastBatch = checkIns;
+        return Task.CompletedTask;
     }
 }
 

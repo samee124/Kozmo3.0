@@ -155,7 +155,55 @@ public sealed class RaiseCheckInsStageTests
         Assert.Empty(await store.GetOpenAsync());
     }
 
-    // ── Test 6: raised check-ins are persisted OPEN and retrievable ──────────
+    // ── Test 6: rerun dedup — DIMENSION_GAP with TargetField ─────────────────
+
+    [Fact]
+    public async Task Rerun_DimensionGap_WithTargetField_NotDuplicated()
+    {
+        var store = new InMemoryCheckInStore();
+        var stage = new RaiseCheckInsStage();
+        var gap   = new VendorGapRequest(RegulusId, "Contract ref?", ResponseShape.TYPED_VALUE, "contract_ref");
+
+        // First run — raises the check-in.
+        await stage.RaiseAsync([], [gap], store, "owner@test", RunId, Now);
+        Assert.Single(await store.GetOpenAsync());
+
+        // Second run with a new ProgramRunId — same (VendorId, TargetField) still OPEN → skip.
+        var run2    = Guid.NewGuid();
+        var raised2 = await stage.RaiseAsync([], [gap], store, "owner@test", run2, Now);
+
+        Assert.Empty(raised2);
+        Assert.Single(await store.GetOpenAsync()); // only the original remains
+    }
+
+    // ── Test 7: rerun dedup — IDENTITY_CONFIRM ───────────────────────────────
+
+    [Fact]
+    public async Task Rerun_IdentityConfirm_NotDuplicated()
+    {
+        var store = new InMemoryCheckInStore();
+        var stage = new RaiseCheckInsStage();
+        var flags = new[] { ResolutionFlags.PossibleSameEntity, ResolutionFlags.TriageRequired };
+
+        var dispositions = new[]
+        {
+            Triage(AbcId1, "ABC Tech",        flags, AbcQuestion),
+            Triage(AbcId2, "ABC Technologies", flags, AbcQuestion),
+        };
+
+        // First run — raises the identity confirm.
+        await stage.RaiseAsync(dispositions, [], store, "owner@test", RunId, Now);
+        Assert.Single(await store.GetOpenAsync());
+
+        // Second run — same question still OPEN → skip.
+        var run2    = Guid.NewGuid();
+        var raised2 = await stage.RaiseAsync(dispositions, [], store, "owner@test", run2, Now);
+
+        Assert.Empty(raised2);
+        Assert.Single(await store.GetOpenAsync());
+    }
+
+    // ── Test 8: raised check-ins are persisted OPEN and retrievable ──────────
 
     [Fact]
     public async Task RaisedCheckIns_PersistedOpen_Retrievable()

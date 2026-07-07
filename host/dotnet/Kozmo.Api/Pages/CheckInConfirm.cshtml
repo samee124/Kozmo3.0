@@ -1,0 +1,350 @@
+@page "/check-ins/{id}/confirm"
+@using Kozmo.Api.Pages
+@model CheckInConfirmModel
+@{
+    Layout = null;
+    var isError    = Model.State == CheckInConfirmModel.ConfirmState.Error;
+    var isAlready  = Model.State == CheckInConfirmModel.ConfirmState.AlreadyRecorded;
+    var isPending  = Model.State == CheckInConfirmModel.ConfirmState.PendingConfirm;
+    var isRecorded = Model.State == CheckInConfirmModel.ConfirmState.Recorded;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Kozmo — Check-in</title>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --canvas:       #F9F9FA;
+            --surface:      #FFFFFF;
+            --surface-soft: #F6F6F7;
+            --line-1:       #EDEAE9;
+            --line-3:       #E5E5E7;
+
+            --ink-0: #1E1F21;
+            --ink-2: #54545A;
+            --ink-3: #6D6E72;
+            --ink-4: #9C9CA0;
+
+            --accent:        #F06A6A;
+            --accent-soft:   #FDECEC;
+            --accent-border: #F8D2D2;
+
+            --affirm:        #14A085;
+            --affirm-soft:   #E6F4F0;
+            --affirm-border: #C8E8DE;
+            --affirm-ink:    #0C7860;
+
+            --urgent:        #E8384F;
+            --urgent-soft:   #FCE6E9;
+            --urgent-border: #F4C2C9;
+            --urgent-ink:    #B81B33;
+
+            --watch:         #4573D2;
+            --watch-soft:    #E5EDFA;
+            --watch-border:  #C3D5F1;
+            --watch-ink:     #2A56B5;
+
+            --gold: #A9762F;
+
+            --font: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            --font-mono: ui-monospace, "Cascadia Code", "Fira Mono", monospace;
+
+            --r-md:  6px;
+            --r-lg:  8px;
+            --r-pill: 999px;
+
+            --shadow-sm: 0 1px 2px rgba(0,0,0,.05);
+            --shadow-md: 0 2px 8px rgba(0,0,0,.07), 0 1px 2px rgba(0,0,0,.04);
+        }
+
+        html, body {
+            height: 100%;
+            background: var(--canvas);
+            font-family: var(--font);
+            font-size: 14px;
+            line-height: 1.5;
+            color: var(--ink-0);
+            -webkit-font-smoothing: antialiased;
+            text-rendering: optimizeLegibility;
+        }
+
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1rem;
+            min-height: 100vh;
+        }
+
+        /* ── Card ─────────────────────────────────────────── */
+
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--line-1);
+            border-radius: 12px;
+            box-shadow: var(--shadow-md);
+            width: 100%;
+            max-width: 460px;
+            padding: 28px 28px 24px;
+        }
+
+        /* ── Logo ─────────────────────────────────────────── */
+
+        .logo-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 24px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--line-3);
+        }
+        .logo-k {
+            width: 26px;
+            height: 26px;
+            background: var(--gold);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 700;
+            color: #fff;
+            flex-shrink: 0;
+            letter-spacing: 0;
+        }
+        .logo-name {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--ink-0);
+            letter-spacing: -0.2px;
+        }
+
+        /* ── Status icon ──────────────────────────────────── */
+
+        .status-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            margin-bottom: 14px;
+        }
+        .icon-ok  { background: var(--affirm-soft); color: var(--affirm); }
+        .icon-err { background: var(--urgent-soft);  color: var(--urgent); }
+        .icon-inf { background: var(--watch-soft);   color: var(--watch);  }
+
+        /* ── Typography ───────────────────────────────────── */
+
+        .page-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--ink-0);
+            margin-bottom: 4px;
+        }
+        .page-sub {
+            font-size: 13px;
+            color: var(--ink-3);
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        /* ── Question box ─────────────────────────────────── */
+
+        .question-box {
+            background: var(--surface-soft);
+            border: 1px solid var(--line-1);
+            border-radius: var(--r-lg);
+            padding: 12px 14px;
+            font-size: 13px;
+            line-height: 1.55;
+            color: var(--ink-2);
+            margin-bottom: 16px;
+        }
+
+        /* ── Answer badge ─────────────────────────────────── */
+
+        .answer-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 12px;
+            border-radius: var(--r-pill);
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            border: 1px solid transparent;
+        }
+        .badge-yes { background: var(--affirm-soft); color: var(--affirm-ink); border-color: var(--affirm-border); }
+        .badge-no  { background: var(--urgent-soft);  color: var(--urgent-ink);  border-color: var(--urgent-border); }
+        .badge-unk { background: var(--surface-soft); color: var(--ink-3);       border-color: var(--line-1); }
+
+        /* ── Buttons ──────────────────────────────────────── */
+
+        .btn-primary {
+            display: block;
+            width: 100%;
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            border-radius: var(--r-md);
+            padding: 9px 16px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: center;
+            transition: background 120ms ease;
+            margin-bottom: 10px;
+        }
+        .btn-primary:hover { background: #E15555; }
+
+        .btn-back {
+            display: block;
+            width: 100%;
+            background: transparent;
+            border: 1px solid var(--line-1);
+            border-radius: var(--r-md);
+            padding: 8px 16px;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--ink-3);
+            cursor: pointer;
+            text-align: center;
+            transition: border-color 120ms ease, color 120ms ease;
+            font-family: var(--font);
+        }
+        .btn-back:hover { border-color: var(--ink-4); color: var(--ink-2); }
+
+        /* ── Divider ──────────────────────────────────────── */
+
+        .divider { border: none; border-top: 1px solid var(--line-3); margin: 20px 0; }
+
+        /* ── Ref ID ───────────────────────────────────────── */
+
+        .ref-id {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--ink-4);
+        }
+
+        /* ── Spinner ──────────────────────────────────────── */
+
+        @@keyframes spin { to { transform: rotate(360deg); } }
+        .spinner {
+            width: 20px; height: 20px;
+            border: 2px solid var(--watch-border);
+            border-top-color: var(--watch);
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 8px;
+        }
+    </style>
+</head>
+<body>
+<div class="card">
+
+    <div class="logo-row">
+        <div class="logo-k">K</div>
+        <span class="logo-name">Kozmo</span>
+    </div>
+
+    @if (isError)
+    {
+        <div class="status-icon icon-err">&#10005;</div>
+        <p class="page-title">Link invalid or expired</p>
+        <p class="page-sub">@Model.ErrorMessage This link may have already been used or it has passed its expiry window.</p>
+        <hr class="divider">
+        <button class="btn-back" onclick="history.length > 1 ? history.back() : window.close()">
+            &larr; Back to email
+        </button>
+    }
+    else if (isAlready)
+    {
+        <div class="status-icon icon-ok">&#10003;</div>
+        <p class="page-title">Already recorded</p>
+        <p class="page-sub">This answer was saved previously. No changes were made.</p>
+        @if (!string.IsNullOrEmpty(Model.Question))
+        {
+            <div class="question-box">@Model.Question</div>
+        }
+        <hr class="divider">
+        <button class="btn-back" onclick="history.length > 1 ? history.back() : window.close()">
+            &larr; Back to email
+        </button>
+    }
+    else if (isRecorded)
+    {
+        var badgeCss = Model.DisplayValue == "Yes" ? "answer-badge badge-yes"
+                     : Model.DisplayValue == "No"  ? "answer-badge badge-no"
+                     :                               "answer-badge badge-unk";
+        <div class="status-icon icon-ok">&#10003;</div>
+        <p class="page-title">Recorded &mdash; thanks.</p>
+        <p class="page-sub">Your answer has been saved and the vendor profile updated.</p>
+        @if (!string.IsNullOrEmpty(Model.Question))
+        {
+            <div class="question-box">@Model.Question</div>
+        }
+        <span class="@badgeCss">&#10003;&nbsp;@Model.DisplayValue</span>
+        <hr class="divider">
+        <button class="btn-back" onclick="history.length > 1 ? history.back() : window.close()">
+            &larr; Back to email
+        </button>
+    }
+    else @* PendingConfirm — auto-submits via JS; form is the no-JS fallback *@
+    {
+        var badgeCss2 = Model.DisplayValue == "Yes" ? "answer-badge badge-yes"
+                      : Model.DisplayValue == "No"  ? "answer-badge badge-no"
+                      :                               "answer-badge badge-unk";
+
+        @* JS shows this, hides ki-manual, then submits *@
+        <div id="ki-auto" style="display:none">
+            <div class="status-icon icon-inf">
+                <span class="spinner"></span>
+            </div>
+            <p class="page-title">Recording your answer&hellip;</p>
+            <p class="page-sub">Saving <strong>@Model.DisplayValue</strong> &mdash; just a moment.</p>
+            @if (!string.IsNullOrEmpty(Model.Question))
+            {
+                <div class="question-box">@Model.Question</div>
+            }
+        </div>
+
+        @* Visible by default — what scanners and no-JS browsers see *@
+        <div id="ki-manual">
+            <p class="page-title">Confirm your answer</p>
+            <p class="page-sub">Review the question below, then confirm your selection.</p>
+            <div class="question-box">@Model.Question</div>
+            <span class="@badgeCss2">@Model.DisplayValue</span>
+
+            <form id="ki-form" method="post">
+                <input type="hidden" name="Id"    value="@Model.Id">
+                <input type="hidden" name="Token" value="@Model.Token">
+                <button type="submit" class="btn-primary">
+                    Confirm &mdash; record &ldquo;@Model.DisplayValue&rdquo;
+                </button>
+            </form>
+        </div>
+
+        <script>
+        (function () {
+            var auto   = document.getElementById('ki-auto');
+            var manual = document.getElementById('ki-manual');
+            var form   = document.getElementById('ki-form');
+            if (!auto || !manual || !form) return;
+            manual.style.display = 'none';
+            auto.style.display   = '';
+            setTimeout(function () { form.submit(); }, 50);
+        }());
+        </script>
+    }
+
+</div>
+</body>
+</html>

@@ -11,6 +11,12 @@ using CheckIn = global::Wc.Contracts.CheckIn;
 /// The question is COPIED from the disposition/gap — never re-derived here.
 /// No transport (Commit 2), no response processing (Commit 3).
 /// Does NOT read the clock — caller supplies 'now'.
+///
+/// Dedup: before inserting any row, the stage queries the store for existing OPEN check-ins.
+/// A check-in is skipped if an OPEN row for the same (VendorId, TargetField) already exists
+/// (for DIMENSION_GAP with a non-null TargetField) or the same (VendorId, Kind, Question)
+/// already exists (for IDENTITY_CONFIRM and null-TargetField gaps). This prevents the same
+/// gap from re-raising a new email on every pipeline rerun while a response is still pending.
 /// </summary>
 public sealed class RaiseCheckInsStage
 {
@@ -21,8 +27,32 @@ public sealed class RaiseCheckInsStage
         string                               owner,
         Guid                                 programRunId,
         DateTimeOffset                       now,
-        CancellationToken                    ct = default)
+        CancellationToken                    ct = default,
+        ICheckInTransport?                   transport = null)
     {
+        // Load open check-ins once — used for cross-run dedup in both paths below.
+        var openCheckIns = await store.GetOpenAsync(ct);
+
+        // Dedup sets keyed by natural identifiers for each kind.
+        // IDENTITY_CONFIRM: no TargetField — dedup by (VendorId, Question text).
+        var openIdentityByVendorQuestion = openCheckIns
+            .Where(c => c.Kind == CheckInKind.IDENTITY_CONFIRM)
+            .Select(c => (c.VendorId, c.Question))
+            .ToHashSet();
+
+        // DIMENSION_GAP with non-null TargetField: dedup by (VendorId, TargetField).
+        var openGapByVendorTarget = openCheckIns
+            .Where(c => c.Kind == CheckInKind.DIMENSION_GAP && c.TargetField != null)
+            .Select(c => (c.VendorId, c.TargetField!))
+            .ToHashSet();
+
+        // DIMENSION_GAP with null TargetField (e.g. provisional-vendor STATUS_SELECT):
+        // dedup by (VendorId, Question text).
+        var openGapByVendorQuestion = openCheckIns
+            .Where(c => c.Kind == CheckInKind.DIMENSION_GAP && c.TargetField == null)
+            .Select(c => (c.VendorId, c.Question))
+            .ToHashSet();
+
         var raised = new List<CheckIn>();
 
         // ── IDENTITY_CONFIRM: TRIAGE + PossibleSameEntity → YES_NO ─────────────
@@ -40,6 +70,10 @@ public sealed class RaiseCheckInsStage
         {
             var first  = group.First();
             var second = group.Count() > 1 ? (Guid?)group.ElementAt(1).ClusterId : null;
+
+            // Cross-run dedup: skip if an OPEN IDENTITY_CONFIRM for this pair already exists.
+            if (openIdentityByVendorQuestion.Contains((first.ClusterId, group.Key)))
+                continue;
 
             var checkIn = new CheckIn(
                 CheckInId:      Guid.NewGuid(),
@@ -64,6 +98,15 @@ public sealed class RaiseCheckInsStage
         // ── DIMENSION_GAP: caller-formed gap request → structured ask ───────────
         foreach (var g in gapRequests)
         {
+            // Cross-run dedup: skip if an OPEN check-in for the same slot already exists.
+            if (g.TargetField != null &&
+                openGapByVendorTarget.Contains((g.VendorId, g.TargetField)))
+                continue;
+
+            if (g.TargetField == null &&
+                openGapByVendorQuestion.Contains((g.VendorId, g.Question)))
+                continue;
+
             var checkIn = new CheckIn(
                 CheckInId:      Guid.NewGuid(),
                 VendorId:       g.VendorId,
@@ -82,6 +125,23 @@ public sealed class RaiseCheckInsStage
 
             await store.SaveAsync(checkIn, ct);
             raised.Add(checkIn);
+        }
+
+        // One digest call per vendor — group raised check-ins by VendorId so each vendor
+        // gets exactly one email envelope regardless of how many questions were raised.
+        if (transport != null && raised.Count > 0)
+        {
+            foreach (var vendorGroup in raised.GroupBy(c => c.VendorId))
+            {
+                try
+                {
+                    await transport.SendAsync(vendorGroup.ToList(), ct);
+                }
+                catch (Exception)
+                {
+                    // Transport failure — check-ins already persisted and answerable in-app.
+                }
+            }
         }
 
         return raised;

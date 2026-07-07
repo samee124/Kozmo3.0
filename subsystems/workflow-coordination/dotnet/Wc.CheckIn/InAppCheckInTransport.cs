@@ -11,6 +11,6 @@ using CheckIn = global::Wc.Contracts.CheckIn;
 /// </summary>
 public sealed class InAppCheckInTransport : ICheckInTransport
 {
-    public Task SendAsync(CheckIn checkIn, CancellationToken ct = default)
+    public Task SendAsync(IReadOnlyList<CheckIn> checkIns, CancellationToken ct = default)
         => Task.CompletedTask;
 }

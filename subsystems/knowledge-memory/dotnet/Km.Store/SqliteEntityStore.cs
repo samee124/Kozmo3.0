@@ -902,6 +902,39 @@ public sealed class SqliteEntityStore : IEntityStore, IRegistryStore, ICheckInRo
         return Task.FromResult<IReadOnlyList<CheckInRow>>(results);
     }
 
+    /// <summary>
+    /// One-time migration: for every (vendor_id, target_field) pair that has multiple OPEN
+    /// check-in rows, keep the one with the earliest raised_at and mark the rest EXPIRED.
+    /// Safe to call repeatedly — subsequent calls are no-ops when no duplicates remain.
+    /// Run once at startup before deploying the cross-run dedup fix so stale rows from
+    /// previous pipeline reruns don't remain live in the pending queue.
+    /// </summary>
+    public Task ExpireDuplicatePendingCheckInsAsync(CancellationToken ct = default)
+    {
+        using var cmd = _conn.CreateCommand();
+        cmd.CommandText = """
+            UPDATE checkins
+            SET status = 'EXPIRED'
+            WHERE status = 'OPEN'
+              AND target_field IS NOT NULL
+              AND checkin_id IN (
+                SELECT c1.checkin_id
+                FROM checkins c1
+                WHERE c1.status = 'OPEN'
+                  AND c1.target_field IS NOT NULL
+                  AND EXISTS (
+                    SELECT 1 FROM checkins c2
+                    WHERE c2.status      = 'OPEN'
+                      AND c2.vendor_id   = c1.vendor_id
+                      AND c2.target_field = c1.target_field
+                      AND c2.raised_at   < c1.raised_at
+                  )
+              )
+            """;
+        cmd.ExecuteNonQuery();
+        return Task.CompletedTask;
+    }
+
     private static CheckInRow ReadCheckInRow(Microsoft.Data.Sqlite.SqliteDataReader reader)
     {
         var pairedCol = reader.GetOrdinal("paired_vendor_id");

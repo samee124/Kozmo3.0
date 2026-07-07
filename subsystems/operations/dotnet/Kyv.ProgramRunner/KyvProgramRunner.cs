@@ -68,6 +68,7 @@ public sealed class KyvProgramRunner
     private readonly SaasProfile                   _profile;
     private readonly RaiseCheckInsStage            _raiseStage;
     private readonly ICheckInStore                 _checkInStore;
+    private readonly ICheckInTransport?            _transport;
     private readonly string                        _owner;
     private readonly PdfTextExtractor              _pdfReader;
     private readonly PdfPageImageExtractor         _imageExtractor;
@@ -93,7 +94,8 @@ public sealed class KyvProgramRunner
         EntityRegistry?            spineRegistry = null,
         IMetadataStore?            metadataStore = null,
         IKozmoLlm?                 emailInterpretationLlm = null,
-        bool                       processEmail  = false)
+        bool                       processEmail  = false,
+        ICheckInTransport?         transport     = null)
     {
         // E-signal Part 5 Step 6 — OFF by default, same opt-in shape as metadataStore/completeness
         // below. Real-corpus proof: turning email on unconditionally surfaced a genuine
@@ -135,6 +137,7 @@ public sealed class KyvProgramRunner
         _profile        = profile;
         _raiseStage     = new RaiseCheckInsStage();
         _checkInStore   = checkInStore;
+        _transport      = transport;
         _owner          = owner;
         _completeness   = completeness;
         _pdfReader      = new PdfTextExtractor();
@@ -355,7 +358,8 @@ public sealed class KyvProgramRunner
             .ToList();
 
         var checkIns = await _raiseStage.RaiseAsync(
-            dispositions, gapRequests, _checkInStore, _owner, runId, now, ct);
+            dispositions, gapRequests, _checkInStore, _owner, runId, now, ct,
+            transport: _transport);
         executions.Add(new(7, "raise_checkins", now, checkIns.Count));
 
         // ── Stage 8: completeness_init — initial Q&A completeness per resolved vendor ──
