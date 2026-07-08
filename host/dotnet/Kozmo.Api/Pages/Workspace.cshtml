@@ -478,6 +478,12 @@ body{
 /* Program Overview */
   .overview-body{padding:var(--s7);display:grid;grid-template-columns:minmax(0,1.6fr) minmax(320px,0.85fr);gap:var(--s6);min-height:0;overflow:auto;flex:1}
   .overview-main{display:flex;flex-direction:column;gap:var(--s6);min-height:0}
+  /* Same fix as .vendors-panel > .vendor-card{flex-shrink:0} — .vendor-card's own min-height:0
+     (below) disables the browser's default "flex item can't shrink below its content" floor, so
+     without an explicit flex-shrink:0 here too, the relocated ingestion card (a direct flex child
+     of this column) can collapse toward its flex-basis while its content (default overflow:visible)
+     spills out past the shrunk box. */
+  .overview-main > .vendor-card{flex-shrink:0}
   .program-summary-card{background:var(--surface);border:1px solid var(--line-1);border-radius:var(--r-lg);padding:var(--s6);box-shadow:var(--shadow-sm);display:flex;flex-direction:column;gap:var(--s5)}
   .summary-top{display:flex;align-items:flex-start;justify-content:space-between;gap:var(--s5);flex-wrap:wrap}
   .summary-meta{display:flex;align-items:center;gap:var(--s2);flex-wrap:wrap}
@@ -767,10 +773,12 @@ body{
       <div class="h-title" id="home-greeting-full">Programs</div>
       <div class="h-sub">Select a program to start analyzing vendor intelligence.</div>
     </div>
-    <div class="prog-grid">
+    <div class="prog-grid" id="home-prog-grid">
 
-      <!-- Tile 1: Vendor Cleanup Program -->
-      <div class="prog-tile" onclick="enterProgram('vcp','Vendor Cleanup Program')">
+      <!-- Tile 1: real program(s), rendered by loadPrograms() from GET /programs. This
+           hardcoded tile is the pre-fetch fallback only — replaced as soon as /programs
+           resolves. -->
+      <div class="prog-tile" onclick="enterCurrentProgram()">
         <div class="prog-ico">
           <svg class="glyph lg"><use href="#g-building"/></svg>
         </div>
@@ -836,7 +844,7 @@ body{
         <span class="ni"><svg class="glyph"><use href="#g-home"/></svg></span>
         <span class="nl">Home</span>
       </li>
-      <li class="nv on" data-nav="program" onclick="enterProgram('vcp','Vendor Cleanup Program')" data-tip="Program">
+      <li class="nv on" data-nav="program" onclick="enterCurrentProgram()" data-tip="Program">
         <span class="ni"><svg class="glyph"><use href="#g-building"/></svg></span>
         <span class="nl">Program</span>
       </li>
@@ -907,8 +915,10 @@ body{
         <div class="tab-panels">
           <div class="tab-panel on">
             <div class="h-body">
-              <div class="prog-grid">
-                <div class="prog-tile" onclick="enterProgram('vcp','Vendor Cleanup Program')">
+              <!-- Rendered by loadPrograms() from GET /programs — see renderProgramTiles().
+                   This markup is the pre-fetch fallback only. -->
+              <div class="prog-grid" id="app-prog-grid">
+                <div class="prog-tile" onclick="enterCurrentProgram()">
                   <div class="prog-ico">
                     <svg class="glyph lg"><use href="#g-building"/></svg>
                   </div>
@@ -934,13 +944,13 @@ body{
         <div class="page-hdr" id="prog-page-hdr">
           <div class="phdr-top">
             <div>
-              <div class="phdr-eyebrow">Kozmo · Vendor Cleanup Program · Last updated May 15, 2026</div>
-              <div class="phdr-title">Vendor Cleanup Program 2026</div>
+              <div class="phdr-eyebrow" id="prog-eyebrow">Kozmo · Vendor Cleanup Program</div>
+              <div class="phdr-title" id="prog-title">Vendor Cleanup Program</div>
               <div class="phdr-sub">Deduplicate, validate, and enrich the full vendor master — one clean, complete, and trusted record for every active vendor relationship.</div>
             </div>
             <div class="phdr-right">
-              <div class="status-pill"><span class="status-pill-dot"></span>Active — Enrichment In Progress</div>
-              <div class="phdr-meta">3,020 vendors in scope · Program Manager: Sarah Chen</div>
+              <div class="status-pill"><span class="status-pill-dot"></span>Active</div>
+              <div class="phdr-meta" id="prog-meta">Loading vendor count…</div>
             </div>
           </div>
           <div class="tab-bar">
@@ -953,10 +963,32 @@ body{
           <div class="tab-panel on" id="panel-overview">
             <div class="overview-body">
               <div class="overview-main">
+                <div class="vendor-card" style="margin-bottom:var(--s5)">
+                  <h4>Run Real Ingestion</h4>
+                  <p style="color:var(--ink-3);font-size:13px;margin:6px 0 var(--s4)">
+                    Paste a Google Drive folder URL and run the real pipeline. Discovered vendors replace
+                    nothing — they're added to the list below alongside anything already known.
+                  </p>
+                  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+                    <input id="drive-url" type="text" placeholder="Paste your Google Drive folder link…"
+                           style="flex:1;min-width:280px;background:var(--canvas);border:1px solid var(--line-1);border-radius:var(--r-md);padding:8px 12px;font-size:13px;color:var(--ink-1)">
+                    <button class="btn-s p" id="btn-run" onclick="runIngestion()" disabled>Run</button>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:8px;margin-top:var(--s4)">
+                    <span class="log-status idle" id="log-status"><span class="ls-dot"></span><span id="log-status-text">Idle</span></span>
+                  </div>
+                  <div id="log-body" class="log-body" style="margin-top:var(--s3);border-radius:var(--r-md)">
+                    <div class="log-idle">No ingestion run yet.</div>
+                  </div>
+                </div>
+
                 <div class="program-summary-card">
                   <div class="summary-top">
                     <div>
                       <div class="overview-pill">Orchestrator · Program Intelligence</div>
+                      <div style="margin-top:var(--s3);color:var(--ink-4);font-size:var(--t-small);line-height:1.6;max-width:720px;">
+                        The vendor count above is real, from your ingested vendors. Everything below this line — resolution/enrichment percentages, the five-stage progress, and strategy counts — is placeholder content, not yet wired to real data.
+                      </div>
                       <div style="margin-top:var(--s3);color:var(--ink-3);line-height:1.75;max-width:720px;">
                         The Vendor Cleanup Program is active and mid-execution. <strong>1,847 of 3,020 vendor records</strong> have been resolved and deduplicated, reaching 61% of the resolution target. Enrichment coverage sits at 48%, with 889 vendors now carrying complete identity, spend, and compliance data against a target of 80%.
                       </div>
@@ -1114,25 +1146,6 @@ body{
                     <input id="vendor-search" oninput="filterVendorTable()" placeholder="Filter vendors…" />
                   </div>
                   <button class="btn-s">Export</button>
-                </div>
-              </div>
-
-              <div class="vendor-card" style="margin-bottom:var(--s5)">
-                <h4>Run Real Ingestion</h4>
-                <p style="color:var(--ink-3);font-size:13px;margin:6px 0 var(--s4)">
-                  Paste a Google Drive folder URL and run the real pipeline. Discovered vendors replace
-                  nothing — they're added to the list below alongside anything already known.
-                </p>
-                <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-                  <input id="drive-url" type="text" placeholder="Paste your Google Drive folder link…"
-                         style="flex:1;min-width:280px;background:var(--canvas);border:1px solid var(--line-1);border-radius:var(--r-md);padding:8px 12px;font-size:13px;color:var(--ink-1)">
-                  <button class="btn-s p" id="btn-run" onclick="runIngestion()" disabled>Run</button>
-                </div>
-                <div style="display:flex;align-items:center;gap:8px;margin-top:var(--s4)">
-                  <span class="log-status idle" id="log-status"><span class="ls-dot"></span><span id="log-status-text">Idle</span></span>
-                </div>
-                <div id="log-body" class="log-body" style="margin-top:var(--s3);border-radius:var(--r-md)">
-                  <div class="log-idle">No ingestion run yet.</div>
                 </div>
               </div>
 
@@ -1426,7 +1439,9 @@ var S = {
   connected: false,
   running: false,
   sse: null,
-  programName: ''
+  programName: '',
+  programId: null,
+  programs: []
 };
 
 // ─────────────────────────────────────────────
@@ -1449,9 +1464,12 @@ function goHome() {
 }
 
 function enterProgram(id, name) {
+  S.programId   = id;
   S.programName = name || 'Program';
   var progTitle = document.getElementById('prog-title');
   if (progTitle) progTitle.textContent = name || 'Program';
+  var progEyebrow = document.getElementById('prog-eyebrow');
+  if (progEyebrow) progEyebrow.textContent = 'Kozmo · ' + (name || 'Program');
   var bcProg = document.getElementById('bc-prog');
   if (bcProg) bcProg.textContent = name || 'Program';
   var sbName = document.getElementById('sb-prog-name');
@@ -1463,6 +1481,115 @@ function enterProgram(id, name) {
   });
   var vp = document.getElementById('view-prog');
   if (vp) vp.classList.add('on');
+  // Entering a program always lands on its Overview. Without this, navigating
+  // Program -> Vendors -> a vendor -> Program left panel-vendor-detail showing under a
+  // "Program" sidebar label — only switchTab() ever touched .tab-panel/.tab-btn/prog-page-hdr
+  // before, so whatever panel was last active (e.g. vendor-detail) stayed active. Mirrors
+  // exactly what switchTab('overview') itself does to those same elements.
+  document.querySelectorAll('.tab-panel').forEach(function(p) {
+    p.classList.remove('on');
+  });
+  var overviewPanel = document.getElementById('panel-overview');
+  if (overviewPanel) overviewPanel.classList.add('on');
+  document.querySelectorAll('.tab-btn').forEach(function(b) {
+    b.classList.toggle('on', b.dataset.tab === 'overview');
+  });
+  var progHdr = document.getElementById('prog-page-hdr');
+  if (progHdr) progHdr.style.display = '';
+  loadProgramVendorCount();
+}
+
+// Re-enters whichever program is already selected (S.programId, set by loadPrograms() as soon
+// as GET /programs resolves) — used by every persistent nav element (the sidebar "Program" link,
+// the pre-fetch fallback tiles) instead of each hardcoding the fake 'vcp' id. Without this, the
+// sidebar link reset S.programId back to 'vcp' on every click even after a real program had
+// already loaded, which is what caused GET /programs/vcp/vendors -> 400 -> "undefined vendors in
+// scope" (fetch() doesn't reject on HTTP error status, so the {"error":...} body silently parsed
+// as the vendor list). Falls back to the same 'vcp' placeholder only if no real program has
+// loaded yet at all (e.g. GET /programs hasn't resolved) — loadProgramVendorCount()'s r.ok check
+// now fails that case gracefully instead of showing "undefined".
+function enterCurrentProgram() {
+  enterProgram(S.programId || 'vcp', S.programName || 'Vendor Cleanup Program');
+}
+
+// ─────────────────────────────────────────────
+//  PROGRAMS
+// ─────────────────────────────────────────────
+function loadPrograms() {
+  fetch('/programs')
+    .then(function(r) {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    })
+    .then(function(programs) {
+      S.programs = Array.isArray(programs) ? programs : [];
+      renderProgramTiles('home-prog-grid');
+      renderProgramTiles('app-prog-grid');
+      if (!S.programId && S.programs.length > 0) {
+        S.programId   = S.programs[0].id;
+        S.programName = S.programs[0].name;
+        var progTitle = document.getElementById('prog-title');
+        if (progTitle) progTitle.textContent = S.programName;
+        var progEyebrow = document.getElementById('prog-eyebrow');
+        if (progEyebrow) progEyebrow.textContent = 'Kozmo · ' + S.programName;
+        var bcProg = document.getElementById('bc-prog');
+        if (bcProg) bcProg.textContent = S.programName;
+        var sbName = document.getElementById('sb-prog-name');
+        if (sbName) sbName.textContent = S.programName;
+      }
+      if (S.programId) loadProgramVendorCount();
+    })
+    .catch(function() {
+      // Leave the fallback tile/labels in place — an honest "couldn't load" is better than
+      // fabricating a program list.
+    });
+}
+
+// Real vendor count for the phdr-meta line — separate from loadVendors() (the vendors-tab
+// table) so entering a program shows a real number immediately, before the Vendors tab is
+// ever opened.
+function loadProgramVendorCount() {
+  var meta = document.getElementById('prog-meta');
+  if (!meta || !S.programId) return;
+  fetch('/programs/' + S.programId + '/vendors')
+    .then(function(r) {
+      // fetch() only rejects on network failure, never on HTTP error status (e.g. 400 for a
+      // stale/invalid program id) — without this check, an error body like
+      // {"error":"invalid program id"} silently parses as "vendors" and (errorObj).length
+      // renders as the literal string "undefined vendors in scope" instead of failing loudly.
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    })
+    .then(function(vendors) {
+      var count = Array.isArray(vendors) ? vendors.length : 0;
+      meta.textContent = count + ' vendor' + (count === 1 ? '' : 's') + ' in scope';
+    })
+    .catch(function() { meta.textContent = 'Vendor count unavailable'; });
+}
+
+function renderProgramTiles(gridId) {
+  var grid = document.getElementById(gridId);
+  if (!grid || S.programs.length === 0) return;
+
+  var tiles = S.programs.map(function(p) {
+    var safeName = String(p.name).replace(/'/g, "\\'");
+    return '<div class="prog-tile" onclick="enterProgram(\'' + p.id + '\', \'' + safeName + '\')">'
+      + '<div class="prog-ico"><svg class="glyph lg"><use href="#g-building"/></svg></div>'
+      + '<div class="prog-name">' + p.name + '</div>'
+      + '<div class="prog-desc">Ingest vendor documents directly from Google Drive. Classify signals, compute risk posture, and surface renewal obligations across your entire vendor portfolio.</div>'
+      + '<div class="prog-foot"><span class="prog-badge active">Active</span><span class="prog-arrow"><svg class="glyph lg"><use href="#g-arrow-right"/></svg></span></div>'
+      + '</div>';
+  }).join('');
+
+  var comingSoon =
+    '<div class="prog-tile inactive">'
+    + '<div class="prog-ico"><svg class="glyph lg"><use href="#g-prog"/></svg></div>'
+    + '<div class="prog-name">Contract Intelligence</div>'
+    + '<div class="prog-desc">Automated contract review — extract SLA terms, flag anomalies, and surface renewal obligations across all vendor agreements.</div>'
+    + '<div class="prog-foot"><span class="prog-badge soon">Coming soon</span></div>'
+    + '</div>';
+
+  grid.innerHTML = tiles + comingSoon;
 }
 
 // Keep sidebar selection in sync when navigating
@@ -1513,6 +1640,7 @@ async function checkAuth() {
     if (btnRun) btnRun.disabled = !S.connected || S.running;
     if (d.connected) {
       showAppHome();
+      loadPrograms();
     } else {
       show('login');
     }
@@ -1588,6 +1716,16 @@ function disconnectDrive() {
 //  TAB SWITCHING
 // ─────────────────────────────────────────────
 function switchTab(name, triggerEl, silent) {
+  // switchTab only toggles .tab-btn/.tab-panel/.nv classes — unlike enterProgram(), it never
+  // activated #view-prog itself. Coming from Home (#view-home showing), clicking any tab
+  // (vendors/overview/detail/vendor-detail) moved the sidebar highlight and the tab-panel class
+  // but left #view-home visible, so no content ever appeared. Only acts when view-prog isn't
+  // already the active view, so this is a no-op (zero behavior change) once already inside Program.
+  var viewProg = document.getElementById('view-prog');
+  if (viewProg && !viewProg.classList.contains('on')) {
+    document.querySelectorAll('.view').forEach(function(v) { v.classList.remove('on'); });
+    viewProg.classList.add('on');
+  }
   document.querySelectorAll('.tab-btn').forEach(function(b) {
     b.classList.toggle('on', b.dataset.tab === name);
   });
@@ -1600,7 +1738,14 @@ function switchTab(name, triggerEl, silent) {
     var tabNav = n.dataset.tabNav;
     var nav = n.dataset.nav;
     if (name === 'vendor-detail') {
-      // When viewing a vendor detail, highlight the Program entry (single app-level context)
+      // A vendor detail page is reached from, and stays within, the Vendors section — the
+      // sidebar must keep "Vendors" highlighted, not jump back to "Program".
+      n.classList.toggle('on', tabNav === 'vendors');
+    } else if (name === 'overview' || name === 'detail') {
+      // The Program page's own tab bar (Overview / Program Detail) uses data-tab, a different
+      // attribute from the sidebar's data-nav/data-tab-nav — neither ever matches 'overview' or
+      // 'detail', so without this branch every sidebar item loses .on the moment either tab is
+      // clicked. Both tabs are still the Program page — keep "Program" highlighted.
       n.classList.toggle('on', nav === 'program');
     } else {
       n.classList.toggle('on', (tabNav && tabNav === name) || (nav && nav === name));
@@ -1654,8 +1799,16 @@ function toggleSidebar() {
 function loadVendors() {
   var tbody = document.getElementById('vendor-tbody');
   var placeholder = '<span style="color:var(--ink-3)">—</span>';
-  fetch('/kyv/vendors')
-    .then(function(r) { return r.json(); })
+  if (!S.programId) {
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--ink-3);padding:20px">' +
+      'Select a program first.</td></tr>';
+    return;
+  }
+  fetch('/programs/' + S.programId + '/vendors')
+    .then(function(r) {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    })
     .then(function(vendors) {
       var count = vendors.length;
       setTxt('vendor-count', count + ' vendor' + (count === 1 ? '' : 's') + ' in scope');

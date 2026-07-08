@@ -1,5 +1,10 @@
 namespace Kozmo.Api;
 
+public sealed record ProgramDto(
+    Guid           Id,
+    string         Name,
+    DateTimeOffset CreatedAt);
+
 public sealed record VendorSummaryDto(
     string         EntityId,
     string         Name,

@@ -31,6 +31,17 @@ public sealed record RegistryVendorRow(
     string?        EntityRole           = null
 );
 
+/// <summary>
+/// Storage row for a Program (programs table) — a durable container that can span multiple
+/// ingestion runs. NOT one-run-equals-one-program: a run (program_run_id) is a single ingestion
+/// event that belongs to a Program (program_id).
+/// </summary>
+public sealed record ProgramRow(
+    Guid           Id,
+    string         Name,
+    DateTimeOffset CreatedAt
+);
+
 /// <summary>Storage row for a vendor alias (vendor_aliases table).</summary>
 public sealed record VendorAliasRow(
     Guid    AliasId,

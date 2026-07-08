@@ -812,6 +812,36 @@ app.MapGet("/kyv/vendors", async (IIiFacade f, EntityRegistry reg, SqliteEntityS
     return Results.Ok(vendors);
 });
 
+// GET /programs — real programs (just one today: "Vendor Cleanup Program"). A Program is a
+// durable container that can span multiple ingestion runs; program_run_id (one run) belongs to
+// program_id (its container) — see SqliteEntityStore.MigratePrograms.
+app.MapGet("/programs", async (SqliteEntityStore storeInst) =>
+{
+    var programs = await storeInst.GetAllProgramsAsync();
+    return Results.Ok(programs.Select(p => new ProgramDto(p.Id, p.Name, p.CreatedAt)));
+});
+
+// GET /programs/{id}/vendors — real vendors scoped to one program, across all of its runs.
+// Mirrors GET /kyv/vendors exactly, just filtered by program_id instead of "every KYV run".
+app.MapGet("/programs/{id}/vendors", async (string id, IIiFacade f, EntityRegistry reg, SqliteEntityStore storeInst) =>
+{
+    if (!Guid.TryParse(id, out var programId))
+        return Results.BadRequest(new { error = "invalid program id" });
+
+    var now        = DemoClock.AsOf;
+    var vendors    = new List<VendorSummaryDto>();
+    var discovered = await storeInst.LoadKyvVendorsByProgramAsync(programId);
+    foreach (var (vendorId, _, _) in discovered)
+    {
+        var entity = reg.GetEntity(vendorId);
+        if (entity is null) continue;
+        var idx = await f.GetIndexAsync(vendorId);
+        var pos = await f.GetPostureAsync(vendorId);
+        vendors.Add(DtoMapper.ToSummary(vendorId, entity, idx, pos, now));
+    }
+    return Results.Ok(vendors);
+});
+
 app.Run();
 
 // ── Local helpers ─────────────────────────────────────────────────────────

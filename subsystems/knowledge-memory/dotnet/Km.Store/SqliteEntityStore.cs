@@ -457,6 +457,64 @@ public sealed class SqliteEntityStore : IEntityStore, IRegistryStore, ICheckInRo
         return Task.FromResult<IReadOnlyList<(Guid, string, DateTimeOffset?)>>(deduped);
     }
 
+    // ── Programs — durable containers spanning multiple runs ───────────────────
+
+    /// <summary>Lists every real program (just one today — see VendorCleanupProgramId).</summary>
+    public Task<IReadOnlyList<ProgramRow>> GetAllProgramsAsync()
+    {
+        using var cmd = _conn.CreateCommand();
+        cmd.CommandText = "SELECT id, name, created_at FROM programs ORDER BY created_at";
+        var results = new List<ProgramRow>();
+        using var reader = cmd.ExecuteReader();
+        while (reader.Read())
+            results.Add(new ProgramRow(
+                Guid.Parse(reader.GetString(0)),
+                reader.GetString(1),
+                DateTimeOffset.Parse(reader.GetString(2))));
+        return Task.FromResult<IReadOnlyList<ProgramRow>>(results);
+    }
+
+    /// <summary>
+    /// Loads every KYV-discovered vendor belonging to <paramref name="programId"/>, across all of
+    /// that program's runs — the program-scoped counterpart to <see cref="LoadAllKyvVendorsAsync"/>,
+    /// same dedup-by-comparison-key discipline (a re-run can leave behind an empty duplicate row).
+    /// </summary>
+    public Task<IReadOnlyList<(Guid Id, string Name, DateTimeOffset? RenewalDate)>> LoadKyvVendorsByProgramAsync(
+        Guid programId)
+    {
+        using var cmd = _conn.CreateCommand();
+        cmd.CommandText = @"
+            SELECT v.id, v.canonical_name, v.renewal_date, v.comparison_key, v.created_at,
+                   (SELECT COUNT(*) FROM beliefs b WHERE b.entity_id = v.id) AS belief_count
+            FROM vendors v
+            WHERE v.program_id = @program_id";
+        cmd.Parameters.AddWithValue("@program_id", programId.ToString());
+
+        var rows = new List<(Guid Id, string Name, DateTimeOffset? Renewal, string GroupKey, DateTimeOffset CreatedAt, long BeliefCount)>();
+        using (var reader = cmd.ExecuteReader())
+        {
+            while (reader.Read())
+            {
+                var id           = Guid.Parse(reader.GetString(0));
+                var name         = reader.GetString(1);
+                var renewalRaw   = reader.IsDBNull(2) ? null : reader.GetString(2);
+                DateTimeOffset? renewal = renewalRaw is null ? null : DateTimeOffset.Parse(renewalRaw);
+                var comparisonKey = reader.IsDBNull(3) ? name : reader.GetString(3);
+                var createdAt    = DateTimeOffset.Parse(reader.GetString(4));
+                var beliefCount  = reader.GetInt64(5);
+                rows.Add((id, name, renewal, comparisonKey, createdAt, beliefCount));
+            }
+        }
+
+        var deduped = rows
+            .GroupBy(r => r.GroupKey, StringComparer.OrdinalIgnoreCase)
+            .Select(g => g.OrderByDescending(r => r.BeliefCount).ThenByDescending(r => r.CreatedAt).First())
+            .Select(r => (r.Id, r.Name, r.Renewal))
+            .ToList();
+
+        return Task.FromResult<IReadOnlyList<(Guid, string, DateTimeOffset?)>>(deduped);
+    }
+
     // ── Reset ─────────────────────────────────────────────────────────────────
 
     public Task ResetAsync(CancellationToken ct = default)
@@ -572,6 +630,59 @@ public sealed class SqliteEntityStore : IEntityStore, IRegistryStore, ICheckInRo
         MigrateRegistryColumns();
         MigrateCheckInColumns();
         MigrateOAuthTokenTable();
+        MigratePrograms();
+    }
+
+    /// <summary>
+    /// Fixed, well-known id for the one real program that exists today ("Vendor Cleanup Program").
+    /// Multiple, user-creatable programs are future work — this keeps the id stable across every
+    /// process start via INSERT OR IGNORE, the same fixed-GUID convention SeedData.cs uses for the
+    /// legacy demo vendors.
+    /// </summary>
+    internal static readonly Guid VendorCleanupProgramId = Guid.Parse("aaaaaaaa-0001-0000-0000-000000000001");
+
+    /// <summary>
+    /// Adds the programs table + vendors.program_id column, and ensures every existing KYV-
+    /// discovered vendor (program_run_id IS NOT NULL) is backfilled onto the one real program. A
+    /// Program is a durable container that can span multiple ingestion runs — NOT one-run-equals-
+    /// one-program; program_run_id (a single ingestion event) and program_id (its durable
+    /// container) are deliberately separate columns.
+    /// </summary>
+    private void MigratePrograms()
+    {
+        using (var create = _conn.CreateCommand())
+        {
+            create.CommandText = """
+                CREATE TABLE IF NOT EXISTS programs (
+                    id         TEXT NOT NULL PRIMARY KEY,
+                    name       TEXT NOT NULL,
+                    created_at TEXT NOT NULL
+                );
+                """;
+            create.ExecuteNonQuery();
+        }
+
+        TryAddColumn("vendors", "program_id", "TEXT");
+
+        using (var seed = _conn.CreateCommand())
+        {
+            seed.CommandText =
+                "INSERT OR IGNORE INTO programs (id, name, created_at) VALUES (@id, @name, @created_at)";
+            seed.Parameters.AddWithValue("@id",         VendorCleanupProgramId.ToString());
+            seed.Parameters.AddWithValue("@name",       "Vendor Cleanup Program");
+            seed.Parameters.AddWithValue("@created_at", DateTimeOffset.UtcNow.ToString("O"));
+            seed.ExecuteNonQuery();
+        }
+
+        // Backfill: every KYV-discovered vendor from any run, not yet assigned a program, belongs
+        // to the one real program. Legacy demo vendors (program_run_id IS NULL) are untouched.
+        using (var backfill = _conn.CreateCommand())
+        {
+            backfill.CommandText =
+                "UPDATE vendors SET program_id = @pid WHERE program_run_id IS NOT NULL AND program_id IS NULL";
+            backfill.Parameters.AddWithValue("@pid", VendorCleanupProgramId.ToString());
+            backfill.ExecuteNonQuery();
+        }
     }
 
     /// <summary>Adds identity-resolution columns to the vendors table and creates vendor_aliases if absent.</summary>
@@ -726,12 +837,12 @@ public sealed class SqliteEntityStore : IEntityStore, IRegistryStore, ICheckInRo
               (id, canonical_name, created_at,
                comparison_key, entity_type, confidence, flags, status,
                rebrand_map_ref, acquisition_map_ref, absorbed_into_vendor_id,
-               program_run_id, entity_role)
+               program_run_id, entity_role, program_id)
             VALUES
               (@id, @name, @created_at,
                @comparison_key, @entity_type, @confidence, @flags, @status,
                @rebrand_map_ref, @acquisition_map_ref, @absorbed_into_vendor_id,
-               @program_run_id, @entity_role)
+               @program_run_id, @entity_role, @program_id)
             """;
         cmd.Parameters.AddWithValue("@id",                      vendor.VendorId.ToString());
         cmd.Parameters.AddWithValue("@name",                    vendor.CanonicalName);
@@ -750,6 +861,14 @@ public sealed class SqliteEntityStore : IEntityStore, IRegistryStore, ICheckInRo
                                                                     ? vendor.ProgramRunId.Value.ToString()
                                                                     : (object)DBNull.Value);
         cmd.Parameters.AddWithValue("@entity_role",             vendor.EntityRole ?? (object)DBNull.Value);
+        // A Program is a durable container that can span multiple runs (program_run_id is one
+        // ingestion event; program_id is its container) — every KYV-discovered vendor belongs to
+        // the one real program that exists today. Legacy demo vendors (no program_run_id) get no
+        // program_id either. When multi-program support lands, this is the seam where a real
+        // caller-supplied programId replaces the fixed constant.
+        cmd.Parameters.AddWithValue("@program_id",              vendor.ProgramRunId.HasValue
+                                                                    ? VendorCleanupProgramId.ToString()
+                                                                    : (object)DBNull.Value);
         cmd.ExecuteNonQuery();
         return Task.CompletedTask;
     }
