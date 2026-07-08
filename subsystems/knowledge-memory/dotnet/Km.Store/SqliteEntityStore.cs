@@ -11,7 +11,7 @@ namespace Km.Store;
 /// IEntityStore over SQLite. Beliefs and postures are append-only; no edit/delete path.
 /// Behind IEntityStore so Azure SQL drops in without caller changes.
 /// </summary>
-public sealed class SqliteEntityStore : IEntityStore, IRegistryStore, ICheckInRowStore, IDisposable
+public sealed class SqliteEntityStore : IEntityStore, IRegistryStore, ICheckInRowStore, IDocumentStore, IDisposable
 {
     private readonly SqliteConnection _conn;
     private readonly SaasProfile?     _profile;
@@ -631,6 +631,7 @@ public sealed class SqliteEntityStore : IEntityStore, IRegistryStore, ICheckInRo
         MigrateCheckInColumns();
         MigrateOAuthTokenTable();
         MigratePrograms();
+        MigrateDocuments();
     }
 
     /// <summary>
@@ -683,6 +684,82 @@ public sealed class SqliteEntityStore : IEntityStore, IRegistryStore, ICheckInRo
             backfill.Parameters.AddWithValue("@pid", VendorCleanupProgramId.ToString());
             backfill.ExecuteNonQuery();
         }
+    }
+
+    /// <summary>
+    /// Adds the documents table — retained source documents (see IDocumentStore). All three
+    /// retention options (raw bytes, extracted text, Drive pointer) are additive columns on the
+    /// same row, not separate tables — a document may populate any or all of them.
+    /// </summary>
+    private void MigrateDocuments()
+    {
+        using var cmd = _conn.CreateCommand();
+        cmd.CommandText = """
+            CREATE TABLE IF NOT EXISTS documents (
+                id            TEXT NOT NULL PRIMARY KEY,
+                program_id    TEXT,
+                vendor_id     TEXT,
+                filename      TEXT NOT NULL,
+                content       BLOB,
+                content_text  TEXT,
+                drive_file_id TEXT,
+                ingested_at   TEXT NOT NULL
+            );
+            CREATE INDEX IF NOT EXISTS ix_documents_vendor ON documents(vendor_id);
+            """;
+        cmd.ExecuteNonQuery();
+    }
+
+    // ── IDocumentStore ───────────────────────────────────────────────────────
+
+    /// <summary>
+    /// Insert-or-replace keyed on Id — callers (DocumentPersistenceStage) compute a deterministic
+    /// Id from the Drive file id (or a content hash when no Drive id exists), so re-ingesting the
+    /// same document updates its existing row (fresh content/vendor/timestamp) instead of minting
+    /// a new orphan row every run.
+    /// </summary>
+    public Task UpsertDocumentAsync(DocumentRow doc, CancellationToken ct = default)
+    {
+        using var cmd = _conn.CreateCommand();
+        cmd.CommandText = """
+            INSERT OR REPLACE INTO documents
+              (id, program_id, vendor_id, filename, content, content_text, drive_file_id, ingested_at)
+            VALUES
+              (@id, @program_id, @vendor_id, @filename, @content, @content_text, @drive_file_id, @ingested_at)
+            """;
+        cmd.Parameters.AddWithValue("@id",            doc.Id.ToString());
+        cmd.Parameters.AddWithValue("@program_id",    doc.ProgramId.HasValue ? doc.ProgramId.Value.ToString() : (object)DBNull.Value);
+        cmd.Parameters.AddWithValue("@vendor_id",     doc.VendorId.HasValue  ? doc.VendorId.Value.ToString()  : (object)DBNull.Value);
+        cmd.Parameters.AddWithValue("@filename",      doc.Filename);
+        cmd.Parameters.AddWithValue("@content",       (object?)doc.Content     ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("@content_text",  (object?)doc.ContentText ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("@drive_file_id", (object?)doc.DriveFileId ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("@ingested_at",   doc.IngestedAt.ToString("O"));
+        cmd.ExecuteNonQuery();
+        return Task.CompletedTask;
+    }
+
+    public Task<DocumentRow?> GetDocumentAsync(Guid id, CancellationToken ct = default)
+    {
+        using var cmd = _conn.CreateCommand();
+        cmd.CommandText = """
+            SELECT id, program_id, vendor_id, filename, content, content_text, drive_file_id, ingested_at
+            FROM documents WHERE id = @id
+            """;
+        cmd.Parameters.AddWithValue("@id", id.ToString());
+        using var reader = cmd.ExecuteReader();
+        if (!reader.Read()) return Task.FromResult<DocumentRow?>(null);
+
+        var row = new DocumentRow(
+            Id:          Guid.Parse(reader.GetString(0)),
+            ProgramId:   reader.IsDBNull(1) ? null : Guid.Parse(reader.GetString(1)),
+            VendorId:    reader.IsDBNull(2) ? null : Guid.Parse(reader.GetString(2)),
+            Filename:    reader.GetString(3),
+            Content:     reader.IsDBNull(4) ? null : (byte[])reader.GetValue(4),
+            ContentText: reader.IsDBNull(5) ? null : reader.GetString(5),
+            DriveFileId: reader.IsDBNull(6) ? null : reader.GetString(6),
+            IngestedAt:  DateTimeOffset.Parse(reader.GetString(7)));
+        return Task.FromResult<DocumentRow?>(row);
     }
 
     /// <summary>Adds identity-resolution columns to the vendors table and creates vendor_aliases if absent.</summary>

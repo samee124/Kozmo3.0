@@ -45,6 +45,7 @@ public sealed class BeliefPersistenceStage
         IReadOnlyList<CandidateCluster>      clusters,
         IReadOnlyList<ResolutionDisposition> dispositions,
         DateTimeOffset                       now,
+        IReadOnlyDictionary<string, Guid>?   docIdToDocumentId = null,
         CancellationToken                    ct = default)
     {
         var docIdToVendorId = BuildDocIdToVendorMap(clusters, dispositions);
@@ -53,6 +54,14 @@ public sealed class BeliefPersistenceStage
         foreach (var (docId, candidates) in candidatesByDoc)
         {
             if (!docIdToVendorId.TryGetValue(docId, out var vendorId)) continue;
+
+            // Document retention (see KYV_KNOWN_GAPS.md): when DocumentPersistenceStage ran for
+            // this document, EvidenceId points at its real documents.id row — Guid.Empty only when
+            // no document store was supplied to this runner (documentStore: null, e.g. existing
+            // tests), preserving the exact prior placeholder behavior for those callers.
+            var evidenceId = docIdToDocumentId != null && docIdToDocumentId.TryGetValue(docId, out var docGuid)
+                ? docGuid
+                : Guid.Empty;
 
             foreach (var candidate in candidates)
             {
@@ -73,7 +82,7 @@ public sealed class BeliefPersistenceStage
                     tier:                candidate.SourceTier,
                     extractorConfidence: candidate.Confidence,
                     observedAt:          now,
-                    provenance:          new BeliefProvenance(Guid.Empty, candidate.Derivation), // no Evidence row in the KYV pipeline yet
+                    provenance:          new BeliefProvenance(evidenceId, candidate.Derivation),
                     ingestedAt:          now,
                     derivation:          candidate.Derivation, // real quoted evidence — see VendorFileWriteService docs
                     ct:                  ct);

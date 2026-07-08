@@ -443,10 +443,26 @@ app.MapPost("/vendors/vendor-file/upload-contract", async (
     var pageTexts    = new PdfTextExtractor().ExtractPageTexts(pdfBytes);
     await lane.ExtractAndWriteAsync(vendorId, ev, pageTexts, DemoClock.AsOf);
 
+    // Document retention (see KYV_KNOWN_GAPS.md) — this endpoint previously read the upload
+    // straight into memory and discarded it once the request finished; content + content_text at
+    // minimum, no drive_file_id (manual upload, not sourced from Drive). Deterministic id is a
+    // content hash — the exact same file uploaded twice reuses the same document row.
+    var contentText = string.Join("\n", pageTexts.OrderBy(kv => kv.Key).Select(kv => kv.Value));
+    var documentId  = DocumentPersistenceStage.ComputeDocumentId(driveFileId: null, pdfBytes);
+    await storeInst.UpsertDocumentAsync(new DocumentRow(
+        Id:          documentId,
+        ProgramId:   null,
+        VendorId:    vendorId,
+        Filename:    file.FileName,
+        Content:     pdfBytes,
+        ContentText: string.IsNullOrEmpty(contentText) ? null : contentText,
+        DriveFileId: null,
+        IngestedAt:  DemoClock.AsOf), default);
+
     // Recompute posture so the vendor-file Razor page sees fresh state on arrival
     await f.RecomputeVendorAsync(vendorId);
 
-    return Results.Ok(new { vendorId = vendorId.ToString() });
+    return Results.Ok(new { vendorId = vendorId.ToString(), documentId = documentId.ToString() });
 });
 
 // GET /vendors/{id}/vendor-file/markdown — render the vendor file as raw markdown text
@@ -701,13 +717,16 @@ app.MapPost("/kyv/run", async (
 
     // Download Drive files to a local temp folder
     string tempFolder;
+    IReadOnlyDictionary<string, string> driveFileIdsByFilename;
     try
     {
         hub.Broadcast(JsonSerializer.Serialize(
             new { type = "kyv-downloading", ts = DateTimeOffset.UtcNow,
                   data = new { driveUrl = request.DriveUrl } }, JsonOpts));
 
-        tempFolder = await downloader.DownloadToTempFolderAsync(token, request.DriveUrl);
+        var downloadResult = await downloader.DownloadToTempFolderAsync(token, request.DriveUrl);
+        tempFolder              = downloadResult.TempDir;
+        driveFileIdsByFilename  = downloadResult.DriveFileIdsByFilename;
 
         var fileCount = Directory.GetFiles(tempFolder, "*.pdf", SearchOption.AllDirectories).Length;
         hub.Broadcast(JsonSerializer.Serialize(
@@ -735,9 +754,10 @@ app.MapPost("/kyv/run", async (
             profile:          profile,
             completeness:     completenessHolder.Value,
             spineRegistry:    entityRegistry,
-            metadataStore:    metadataStore);
+            metadataStore:    metadataStore,
+            documentStore:    storeInst);
 
-        var run = await runner.RunAsync(tempFolder, DateTimeOffset.UtcNow);
+        var run = await runner.RunAsync(tempFolder, DateTimeOffset.UtcNow, driveFileIdsByFilename);
 
         // Replay stages over SSE for live UI feedback
         foreach (var stage in run.Stages)
@@ -810,6 +830,41 @@ app.MapGet("/kyv/vendors", async (IIiFacade f, EntityRegistry reg, SqliteEntityS
         vendors.Add(DtoMapper.ToSummary(id, entity, idx, pos, now));
     }
     return Results.Ok(vendors);
+});
+
+// GET /documents/{id} — metadata + extracted text for a retained source document. Never returns
+// raw bytes here (see /documents/{id}/raw) — a metadata fetch should never accidentally serve a
+// multi-hundred-KB blob.
+app.MapGet("/documents/{id}", async (string id, SqliteEntityStore storeInst) =>
+{
+    if (!Guid.TryParse(id, out var docId))
+        return Results.BadRequest(new { error = "invalid document id" });
+
+    var doc = await storeInst.GetDocumentAsync(docId);
+    if (doc is null) return Results.NotFound();
+
+    return Results.Ok(new
+    {
+        id          = doc.Id,
+        vendorId    = doc.VendorId,
+        filename    = doc.Filename,
+        contentText = doc.ContentText,
+        driveFileId = doc.DriveFileId,
+        hasContent  = doc.Content is not null,
+        ingestedAt  = doc.IngestedAt
+    });
+});
+
+// GET /documents/{id}/raw — the actual retained PDF bytes, only when explicitly requested.
+app.MapGet("/documents/{id}/raw", async (string id, SqliteEntityStore storeInst) =>
+{
+    if (!Guid.TryParse(id, out var docId))
+        return Results.BadRequest(new { error = "invalid document id" });
+
+    var doc = await storeInst.GetDocumentAsync(docId);
+    if (doc is null || doc.Content is null) return Results.NotFound();
+
+    return Results.File(doc.Content, "application/pdf", doc.Filename);
 });
 
 // GET /programs — real programs (just one today: "Vendor Cleanup Program"). A Program is a

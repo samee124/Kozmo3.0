@@ -57,7 +57,7 @@ public static class RealVendorBeliefFixture
             llm, new AlwaysCompanyClassifier(), registry, checkInStore,
             entityStore: store, profile: profile, beliefLlm: beliefLlm);
 
-        await runner.RunAsync(workspacePath, now, ct);
+        await runner.RunAsync(workspacePath, now, ct: ct);
 
         var all    = await registry.GetAllAsync(ct);
         var vendor = all.FirstOrDefault(
