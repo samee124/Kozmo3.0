@@ -371,7 +371,14 @@ public sealed class DocumentBeliefExtractor
             // corpus evidence (0128_escalation_13_0_0.eml: "each take over 8 hours for an initial
             // response") is a customer's observation of past performance; this guard rejects the
             // opposite shape.
-            if (string.Equals(criterion, "support_responsiveness", StringComparison.OrdinalIgnoreCase) &&
+            //
+            // incident_duration_hours (mttr claim key) shares the exact same observed-vs-promised
+            // shape — "3-hour outage" (measured) vs. "we guarantee restoration within 2 hours
+            // going forward" (a promise) — so it reuses the same guard rather than a near-duplicate
+            // one. Real corpus evidence: 0186_escalation_19_5_4.eml, "a 3-hour outage on a core
+            // module is well outside what we'd expect from an SLA standpoint."
+            if ((string.Equals(criterion, "support_responsiveness", StringComparison.OrdinalIgnoreCase) ||
+                 string.Equals(criterion, "incident_duration_hours", StringComparison.OrdinalIgnoreCase)) &&
                 ContainsFutureCommitmentLanguage(evidence!))
                 continue;
 

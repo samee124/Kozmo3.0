@@ -33,6 +33,21 @@
       "expected_for": ["saas_vendor"],
       "rubric_criterion": "support_response_time"
     },
+    "incident_duration_hours": {
+      "class": "scored",
+      "value_type": "duration",
+      "dimension": "Operational",
+      "typical_tier": "VERIFIED",
+      "half_life_days": 30,
+      "dimension_weight": 0.25,
+      "definition": "An explicit, ALREADY-OBSERVED total duration of a service incident or outage, in hours -- how long an outage/incident actually lasted, as measured, reported, or complained about after the fact. Not a promised or marketed future restoration/resolution target.",
+      "positive_example": "\"a 3-hour outage on a core module\" -> value 3",
+      "negative_example": "A forward-looking commitment or promised restoration/resolution target time that has not yet been observed (e.g. \"we guarantee restoration within 2 hours going forward\") is not extracted -- that is an unverified promise, not a measured fact this key covers. A support ticket response time is a different fact -- see support_responsiveness.",
+      "deterministic_guard": "DocumentBeliefExtractor.ContainsFutureCommitmentLanguage",
+      "prompt_fragment": "- incident_duration_hours: an explicit, ALREADY-OBSERVED total duration of a\n  service incident or outage, in HOURS -- how long an outage/incident actually lasted, as\n  measured, reported, or complained about (e.g. \"a 3-hour outage on a core module\"). value =\n  the number of hours as given (e.g. 3). This is a fact about what ACTUALLY HAPPENED, never a\n  promised or marketed future restoration target -- do NOT extract a forward-looking commitment\n  (e.g. \"we guarantee restoration within 2 hours going forward\") as this fact; that is an\n  unverified promise, a different thing this key does not cover.",
+      "expected_for": ["saas_vendor"],
+      "rubric_criterion": "mttr"
+    },
     "csat": {
       "class": "scored",
       "value_type": "rating",

@@ -37,7 +37,10 @@ public sealed class VendorFileTests
         // 15, not 14: E1 Part 7 Step 3 adds invoice_amount (invoices extract this instead of
         // annual_value) — a deliberate catalogue growth, not drift.
         Assert.True(profile.ClaimKeyCatalogue.ContainsKey("invoice_amount"));
-        Assert.Equal(15, profile.ClaimKeyCatalogue.Count);
+        // 16, not 15: incident_duration_hours completes the previously-bare mttr rubric criterion
+        // with an email-sourced claim key, same pattern as support_responsiveness.
+        Assert.True(profile.ClaimKeyCatalogue.ContainsKey("incident_duration_hours"));
+        Assert.Equal(16, profile.ClaimKeyCatalogue.Count);
     }
 
     [Fact, Trait("Category", "VendorFile")]
@@ -70,7 +73,8 @@ public sealed class VendorFileTests
             "expected_belief_sets must define 'saas_vendor' class.");
         // 11, not 10: support_responsiveness (E-docdepth build item 1) completed with a real
         // expected_for tag — the catalogue is the single source of truth for this count.
-        Assert.Equal(11, profile.ExpectedBeliefSets["saas_vendor"].Count);
+        // 12, not 11: incident_duration_hours adds its own expected_for tag, same pattern.
+        Assert.Equal(12, profile.ExpectedBeliefSets["saas_vendor"].Count);
     }
 
     [Fact, Trait("Category", "VendorFile")]
@@ -558,10 +562,10 @@ public sealed class VendorFileTests
         var current = await store.GetCurrentBeliefsAsync(vendorId);
         var result  = comp.Compute(vendorId, current);
 
-        // saas_vendor expects 11 slots (support_responsiveness added, E-docdepth build item 1);
-        // 3 filled, 8 missing
+        // saas_vendor expects 12 slots (support_responsiveness + incident_duration_hours added);
+        // 3 filled, 9 missing
         Assert.Equal(3, result.FilledKeys.Count);
-        Assert.Equal(8, result.GapKeys.Count);
+        Assert.Equal(9, result.GapKeys.Count);
         Assert.True(result.Ratio < 0.5);
     }
 
@@ -969,19 +973,21 @@ public sealed class VendorFileTests
         Assert.NotNull(judgement);
         var management = judgement.Management;
 
-        // Completeness: 6 / 11 filled (notice_period not in expected_belief_sets; expected count
-        // is 11, not 10, since support_responsiveness was completed — E-docdepth build item 1)
+        // Completeness: 6 / 12 filled (notice_period not in expected_belief_sets; expected count
+        // is 12, not 11, since incident_duration_hours was completed on top of support_responsiveness)
         Assert.Equal(6, management.FilledCount);
-        Assert.Equal(11, management.ExpectedCount);
-        Assert.Equal(6.0 / 11.0, management.Completeness, precision: 10);
+        Assert.Equal(12, management.ExpectedCount);
+        Assert.Equal(6.0 / 12.0, management.Completeness, precision: 10);
 
-        // Gaps: invoice_accuracy, renewal_intent, contract_on_file, payment_terms, support_responsiveness
-        Assert.Equal(5, management.GapSlots.Count);
-        Assert.Contains("invoice_accuracy",       management.GapSlots);
-        Assert.Contains("renewal_intent",         management.GapSlots);
-        Assert.Contains("contract_on_file",       management.GapSlots);
-        Assert.Contains("payment_terms",          management.GapSlots);
-        Assert.Contains("support_responsiveness", management.GapSlots);
+        // Gaps: invoice_accuracy, renewal_intent, contract_on_file, payment_terms,
+        // support_responsiveness, incident_duration_hours
+        Assert.Equal(6, management.GapSlots.Count);
+        Assert.Contains("invoice_accuracy",        management.GapSlots);
+        Assert.Contains("renewal_intent",          management.GapSlots);
+        Assert.Contains("contract_on_file",        management.GapSlots);
+        Assert.Contains("payment_terms",           management.GapSlots);
+        Assert.Contains("support_responsiveness",  management.GapSlots);
+        Assert.Contains("incident_duration_hours", management.GapSlots);
 
         // Weak dimensions: only Operational (sla_uptime dim_score = 0.20 < AtRiskMin 0.40)
         Assert.Single(management.WeakDimensions);
