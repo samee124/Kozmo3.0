@@ -43,6 +43,11 @@ public sealed record SaasProfile(
     // never projected into belief scoring, never read by the scoring assemblies (CI wall lane).
     public IReadOnlyDictionary<string, MetadataFieldDefinition> MetadataFieldCatalogue { get; init; } =
         new Dictionary<string, MetadataFieldDefinition>();
+
+    // E2.1 — non-fatal coherence findings from Catalogue's boot-time validator (e.g. a "scored"
+    // claim key whose rubric criterion doesn't resolve). Logged at Load() time; also exposed here
+    // so tests can assert on them without parsing console output. Empty when everything's coherent.
+    public IReadOnlyList<string> ValidationWarnings { get; init; } = Array.Empty<string>();
 }
 
 /// <summary>
@@ -154,12 +159,19 @@ public sealed record ClaimKeyDefinition(
     // hardcoded dictionaries previously in RulesExtractor and BeliefPersistenceStage.
     public string? RubricCriterion { get; init; }
 
-    // E1 Part 7 Step 7 Fix 2 — vendor classes (as named in expected_belief_sets.saas.v1.json's
-    // vendor_classes map) for which this claim key is an expected slot. Catalogue.cs derives
-    // ExpectedBeliefSets from these tags directly, so the catalogue is the single source of truth
-    // for "which claim keys should exist for this vendor class" — no separately-maintained list to
-    // drift out of sync. Empty for claim keys that are not an expected slot for any vendor class.
+    // E1 Part 7 Step 7 Fix 2 — vendor classes for which this claim key is an expected slot.
+    // E2.1: no longer the authority Catalogue.cs derives ExpectedBeliefSets from — Requirement
+    // (below) is now the authority. Kept, unused for behavior, only as the input to Catalogue's
+    // boot-time coherence check (the Requirement-derived expected set must still equal this
+    // ExpectedFor-derived set) — a one-version safety net before this field is removed entirely.
     public IReadOnlyList<string> ExpectedFor { get; init; } = Array.Empty<string>();
+
+    // E2.1 — additive metadata only; no consumer branches on this yet (E2.3 wires it into
+    // dimension-assessability gating). "required" | "expected" | "optional". Populated to exactly
+    // reproduce today's ExpectedFor-derived behavior: every key that was in expected_for is
+    // "expected"; every key that wasn't is "optional"; nothing is "required" yet (that would change
+    // scoring-gate behavior, E2.1 must not). Catalogue.cs derives ExpectedBeliefSets from this field.
+    public string Requirement { get; init; } = "optional";
 };
 
 public sealed record ClassificationRule(

@@ -5,6 +5,7 @@
   "claim_keys": {
     "sla_uptime": {
       "class": "scored",
+      "requirement": "expected",
       "value_type": "percent",
       "dimension": "Operational",
       "typical_tier": "VERIFIED",
@@ -20,6 +21,7 @@
     },
     "support_responsiveness": {
       "class": "scored",
+      "requirement": "expected",
       "value_type": "duration",
       "dimension": "Operational",
       "typical_tier": "VERIFIED",
@@ -35,6 +37,7 @@
     },
     "incident_duration_hours": {
       "class": "scored",
+      "requirement": "expected",
       "value_type": "duration",
       "dimension": "Operational",
       "typical_tier": "VERIFIED",
@@ -50,6 +53,7 @@
     },
     "csat": {
       "class": "scored",
+      "requirement": "expected",
       "value_type": "rating",
       "dimension": "Experiential",
       "typical_tier": "REPORTED",
@@ -65,6 +69,7 @@
     },
     "usage_trend": {
       "class": "scored",
+      "requirement": "expected",
       "value_type": "percent",
       "dimension": "Financial",
       "typical_tier": "VERIFIED",
@@ -74,6 +79,7 @@
     },
     "invoice_accuracy": {
       "class": "scored",
+      "requirement": "expected",
       "value_type": "percent",
       "dimension": "Financial",
       "typical_tier": "VERIFIED",
@@ -83,6 +89,7 @@
     },
     "roadmap_alignment": {
       "class": "scored",
+      "requirement": "expected",
       "value_type": "score",
       "dimension": "Strategic",
       "typical_tier": "REPORTED",
@@ -92,6 +99,7 @@
     },
     "renewal_intent": {
       "class": "scored",
+      "requirement": "expected",
       "value_type": "enum",
       "dimension": "Strategic",
       "typical_tier": "REPORTED",
@@ -101,6 +109,7 @@
     },
     "annual_value": {
       "class": "structural",
+      "requirement": "expected",
       "value_type": "money",
       "dimension": "Financial",
       "typical_tier": "PRIMARY",
@@ -115,6 +124,7 @@
     },
     "invoice_amount": {
       "class": "structural",
+      "requirement": "optional",
       "value_type": "money",
       "dimension": "Financial",
       "typical_tier": "VERIFIED",
@@ -128,6 +138,7 @@
     },
     "renewal_date": {
       "class": "structural",
+      "requirement": "expected",
       "value_type": "date",
       "dimension": "",
       "typical_tier": "PRIMARY",
@@ -142,6 +153,7 @@
     },
     "notice_period": {
       "class": "structural",
+      "requirement": "optional",
       "value_type": "duration",
       "dimension": "",
       "typical_tier": "PRIMARY",
@@ -150,6 +162,7 @@
     },
     "auto_renewal": {
       "class": "structural",
+      "requirement": "optional",
       "value_type": "bool",
       "dimension": "",
       "typical_tier": "PRIMARY",
@@ -158,6 +171,7 @@
     },
     "payment_terms": {
       "class": "structural",
+      "requirement": "expected",
       "value_type": "enum",
       "dimension": "Financial",
       "typical_tier": "PRIMARY",
@@ -172,6 +186,7 @@
     },
     "liability_cap": {
       "class": "structural",
+      "requirement": "optional",
       "value_type": "money",
       "dimension": "",
       "typical_tier": "PRIMARY",
@@ -180,6 +195,7 @@
     },
     "contract_on_file": {
       "class": "structural",
+      "requirement": "expected",
       "value_type": "bool",
       "dimension": "",
       "typical_tier": "PRIMARY",
