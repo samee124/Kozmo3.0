@@ -419,20 +419,23 @@ public sealed class SqliteEntityStore : IEntityStore, IRegistryStore, ICheckInRo
     /// boot-time re-registration into EntityRegistry — without this, a vendor discovered by a
     /// prior process instance vanishes from /vendors on restart even though its beliefs/checkins
     /// remain in SQLite (LoadVendorsAsync deliberately excludes them; see its doc comment).
-    /// Rows are deduped per comparison_key (falling back to canonical_name), preferring whichever
-    /// duplicate has beliefs recorded — a re-run can leave behind an empty duplicate row, and that
-    /// one should never win over the real one just for being newer.
+    /// Rows are deduped per comparison_key (falling back to canonical_name); tiebreak matches
+    /// <see cref="LoadKyvVendorsByProgramAsync"/> exactly (assessed-state, then belief count, then
+    /// recency) — this is the query that populates EntityRegistry at boot, so GET /vendors/{id}
+    /// (which reads EntityRegistry.GetEntity, not the vendors table directly) would otherwise keep
+    /// resolving to whichever duplicate this method picks, regardless of which one is fixed there.
     /// </summary>
     public Task<IReadOnlyList<(Guid Id, string Name, DateTimeOffset? RenewalDate)>> LoadAllKyvVendorsAsync()
     {
         using var cmd = _conn.CreateCommand();
         cmd.CommandText = @"
             SELECT v.id, v.canonical_name, v.renewal_date, v.comparison_key, v.created_at,
-                   (SELECT COUNT(*) FROM beliefs b WHERE b.entity_id = v.id) AS belief_count
+                   (SELECT COUNT(*) FROM beliefs b WHERE b.entity_id = v.id) AS belief_count,
+                   (SELECT COUNT(*) FROM entity_indices ei WHERE ei.entity_id = v.id) AS index_count
             FROM vendors v
             WHERE v.program_run_id IS NOT NULL";
 
-        var rows = new List<(Guid Id, string Name, DateTimeOffset? Renewal, string GroupKey, DateTimeOffset CreatedAt, long BeliefCount)>();
+        var rows = new List<(Guid Id, string Name, DateTimeOffset? Renewal, string GroupKey, DateTimeOffset CreatedAt, long BeliefCount, long IndexCount)>();
         using (var reader = cmd.ExecuteReader())
         {
             while (reader.Read())
@@ -444,13 +447,18 @@ public sealed class SqliteEntityStore : IEntityStore, IRegistryStore, ICheckInRo
                 var comparisonKey = reader.IsDBNull(3) ? name : reader.GetString(3);
                 var createdAt    = DateTimeOffset.Parse(reader.GetString(4));
                 var beliefCount  = reader.GetInt64(5);
-                rows.Add((id, name, renewal, comparisonKey, createdAt, beliefCount));
+                var indexCount   = reader.GetInt64(6);
+                rows.Add((id, name, renewal, comparisonKey, createdAt, beliefCount, indexCount));
             }
         }
 
         var deduped = rows
             .GroupBy(r => r.GroupKey, StringComparer.OrdinalIgnoreCase)
-            .Select(g => g.OrderByDescending(r => r.BeliefCount).ThenByDescending(r => r.CreatedAt).First())
+            .Select(g => g
+                .OrderByDescending(r => r.IndexCount > 0)
+                .ThenByDescending(r => r.BeliefCount)
+                .ThenByDescending(r => r.CreatedAt)
+                .First())
             .Select(r => (r.Id, r.Name, r.Renewal))
             .ToList();
 
@@ -478,6 +486,11 @@ public sealed class SqliteEntityStore : IEntityStore, IRegistryStore, ICheckInRo
     /// Loads every KYV-discovered vendor belonging to <paramref name="programId"/>, across all of
     /// that program's runs — the program-scoped counterpart to <see cref="LoadAllKyvVendorsAsync"/>,
     /// same dedup-by-comparison-key discipline (a re-run can leave behind an empty duplicate row).
+    /// Tiebreak (not identity resolution — the comparison_key grouping itself is untouched, this
+    /// only orders which surviving duplicate wins): prefer a duplicate that has actually been
+    /// assessed (a persisted Index — see IEntityStore.SaveIndexAsync) over one that hasn't, since a
+    /// real, banded posture is more useful to surface than raw belief volume. Belief count, then
+    /// recency, remain the tiebreak among duplicates tied on assessed-state.
     /// </summary>
     public Task<IReadOnlyList<(Guid Id, string Name, DateTimeOffset? RenewalDate)>> LoadKyvVendorsByProgramAsync(
         Guid programId)
@@ -485,12 +498,13 @@ public sealed class SqliteEntityStore : IEntityStore, IRegistryStore, ICheckInRo
         using var cmd = _conn.CreateCommand();
         cmd.CommandText = @"
             SELECT v.id, v.canonical_name, v.renewal_date, v.comparison_key, v.created_at,
-                   (SELECT COUNT(*) FROM beliefs b WHERE b.entity_id = v.id) AS belief_count
+                   (SELECT COUNT(*) FROM beliefs b WHERE b.entity_id = v.id) AS belief_count,
+                   (SELECT COUNT(*) FROM entity_indices ei WHERE ei.entity_id = v.id) AS index_count
             FROM vendors v
             WHERE v.program_id = @program_id";
         cmd.Parameters.AddWithValue("@program_id", programId.ToString());
 
-        var rows = new List<(Guid Id, string Name, DateTimeOffset? Renewal, string GroupKey, DateTimeOffset CreatedAt, long BeliefCount)>();
+        var rows = new List<(Guid Id, string Name, DateTimeOffset? Renewal, string GroupKey, DateTimeOffset CreatedAt, long BeliefCount, long IndexCount)>();
         using (var reader = cmd.ExecuteReader())
         {
             while (reader.Read())
@@ -502,13 +516,18 @@ public sealed class SqliteEntityStore : IEntityStore, IRegistryStore, ICheckInRo
                 var comparisonKey = reader.IsDBNull(3) ? name : reader.GetString(3);
                 var createdAt    = DateTimeOffset.Parse(reader.GetString(4));
                 var beliefCount  = reader.GetInt64(5);
-                rows.Add((id, name, renewal, comparisonKey, createdAt, beliefCount));
+                var indexCount   = reader.GetInt64(6);
+                rows.Add((id, name, renewal, comparisonKey, createdAt, beliefCount, indexCount));
             }
         }
 
         var deduped = rows
             .GroupBy(r => r.GroupKey, StringComparer.OrdinalIgnoreCase)
-            .Select(g => g.OrderByDescending(r => r.BeliefCount).ThenByDescending(r => r.CreatedAt).First())
+            .Select(g => g
+                .OrderByDescending(r => r.IndexCount > 0)
+                .ThenByDescending(r => r.BeliefCount)
+                .ThenByDescending(r => r.CreatedAt)
+                .First())
             .Select(r => (r.Id, r.Name, r.Renewal))
             .ToList();
 

@@ -459,8 +459,15 @@ app.MapPost("/vendors/vendor-file/upload-contract", async (
         DriveFileId: null,
         IngestedAt:  DemoClock.AsOf), default);
 
-    // Recompute posture so the vendor-file Razor page sees fresh state on arrival
-    await f.RecomputeVendorAsync(vendorId);
+    // Recompute posture so the vendor-file Razor page sees fresh state on arrival — persisted the
+    // same way Kyv.ProgramRunner Stage 9 persists it, so GET /vendors/{id} sees it too (previously
+    // discarded; RecomputeVendorAsync itself never persists — see IIiFacade.cs doc comment).
+    var judgement = await f.RecomputeVendorAsync(vendorId);
+    if (judgement is not null)
+    {
+        await storeInst.SaveIndexAsync(judgement.Index);
+        await storeInst.AppendPostureAsync(judgement.Posture);
+    }
 
     return Results.Ok(new { vendorId = vendorId.ToString(), documentId = documentId.ToString() });
 });
@@ -604,7 +611,7 @@ app.MapPost("/checkins/{id}/answer", async (
     var writeSvc   = new VendorFileWriteService(storeInst, profile);
     await processSvc.ProcessAsync(
         guid, checkInStore, new IdentityRegistry(storeInst), writeSvc, f, profile,
-        DateTimeOffset.UtcNow);
+        DateTimeOffset.UtcNow, entityStore: storeInst);
 
     return Results.Ok(new { outcome = "Ok", checkInId = answer.Updated!.CheckInId });
 });

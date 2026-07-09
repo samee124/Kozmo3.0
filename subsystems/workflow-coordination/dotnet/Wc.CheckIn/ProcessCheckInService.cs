@@ -3,6 +3,7 @@ using Ii.Contracts;
 using Ii.Observation;
 using Kozmo.Contracts;
 using Kozmo.Contracts.Config;
+using Kozmo.Contracts.Interfaces;
 using Km.Store;
 using Wc.Contracts;
 
@@ -33,7 +34,15 @@ public sealed class ProcessCheckInService
         IIiFacade             facade,
         SaasProfile           profile,
         DateTimeOffset        now,
-        CancellationToken     ct = default)
+        CancellationToken     ct = default,
+        // E2 loop-closure — optional. When supplied, a DIMENSION_GAP answer's recompute is
+        // persisted the same way Kyv.ProgramRunner Stage 9 persists it (SaveIndexAsync +
+        // AppendPostureAsync), so /vendors/{id} and /vendors/{id}/trail see it immediately
+        // instead of staying 404/not-assessed forever. Null (the default) preserves the exact
+        // prior read-only-recompute behavior — every existing caller that doesn't pass one is
+        // unaffected. IDENTITY_CONFIRM's own recomputes (MergeVendorsAsync/LiftBothToConfirmedAsync)
+        // are untouched — out of scope here (identity resolution, not this loop).
+        IEntityStore?         entityStore = null)
     {
         // ── §5 wrong-match guard ──────────────────────────────────────────────
         var checkIn = await checkInStore.GetAsync(checkInId, ct);
@@ -55,7 +64,12 @@ public sealed class ProcessCheckInService
 
             case CheckInKind.DIMENSION_GAP:
                 await ProcessDimensionGapAsync(checkIn, writeService, profile, now, ct);
-                await facade.RecomputeVendorAsync(affectedVendorId, ct);
+                var judgement = await facade.RecomputeVendorAsync(affectedVendorId, ct);
+                if (judgement is not null && entityStore is not null)
+                {
+                    await entityStore.SaveIndexAsync(judgement.Index, ct);
+                    await entityStore.AppendPostureAsync(judgement.Posture, ct);
+                }
                 break;
         }
 

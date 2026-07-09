@@ -571,6 +571,7 @@ body{
   .vendor-overview-grid{display:grid;grid-template-columns:1.7fr 1fr;gap:var(--s5);align-items:start}
   .vendor-card{background:var(--surface);border:1px solid var(--line-1);border-radius:var(--r-lg);padding:var(--s6);box-shadow:var(--shadow-sm)}
   .vendor-card h4{font-size:var(--t-h3);font-weight:700;color:var(--ink-0);margin-bottom:var(--s3)}
+  .mock-tag{font-size:11px;font-weight:400;color:var(--ink-4);text-transform:none;letter-spacing:normal}
   .vendor-card p{color:var(--ink-3);line-height:1.75}
   .vendor-card small{display:block;color:var(--ink-4);margin-top:var(--s2)}
   .vendor-status-line{display:grid;grid-template-columns:1fr auto;gap:var(--s4);align-items:center}
@@ -1284,7 +1285,7 @@ body{
                         </ul>
                       </div>
                       <div class="vendor-card" style="margin-top:var(--s5)">
-                        <h4>Data &amp; Signals</h4>
+                        <h4>Data &amp; Signals <span class="mock-tag">(placeholder — not yet wired)</span></h4>
                         <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--s4)">
                           <div>
                             <div class="snapshot-row"><span class="snapshot-label">SPEND YTD</span><span class="snapshot-value" id="detail-spend-data">$39,300</span></div>
@@ -1301,7 +1302,7 @@ body{
                     </div>
                     <div class="vendor-detail-subpanel" id="vendor-detail-sub-analysis">
                       <div class="vendor-card">
-                        <h4>Questions &amp; Answers</h4>
+                        <h4>Questions &amp; Answers <span class="mock-tag">(placeholder — not yet wired)</span></h4>
                         <div id="detail-qa"></div>
                       </div>
                       <div class="vendor-card" style="margin-top:var(--s5)">
@@ -1315,13 +1316,13 @@ body{
                     </div>
                     <div class="vendor-detail-subpanel" id="vendor-detail-sub-artifacts">
                       <div class="vendor-card">
-                        <h4>Generated Artifacts</h4>
+                        <h4>Generated Artifacts <span class="mock-tag">(placeholder — not yet wired)</span></h4>
                         <div id="detail-artifacts"></div>
                       </div>
                     </div>
                     <div class="vendor-detail-subpanel" id="vendor-detail-sub-plan">
                       <div class="vendor-card">
-                        <h4>Action Plan</h4>
+                        <h4>Action Plan <span class="mock-tag">(placeholder — not yet wired)</span></h4>
                         <ol class="plan-list" id="detail-plan" style="list-style:none;padding:0;margin:0"></ol>
                       </div>
                       <div class="vendor-card" style="margin-top:var(--s5)">
@@ -1334,13 +1335,13 @@ body{
                         </div>
                       </div>
                       <div class="vendor-card" style="margin-top:var(--s5)">
-                        <h4>Communications</h4>
+                        <h4>Communications <span class="mock-tag">(placeholder — not yet wired)</span></h4>
                         <div id="detail-comms"></div>
                       </div>
                     </div>
                     <div class="vendor-detail-subpanel" id="vendor-detail-sub-memory">
                       <div class="vendor-card">
-                        <h4>Current State</h4>
+                        <h4>Current State <span class="mock-tag">(placeholder — not yet wired)</span></h4>
                         <div class="vendor-snapshot" id="detail-memory-state"></div>
                       </div>
                       <div class="vendor-card" style="margin-top:var(--s5)">
@@ -1348,7 +1349,7 @@ body{
                         <div id="detail-decisions"></div>
                       </div>
                       <div class="vendor-card" style="margin-top:var(--s5)">
-                        <h4>Activity Ledger</h4>
+                        <h4>Activity Ledger <span class="mock-tag">(placeholder — not yet wired)</span></h4>
                         <div id="detail-ledger"></div>
                       </div>
                     </div>
@@ -2493,6 +2494,49 @@ function loadRealVendorDetail(vendorId) {
 
   loadVendorCheckins(vendorId);
   loadVendorEvidence(vendorId);
+  loadVendorIndex(vendorId);
+}
+
+// Real, computed Index (GET /vendors/{id} -> IndexViewDto) for the Scores & Metrics panel and the
+// Overview snapshot row. A dimension with beliefCount === 0 has never been assessed — rendered as
+// "Not assessed", never as its neutral 0.5 placeholder score, which would look like a real (if
+// mediocre) measurement. 404 (no persisted Index yet — vendor is honestly not-assessed) and any
+// fetch failure both fall back to the same honest "Not assessed" render, never an error state.
+var ALL_DIMENSIONS = ['Operational', 'Experiential', 'Financial', 'Strategic'];
+
+function loadVendorIndex(vendorId) {
+  fetch('/vendors/' + vendorId)
+    .then(function(r) { return r.ok ? r.json() : null; })
+    .then(function(vd) {
+      if (vd && vd.index) renderRealIndex(vd.index);
+      else renderNotAssessedIndex();
+    })
+    .catch(function() { renderNotAssessedIndex(); });
+}
+
+function renderNotAssessedIndex() {
+  setTxt('detail-cri', 'Not assessed');
+  setTxt('detail-cri-delta', '');
+  renderScores('detail-scores', ALL_DIMENSIONS.map(function(name) {
+    return { value: 'Not assessed', label: name, cls: '' };
+  }));
+}
+
+function renderRealIndex(index) {
+  setTxt('detail-cri', index.band + ' · composite ' + index.composite.toFixed(2));
+  setTxt('detail-cri-delta', '');
+  var byDim = {};
+  (index.dimensions || []).forEach(function(d) { byDim[d.dimension] = d; });
+  renderScores('detail-scores', ALL_DIMENSIONS.map(function(name) {
+    var d = byDim[name];
+    if (!d || d.beliefCount === 0) return { value: 'Not assessed', label: name, cls: '' };
+    var pct = Math.round(d.score * 100);
+    return {
+      value: pct + '%',
+      label: name + ' (conf ' + d.confidence.toFixed(2) + ')',
+      cls: pct >= 70 ? 'good' : pct < 40 ? 'warn' : ''
+    };
+  }));
 }
 
 // Real contract clauses (E1 metadata) for one vendor — quoted derivations, never fabricated.
