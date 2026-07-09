@@ -33,6 +33,35 @@ public sealed class ProcessCheckInServiceTests
         HalfLifeDays:        new Dictionary<string, int>(),
         EntityResolution:    new EntityResolutionConfig("exact", 0.85, new Dictionary<string, string>()));
 
+    // E2 bridge fixture — mirrors the real catalogue/scoring_rubric.saas.v1.json entries for
+    // sla_uptime/uptime_sla and csat/csat_score exactly (same bands), so these tests prove the
+    // real banding behavior, not a fixture invented for the test.
+    private static readonly SaasProfile BoundProfile = EmptyProfile with
+    {
+        ClaimKeyCatalogue = new Dictionary<string, ClaimKeyDefinition>
+        {
+            ["sla_uptime"] = new("scored", "percent", "Operational", "Verified", 30, 0.25) { RubricCriterion = "uptime_sla" },
+            ["csat"]       = new("scored", "rating",  "Experiential", "Reported", 60, 0.25) { RubricCriterion = "csat_score" },
+        },
+        ScoringRubric = new Dictionary<string, CriterionRubric>
+        {
+            ["uptime_sla"] = new("numeric", new List<RubricThreshold>
+            {
+                new(99.5, 100.0, 1.00),
+                new(99.0, 99.5,  0.80),
+                new(98.0, 99.0,  0.45),
+                new(95.0, 98.0,  0.25),
+                new(0.0,  95.0,  0.10),
+            }, null),
+            ["csat_score"] = new("numeric", new List<RubricThreshold>
+            {
+                new(4.5, 5.0, 1.00),
+                new(4.0, 4.5, 0.80),
+                new(1.0, 2.0, 0.15),
+            }, null),
+        },
+    };
+
     // ── helpers ───────────────────────────────────────────────────────────────
 
     private static CheckIn IdentityCheckIn(Guid ciId, PendingStatus status, string responseValue, Guid pairedId) =>
@@ -65,6 +94,23 @@ public sealed class ProcessCheckInServiceTests
             AnsweredAt:     status == PendingStatus.ANSWERED ? Now.AddHours(1) : null,
             ExpiresAt:      null,
             ResponseValue:  status == PendingStatus.ANSWERED ? "0.99" : null);
+
+    private static CheckIn BoundDimGapCheckIn(
+        Guid ciId, Guid vendorId, string targetClaimKey, string responseValue) =>
+        new(CheckInId:      ciId,
+            VendorId:       vendorId,
+            ProgramRunId:   RunId,
+            Kind:           CheckInKind.DIMENSION_GAP,
+            Question:       "What is the vendor's contracted uptime SLA percentage?",
+            ResponseShape:  ResponseShape.TYPED_VALUE,
+            TargetField:    "saas.op.l1.2",
+            Owner:          "analyst@test",
+            Status:         PendingStatus.ANSWERED,
+            RaisedAt:       Now,
+            AnsweredAt:     Now.AddHours(1),
+            ExpiresAt:      null,
+            ResponseValue:  responseValue,
+            TargetClaimKey: targetClaimKey);
 
     private static CanonicalVendor TriageVendor(Guid id, string name) => new(
         VendorId:          id,
@@ -345,6 +391,76 @@ public sealed class ProcessCheckInServiceTests
         var open = await checkInStore.GetOpenAsync();
         Assert.Single(open);
         Assert.Equal(ciId2, open[0].CheckInId);
+    }
+
+    // ── 8. E2 bridge — bound question writes a real, scored, dimension-correct belief ──────────
+
+    [Fact]
+    public async Task CheckIn_BoundQuestion_AnswerBands_WritesRealDimensionAndScoredValue()
+    {
+        var entityStore  = new InMemoryEntityStore();
+        var checkInStore = new InMemoryCheckInStore();
+        var ciId         = Guid.NewGuid();
+        await checkInStore.SaveAsync(BoundDimGapCheckIn(ciId, RegulusId, "sla_uptime", "99.9"));
+
+        await Svc().ProcessAsync(ciId, checkInStore,
+            new InMemoryIdentityRegistry(),
+            new VendorFileWriteService(entityStore, BoundProfile),
+            new TrackingFacade(), BoundProfile, Now);
+
+        var belief = Assert.Single(entityStore.AllBeliefs);
+        Assert.Equal(Dimension.Operational, belief.Dimension); // NOT the Financial default
+        Assert.Equal("sla_uptime", belief.ClaimKey);
+        Assert.Equal("sla_uptime", belief.Criterion);           // same convention as BeliefPersistenceStage
+        Assert.Equal(1.00, belief.Value);                       // 99.9% banded via uptime_sla thresholds
+        Assert.Equal(SourceTier.Confirmed, belief.SourceTier);
+        Assert.Equal(0.65, belief.Confidence);
+        Assert.Equal(ciId, belief.Provenance!.EvidenceId);
+    }
+
+    [Fact]
+    public async Task CheckIn_BoundQuestion_OutOfDomainAnswer_FallsBackToUnboundBehavior()
+    {
+        // csat_score only bands 1.0-5.0; an NPS-scale answer (45) is out of that domain.
+        // ScoreFromRubric abstains (null) — the fix must NOT fabricate a score from it.
+        var entityStore  = new InMemoryEntityStore();
+        var checkInStore = new InMemoryCheckInStore();
+        var ciId         = Guid.NewGuid();
+        await checkInStore.SaveAsync(BoundDimGapCheckIn(ciId, RegulusId, "csat", "45"));
+
+        await Svc().ProcessAsync(ciId, checkInStore,
+            new InMemoryIdentityRegistry(),
+            new VendorFileWriteService(entityStore, BoundProfile),
+            new TrackingFacade(), BoundProfile, Now);
+
+        var belief = Assert.Single(entityStore.AllBeliefs);
+        // Exact legacy fallback: TargetField ("saas.op.l1.2") isn't a catalogue key, so dimension
+        // defaults to Financial and value is the present/positive signal — never a fabricated band.
+        Assert.Equal(Dimension.Financial, belief.Dimension);
+        Assert.Equal("saas.op.l1.2", belief.ClaimKey);
+        Assert.Equal(1.0, belief.Value);
+        Assert.Equal(SourceTier.Confirmed, belief.SourceTier);
+    }
+
+    [Fact]
+    public async Task CheckIn_UnboundQuestion_TargetClaimKeyNull_UnchangedLegacyBehavior()
+    {
+        // Regression guard: a check-in with no TargetClaimKey (every question before this fix,
+        // and every question that stays unbound) must write byte-identical output to before.
+        var entityStore  = new InMemoryEntityStore();
+        var checkInStore = new InMemoryCheckInStore();
+        var ciId         = Guid.NewGuid();
+        await checkInStore.SaveAsync(DimGapCheckIn(ciId, RegulusId, PendingStatus.ANSWERED));
+
+        await Svc().ProcessAsync(ciId, checkInStore,
+            new InMemoryIdentityRegistry(),
+            new VendorFileWriteService(entityStore, BoundProfile),
+            new TrackingFacade(), BoundProfile, Now);
+
+        var belief = Assert.Single(entityStore.AllBeliefs);
+        Assert.Equal(Dimension.Financial, belief.Dimension);
+        Assert.Equal("human_answer", belief.ClaimKey);
+        Assert.Equal(1.0, belief.Value);
     }
 }
 

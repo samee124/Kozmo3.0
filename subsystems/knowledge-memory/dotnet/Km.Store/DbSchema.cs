@@ -109,7 +109,8 @@ internal static class DbSchema
             answered_at       TEXT,
             expires_at        TEXT,
             response_value    TEXT,
-            paired_vendor_id  TEXT
+            paired_vendor_id  TEXT,
+            target_claim_key  TEXT
         );
         CREATE INDEX IF NOT EXISTS ix_checkins_vendor
             ON checkins(vendor_id);

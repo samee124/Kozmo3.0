@@ -30,5 +30,6 @@ public sealed record CheckInRow(
     DateTimeOffset? AnsweredAt,
     DateTimeOffset? ExpiresAt,
     string?         ResponseValue,
-    Guid?           PairedVendorId = null
+    Guid?           PairedVendorId = null,
+    string?         TargetClaimKey = null
 );

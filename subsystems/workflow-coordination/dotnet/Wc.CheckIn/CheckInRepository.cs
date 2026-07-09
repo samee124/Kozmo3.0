@@ -32,7 +32,8 @@ public sealed class CheckInRepository : ICheckInStore
             AnsweredAt:     checkIn.AnsweredAt,
             ExpiresAt:      checkIn.ExpiresAt,
             ResponseValue:  checkIn.ResponseValue,
-            PairedVendorId: checkIn.PairedVendorId);
+            PairedVendorId: checkIn.PairedVendorId,
+            TargetClaimKey: checkIn.TargetClaimKey);
         await _store.SaveCheckInAsync(row, ct);
     }
 
@@ -68,5 +69,6 @@ public sealed class CheckInRepository : ICheckInStore
         AnsweredAt:     row.AnsweredAt,
         ExpiresAt:      row.ExpiresAt,
         ResponseValue:  row.ResponseValue,
-        PairedVendorId: row.PairedVendorId);
+        PairedVendorId: row.PairedVendorId,
+        TargetClaimKey: row.TargetClaimKey);
 }

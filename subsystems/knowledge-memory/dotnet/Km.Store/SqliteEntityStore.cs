@@ -1041,11 +1041,11 @@ public sealed class SqliteEntityStore : IEntityStore, IRegistryStore, ICheckInRo
             INSERT OR REPLACE INTO checkins
               (checkin_id, vendor_id, program_run_id, kind, question, response_shape,
                target_field, owner, status, raised_at, answered_at, expires_at,
-               response_value, paired_vendor_id)
+               response_value, paired_vendor_id, target_claim_key)
             VALUES
               (@checkin_id, @vendor_id, @program_run_id, @kind, @question, @response_shape,
                @target_field, @owner, @status, @raised_at, @answered_at, @expires_at,
-               @response_value, @paired_vendor_id)
+               @response_value, @paired_vendor_id, @target_claim_key)
             """;
         cmd.Parameters.AddWithValue("@checkin_id",       row.CheckInId.ToString());
         cmd.Parameters.AddWithValue("@vendor_id",        row.VendorId.ToString());
@@ -1061,6 +1061,7 @@ public sealed class SqliteEntityStore : IEntityStore, IRegistryStore, ICheckInRo
         cmd.Parameters.AddWithValue("@expires_at",       row.ExpiresAt.HasValue     ? row.ExpiresAt.Value.ToString("O")     : (object)DBNull.Value);
         cmd.Parameters.AddWithValue("@response_value",   row.ResponseValue          ?? (object)DBNull.Value);
         cmd.Parameters.AddWithValue("@paired_vendor_id", row.PairedVendorId.HasValue ? row.PairedVendorId.Value.ToString() : (object)DBNull.Value);
+        cmd.Parameters.AddWithValue("@target_claim_key", row.TargetClaimKey  ?? (object)DBNull.Value);
         cmd.ExecuteNonQuery();
         return Task.CompletedTask;
     }
@@ -1101,6 +1102,7 @@ public sealed class SqliteEntityStore : IEntityStore, IRegistryStore, ICheckInRo
     private static CheckInRow ReadCheckInRow(Microsoft.Data.Sqlite.SqliteDataReader reader)
     {
         var pairedCol = reader.GetOrdinal("paired_vendor_id");
+        var claimKeyCol = reader.GetOrdinal("target_claim_key");
         return new CheckInRow(
             CheckInId:      Guid.Parse(reader.GetString(reader.GetOrdinal("checkin_id"))),
             VendorId:       Guid.Parse(reader.GetString(reader.GetOrdinal("vendor_id"))),
@@ -1115,12 +1117,14 @@ public sealed class SqliteEntityStore : IEntityStore, IRegistryStore, ICheckInRo
             AnsweredAt:     reader.IsDBNull(reader.GetOrdinal("answered_at"))   ? null : DateTimeOffset.Parse(reader.GetString(reader.GetOrdinal("answered_at"))),
             ExpiresAt:      reader.IsDBNull(reader.GetOrdinal("expires_at"))    ? null : DateTimeOffset.Parse(reader.GetString(reader.GetOrdinal("expires_at"))),
             ResponseValue:  reader.IsDBNull(reader.GetOrdinal("response_value")) ? null : reader.GetString(reader.GetOrdinal("response_value")),
-            PairedVendorId: reader.IsDBNull(pairedCol) ? null : Guid.Parse(reader.GetString(pairedCol)));
+            PairedVendorId: reader.IsDBNull(pairedCol)   ? null : Guid.Parse(reader.GetString(pairedCol)),
+            TargetClaimKey: reader.IsDBNull(claimKeyCol) ? null : reader.GetString(claimKeyCol));
     }
 
     private void MigrateCheckInColumns()
     {
         TryAddColumn("checkins", "paired_vendor_id", "TEXT");
+        TryAddColumn("checkins", "target_claim_key", "TEXT");
     }
 
     private void MigrateOAuthTokenTable()

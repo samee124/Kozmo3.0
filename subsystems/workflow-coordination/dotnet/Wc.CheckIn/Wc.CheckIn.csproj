@@ -11,6 +11,11 @@
     <ProjectReference Include="..\..\..\knowledge-memory\dotnet\Km.Store\Km.Store.csproj" />
     <ProjectReference Include="..\..\..\identity-governance\dotnet\Ig.Contracts\Ig.Contracts.csproj" />
     <ProjectReference Include="..\..\..\interpretation-inference\dotnet\Ii.Contracts\Ii.Contracts.csproj" />
+    <!-- ObservationModule.ScoreFromRubric — the SAME numeric-band function BeliefPersistenceStage
+         uses for extracted beliefs; ProcessCheckInService reuses it to band a bound check-in
+         answer, so a claim key bands identically whether the evidence came from a document or a
+         human. Kyv.ProgramRunner already crosses this same seam (BeliefPersistenceStage). -->
+    <ProjectReference Include="..\..\..\interpretation-inference\dotnet\Ii.Observation\Ii.Observation.csproj" />
     <ProjectReference Include="..\..\..\..\libs\Kozmo.Contracts\Kozmo.Contracts.csproj" />
   </ItemGroup>
   <ItemGroup>

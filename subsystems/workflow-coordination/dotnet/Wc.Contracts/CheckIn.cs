@@ -23,7 +23,13 @@ public sealed record CheckIn(
     DateTimeOffset? AnsweredAt,
     DateTimeOffset? ExpiresAt,
     string?         ResponseValue,
-    Guid?           PairedVendorId = null   // IDENTITY_CONFIRM: the second entity in the pair
+    Guid?           PairedVendorId = null,  // IDENTITY_CONFIRM: the second entity in the pair
+    // E2 bridge — nullable. Copied from Question.TargetClaimKey by GapCheckInStage at raise time.
+    // When set, ProcessCheckInService resolves this claim_key_catalogue key's dimension and
+    // rubric_criterion and bands the answer into a real scored belief. Null (every DIMENSION_GAP
+    // check-in before this field existed, and every unbound question) keeps the exact prior
+    // present-field-only write.
+    string?         TargetClaimKey = null
 );
 
 /// <summary>
