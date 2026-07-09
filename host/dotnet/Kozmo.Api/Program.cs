@@ -46,6 +46,9 @@ var builder = WebApplication.CreateBuilder(args);
 
 var catalogueDir  = FindCatalogueDir();
 var profile       = new Catalogue().Load(catalogueDir);
+// E2.2a — boot-time coherence check Catalogue.Validate can't do itself (Km.Store must not
+// reference Ii.Completeness); see QuestionBankValidator's doc comment.
+QuestionBankValidator.ValidateBindings(profile);
 var dbPath        = Path.Combine(AppContext.BaseDirectory, "kozmo-demo.db");
 var store         = new SqliteEntityStore($"Data Source={dbPath}", profile);
 // E1 Part 7 Step 5 wiring — same db file as SqliteEntityStore, own table (document_metadata), own

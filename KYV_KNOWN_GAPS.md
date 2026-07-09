@@ -687,3 +687,26 @@ not addressed by this decision.
 
 REVISIT: as a dedicated identity-resolution phase, owned with Dev A (Ig.Resolution), addressing role-
 filtering, fuzzy-match calibration, and email-derived collision handling together — not piecemeal.
+
+## FINDING (E2.2 diagnosis, 2026-07-09): dispute_rate — a second fully-dead rubric criterion
+
+Same shape as escalation_count above, but distinct and additive: `dispute_rate` (in
+scoring_rubric.saas.v1.json) has **no catalogue claim key** (no `rubric_criterion` field anywhere
+points at it, and no claim key's own name coincides with it) **and no classification.saas.v1.json
+rule** either. Unlike escalation_count (which at least has a documented extraction-difficulty
+deferral above), dispute_rate has never had anything reach it — not deferred, just never wired.
+Fully unreachable by any path in the system today. For E2.3+ awareness alongside the usage_trend
+orphan (E2.1) and escalation_count.
+
+## FINDING (E2.2 diagnosis, 2026-07-09): notice_period / liability_cap — claim-key vs metadata-field name collision
+
+`notice_period` and `liability_cap` each name **two independent things** that happen to share a
+string: a claim key in claim_key_catalogue.saas.v1.json (class=structural, extracted into the
+`beliefs` table, Confidence forced to 0 by VendorFileWriteService, never actually referenced by any
+extraction schema's `claim_keys` array — so this half is itself unreachable via document/email
+extraction today) and a metadata field in metadata_field_catalogue.saas.v1.json (extracted via
+msa's `commercial_terms` metadata_field_group into the separate `document_metadata` store, never
+scored, never a belief). Two different pipelines, two different storage tables, one shared name —
+not by design, by coincidence. Ambiguous on any drill-down/audit view that shows the raw key name
+without saying which catalogue it came from. Flag for later disambiguation (rename one, or fold the
+claim-key half into the metadata-field half since the claim-key half is already unreachable).

@@ -77,6 +77,48 @@ public sealed class VendorFileTests
         Assert.Equal(12, profile.ExpectedBeliefSets["saas_vendor"].Count);
     }
 
+    // ── E2.2a — extraction-schema coherence (Catalogue.ValidateExtractionSchemaKeys) ────────────
+
+    [Fact, Trait("Category", "VendorFile")]
+    public void Catalogue_RealConfig_ExtractionSchemaKeys_AllResolve()
+    {
+        // The real config must pass cleanly — this is the CRITICAL constraint E2.2a is built
+        // under. Load() already runs this check internally; asserting no throw here pins it.
+        var profile = new Catalogue().Load(CataloguePath);
+        Assert.NotNull(profile); // Load() would have thrown already if a schema key didn't resolve
+    }
+
+    [Fact, Trait("Category", "VendorFile")]
+    public void ValidateExtractionSchemaKeys_UnknownKeyInSchema_Throws()
+    {
+        var profile = new Catalogue().Load(CataloguePath);
+        var badProfile = profile with
+        {
+            ExtractionSchemas = new Dictionary<string, ExtractionSchema>
+            {
+                ["bad_doc_type"] = new(["totally_nonexistent_claim_key"], [])
+            }
+        };
+
+        var ex = Assert.Throws<InvalidOperationException>(
+            () => Catalogue.ValidateExtractionSchemaKeys(badProfile));
+        Assert.Contains("bad_doc_type", ex.Message);
+        Assert.Contains("totally_nonexistent_claim_key", ex.Message);
+    }
+
+    [Fact, Trait("Category", "VendorFile")]
+    public void ValidateExtractionSchemaKeys_UnknownKeyInDefaultSchema_Throws()
+    {
+        var profile = new Catalogue().Load(CataloguePath);
+        var badProfile = profile with
+        {
+            DefaultExtractionSchema = new(["totally_nonexistent_claim_key"], [])
+        };
+
+        Assert.Throws<InvalidOperationException>(
+            () => Catalogue.ValidateExtractionSchemaKeys(badProfile));
+    }
+
     [Fact, Trait("Category", "VendorFile")]
     public void Belief_VendorFileFields_CompileAndDefault()
     {

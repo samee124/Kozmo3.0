@@ -419,9 +419,37 @@ public sealed class Catalogue : ICatalogue
                     $"New: [{string.Join(", ", newSet.OrderBy(x => x, StringComparer.Ordinal))}].");
         }
 
+        // 10. HARD FAIL: every extraction schema's claim_keys entry must name a real catalogue
+        // claim key. BeliefExtractionPrompt.BuildSystem / EmailInterpretationPrompt.BuildBeliefSystem
+        // already throw on an unknown key — but only lazily, the first time that specific doc-type
+        // (or email) schema is actually used for a real extraction. This surfaces the identical
+        // error at boot, for every schema, unconditionally — an unknown key should never ship
+        // waiting to be discovered days later by whichever document type happens to trip it first.
+        ValidateExtractionSchemaKeys(p);
+
         foreach (var w in warnings)
             Console.WriteLine($"[Catalogue] WARNING: {w}");
 
         return warnings;
+    }
+
+    /// <summary>
+    /// E2.2a — public and pure (profile in, throws or returns) so it's independently testable
+    /// without going through file-based Load(). Called from Validate() above for the real config.
+    /// </summary>
+    public static void ValidateExtractionSchemaKeys(SaasProfile p)
+    {
+        CheckSchema("default", p.DefaultExtractionSchema.BeliefKeys);
+        foreach (var (schemaName, schema) in p.ExtractionSchemas)
+            CheckSchema(schemaName, schema.BeliefKeys);
+
+        void CheckSchema(string schemaName, IReadOnlyList<string> beliefKeys)
+        {
+            foreach (var key in beliefKeys)
+                if (!p.ClaimKeyCatalogue.ContainsKey(key))
+                    throw new InvalidOperationException(
+                        $"Catalogue coherence: extraction schema '{schemaName}' references claim key " +
+                        $"'{key}', which does not exist in claim_key_catalogue.saas.v1.json.");
+        }
     }
 }
