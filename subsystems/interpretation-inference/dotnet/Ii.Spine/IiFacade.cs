@@ -190,13 +190,19 @@ public sealed class IiFacade : IIiFacade
         var decayed  = allBeliefs.Select(b => _decay.WithCurrentFreshness(b, _profile, now)).ToList();
         var anchored = AnchorConfidences(decayed, allHistory, now);
 
+        // Must pass the entity's actual current index as `previous`, same as RecomputeIndexAsync's
+        // full-aggregate branch — otherwise Build() always stamps Version=1 (previous?.Version ?? 0)
+        // regardless of existing history, colliding with an already-persisted version 1 row and
+        // breaking GetTrajectoryAsync's per-version posture lookup.
+        var previous = await _store.GetIndexAsync(entityId, ct);
+
         var scores   = BuildAllDimensionScores(entityId, anchored);
-        var index    = _index.Aggregate(entityId, scores, anchored, null, _profile, now);
+        var index    = _index.Aggregate(entityId, scores, anchored, previous, _profile, now);
         if (index is null) return null; // no dimension has scored evidence — nothing to band
 
         var entity   = _registry.GetEntity(entityId);
         var meta     = ComputeMeta(entityId, decayed, anchored, allHistory, now);
-        var posture  = _posture.Assign(index, null, entity?.RenewalDate, _profile, now, meta);
+        var posture  = _posture.Assign(index, previous, entity?.RenewalDate, _profile, now, meta);
         var mgmt     = ComputeManagementBlock(entityId, decayed, allBeliefs, scores, meta);
 
         // Phase 5: Q&A completeness convergence — synchronous, in the same recompute pass.
