@@ -186,6 +186,64 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,[t
 .history-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:28px}
 .history-svg-wrap svg{width:100%;height:220px}
 
+/* ── contract evidence ── */
+.evidence-panel{margin-bottom:40px}
+.evidence-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px 20px;margin-bottom:10px}
+.evidence-card-top{display:flex;align-items:center;gap:10px;margin-bottom:4px;flex-wrap:wrap}
+.evidence-field{font-weight:600;font-size:var(--t-card)}
+.evidence-doctype{font-size:var(--t-eyebrow);color:var(--muted);text-transform:uppercase;letter-spacing:.06em;background:var(--canvas);border:1px solid var(--line);border-radius:999px;padding:2px 8px}
+.evidence-source-link{font-size:var(--t-secondary);font-weight:600;color:var(--accent)}
+.evidence-source-link:hover{text-decoration:underline}
+.evidence-value{font-size:var(--t-card);color:var(--ink);margin-bottom:2px}
+.evidence-derivation{font-size:var(--t-secondary);color:var(--muted);font-style:italic}
+
+/* ── completeness ── */
+.completeness-panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:24px;margin-bottom:40px}
+.completeness-summary{font-size:var(--t-card);font-weight:600;margin-bottom:12px}
+.completeness-bar-track{height:8px;border-radius:6px;background:var(--line);overflow:hidden;margin-bottom:16px}
+.completeness-bar-fill{height:100%;border-radius:6px;background:var(--accent);width:0;transition:width var(--tr)}
+.completeness-list{display:flex;flex-direction:column;gap:4px}
+.completeness-item{font-size:var(--t-secondary)}
+.completeness-item.completeness-known{color:var(--ink)}
+.completeness-item.completeness-gap{color:var(--muted)}
+
+/* ── document source viewer ── */
+.doc-overlay{position:fixed;inset:0;z-index:300;display:none;align-items:center;justify-content:center;background:rgba(20,23,31,.45)}
+.doc-overlay.open{display:flex}
+.doc-card{background:var(--surface);border-radius:var(--radius);box-shadow:0 12px 32px rgba(20,23,31,.2);width:min(560px,90vw);max-height:80vh;overflow:hidden;display:flex;flex-direction:column}
+.doc-card-top{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--line);font-family:var(--font-display);font-weight:600}
+.doc-body{padding:20px;white-space:pre-wrap;font-size:var(--t-secondary);color:var(--ink);line-height:1.6;overflow:auto}
+.doc-footer{padding:0 20px 20px}
+.doc-footer a{font-size:var(--t-secondary);font-weight:600;color:var(--accent)}
+.doc-footer a:hover{text-decoration:underline}
+
+/* ── authored questions (screen B) ── */
+.qa-item{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px 20px;margin-bottom:10px}
+.qa-question{font-size:var(--t-card);font-weight:500;margin-bottom:8px}
+.qa-answer{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.qa-answer-value{font-weight:600;font-size:var(--t-card)}
+.qa-not-reviewed{color:var(--notassessed);font-style:italic;font-size:var(--t-card)}
+
+/* ── complete the gaps ── */
+.gaps-panel{margin-bottom:40px}
+.gap-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px 20px;margin-bottom:10px}
+.gap-card.bound{border-color:var(--accent)}
+.gap-card-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:4px;flex-wrap:wrap}
+.gap-question{font-size:var(--t-card);font-weight:500}
+.gap-dim-tag{font-size:var(--t-eyebrow);color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.gap-scores-tag{font-size:var(--t-eyebrow);font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.06em;background:var(--accent-soft);border-radius:999px;padding:2px 10px}
+.gap-unbound-tag{font-size:var(--t-eyebrow);color:var(--muted);text-transform:uppercase;letter-spacing:.06em;background:var(--notassessed-bg);border-radius:999px;padding:2px 10px}
+.gap-unbound-note{font-size:var(--t-secondary);color:var(--muted);font-style:italic;margin-top:6px}
+.gap-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:10px}
+.gap-input{flex:1;min-width:160px;border:1px solid var(--line);border-radius:8px;padding:8px 12px;font-size:var(--t-body);color:var(--ink);background:var(--canvas)}
+.gap-select{flex:1;min-width:160px;border:1px solid var(--line);border-radius:8px;padding:8px 12px;font-size:var(--t-body);color:var(--ink);background:var(--canvas)}
+.gap-btn{background:var(--accent);color:#fff;border-radius:8px;padding:8px 18px;font-size:var(--t-secondary);font-weight:600;white-space:nowrap}
+.gap-btn:hover{background:#194b85}
+.gap-btn:disabled{opacity:.6;cursor:default}
+.gap-status{font-size:var(--t-secondary);color:var(--muted);flex-basis:100%}
+.gaps-empty{font-size:var(--t-secondary);color:var(--muted);font-style:italic}
+.gap-upload-btn{margin-top:10px;background:var(--notassessed-bg);color:var(--muted);border:1px dashed var(--line);border-radius:8px;padding:8px 18px;font-size:var(--t-secondary);font-weight:600;cursor:default}
+
 /* ── loading / toast ── */
 .updating-toast{position:fixed;bottom:24px;right:24px;background:var(--ink);color:#fff;padding:10px 18px;border-radius:8px;font-size:var(--t-secondary);opacity:0;transform:translateY(8px);transition:all var(--tr);pointer-events:none;z-index:200}
 .updating-toast.show{opacity:1;transform:none}
@@ -234,6 +292,15 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,[t
     <div class="section-title">Open check-ins</div>
     <div class="checkins-panel" id="checkins-panel"></div>
 
+    <div class="section-title">Complete the gaps</div>
+    <div class="gaps-panel" id="gaps-panel"></div>
+
+    <div class="section-title">Contract Evidence</div>
+    <div class="evidence-panel" id="contract-evidence-panel"></div>
+
+    <div class="section-title">Completeness</div>
+    <div class="completeness-panel" id="completeness-panel"></div>
+
     <div class="section-title">Recommended stance</div>
     <div class="stance-card" id="stance-card"></div>
 
@@ -261,6 +328,9 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,[t
       <div class="detail-score-big" id="detail-score">—</div>
       <div class="detail-bar-track"><div class="detail-bar-fill" id="detail-bar-fill"></div></div>
     </div>
+    <div class="section-title">Authored questions</div>
+    <div id="detail-questions"></div>
+
     <div class="section-title">What we know</div>
     <div id="detail-evidence"></div>
   </div>
@@ -277,6 +347,17 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,[t
 </div>
 
 <div class="updating-toast" id="updating-toast">Updating…</div>
+
+<div class="doc-overlay" id="doc-overlay">
+  <div class="doc-card">
+    <div class="doc-card-top">
+      <span id="doc-title">Source document</span>
+      <button class="detail-nav-btn" id="doc-close">✕</button>
+    </div>
+    <div class="doc-body" id="doc-body"></div>
+    <div class="doc-footer"><a id="doc-pdf-link" href="#" target="_blank" rel="noopener" style="display:none">View original PDF →</a></div>
+  </div>
+</div>
 
 <script>
 'use strict';
@@ -295,6 +376,8 @@ var S = {
   trajectory: [],
   checkins: [],
   metadata: [],
+  vendorFile: null,     // GET /vendors/{id}/vendor-file — completeness/gaps
+  questionsByDim: {},   // dimension -> GET /vendors/{id}/questions response, all 4 dimensions
   prevScores: {},       // dimension -> score, from before the most recent answer this session
   detailDim: null
 };
@@ -354,6 +437,8 @@ function init() {
   qs('detail-prev').onclick = function () { stepDimension(-1); };
   qs('detail-next').onclick = function () { stepDimension(1); };
   qs('view-history-link').onclick = function () { openHistory(); };
+  qs('doc-close').onclick = function () { closeDocumentSource(); };
+  qs('doc-overlay').onclick = function (e) { if (e.target === e.currentTarget) closeDocumentSource(); };
 }
 
 function loadVendor(vendorId) {
@@ -363,14 +448,25 @@ function loadVendor(vendorId) {
     fetch('/vendors/' + vendorId).then(function (r) { return r.ok ? r.json() : null; }),
     fetch('/vendors/' + vendorId + '/trajectory').then(function (r) { return r.ok ? r.json() : []; }),
     fetch('/checkins').then(function (r) { return r.ok ? r.json() : []; }),
-    fetch('/vendors/' + vendorId + '/metadata').then(function (r) { return r.ok ? r.json() : { clauses: [] }; })
+    fetch('/vendors/' + vendorId + '/metadata').then(function (r) { return r.ok ? r.json() : { clauses: [] }; }),
+    fetch('/vendors/' + vendorId + '/vendor-file').then(function (r) { return r.ok ? r.json() : null; }),
+    loadAllQuestions(vendorId)
   ]).then(function (results) {
     S.detail = results[0];
     S.trajectory = results[1] || [];
     S.checkins = (results[2] || []).filter(function (c) { return c.vendorId === vendorId; });
     S.metadata = (results[3] && results[3].clauses) || [];
+    S.vendorFile = results[4];
     renderAll();
   });
+}
+
+function loadAllQuestions(vendorId) {
+  return Promise.all(ALL_DIMENSIONS.map(function (dim) {
+    return fetch('/vendors/' + vendorId + '/questions?dimension=' + encodeURIComponent(dim))
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (data) { S.questionsByDim[dim] = data; });
+  }));
 }
 
 function renderAll() {
@@ -378,6 +474,9 @@ function renderAll() {
   renderImpactVectorHeader();
   renderDimensionsGrid();
   renderCheckins();
+  renderCompleteTheGaps();
+  renderContractEvidence();
+  renderCompleteness();
   renderStanceCard();
   switchView('view-main');
 }
@@ -624,14 +723,222 @@ function reloadAfterAnswer() {
   return Promise.all([
     fetch('/vendors/' + S.vendorId).then(function (r) { return r.ok ? r.json() : null; }),
     fetch('/vendors/' + S.vendorId + '/trajectory').then(function (r) { return r.ok ? r.json() : []; }),
-    fetch('/checkins').then(function (r) { return r.ok ? r.json() : []; })
+    fetch('/checkins').then(function (r) { return r.ok ? r.json() : []; }),
+    // Completeness (filled/gap keys) legitimately changes once a bound check-in writes a
+    // claim-keyed belief — re-fetch so the Completeness panel reflects the real new state.
+    fetch('/vendors/' + S.vendorId + '/vendor-file').then(function (r) { return r.ok ? r.json() : null; }),
+    loadAllQuestions(S.vendorId)
   ]).then(function (results) {
     S.detail = results[0];
     S.trajectory = results[1] || [];
     S.checkins = (results[2] || []).filter(function (c) { return c.vendorId === S.vendorId; });
+    S.vendorFile = results[3];
     hideToast();
     renderAll();
   });
+}
+
+/* ── Complete the gaps ── */
+function renderCompleteTheGaps() {
+  var el = qs('gaps-panel');
+  var rows = [];
+  ALL_DIMENSIONS.forEach(function (dim) {
+    var data = S.questionsByDim[dim];
+    if (!data || !data.questions) return;
+    data.questions.forEach(function (q) {
+      if (!q.answered) rows.push({ dimension: dim, q: q });
+    });
+  });
+
+  if (!rows.length) {
+    el.innerHTML = '<div class="gaps-empty">No open gaps — every authored question for this vendor has a real answer on file.</div>' +
+      '<button class="gap-upload-btn" disabled title="Not built yet — needs gap-targeted extraction">Upload supporting document (coming soon)</button>';
+    return;
+  }
+
+  el.innerHTML = rows.map(function (r) {
+    var q = r.q;
+    var bound = !!q.targetClaimKey;
+    var tag = bound
+      ? '<span class="gap-scores-tag">Scores this dimension</span>'
+      : '<span class="gap-unbound-tag">Not yet mapped to scoring</span>';
+    var body = bound
+      ? '<div class="gap-row" data-qid="' + esc(q.id) + '" data-dim="' + esc(r.dimension) + '" data-answertype="' + esc(q.answerType) + '">' +
+          gapInputHtml(q) +
+          '<button class="gap-btn">Answer</button>' +
+          '<span class="gap-status"></span>' +
+        '</div>'
+      : '<div class="gap-unbound-note">Answering this today would not move any score — the question isn\'t bound to a scoring claim key yet (E2.2c work). Answerable once mapped, coming soon.</div>';
+    return '<div class="gap-card ' + (bound ? 'bound' : '') + '">' +
+      '<div class="gap-card-top"><span class="gap-question">' + esc(q.text) + '</span>' + tag + '</div>' +
+      '<div class="gap-dim-tag">' + esc(r.dimension) + '</div>' +
+      body +
+      '</div>';
+  }).join('') +
+  '<button class="gap-upload-btn" disabled title="Not built yet — needs gap-targeted extraction">Upload supporting document (coming soon)</button>';
+
+  el.querySelectorAll('.gap-row').forEach(function (row) {
+    var btn = row.querySelector('.gap-btn');
+    btn.onclick = function () { answerGapQuestion(row); };
+  });
+}
+
+function gapInputHtml(q) {
+  if (q.answerType === 'YesNo') {
+    return '<select class="gap-select"><option value="">Choose…</option><option value="true">Yes</option><option value="false">No</option></select>';
+  }
+  // StatusSelect has no enumerated option list anywhere in the backend today — a free-text
+  // input is honest; a fabricated dropdown of options would not be.
+  return '<input class="gap-input" type="text" placeholder="Enter a value"/>';
+}
+
+function answerGapQuestion(row) {
+  var qid = row.getAttribute('data-qid');
+  var dim = row.getAttribute('data-dim');
+  var btn = row.querySelector('.gap-btn');
+  var status = row.querySelector('.gap-status');
+  var inputEl = row.querySelector('.gap-input, .gap-select');
+  var value = (inputEl.value || '').trim();
+  if (!value) { status.textContent = 'Enter a value first.'; return; }
+
+  btn.disabled = true;
+  status.textContent = 'Opening this question for input…';
+
+  findOrRaiseOpenCheckin(qid)
+    .then(function (checkIn) {
+      if (!checkIn) {
+        status.textContent = 'This question could not be reopened for input through the existing check-in path right now (it was already asked before and not answered, so the system will not re-nag automatically).';
+        btn.disabled = false;
+        return null;
+      }
+      status.textContent = 'Updating…';
+      showToast('Recording answer and recomputing index…');
+      if (S.detail && S.detail.index) {
+        S.detail.index.dimensions.forEach(function (d) {
+          if (d.beliefCount > 0) S.prevScores[d.dimension] = d.score;
+        });
+      }
+      return fetch('/checkins/' + checkIn.checkInId + '/answer', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ responseValue: value })
+      }).then(function (r) { return r.json().then(function (body) { return { ok: r.ok, body: body }; }); });
+    })
+    .then(function (res) {
+      if (!res) return;
+      if (!res.ok) {
+        status.textContent = (res.body && res.body.error) || 'Could not record answer.';
+        btn.disabled = false;
+        hideToast();
+        return;
+      }
+      return reloadAfterAnswer();
+    })
+    .catch(function () {
+      status.textContent = 'Network error — try again.';
+      btn.disabled = false;
+      hideToast();
+    });
+}
+
+// Uses only existing production endpoints — no new write path. First looks for an OPEN check-in
+// already targeting this question. If none exists, triggers a real recompute via the light
+// GET /vendors/{id}/vendor-file/markdown side effect (already wired to CompletenessOrchestrator ->
+// GapCheckInStage in Program.cs), then looks again. If the question was already asked before and
+// left unanswered, GapCheckInStage's permanent-gap rule intentionally won't re-raise it — that
+// shows up here as still finding nothing, which is reported honestly to the user, not papered over.
+function findOrRaiseOpenCheckin(questionId) {
+  function findOpen() {
+    return fetch('/checkins').then(function (r) { return r.ok ? r.json() : []; })
+      .then(function (all) { return all.find(function (c) { return c.vendorId === S.vendorId && c.targetField === questionId; }) || null; });
+  }
+  return findOpen().then(function (existing) {
+    if (existing) return existing;
+    return fetch('/vendors/' + S.vendorId + '/vendor-file/markdown')
+      .then(function () { return findOpen(); });
+  });
+}
+
+/* ── Contract Evidence ── */
+function evidenceFieldLabel(field) {
+  return (field || '').split('_').map(function (w) {
+    return w.charAt(0).toUpperCase() + w.slice(1);
+  }).join(' ');
+}
+
+function renderContractEvidence() {
+  var el = qs('contract-evidence-panel');
+  if (!S.metadata.length) {
+    el.innerHTML = '<div class="evidence-empty">No contract clauses extracted for this vendor yet.</div>';
+    return;
+  }
+  el.innerHTML = S.metadata.map(function (c) {
+    var badge = c.documentType ? '<span class="evidence-doctype">' + esc(c.documentType) + '</span>' : '';
+    var link = c.documentId
+      ? '<button class="evidence-source-link" data-docid="' + esc(c.documentId) + '">View source</button>'
+      : '';
+    return '<div class="evidence-card">' +
+      '<div class="evidence-card-top"><span class="evidence-field">' + esc(evidenceFieldLabel(c.field)) + '</span>' + badge + link + '</div>' +
+      '<div class="evidence-value">' + esc(c.value) + '</div>' +
+      (c.derivation ? '<div class="evidence-derivation">' + esc(c.derivation) + '</div>' : '') +
+      '</div>';
+  }).join('');
+  el.querySelectorAll('.evidence-source-link').forEach(function (btn) {
+    btn.onclick = function () { showDocumentSource(btn.getAttribute('data-docid')); };
+  });
+}
+
+function showDocumentSource(documentId) {
+  var overlay = qs('doc-overlay'), title = qs('doc-title'), body = qs('doc-body'), pdfLink = qs('doc-pdf-link');
+  title.textContent = 'Loading…';
+  body.textContent = '';
+  pdfLink.style.display = 'none';
+  overlay.classList.add('open');
+
+  fetch('/documents/' + encodeURIComponent(documentId))
+    .then(function (r) { if (!r.ok) throw new Error('document not found'); return r.json(); })
+    .then(function (doc) {
+      title.textContent = doc.filename || 'Source document';
+      body.textContent = doc.contentText || '(no extracted text retained for this document)';
+      if (doc.hasContent) {
+        pdfLink.href = '/documents/' + encodeURIComponent(documentId) + '/raw';
+        pdfLink.style.display = 'inline-block';
+      }
+    })
+    .catch(function (err) {
+      title.textContent = 'Could not load source';
+      body.textContent = err.message;
+    });
+}
+
+function closeDocumentSource() {
+  qs('doc-overlay').classList.remove('open');
+}
+
+/* ── Completeness ── */
+function renderCompleteness() {
+  var el = qs('completeness-panel');
+  var vf = S.vendorFile;
+  if (!vf) {
+    el.innerHTML = '<div class="evidence-empty">Completeness unavailable for this vendor right now.</div>';
+    return;
+  }
+  var comp = vf.completeness || { ratio: 0, filledKeys: [], gapKeys: [] };
+  var known = (comp.filledKeys || []).length;
+  var gaps = (comp.gapKeys || []).length;
+  var total = known + gaps;
+  var pct = Math.round((comp.ratio || 0) * 100);
+
+  var items = (comp.filledKeys || []).map(function (k) {
+    return '<div class="completeness-item completeness-known">✓ ' + esc(k) + '</div>';
+  }).concat((comp.gapKeys || []).map(function (k) {
+    return '<div class="completeness-item completeness-gap">○ ' + esc(k) + '</div>';
+  }));
+
+  el.innerHTML =
+    '<div class="completeness-summary">' + pct + '% complete <span class="dim-confidence">(' + known + ' of ' + total + ' tracked fields known)</span></div>' +
+    '<div class="completeness-bar-track"><div class="completeness-bar-fill" style="width:' + pct + '%"></div></div>' +
+    '<div class="completeness-list">' + (items.join('') || '<div class="evidence-empty">No tracked fields for this vendor.</div>') + '</div>';
 }
 
 /* ── stance / evidence ── */
@@ -643,17 +950,12 @@ function renderStanceCard() {
   }
   var p = S.detail.posture;
   var cautionsHtml = (p.cautions || []).map(function (c) { return '<span class="caution-tag">' + esc(c) + '</span>'; }).join('');
-  var evidenceItems = S.metadata.map(function (m) {
-    return '<div class="evidence-item"><span class="ev-dot">•</span>' + esc(m.field) + ': ' + esc(m.value) + (m.derivation ? ' <span style="color:var(--muted)">(' + esc(m.derivation) + ')</span>' : '') + '</div>';
-  }).join('');
   var gapsHtml = (p.evidenceGaps || []).map(function (g) { return '<div class="evidence-item"><span class="ev-dot">•</span>' + esc(g) + '</div>'; }).join('');
 
   card.innerHTML =
     '<div class="stance-headline"><span class="band-pill ' + S.detail.index.band + '">' + esc(p.stance) + '</span><span class="dim-confidence">confidence ' + p.confidence.toFixed(2) + '</span></div>' +
     '<div class="stance-rationale">' + esc(p.rationale) + '</div>' +
     cautionsHtml +
-    '<div class="section-title" style="font-size:var(--t-card);margin-top:16px;margin-bottom:8px">Evidence on file</div>' +
-    '<div class="evidence-list">' + (evidenceItems || '<div class="evidence-empty">No retained metadata clauses for this vendor.</div>') + '</div>' +
     (gapsHtml ? '<div class="section-title" style="font-size:var(--t-card);margin-top:16px;margin-bottom:8px">Evidence gaps</div><div class="evidence-list">' + gapsHtml + '</div>' : '');
 }
 
@@ -694,10 +996,44 @@ function renderDimensionDetail() {
 
   var evidenceEl = qs('detail-evidence');
   evidenceEl.innerHTML = '<div class="evidence-empty">Loading…</div>';
+  var questionsEl = qs('detail-questions');
+  questionsEl.innerHTML = '<div class="evidence-empty">Loading…</div>';
 
   fetch('/vendors/' + S.vendorId + '/trail').then(function (r) { return r.ok ? r.json() : null; }).then(function (trail) {
     renderDetailEvidence(name, assessed, trail);
   });
+
+  // Authored L1+L2 questions (SaasQuestionBank — doctrine, never LLM-generated) for this
+  // dimension, independent of whether the dimension as a whole is assessed: each question
+  // carries its own real answer (if a bound belief exists) or an honest "Not yet reviewed".
+  fetch('/vendors/' + S.vendorId + '/questions?dimension=' + encodeURIComponent(name))
+    .then(function (r) { return r.ok ? r.json() : null; })
+    .then(function (data) { renderDimensionQuestions(data); });
+}
+
+function renderDimensionQuestions(data) {
+  var el = qs('detail-questions');
+  if (!data || !data.questions || !data.questions.length) {
+    el.innerHTML = '<div class="evidence-empty">No authored questions found for this dimension.</div>';
+    return;
+  }
+  el.innerHTML = data.questions.map(function (q) {
+    if (q.answered && q.belief) {
+      var b = q.belief;
+      // Same derivation-over-banded-value preference as the belief cards below.
+      var headline = b.derivation ? esc(b.derivation) : (b.value !== undefined ? b.value : '—');
+      var bandedNote = b.derivation && b.value !== undefined ? ' · banded score ' + b.value.toFixed(2) : '';
+      return '<div class="qa-item">' +
+        '<div class="qa-question">' + esc(q.text) + '</div>' +
+        '<div class="qa-answer"><span class="qa-answer-value">' + headline + '</span><span class="belief-tier">' + esc(b.sourceTier || '') + '</span></div>' +
+        '<div class="belief-meta">' + esc(b.criterion || '') + bandedNote + (b.confidence !== undefined ? ' · confidence ' + b.confidence.toFixed(2) : '') + '</div>' +
+        '</div>';
+    }
+    return '<div class="qa-item">' +
+      '<div class="qa-question">' + esc(q.text) + '</div>' +
+      '<div class="qa-answer qa-not-reviewed">Not yet reviewed</div>' +
+      '</div>';
+  }).join('');
 }
 
 function renderDetailEvidence(name, assessed, trail) {

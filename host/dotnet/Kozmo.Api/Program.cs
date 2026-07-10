@@ -564,6 +564,58 @@ app.MapGet("/vendors/{id}/metadata", async (
     });
 });
 
+// GET /vendors/{id}/questions?dimension=Operational — ALL SIX authored completeness questions
+// (SaasQuestionBank — doctrine, never LLM-generated, L1+L2+L3) for one dimension, cross-referenced
+// against this vendor's real current beliefs. Only the two bound questions system-wide (sla_uptime ->
+// Operational, csat -> Experiential) can ever resolve a real answer; every other question is an
+// honest "not yet reviewed" gap, not a fabricated one — there is no path today that writes a
+// Dimension/Criterion-scoped belief for an unbound question.
+app.MapGet("/vendors/{id}/questions", async (
+    string            id,
+    string?           dimension,
+    EntityRegistry    reg,
+    SqliteEntityStore storeInst) =>
+{
+    if (!Guid.TryParse(id, out var guid)) return Results.BadRequest("Invalid GUID");
+    if (reg.GetEntity(guid) is null) return Results.NotFound();
+    if (!Enum.TryParse<Dimension>(dimension, ignoreCase: true, out var dim))
+        return Results.BadRequest("Invalid or missing dimension");
+
+    var beliefs = await storeInst.GetCurrentBeliefsAsync(guid);
+
+    var questions = SaasQuestionBank.All
+        .Where(q => q.Dimension == dim)
+        .OrderBy(q => q.DepthLevel)
+        .ThenBy(q => q.Id, StringComparer.Ordinal)
+        .Select(q =>
+        {
+            var belief = q.TargetClaimKey is not null
+                ? beliefs.FirstOrDefault(b => b.Criterion == q.TargetClaimKey)
+                : null;
+
+            return new
+            {
+                id             = q.Id,
+                text           = q.Text,
+                depthLevel     = q.DepthLevel.ToString(),
+                answerType     = q.AnswerType.ToString(),
+                targetClaimKey = q.TargetClaimKey,
+                answered       = belief is not null,
+                belief         = belief is null ? null : new
+                {
+                    value      = belief.Value,
+                    derivation = string.IsNullOrEmpty(belief.Derivation) ? null : belief.Derivation,
+                    sourceTier = belief.SourceTier.ToString(),
+                    confidence = belief.Confidence,
+                    criterion  = belief.Criterion
+                }
+            };
+        })
+        .ToList();
+
+    return Results.Ok(new { dimension = dim.ToString(), questions });
+});
+
 // GET /checkins — list all OPEN check-ins for the in-app pending view
 app.MapGet("/checkins", async (ICheckInStore checkInStore) =>
 {
