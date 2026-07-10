@@ -1,0 +1,763 @@
+@page "/momentum"
+@{
+    Layout = null;
+}
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Kozmo · Momentum Workspace</title>
+<style>
+/* ═══════════════════════════════════════════════════════
+   MOMENTUM WORKSPACE — Vendor Readiness Impact Vector
+   Self-hosted Fraunces/Inter (no CDN, CI Lane 5 safe) — see wwwroot/fonts
+═══════════════════════════════════════════════════════ */
+@@font-face{font-family:'Fraunces';font-style:normal;font-weight:400;font-display:swap;src:url('/fonts/fraunces-400.woff2') format('woff2')}
+@@font-face{font-family:'Fraunces';font-style:normal;font-weight:600;font-display:swap;src:url('/fonts/fraunces-600.woff2') format('woff2')}
+@@font-face{font-family:'Inter';font-style:normal;font-weight:400;font-display:swap;src:url('/fonts/inter-400.woff2') format('woff2')}
+@@font-face{font-family:'Inter';font-style:normal;font-weight:500;font-display:swap;src:url('/fonts/inter-500.woff2') format('woff2')}
+@@font-face{font-family:'Inter';font-style:normal;font-weight:600;font-display:swap;src:url('/fonts/inter-600.woff2') format('woff2')}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+button{font:inherit;cursor:pointer;border:0;background:transparent;color:inherit;padding:0}
+ul,ol{list-style:none}
+a{color:inherit;text-decoration:none}
+input,select{font:inherit}
+
+:root{
+  --canvas:#F4F5F7; --surface:#FFFFFF; --ink:#14171F; --muted:#5B6270; --line:#E3E6EB;
+  --accent:#1F5FA6; --accent-soft:#E7EFF8;
+  --critical:#B23A48; --critical-bg:#F7E9EB;
+  --atrisk:#C77D24; --atrisk-bg:#F7EFDF;
+  --healthy:#2E7D5B; --healthy-bg:#E4F0EA;
+  --notassessed:#9AA1AC; --notassessed-bg:#EEEFF1;
+
+  --font-display:'Fraunces',Georgia,serif;
+  --font-body:'Inter',system-ui,-apple-system,"Segoe UI",sans-serif;
+
+  --t-super:64px; --t-title:32px; --t-section:22px; --t-body:16px;
+  --t-card:14px; --t-secondary:13px; --t-eyebrow:11px;
+
+  --radius:12px;
+  --tr:0.4s ease;
+}
+
+@@media (prefers-reduced-motion: reduce){
+  *{animation-duration:0.001ms!important;transition-duration:0.001ms!important}
+}
+
+html,body{min-height:100%;background:var(--canvas);color:var(--ink);font-family:var(--font-body);font-size:var(--t-body);line-height:1.5;-webkit-font-smoothing:antialiased}
+.tabular{font-variant-numeric:tabular-nums}
+
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,[tabindex]:focus-visible{
+  outline:2px solid var(--accent);outline-offset:2px;border-radius:4px;
+}
+
+.mw-shell{max-width:1080px;margin:0 auto;padding:32px 24px 96px}
+
+.mw-topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:40px}
+.mw-brand{display:flex;align-items:center;gap:10px;font-family:var(--font-display);font-weight:600;font-size:18px}
+.mw-brand-mark{width:22px;height:22px;border-radius:5px;background:var(--accent);flex-shrink:0}
+.mw-back{font-size:var(--t-secondary);color:var(--muted)}
+.mw-back:hover{color:var(--accent)}
+.mw-vendor-picker{display:flex;align-items:center;gap:8px}
+.mw-vendor-picker select{border:1px solid var(--line);border-radius:8px;padding:6px 10px;background:var(--surface);color:var(--ink);font-size:var(--t-secondary)}
+
+.view{animation:fadeUp var(--tr)}
+.view.hidden{display:none!important}
+@@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* ── party header ── */
+.party-header{margin-bottom:40px}
+.party-name{font-family:var(--font-display);font-weight:600;font-size:var(--t-title);letter-spacing:-0.01em}
+.party-tags{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.tag{font-size:var(--t-secondary);color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:3px 10px;background:var(--surface)}
+
+/* ── impact vector header ── */
+.iv-header{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:28px 28px 24px;margin-bottom:32px}
+.iv-eyebrow{font-size:var(--t-eyebrow);text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600;margin-bottom:14px}
+.iv-main-row{display:flex;align-items:flex-end;gap:24px;flex-wrap:wrap}
+.iv-super{font-family:var(--font-display);font-weight:600;font-size:var(--t-super);line-height:1;letter-spacing:-0.02em}
+.iv-super.tabular{font-variant-numeric:tabular-nums}
+.iv-super-unit{font-size:20px;color:var(--muted);font-family:var(--font-body);margin-left:4px}
+.iv-badges{display:flex;flex-direction:column;gap:8px;margin-bottom:6px}
+.band-pill{display:inline-flex;align-items:center;gap:6px;font-size:var(--t-secondary);font-weight:600;padding:4px 12px;border-radius:999px;width:fit-content}
+.band-pill.Healthy{background:var(--healthy-bg);color:var(--healthy)}
+.band-pill.AtRisk{background:var(--atrisk-bg);color:var(--atrisk)}
+.band-pill.Critical{background:var(--critical-bg);color:var(--critical)}
+.band-pill.NotAssessed{background:var(--notassessed-bg);color:var(--notassessed)}
+.stance-pill{display:inline-flex;align-items:center;gap:6px;font-size:var(--t-secondary);color:var(--muted);font-weight:500}
+.momentum-arrow{font-size:var(--t-secondary);font-weight:600;display:inline-flex;align-items:center;gap:4px}
+.momentum-arrow.up{color:var(--healthy)}
+.momentum-arrow.down{color:var(--critical)}
+.momentum-arrow.flat{color:var(--muted)}
+
+.iv-spark-wrap{margin-top:20px}
+.iv-spark-baseline{font-size:var(--t-secondary);color:var(--muted);font-style:italic}
+.iv-spark svg{display:block;width:100%;height:56px}
+
+.contrib-bar{display:flex;height:28px;border-radius:8px;overflow:hidden;margin-top:24px;border:1px solid var(--line)}
+.contrib-seg{position:relative;transition:flex-basis var(--tr);display:flex;align-items:center;justify-content:center;font-size:var(--t-eyebrow);font-weight:600;color:#fff;overflow:hidden;min-width:2px}
+.contrib-seg.Healthy{background:var(--healthy)}
+.contrib-seg.AtRisk{background:var(--atrisk)}
+.contrib-seg.Critical{background:var(--critical)}
+.contrib-seg.NotAssessed{
+  background:repeating-linear-gradient(45deg,var(--notassessed-bg),var(--notassessed-bg) 6px,#DFE1E5 6px,#DFE1E5 12px);
+  color:var(--muted);
+}
+.contrib-legend{display:flex;gap:16px;margin-top:10px;flex-wrap:wrap}
+.contrib-legend-item{display:flex;align-items:center;gap:6px;font-size:var(--t-secondary);color:var(--muted)}
+.contrib-legend-swatch{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+
+/* ── dimensions grid ── */
+.section-title{font-family:var(--font-display);font-weight:600;font-size:var(--t-section);margin-bottom:16px}
+.dims-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:40px}
+@@media (max-width:640px){.dims-grid{grid-template-columns:1fr}}
+.dim-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:20px;cursor:pointer;transition:border-color var(--tr-fast,120ms ease)}
+.dim-card:hover{border-color:var(--accent)}
+.dim-card-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px}
+.dim-name{font-weight:600;font-size:var(--t-card)}
+.dim-weight{font-size:var(--t-eyebrow);color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.dim-score-row{display:flex;align-items:baseline;gap:8px;margin-bottom:10px}
+.dim-score{font-family:var(--font-display);font-weight:600;font-size:28px}
+.dim-score.notassessed{color:var(--notassessed);font-family:var(--font-body);font-size:var(--t-card);font-weight:600}
+.dim-confidence{font-size:var(--t-secondary);color:var(--muted)}
+.dim-bar-track{height:8px;border-radius:6px;background:var(--line);overflow:hidden}
+.dim-bar-fill{height:100%;border-radius:6px;transition:width var(--tr);width:0}
+.dim-bar-fill.Healthy{background:var(--healthy)}
+.dim-bar-fill.AtRisk{background:var(--atrisk)}
+.dim-bar-fill.Critical{background:var(--critical)}
+.dim-bar-track.notassessed{background:repeating-linear-gradient(45deg,var(--notassessed-bg),var(--notassessed-bg) 5px,#E4E5E8 5px,#E4E5E8 10px)}
+.dim-trend{margin-top:10px;font-size:var(--t-secondary);color:var(--muted)}
+.dim-trend.up{color:var(--healthy);font-weight:600}
+.dim-trend.down{color:var(--critical);font-weight:600}
+
+/* ── check-ins panel ── */
+.checkins-panel{margin-bottom:40px}
+.checkin-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:20px;margin-bottom:12px;display:flex;flex-direction:column;gap:12px}
+.checkin-q{font-size:var(--t-card);font-weight:500}
+.checkin-meta{font-size:var(--t-eyebrow);color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.checkin-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.checkin-input{flex:1;min-width:160px;border:1px solid var(--line);border-radius:8px;padding:8px 12px;font-size:var(--t-body);color:var(--ink);background:var(--canvas)}
+.checkin-btn{background:var(--accent);color:#fff;border-radius:8px;padding:8px 18px;font-size:var(--t-secondary);font-weight:600;white-space:nowrap}
+.checkin-btn:hover{background:#194b85}
+.checkin-btn:disabled{opacity:.6;cursor:default}
+.checkin-status{font-size:var(--t-secondary);color:var(--muted)}
+.checkin-empty{font-size:var(--t-secondary);color:var(--muted);font-style:italic}
+
+/* ── stance/evidence ── */
+.stance-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:24px;margin-bottom:40px}
+.stance-headline{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.stance-rationale{color:var(--muted);font-size:var(--t-card);margin-bottom:14px}
+.evidence-list{display:flex;flex-direction:column;gap:6px}
+.evidence-item{font-size:var(--t-secondary);color:var(--ink);display:flex;gap:8px}
+.evidence-item .ev-dot{color:var(--muted)}
+.evidence-empty{font-size:var(--t-secondary);color:var(--muted);font-style:italic}
+.caution-tag{display:inline-flex;font-size:var(--t-eyebrow);color:var(--critical);background:var(--critical-bg);border-radius:999px;padding:3px 10px;margin-right:6px;margin-top:6px}
+
+/* ── coming soon strip ── */
+.vectors-strip{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:20px}
+.vector-stub{flex:1;min-width:180px;background:var(--notassessed-bg);border:1px dashed var(--line);border-radius:var(--radius);padding:16px;opacity:.7;position:relative}
+.vector-stub-badge{position:absolute;top:10px;right:10px;font-size:var(--t-eyebrow);color:var(--muted);text-transform:uppercase;letter-spacing:.06em;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:2px 8px}
+.vector-stub-name{font-weight:600;font-size:var(--t-card);color:var(--muted)}
+
+/* ── dimension detail (screen B) ── */
+.detail-nav{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}
+.detail-nav-btn{font-size:var(--t-secondary);color:var(--accent);font-weight:600}
+.detail-nav-btn:hover{text-decoration:underline}
+.detail-header{margin-bottom:24px}
+.detail-score-big{font-family:var(--font-display);font-weight:600;font-size:48px}
+.detail-score-big.notassessed{color:var(--notassessed);font-size:28px;font-family:var(--font-body)}
+.detail-bar-track{height:12px;border-radius:8px;background:var(--line);overflow:hidden;margin-top:16px;max-width:400px}
+.detail-bar-fill{height:100%;border-radius:8px;width:0;transition:width var(--tr)}
+.detail-bar-fill.Healthy{background:var(--healthy)}
+.detail-bar-fill.AtRisk{background:var(--atrisk)}
+.detail-bar-fill.Critical{background:var(--critical)}
+.belief-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px 20px;margin-bottom:10px}
+.belief-top{display:flex;justify-content:space-between;gap:12px;margin-bottom:6px}
+.belief-value{font-weight:600;font-size:var(--t-card)}
+.belief-tier{font-size:var(--t-eyebrow);color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.belief-meta{font-size:var(--t-secondary);color:var(--muted)}
+.no-evidence{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:24px;color:var(--muted)}
+.no-evidence strong{color:var(--ink);display:block;margin-bottom:6px;font-size:var(--t-card)}
+
+/* ── history (screen C) ── */
+.history-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:28px}
+.history-svg-wrap svg{width:100%;height:220px}
+
+/* ── loading / toast ── */
+.updating-toast{position:fixed;bottom:24px;right:24px;background:var(--ink);color:#fff;padding:10px 18px;border-radius:8px;font-size:var(--t-secondary);opacity:0;transform:translateY(8px);transition:all var(--tr);pointer-events:none;z-index:200}
+.updating-toast.show{opacity:1;transform:none}
+</style>
+</head>
+<body>
+<div class="mw-shell">
+
+  <div class="mw-topbar">
+    <div class="mw-brand"><span class="mw-brand-mark"></span> Momentum Workspace</div>
+    <div class="mw-vendor-picker">
+      <a class="mw-back" href="/workspace">← Back to Workspace</a>
+      <select id="vendor-select" aria-label="Select vendor"></select>
+    </div>
+  </div>
+
+  <!-- ══════════ VIEW A — MAIN ══════════ -->
+  <div class="view" id="view-main">
+
+    <div class="party-header">
+      <div class="party-name" id="party-name">—</div>
+      <div class="party-tags" id="party-tags"></div>
+    </div>
+
+    <div class="iv-header">
+      <div class="iv-eyebrow">Vendor Readiness — Impact Vector</div>
+      <div class="iv-main-row">
+        <div>
+          <span class="iv-super tabular" id="super-index">—</span><span class="iv-super-unit">/ 100</span>
+        </div>
+        <div class="iv-badges">
+          <span class="band-pill" id="band-pill">—</span>
+          <span class="stance-pill" id="stance-pill">—</span>
+          <span class="momentum-arrow" id="momentum-arrow"></span>
+        </div>
+      </div>
+      <div class="iv-spark-wrap" id="spark-wrap"></div>
+      <button class="detail-nav-btn" id="view-history-link" style="margin-top:8px;font-size:var(--t-secondary)">View full momentum history →</button>
+      <div class="contrib-bar" id="contrib-bar"></div>
+      <div class="contrib-legend" id="contrib-legend"></div>
+    </div>
+
+    <div class="section-title">Dimensions</div>
+    <div class="dims-grid" id="dims-grid"></div>
+
+    <div class="section-title">Open check-ins</div>
+    <div class="checkins-panel" id="checkins-panel"></div>
+
+    <div class="section-title">Recommended stance</div>
+    <div class="stance-card" id="stance-card"></div>
+
+    <div class="section-title">Other Impact Vectors</div>
+    <div class="vectors-strip">
+      <div class="vector-stub"><div class="vector-stub-badge">Coming soon</div><div class="vector-stub-name">Contract Compliance</div></div>
+      <div class="vector-stub"><div class="vector-stub-badge">Coming soon</div><div class="vector-stub-name">Security Posture</div></div>
+      <div class="vector-stub"><div class="vector-stub-badge">Coming soon</div><div class="vector-stub-name">Delivery Risk</div></div>
+    </div>
+
+  </div>
+
+  <!-- ══════════ VIEW B — DIMENSION DETAIL ══════════ -->
+  <div class="view hidden" id="view-detail">
+    <div class="detail-nav">
+      <button class="detail-nav-btn" id="detail-back">← Back to Momentum Workspace</button>
+      <div>
+        <button class="detail-nav-btn" id="detail-prev">‹ Prev</button>
+        <button class="detail-nav-btn" id="detail-next">Next ›</button>
+      </div>
+    </div>
+    <div class="detail-header">
+      <div class="iv-eyebrow" id="detail-eyebrow">Dimension</div>
+      <div class="party-name" id="detail-name">—</div>
+      <div class="detail-score-big" id="detail-score">—</div>
+      <div class="detail-bar-track"><div class="detail-bar-fill" id="detail-bar-fill"></div></div>
+    </div>
+    <div class="section-title">What we know</div>
+    <div id="detail-evidence"></div>
+  </div>
+
+  <!-- ══════════ VIEW C — MOMENTUM & HISTORY ══════════ -->
+  <div class="view hidden" id="view-history">
+    <div class="detail-nav">
+      <button class="detail-nav-btn" id="history-back">← Back to Momentum Workspace</button>
+    </div>
+    <div class="section-title">Momentum &amp; history</div>
+    <div class="history-card" id="history-card"></div>
+  </div>
+
+</div>
+
+<div class="updating-toast" id="updating-toast">Updating…</div>
+
+<script>
+'use strict';
+/* Reuses the exact endpoints already wired in Workspace.cshtml — no engine changes. */
+
+var ALL_DIMENSIONS = ['Operational', 'Experiential', 'Financial', 'Strategic'];
+/* Mirrors the two TargetClaimKey bindings authored in Ii.Completeness/SaasQuestionBank.cs
+   (sla_uptime -> Operational, csat -> Experiential) — used only to tell a visitor on Screen B
+   which open check-in would fill an unassessed dimension. Not a scoring rule; purely a display hint. */
+var TARGET_FIELD_DIMENSION = { 'saas.op.l1.2': 'Operational', 'saas.exp.l1.2': 'Experiential' };
+
+var S = {
+  vendorId: null,
+  vendors: [],
+  detail: null,        // last VendorDetailDto
+  trajectory: [],
+  checkins: [],
+  metadata: [],
+  prevScores: {},       // dimension -> score, from before the most recent answer this session
+  detailDim: null
+};
+
+function qs(id) { return document.getElementById(id); }
+function fmtPct(score) { return Math.round(score * 100); }
+function esc(s) {
+  return String(s === undefined || s === null ? '' : s).replace(/[&<>"']/g, function (c) {
+    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+  });
+}
+
+function bandForScore(score) {
+  if (score >= 0.65) return 'Healthy';
+  if (score >= 0.40) return 'AtRisk';
+  return 'Critical';
+}
+
+function showToast(msg) {
+  var t = qs('updating-toast');
+  t.textContent = msg;
+  t.classList.add('show');
+}
+function hideToast() {
+  qs('updating-toast').classList.remove('show');
+}
+
+function switchView(id) {
+  ['view-main', 'view-detail', 'view-history'].forEach(function (v) {
+    qs(v).classList.toggle('hidden', v !== id);
+  });
+}
+
+/* ── bootstrap ── */
+function init() {
+  var params = new URLSearchParams(window.location.search);
+  var preferred = params.get('vendorId');
+
+  fetch('/vendors').then(function (r) { return r.json(); }).then(function (list) {
+    S.vendors = list;
+    var sel = qs('vendor-select');
+    sel.innerHTML = list.map(function (v) {
+      return '<option value="' + v.entityId + '">' + esc(v.name) + '</option>';
+    }).join('');
+    var initial = preferred && list.some(function (v) { return v.entityId === preferred; })
+      ? preferred
+      : (list[0] ? list[0].entityId : null);
+    if (initial) {
+      sel.value = initial;
+      loadVendor(initial);
+    }
+    sel.onchange = function () { loadVendor(sel.value); };
+  });
+
+  qs('detail-back').onclick = function () { switchView('view-main'); };
+  qs('history-back').onclick = function () { switchView('view-main'); };
+  qs('detail-prev').onclick = function () { stepDimension(-1); };
+  qs('detail-next').onclick = function () { stepDimension(1); };
+  qs('view-history-link').onclick = function () { openHistory(); };
+}
+
+function loadVendor(vendorId) {
+  S.vendorId = vendorId;
+  S.prevScores = {};
+  Promise.all([
+    fetch('/vendors/' + vendorId).then(function (r) { return r.ok ? r.json() : null; }),
+    fetch('/vendors/' + vendorId + '/trajectory').then(function (r) { return r.ok ? r.json() : []; }),
+    fetch('/checkins').then(function (r) { return r.ok ? r.json() : []; }),
+    fetch('/vendors/' + vendorId + '/metadata').then(function (r) { return r.ok ? r.json() : { clauses: [] }; })
+  ]).then(function (results) {
+    S.detail = results[0];
+    S.trajectory = results[1] || [];
+    S.checkins = (results[2] || []).filter(function (c) { return c.vendorId === vendorId; });
+    S.metadata = (results[3] && results[3].clauses) || [];
+    renderAll();
+  });
+}
+
+function renderAll() {
+  renderPartyHeader();
+  renderImpactVectorHeader();
+  renderDimensionsGrid();
+  renderCheckins();
+  renderStanceCard();
+  switchView('view-main');
+}
+
+/* ── party header ── */
+function renderPartyHeader() {
+  var name = (S.detail && S.detail.name) || (S.vendors.find(function (v) { return v.entityId === S.vendorId; }) || {}).name || 'Unknown vendor';
+  qs('party-name').textContent = name;
+  var tags = [];
+  if (S.detail && S.detail.index) tags.push(S.detail.index.configVersion);
+  var renewal = S.detail && S.detail.posture && S.detail.posture.renewal;
+  if (renewal) tags.push('Renewal in ' + renewal.daysToRenewal + 'd');
+  qs('party-tags').innerHTML = tags.map(function (t) { return '<span class="tag">' + t + '</span>'; }).join('');
+}
+
+/* ── impact vector header ── */
+function renderImpactVectorHeader() {
+  var superEl = qs('super-index');
+  var bandEl = qs('band-pill');
+  var stanceEl = qs('stance-pill');
+  var arrowEl = qs('momentum-arrow');
+
+  if (!S.detail || !S.detail.index) {
+    animateNumber(superEl, lastRenderedSuper, null, function () { superEl.textContent = 'Not assessed'; });
+    bandEl.textContent = 'Not assessed';
+    bandEl.className = 'band-pill NotAssessed';
+    stanceEl.textContent = 'No stance yet — awaiting first scored evidence';
+    arrowEl.textContent = '';
+    renderSpark([]);
+    renderContribBar(ALL_DIMENSIONS.map(function (d) { return { dimension: d, weight: 0.25, assessed: false }; }));
+    return;
+  }
+
+  var idx = S.detail.index;
+  var newVal = Math.round(idx.composite * 100);
+  animateNumber(superEl, lastRenderedSuper === null ? 0 : lastRenderedSuper, newVal);
+  lastRenderedSuper = newVal;
+
+  bandEl.textContent = idx.band;
+  bandEl.className = 'band-pill ' + idx.band;
+  stanceEl.textContent = S.detail.posture.stance;
+
+  renderMomentumArrow(arrowEl);
+  renderSpark(S.trajectory);
+  renderContribBar(idx.dimensions);
+}
+
+var lastRenderedSuper = null;
+
+function animateNumber(el, from, to, onNull) {
+  if (to === null) { if (onNull) onNull(); return; }
+  var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduced) { el.textContent = to; return; }
+  var start = null;
+  var duration = 600;
+  function step(ts) {
+    if (!start) start = ts;
+    var p = Math.min(1, (ts - start) / duration);
+    var val = Math.round(from + (to - from) * p);
+    el.textContent = val;
+    if (p < 1) requestAnimationFrame(step);
+    else el.textContent = to;
+  }
+  requestAnimationFrame(step);
+}
+
+function renderMomentumArrow(arrowEl) {
+  if (!S.trajectory || S.trajectory.length < 2) {
+    arrowEl.textContent = '';
+    arrowEl.className = 'momentum-arrow';
+    return;
+  }
+  var last = S.trajectory[S.trajectory.length - 1].composite;
+  var prev = S.trajectory[S.trajectory.length - 2].composite;
+  var delta = last - prev;
+  if (Math.abs(delta) < 0.005) {
+    arrowEl.textContent = '→ steady';
+    arrowEl.className = 'momentum-arrow flat';
+  } else if (delta > 0) {
+    arrowEl.textContent = '↑ improving';
+    arrowEl.className = 'momentum-arrow up';
+  } else {
+    arrowEl.textContent = '↓ declining';
+    arrowEl.className = 'momentum-arrow down';
+  }
+}
+
+function renderSpark(trajectory) {
+  var wrap = qs('spark-wrap');
+  if (!trajectory || trajectory.length < 2) {
+    wrap.innerHTML = '<div class="iv-spark-baseline">Baseline — first review</div>';
+    return;
+  }
+  var w = 600, h = 56, pad = 6;
+  var vals = trajectory.map(function (p) { return p.composite; });
+  var min = Math.min.apply(null, vals), max = Math.max.apply(null, vals);
+  var range = (max - min) || 1;
+  var pts = vals.map(function (v, i) {
+    var x = pad + (i / (vals.length - 1)) * (w - pad * 2);
+    var y = h - pad - ((v - min) / range) * (h - pad * 2);
+    return x.toFixed(1) + ',' + y.toFixed(1);
+  }).join(' ');
+  wrap.innerHTML = '<div class="iv-spark"><svg viewBox="0 0 ' + w + ' ' + h + '" preserveAspectRatio="none" role="img" aria-label="Composite index across ' + trajectory.length + ' recorded signal checkpoints">' +
+    '<polyline points="' + pts + '" fill="none" stroke="var(--accent)" stroke-width="2"/>' +
+    '</svg></div>' +
+    '<div class="iv-spark-baseline" style="font-style:normal">' + trajectory.length + ' recorded checkpoints (ordered by signal sequence, not wall-clock time)</div>';
+}
+
+function renderContribBar(dimensions) {
+  var bar = qs('contrib-bar');
+  var legend = qs('contrib-legend');
+  var byDim = {};
+  dimensions.forEach(function (d) { byDim[d.dimension] = d; });
+
+  var segs = ALL_DIMENSIONS.map(function (name) {
+    var d = byDim[name];
+    var assessed = d && d.beliefCount > 0;
+    var weight = d ? d.weight : 0.25;
+    return { dimension: name, weight: weight, assessed: assessed, score: assessed ? d.score : null };
+  });
+
+  bar.innerHTML = segs.map(function (s) {
+    var cls = s.assessed ? bandForScore(s.score) : 'NotAssessed';
+    var label = s.assessed ? (s.dimension + ' ' + fmtPct(s.score) + '%') : (s.dimension + ' · not assessed');
+    return '<div class="contrib-seg ' + cls + '" style="flex-basis:' + (s.weight * 100) + '%" title="' + label + '">' + s.dimension.slice(0, 3) + '</div>';
+  }).join('');
+
+  legend.innerHTML = segs.map(function (s) {
+    var cls = s.assessed ? bandForScore(s.score) : 'NotAssessed';
+    var swatchColor = 'var(--' + (cls === 'NotAssessed' ? 'notassessed' : cls.toLowerCase()) + ')';
+    return '<span class="contrib-legend-item"><span class="contrib-legend-swatch" style="background:' + swatchColor + '"></span>' + s.dimension + (s.assessed ? '' : ' (not assessed)') + '</span>';
+  }).join('');
+}
+
+/* ── dimensions grid ── */
+function renderDimensionsGrid() {
+  var grid = qs('dims-grid');
+  if (!S.detail || !S.detail.index) {
+    grid.innerHTML = ALL_DIMENSIONS.map(function (name) { return dimCardHtml({ dimension: name, weight: 0.25, beliefCount: 0 }); }).join('');
+    bindDimCardClicks();
+    return;
+  }
+  var byDim = {};
+  S.detail.index.dimensions.forEach(function (d) { byDim[d.dimension] = d; });
+  grid.innerHTML = ALL_DIMENSIONS.map(function (name) {
+    return dimCardHtml(byDim[name] || { dimension: name, weight: 0.25, beliefCount: 0 });
+  }).join('');
+  bindDimCardClicks();
+}
+
+function dimCardHtml(d) {
+  var assessed = d.beliefCount > 0;
+  var band = assessed ? bandForScore(d.score) : 'NotAssessed';
+  var trendHtml = '';
+  if (assessed && S.prevScores[d.dimension] !== undefined && S.prevScores[d.dimension] !== d.score) {
+    var delta = d.score - S.prevScores[d.dimension];
+    trendHtml = '<div class="dim-trend ' + (delta > 0 ? 'up' : 'down') + '">' + (delta > 0 ? '↑ ' : '↓ ') + 'from ' + fmtPct(S.prevScores[d.dimension]) + '% this session</div>';
+  } else {
+    trendHtml = '<div class="dim-trend">No trend yet — single reading</div>';
+  }
+  return '<div class="dim-card" data-dim="' + d.dimension + '" tabindex="0" role="button" aria-label="View ' + d.dimension + ' detail">' +
+    '<div class="dim-card-top"><span class="dim-name">' + d.dimension + '</span><span class="dim-weight">weight ' + Math.round((d.weight || 0.25) * 100) + '%</span></div>' +
+    (assessed
+      ? '<div class="dim-score-row"><span class="dim-score">' + fmtPct(d.score) + '%</span><span class="dim-confidence">conf ' + d.confidence.toFixed(2) + '</span></div>' +
+        '<div class="dim-bar-track"><div class="dim-bar-fill ' + band + '" style="width:' + fmtPct(d.score) + '%"></div></div>'
+      : '<div class="dim-score-row"><span class="dim-score notassessed">Not assessed</span></div>' +
+        '<div class="dim-bar-track notassessed" style="height:8px"></div>') +
+    trendHtml +
+    '</div>';
+}
+
+function bindDimCardClicks() {
+  document.querySelectorAll('.dim-card').forEach(function (card) {
+    card.onclick = function () { openDimensionDetail(card.getAttribute('data-dim')); };
+    card.onkeydown = function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); card.click(); } };
+  });
+}
+
+/* ── check-ins panel ── */
+function renderCheckins() {
+  var panel = qs('checkins-panel');
+  if (!S.checkins.length) {
+    panel.innerHTML = '<div class="checkin-empty">No open check-ins for this vendor right now.</div>';
+    return;
+  }
+  panel.innerHTML = S.checkins.map(function (c) {
+    var inputType = c.responseShape === 'TYPED_VALUE' ? 'text' : (c.responseShape === 'YES_NO' ? 'text' : 'text');
+    var placeholder = c.responseShape === 'YES_NO' ? 'true or false' : 'Enter a value';
+    return '<div class="checkin-card" data-checkin="' + c.checkInId + '">' +
+      '<div class="checkin-meta">' + esc(c.kind.replace('_', ' ')) + '</div>' +
+      '<div class="checkin-q">' + esc(c.question) + '</div>' +
+      '<div class="checkin-row">' +
+      '<input class="checkin-input" type="' + inputType + '" placeholder="' + placeholder + '"/>' +
+      '<button class="checkin-btn">Answer</button>' +
+      '<span class="checkin-status"></span>' +
+      '</div></div>';
+  }).join('');
+
+  panel.querySelectorAll('.checkin-card').forEach(function (card) {
+    var id = card.getAttribute('data-checkin');
+    var input = card.querySelector('.checkin-input');
+    var btn = card.querySelector('.checkin-btn');
+    var status = card.querySelector('.checkin-status');
+    btn.onclick = function () { answerCheckin(id, input.value, btn, status, card); };
+    input.onkeydown = function (e) { if (e.key === 'Enter') btn.click(); };
+  });
+}
+
+function answerCheckin(checkInId, value, btn, status, card) {
+  if (!value || !value.trim()) { status.textContent = 'Enter a value first.'; return; }
+  btn.disabled = true;
+  status.textContent = 'Updating…';
+  showToast('Recording answer and recomputing index…');
+
+  // capture pre-answer scores so the dimension card can show a real, observed-in-session delta
+  if (S.detail && S.detail.index) {
+    S.detail.index.dimensions.forEach(function (d) {
+      if (d.beliefCount > 0) S.prevScores[d.dimension] = d.score;
+    });
+  }
+
+  fetch('/checkins/' + checkInId + '/answer', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ responseValue: value.trim() })
+  }).then(function (r) { return r.json().then(function (body) { return { ok: r.ok, body: body }; }); })
+    .then(function (res) {
+      if (!res.ok) {
+        status.textContent = (res.body && res.body.error) || 'Could not record answer.';
+        btn.disabled = false;
+        hideToast();
+        return;
+      }
+      return reloadAfterAnswer();
+    })
+    .catch(function () {
+      status.textContent = 'Network error — try again.';
+      btn.disabled = false;
+      hideToast();
+    });
+}
+
+function reloadAfterAnswer() {
+  return Promise.all([
+    fetch('/vendors/' + S.vendorId).then(function (r) { return r.ok ? r.json() : null; }),
+    fetch('/vendors/' + S.vendorId + '/trajectory').then(function (r) { return r.ok ? r.json() : []; }),
+    fetch('/checkins').then(function (r) { return r.ok ? r.json() : []; })
+  ]).then(function (results) {
+    S.detail = results[0];
+    S.trajectory = results[1] || [];
+    S.checkins = (results[2] || []).filter(function (c) { return c.vendorId === S.vendorId; });
+    hideToast();
+    renderAll();
+  });
+}
+
+/* ── stance / evidence ── */
+function renderStanceCard() {
+  var card = qs('stance-card');
+  if (!S.detail || !S.detail.posture) {
+    card.innerHTML = '<div class="evidence-empty">No posture yet — this vendor has no scored evidence.</div>';
+    return;
+  }
+  var p = S.detail.posture;
+  var cautionsHtml = (p.cautions || []).map(function (c) { return '<span class="caution-tag">' + esc(c) + '</span>'; }).join('');
+  var evidenceItems = S.metadata.map(function (m) {
+    return '<div class="evidence-item"><span class="ev-dot">•</span>' + esc(m.field) + ': ' + esc(m.value) + (m.derivation ? ' <span style="color:var(--muted)">(' + esc(m.derivation) + ')</span>' : '') + '</div>';
+  }).join('');
+  var gapsHtml = (p.evidenceGaps || []).map(function (g) { return '<div class="evidence-item"><span class="ev-dot">•</span>' + esc(g) + '</div>'; }).join('');
+
+  card.innerHTML =
+    '<div class="stance-headline"><span class="band-pill ' + S.detail.index.band + '">' + esc(p.stance) + '</span><span class="dim-confidence">confidence ' + p.confidence.toFixed(2) + '</span></div>' +
+    '<div class="stance-rationale">' + esc(p.rationale) + '</div>' +
+    cautionsHtml +
+    '<div class="section-title" style="font-size:var(--t-card);margin-top:16px;margin-bottom:8px">Evidence on file</div>' +
+    '<div class="evidence-list">' + (evidenceItems || '<div class="evidence-empty">No retained metadata clauses for this vendor.</div>') + '</div>' +
+    (gapsHtml ? '<div class="section-title" style="font-size:var(--t-card);margin-top:16px;margin-bottom:8px">Evidence gaps</div><div class="evidence-list">' + gapsHtml + '</div>' : '');
+}
+
+/* ── Screen B: dimension detail ── */
+function openDimensionDetail(dimension) {
+  S.detailDim = dimension;
+  switchView('view-detail');
+  renderDimensionDetail();
+}
+
+function stepDimension(delta) {
+  var idx = ALL_DIMENSIONS.indexOf(S.detailDim);
+  var next = (idx + delta + ALL_DIMENSIONS.length) % ALL_DIMENSIONS.length;
+  S.detailDim = ALL_DIMENSIONS[next];
+  renderDimensionDetail();
+}
+
+function renderDimensionDetail() {
+  var name = S.detailDim;
+  qs('detail-eyebrow').textContent = 'Dimension detail';
+  qs('detail-name').textContent = name;
+
+  var d = S.detail && S.detail.index && S.detail.index.dimensions.find(function (x) { return x.dimension === name; });
+  var assessed = d && d.beliefCount > 0;
+
+  if (assessed) {
+    qs('detail-score').className = 'detail-score-big';
+    qs('detail-score').textContent = fmtPct(d.score) + '%';
+    var band = bandForScore(d.score);
+    qs('detail-bar-fill').className = 'detail-bar-fill ' + band;
+    qs('detail-bar-fill').style.width = fmtPct(d.score) + '%';
+  } else {
+    qs('detail-score').className = 'detail-score-big notassessed';
+    qs('detail-score').textContent = 'Not assessed';
+    qs('detail-bar-fill').className = 'detail-bar-fill';
+    qs('detail-bar-fill').style.width = '0%';
+  }
+
+  var evidenceEl = qs('detail-evidence');
+  evidenceEl.innerHTML = '<div class="evidence-empty">Loading…</div>';
+
+  fetch('/vendors/' + S.vendorId + '/trail').then(function (r) { return r.ok ? r.json() : null; }).then(function (trail) {
+    renderDetailEvidence(name, assessed, trail);
+  });
+}
+
+function renderDetailEvidence(name, assessed, trail) {
+  var evidenceEl = qs('detail-evidence');
+  if (!assessed) {
+    var openCheckin = S.checkins.find(function (c) { return TARGET_FIELD_DIMENSION[c.targetField] === name; });
+    evidenceEl.innerHTML = '<div class="no-evidence"><strong>No scoring evidence yet</strong>' +
+      (openCheckin
+        ? 'Answer the open check-in "' + esc(openCheckin.question) + '" to fill this dimension.'
+        : 'No open check-in currently targets this dimension.') +
+      '</div>';
+    return;
+  }
+  if (!trail || !trail.assessed || !trail.dimensions) {
+    evidenceEl.innerHTML = '<div class="no-evidence"><strong>Evidence trail unavailable</strong>The reasoning trail could not be loaded for this vendor right now.</div>';
+    return;
+  }
+  var dimEntry = trail.dimensions.find(function (dd) { return dd.dimension === name; });
+  var beliefs = (dimEntry && dimEntry.beliefs) || [];
+  if (!beliefs.length) {
+    evidenceEl.innerHTML = '<div class="no-evidence"><strong>No contributing beliefs recorded</strong>This dimension carries a score but no beliefs were returned by the trail endpoint.</div>';
+    return;
+  }
+  evidenceEl.innerHTML = beliefs.map(function (b) {
+    // b.value is the banded 0-1 score for scored claim keys; b.derivation (when present) is the
+    // real quoted raw text (e.g. "99.9" or "4.6 out of 5.0") — prefer showing that to a reader.
+    var headline = b.derivation ? esc(b.derivation) : (b.value !== undefined ? b.value : '—');
+    var bandedNote = b.derivation && b.value !== undefined ? ' · banded score ' + b.value.toFixed(2) : '';
+    return '<div class="belief-card">' +
+      '<div class="belief-top"><span class="belief-value">' + headline + '</span><span class="belief-tier">' + esc(b.sourceTier || '') + '</span></div>' +
+      '<div class="belief-meta">' + esc(b.criterion || '') + bandedNote + (b.confidence !== undefined ? ' · confidence ' + b.confidence.toFixed(2) : '') + '</div>' +
+      '</div>';
+  }).join('');
+}
+
+/* ── Screen C: history ── */
+function openHistory() {
+  switchView('view-history');
+  var card = qs('history-card');
+  if (!S.trajectory || S.trajectory.length < 2) {
+    card.innerHTML = '<div class="iv-spark-baseline">Baseline — first review. There is only one recorded checkpoint for this vendor, so no trend can be shown yet.</div>';
+    return;
+  }
+  var w = 900, h = 220, pad = 20;
+  var vals = S.trajectory.map(function (p) { return p.composite; });
+  var min = Math.min.apply(null, vals), max = Math.max.apply(null, vals);
+  var range = (max - min) || 1;
+  var pts = vals.map(function (v, i) {
+    var x = pad + (i / (vals.length - 1)) * (w - pad * 2);
+    var y = h - pad - ((v - min) / range) * (h - pad * 2);
+    return x.toFixed(1) + ',' + y.toFixed(1);
+  });
+  var circles = pts.map(function (p) { var xy = p.split(','); return '<circle cx="' + xy[0] + '" cy="' + xy[1] + '" r="4" fill="var(--accent)"/>'; }).join('');
+  card.innerHTML = '<div class="history-svg-wrap"><svg viewBox="0 0 ' + w + ' ' + h + '" preserveAspectRatio="none">' +
+    '<polyline points="' + pts.join(' ') + '" fill="none" stroke="var(--accent)" stroke-width="2"/>' + circles +
+    '</svg></div>' +
+    '<div class="iv-spark-baseline" style="font-style:normal;margin-top:8px">' + S.trajectory.length + ' checkpoints, ordered by signal sequence (recorded timestamps coincide at seed time, so the x-axis is sequence order, not wall-clock date).</div>';
+}
+
+init();
+</script>
+</body>
+</html>
