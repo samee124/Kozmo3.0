@@ -424,6 +424,9 @@ public sealed class SqliteEntityStore : IEntityStore, IRegistryStore, ICheckInRo
     /// recency) — this is the query that populates EntityRegistry at boot, so GET /vendors/{id}
     /// (which reads EntityRegistry.GetEntity, not the vendors table directly) would otherwise keep
     /// resolving to whichever duplicate this method picks, regardless of which one is fixed there.
+    /// Excludes status='Absorbed' rows (B2 reconciliation, retired duplicates/false-positives) —
+    /// without this filter an absorbed row would still surface here even though it carries no
+    /// unique data, since it isn't the comparison_key group's dedup winner either way.
     /// </summary>
     public Task<IReadOnlyList<(Guid Id, string Name, DateTimeOffset? RenewalDate)>> LoadAllKyvVendorsAsync()
     {
@@ -433,7 +436,8 @@ public sealed class SqliteEntityStore : IEntityStore, IRegistryStore, ICheckInRo
                    (SELECT COUNT(*) FROM beliefs b WHERE b.entity_id = v.id) AS belief_count,
                    (SELECT COUNT(*) FROM entity_indices ei WHERE ei.entity_id = v.id) AS index_count
             FROM vendors v
-            WHERE v.program_run_id IS NOT NULL";
+            WHERE v.program_run_id IS NOT NULL
+              AND (v.status IS NULL OR v.status <> 'Absorbed')";
 
         var rows = new List<(Guid Id, string Name, DateTimeOffset? Renewal, string GroupKey, DateTimeOffset CreatedAt, long BeliefCount, long IndexCount)>();
         using (var reader = cmd.ExecuteReader())
@@ -501,7 +505,8 @@ public sealed class SqliteEntityStore : IEntityStore, IRegistryStore, ICheckInRo
                    (SELECT COUNT(*) FROM beliefs b WHERE b.entity_id = v.id) AS belief_count,
                    (SELECT COUNT(*) FROM entity_indices ei WHERE ei.entity_id = v.id) AS index_count
             FROM vendors v
-            WHERE v.program_id = @program_id";
+            WHERE v.program_id = @program_id
+              AND (v.status IS NULL OR v.status <> 'Absorbed')";
         cmd.Parameters.AddWithValue("@program_id", programId.ToString());
 
         var rows = new List<(Guid Id, string Name, DateTimeOffset? Renewal, string GroupKey, DateTimeOffset CreatedAt, long BeliefCount, long IndexCount)>();
