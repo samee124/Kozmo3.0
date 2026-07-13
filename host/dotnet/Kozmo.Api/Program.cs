@@ -874,6 +874,107 @@ app.MapPost("/kyv/run", async (
     }
 });
 
+// POST /kyv/run-local — ingest a LOCAL folder through the identical KYV pipeline as POST /kyv/run,
+// skipping the Google Drive download hop entirely. No OAuth is required here: in the Drive path,
+// GoogleOAuthService/GoogleDriveDownloader exist solely to fetch files onto local disk before the
+// pipeline runs — once files are local, KyvProgramRunner.RunAsync never touches Drive or OAuth
+// itself. This calls the SAME RunAsync the Drive path and the test suite (KyvProgramRunnerTests,
+// CompletenessWiringTests) already exercise — identical six identity stages
+// (Normalize→Classify→Cluster→Annotate→Assign→Write), identical belief/metadata persistence,
+// identical completeness/index hooks. Not forked.
+app.MapPost("/kyv/run-local", async (
+    KyvRunLocalRequest     request,
+    SqliteEntityStore      storeInst,
+    ICheckInStore          checkInStore,
+    SseHub                 hub,
+    EntityRegistry         entityRegistry,
+    KyvVendorTracker       kyvTracker,
+    Func<IKozmoLlm?>       liveLlmFactory,
+    SaasProfile            profile,
+    CompletenessHolder     completenessHolder,
+    IMetadataStore         metadataStore) =>
+{
+    if (string.IsNullOrWhiteSpace(request.LocalPath))
+        return Results.BadRequest(new { error = "localPath must not be empty." });
+
+    if (!Directory.Exists(request.LocalPath))
+        return Results.BadRequest(new { error = $"localPath does not exist: {request.LocalPath}" });
+
+    // Live LLM required — same requirement as the Drive path; KYV candidate/belief extraction
+    // uses real GPT-4o-mini in record mode (cached afterward, never re-called for the same
+    // document text — see CachingLlmClient).
+    var liveLlm = liveLlmFactory();
+    if (liveLlm is null)
+        return Results.Problem(
+            detail:     "OPENAI_API_KEY is not set or fixture cache path is unavailable.",
+            statusCode: 503);
+
+    hub.Broadcast(JsonSerializer.Serialize(
+        new { type = "kyv-started", ts = DateTimeOffset.UtcNow,
+              data = new { localPath = request.LocalPath } }, JsonOpts));
+
+    // Same construction as POST /kyv/run (entity-type classifier defaults to Company for
+    // ambiguous names, same as offline tests) — only the input (a local folder, no temp-download
+    // step, no driveFileIdsByFilename) differs.
+    var runner = new KyvProgramRunner(
+        llm:              liveLlm,
+        entityClassifier: new AlwaysCompanyClassifier(),
+        registry:         new IdentityRegistry(storeInst),
+        checkInStore:     checkInStore,
+        entityStore:      storeInst,
+        profile:          profile,
+        completeness:     completenessHolder.Value,
+        spineRegistry:    entityRegistry,
+        metadataStore:    metadataStore,
+        documentStore:    storeInst);
+
+    var run = await runner.RunAsync(request.LocalPath, DateTimeOffset.UtcNow);
+
+    // Replay stages over SSE for live UI feedback — same as the Drive path.
+    foreach (var stage in run.Stages)
+    {
+        await Task.Delay(250);
+        hub.Broadcast(JsonSerializer.Serialize(
+            new { type = "kyv-stage", ts = DateTimeOffset.UtcNow,
+                  data = new { name = stage.StageName, order = stage.StageOrder,
+                               itemsProcessed = stage.ItemsProcessed } }, JsonOpts));
+    }
+
+    hub.Broadcast(JsonSerializer.Serialize(
+        new { type = "kyv-complete", ts = DateTimeOffset.UtcNow,
+              data = new { runId = run.RunId, status = run.Status.ToString() } }, JsonOpts));
+
+    // Sync EntityRegistry so /vendors immediately reflects KYV-discovered vendors — same as the
+    // Drive path (LoadVendorsAsync excludes KYV rows by design; use the run-scoped query instead).
+    var allVendors = await storeInst.LoadVendorsByRunAsync(run.RunId);
+    foreach (var (vid, vname, vren) in allVendors)
+        entityRegistry.Register(vid, vname, vren);
+
+    var seededSet = new HashSet<Guid>(SeedData.VendorIds);
+    kyvTracker.RecordDiscovered(allVendors.Select(v => v.Item1).Where(id => !seededSet.Contains(id)));
+
+    return Results.Ok(new
+    {
+        runId              = run.RunId,
+        programName        = run.ProgramName,
+        sourceFolder       = run.SourceFolder,
+        status             = run.Status.ToString(),
+        startedAt          = run.StartedAt,
+        finishedAt         = run.FinishedAt,
+        stages             = run.Stages.Select(s => new
+        {
+            order          = s.StageOrder,
+            name           = s.StageName,
+            itemsProcessed = s.ItemsProcessed
+        }),
+        unreadableDocuments = run.UnreadableDocuments.Select(u => new
+        {
+            path   = u.RelativePath,
+            reason = u.Reason
+        })
+    });
+});
+
 // GET /kyv/vendors — vendors discovered through KYV ingestion (excludes seeded demo data).
 // Sourced from the vendors table's program_run_id column (non-null only for KYV-discovered rows,
 // always absent for seeds — see LoadAllKyvVendorsAsync), not in-memory run tracking, so this stays
@@ -1192,6 +1293,13 @@ public sealed class KyvVendorTracker
 
 record CheckInAnswerRequest(string? ResponseValue);
 record KyvRunRequest(string DriveUrl);
+// ProgramId is accepted for shape-compatibility with a future multi-program design but is
+// currently a no-op: the system has exactly one program today (VendorCleanupProgramId, a fixed
+// constant in SqliteEntityStore.SaveRegistryVendorAsync) — every KYV-discovered vendor is stamped
+// into it regardless of what's passed here. Wiring a real per-request program target would mean
+// threading a programId through RegistryWriter/KyvProgramRunner, out of scope for this endpoint
+// (which only replaces the Drive-download hop, not the pipeline itself).
+record KyvRunLocalRequest(string LocalPath, string? ProgramId = null);
 
 // Nullable-singleton wrapper — Microsoft.Extensions.DependencyInjection's AddSingleton(TService)
 // overload throws on a null instance, so a possibly-null CompletenessOrchestrator (absent when
