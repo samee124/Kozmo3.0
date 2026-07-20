@@ -5,8 +5,8 @@
       "applicationUrl": "http://localhost:5000",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "GOOGLE_CLIENT_ID": "YOUR_GOOGLE_CLIENT_ID",
-        "GOOGLE_CLIENT_SECRET": "YOUR_GOOGLE_CLIENT_SECRET"
+        "GOOGLE_CLIENT_ID": "",
+        "GOOGLE_CLIENT_SECRET": ""
       }
     }
   }

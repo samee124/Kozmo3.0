@@ -1,0 +1,50 @@
+```
+Workday, Inc.                       MASTER SAAS SUBSCRIPTION AGREEMENT
+6230 Stoneridge Mall Road, Pleasanton, CA 94588
+
+This Master SaaS Subscription Agreement ("Agreement"), effective as of February 28, 2013, is between Workday, Inc. ("Workday"), a Delaware corporation, and Brookfield Corporate Operations LLC ("Customer"), a Delaware limited liability company with offices at 200 Vesey Street, New York, New York 10281.
+
+1. PROVISION OF THE SERVICE. Workday shall make the Service available to Customer and its Affiliates during the Term, in accordance with the Documentation and the Service Level Agreement attached as Schedule B.
+
+2. FEES. Fees for the Service will be invoiced in accordance with the applicable Order Form. Except as subject to good faith dispute, all fees are due and payable within thirty (30) days of Customer's receipt of an invoice.
+
+3. PROPRIETARY RIGHTS. Workday and its licensors own all right, title and interest in and to the Service, Documentation, and other Workday Intellectual Property Rights.
+
+Page 1 of 4
+```
+```
+Workday, Inc.                       MASTER SAAS SUBSCRIPTION AGREEMENT
+6230 Stoneridge Mall Road, Pleasanton, CA 94588
+
+4. CONFIDENTIALITY. Each party agrees to protect the Confidential Information of
+the other party using the same degree of care it uses for its own confidential
+information of like kind, but in no event less than a reasonable standard of care.
+
+5. CUSTOMER DATA. As between Workday and Customer, Customer Data is and
+shall remain the exclusive property of Customer. Workday shall not use Customer
+Data except to provide the Service or as otherwise instructed in writing by Customer.
+
+6. LIMITATION OF LIABILITY. Except with respect to breach of confidentiality
+obligations, willful misconduct, or indemnification obligations, in no event shall
+either party's aggregate liability arising out of this Agreement exceed the
+subscription fees paid or payable during the twelve (12) months preceding the
+claim.
+
+Page 2 of 4
+```
+```
+Workday, Inc.
+6250 Stoneridge Mall Road, Pleasanton, CA 94588
+
+MASTER SAAS SUBSCRIPTION AGREEMENT
+
+7. TERM AND TERMINATION. This Agreement commences on the Effective Date and continues until the stated term in all Order Forms has expired or is otherwise 
+terminated.
+
+8. NOTICE. All notices under this Agreement shall be in writing and shall be deemed given upon personal delivery, the third business day after first-class 
+mailing, or the first business day after sending by a nationally recognized overnight courier.
+
+9. GOVERNING LAW. This Agreement shall be governed exclusively by the internal laws of the State of New York, without regard to its conflicts of laws rules.
+
+Page 3 of 4
+```

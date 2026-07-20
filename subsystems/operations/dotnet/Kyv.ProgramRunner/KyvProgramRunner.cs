@@ -247,7 +247,8 @@ public sealed class KyvProgramRunner
 
             pdfDocuments.Add((docId, bytes, text, driveFileId));
 
-            var beliefs = await extractor.ExtractAsync(text, docId, tier, ct);
+            var beliefs = await extractor.ExtractAsync(
+                text, docId, tier, DocTypeInferrer.IsBankingContext(docId), ct);
             allCandidates.AddRange(beliefs);
 
             // Dimension-fact + metadata extraction (Commit 2 belief bridge; E1 Part 7 Step 5
@@ -291,7 +292,8 @@ public sealed class KyvProgramRunner
             var identityText = EmailParser.BuildIdentityText(email);
             try
             {
-                var candidates = await extractor.ExtractAsync(identityText, docId, SourceTier.Correspondence, ct);
+                var candidates = await extractor.ExtractAsync(
+                    identityText, docId, SourceTier.Correspondence, DocTypeInferrer.IsBankingContext(docId), ct);
                 allCandidates.AddRange(candidates);
             }
             catch (LlmCacheMissException)

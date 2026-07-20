@@ -1,0 +1,1 @@
+Workday, Inc. SOC 2 TYPE II REPORT (SUMMARY) - CURRENT 6230 Stoneridge Mall Road, Pleasanton, CA 94588 April 2023 Review Period: 2022 Trust Services Categories: Security, Availability, Confidentiality, Privacy Opinion: Unqualified - no exceptions noted. Auditor: Deloitte & Touche LLP This report supersedes prior SOC 2 reports for currency purposes.

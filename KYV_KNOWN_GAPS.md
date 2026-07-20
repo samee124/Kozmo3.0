@@ -688,6 +688,35 @@ not addressed by this decision.
 REVISIT: as a dedicated identity-resolution phase, owned with Dev A (Ig.Resolution), addressing role-
 filtering, fuzzy-match calibration, and email-derived collision handling together — not piecemeal.
 
+## DECISION: escalation_count / incident_volume — DEFERRED (2026-07-08)
+
+Real evidence exists (OfficeSpace/Brookfield: 5 escalation threads + outage/sync-failure references).
+Deferred, not built, for three compounding reasons:
+
+1. Aggregate extraction shape: unlike support_response_time and mttr (clean single-fact-per-message
+   reads, both built and proven), escalation_count requires counting distinct escalation threads
+   ACROSS the corpus — a fundamentally harder, cross-message extraction.
+2. Entangled with deferred thread-grouping: counting distinct threads depends on knowing which emails
+   belong to the same thread — exactly the problem deferred in E-signal Step 7 (no reference headers,
+   needs judgment-call temporal-proximity disambiguation). Building escalation_count properly requires
+   that deferred work first.
+3. Double-counting risk with incident_volume (and now mttr): an escalated outage could be counted as
+   an incident (mttr), an incident (incident_volume), AND an escalation (escalation_count) — inflating
+   risk three ways for one real event. incident_volume specifically is deferred because "count distinct
+   incidents" needs the same cross-message deduplication.
+
+Also dormant regardless: email-sourced, so blocked from live vendors by the identity-resolution gap
+(separately logged) even if built.
+
+REVISIT: when (a) E-signal thread-grouping is built (Phase H momentum consumer), giving a reliable way
+to count distinct threads/incidents without double-counting, AND (b) identity resolution lets email
+beliefs reach live vendors. At that point, likely Option C: define escalation and incident as distinct
+concepts (escalation = customer raised a formal complaint; incident/mttr = service failure event),
+with cross-message linking to avoid counting one real event as both.
+
+DONE this arc: support_response_time and mttr — two operational risk signals proven end-to-end
+(synthetic vendor null -> computed posture), demonstrating the extract->rubric->posture mechanism.
+
 ## FINDING (E2.2 diagnosis, 2026-07-09): dispute_rate — a second fully-dead rubric criterion
 
 Same shape as escalation_count above, but distinct and additive: `dispute_rate` (in

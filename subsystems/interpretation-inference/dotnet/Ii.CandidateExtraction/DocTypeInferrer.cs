@@ -74,4 +74,26 @@ public static class DocTypeInferrer
 
         return "";
     }
+
+    // Bare filename keywords, not the fully-derived word list InferDocType uses ("_" left in,
+    // e.g. "ACH_Banking_Form" contains "ach" and "banking" either way) — deliberately separate
+    // from InferDocType (which is narrow-by-design: only doc types wired to a distinct
+    // extraction schema, see its own doc comment) since a banking-context signal has nothing to
+    // do with claim-key extraction-schema selection; it exists solely to tell the identity
+    // extraction prompt "any bank named in this document is a payment-routing detail, not a
+    // vendor" (B3 — bank false-positive suppression).
+    private static readonly string[] BankingContextKeywords =
+        ["ach", "banking", "routing", "wire", "remittance", "direct deposit"];
+
+    /// <summary>
+    /// True when the filename indicates the document is an ACH/banking-details/wire-instruction
+    /// form — i.e. any bank or financial institution named in it is providing payment-routing
+    /// information, never acting as a vendor. Filename-based (cheap, deterministic), matching the
+    /// existing InferTier/InferDocType convention — no document text is scanned.
+    /// </summary>
+    public static bool IsBankingContext(string fileName)
+    {
+        var f = Path.GetFileNameWithoutExtension(fileName).ToLowerInvariant().Replace('_', ' ');
+        return BankingContextKeywords.Any(f.Contains);
+    }
 }

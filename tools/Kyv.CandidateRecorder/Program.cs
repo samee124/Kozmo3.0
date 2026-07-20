@@ -198,7 +198,7 @@ foreach (var group in byScenario)
         IReadOnlyList<CandidateIdentityBelief> beliefs;
         try
         {
-            beliefs = await extractor.ExtractAsync(text, fileName, tier);
+            beliefs = await extractor.ExtractAsync(text, fileName, tier, DocTypeInferrer.IsBankingContext(fileName));
         }
         catch (LlmCacheMissException)
         {

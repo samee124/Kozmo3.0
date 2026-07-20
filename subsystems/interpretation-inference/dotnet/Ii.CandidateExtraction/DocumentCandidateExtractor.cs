@@ -35,6 +35,13 @@ public sealed class DocumentCandidateExtractor
     /// <param name="documentText">Full extracted text of the document (pre-extracted by PdfTextExtractor).</param>
     /// <param name="docId">Filename or stable identifier used as provenance.DocId.</param>
     /// <param name="tier">Source tier implied by doc type (use <see cref="DocTypeInferrer.InferTier"/>).</param>
+    /// <param name="isBankingContext">
+    /// True when the document is an ACH/banking-details/wire-instruction form (use
+    /// <see cref="DocTypeInferrer.IsBankingContext"/>) — B3: tells the extraction prompt that any
+    /// bank/financial institution named in it is a payment-routing detail, not a vendor, so the
+    /// model reliably classifies it role="issuer" instead of "unknown". Defaults to false so every
+    /// existing caller that doesn't compute this signal is unaffected.
+    /// </param>
     /// <param name="ct">Cancellation token.</param>
     /// <returns>
     /// Filtered, deduped list of <see cref="CandidateIdentityBelief"/> records ready for resolution.
@@ -45,10 +52,11 @@ public sealed class DocumentCandidateExtractor
         string            documentText,
         string            docId,
         SourceTier        tier,
+        bool              isBankingContext = false,
         CancellationToken ct = default)
     {
         var system = ExtractionPrompt.System;
-        var user   = ExtractionPrompt.User(documentText);
+        var user   = ExtractionPrompt.User(documentText, isBankingContext);
 
         var result = await _llm.CompleteJsonAsync(system, user, ExtractionPrompt.MaxTokens, ct);
 

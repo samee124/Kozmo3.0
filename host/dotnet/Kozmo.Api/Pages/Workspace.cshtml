@@ -692,6 +692,17 @@ body{
 .float-settings:hover{background:var(--surface-hover);color:var(--ink-1);box-shadow:var(--shadow-lg)}
 
 .slbl{font-size:var(--t-micro);font-weight:600;letter-spacing:.08em;color:var(--ink-3);text-transform:uppercase;margin-bottom:var(--s4)}
+
+/* Document source viewer (view-source wiring for Contract Evidence) */
+.doc-source-overlay{position:fixed;inset:0;z-index:600;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.45)}
+.doc-source-overlay.open{display:flex}
+.doc-source-card{background:var(--surface);border:1px solid var(--line-1);border-radius:var(--r-lg);box-shadow:var(--shadow-lg);width:min(560px,90vw);max-height:80vh;overflow:hidden;display:flex;flex-direction:column}
+.doc-source-body{padding:var(--s5);white-space:pre-wrap;font-size:13px;color:var(--ink-2);line-height:1.6;overflow:auto}
+.doc-source-footer{padding:0 var(--s5) var(--s5)}
+.doc-source-pdf-link{font-size:13px;font-weight:600;color:var(--accent);text-decoration:none}
+.doc-source-pdf-link:hover{color:var(--accent-hover)}
+.evidence-source-link{font-size:12px;font-weight:600;color:var(--accent);text-decoration:none;margin-left:var(--s2)}
+.evidence-source-link:hover{color:var(--accent-hover)}
 </style>
 </head>
 <body>
@@ -1426,6 +1437,20 @@ body{
         <div class="tw-swatch"    data-accent="emerald" style="background:#14A085" title="Emerald"></div>
         <div class="tw-swatch"    data-accent="violet"  style="background:#6F58D9" title="Violet"></div>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── DOCUMENT SOURCE VIEWER ── -->
+<div class="doc-source-overlay" id="doc-source-overlay" onclick="if(event.target===this) closeDocumentSource()">
+  <div class="doc-source-card">
+    <div class="tw-h">
+      <span class="tw-t" id="doc-source-title">Source document</span>
+      <span class="tw-x" onclick="closeDocumentSource()"><svg class="glyph xs"><use href="#g-x"/></svg></span>
+    </div>
+    <div class="doc-source-body" id="doc-source-body"></div>
+    <div class="doc-source-footer">
+      <a class="doc-source-pdf-link" id="doc-source-pdf-link" href="#" target="_blank" rel="noopener" style="display:none">View original PDF &rarr;</a>
     </div>
   </div>
 </div>
@@ -2172,11 +2197,52 @@ function evidenceFieldLabel(field) {
 
 function vendorEvidenceItem(c) {
   var source = c.documentType ? ' <span style="color:var(--ink-4);font-size:12px">(' + esc(c.documentType) + ')</span>' : '';
+  // Only render a "View source" link when the server resolved a REAL, retained document — never
+  // fabricate one from a clause that has no resolvable documentId (see /vendors/{id}/metadata).
+  var link = c.documentId
+    ? ' <a href="#" class="evidence-source-link" onclick="showDocumentSource(\'' + esc(c.documentId) + '\'); return false;">View source</a>'
+    : '';
   return '<li style="margin-bottom:14px;list-style:none">'
-    + '<div style="font-weight:600;color:var(--ink-0);margin-bottom:2px">' + esc(evidenceFieldLabel(c.field)) + source + '</div>'
+    + '<div style="font-weight:600;color:var(--ink-0);margin-bottom:2px">' + esc(evidenceFieldLabel(c.field)) + source + link + '</div>'
     + '<div style="font-size:13px;color:var(--ink-2)">' + esc(c.value) + '</div>'
     + '<div style="font-size:12px;color:var(--ink-4);margin-top:4px;font-style:italic">' + esc(c.derivation) + '</div>'
     + '</li>';
+}
+
+// Shows a retained source document's extracted text (GET /documents/{id}) plus a link to the
+// original PDF bytes (GET /documents/{id}/raw) when raw content was retained. Only ever invoked
+// from a documentId the server already confirmed resolves — see vendorEvidenceItem above.
+function showDocumentSource(documentId) {
+  var overlay  = document.getElementById('doc-source-overlay');
+  var title    = document.getElementById('doc-source-title');
+  var body     = document.getElementById('doc-source-body');
+  var pdfLink  = document.getElementById('doc-source-pdf-link');
+  if (!overlay || !title || !body || !pdfLink) return;
+
+  title.textContent = 'Loading…';
+  body.textContent  = '';
+  pdfLink.style.display = 'none';
+  overlay.classList.add('open');
+
+  fetch('/documents/' + encodeURIComponent(documentId))
+    .then(function(r) { if (!r.ok) throw new Error('document not found'); return r.json(); })
+    .then(function(doc) {
+      title.textContent = doc.filename || 'Source document';
+      body.textContent  = doc.contentText || '(no extracted text retained for this document)';
+      if (doc.hasContent) {
+        pdfLink.href = '/documents/' + encodeURIComponent(documentId) + '/raw';
+        pdfLink.style.display = 'inline-block';
+      }
+    })
+    .catch(function(err) {
+      title.textContent = 'Could not load source';
+      body.textContent  = err.message;
+    });
+}
+
+function closeDocumentSource() {
+  var overlay = document.getElementById('doc-source-overlay');
+  if (overlay) overlay.classList.remove('open');
 }
 
 // Real, interactive check-ins for one vendor — raise -> answer -> resolved, live in the detail

@@ -1,0 +1,19 @@
+Vendor Security Questionnaire Workday, Inc. - Completed for Brookfield Corporate Operations LLC Last Updated: May 2023
+Q1. Is MFA required for administrative access? A: Yes, enforced for all administrative and production access. Page 2 of 19
+Q2. Is customer data encrypted at rest and in transit? A: Yes, AES-256 at rest and TLS 1.2+ in transit. Page 3 of 19
+Q3. Do you hold current ISO 27001 certification? A: Yes, current certification is on file and provided to customers annually. Page 4 of 19
+Q4. Do you complete an annual SOC 2 Type II examination? A: Yes, covering Security, Availability, Confidentiality, and Privacy. Page 5 of 19
+Q5. What is your data center physical security posture? A: Data centers are operated by contracted providers with SOC2/ISO27001 certification and 24/7 physical security. Page 6 of 19
+Q6. Do you perform regular penetration testing? A: Yes, at least annually by an independent third party. Page 7 of 19
+Q7. What is your incident notification commitment? A: Customers are notified without undue delay, generally within 48 hours of confirming an incident. Page 8 of 19
+Q8. Do you maintain a documented disaster recovery plan? A: Yes, with defined RTO/RPO targets tested at least annually. Page 9 of 19
+Q9. Is a Data Processing Addendum available for GDPR purposes? A: Yes, incorporated into the Agreement via amendment. Page 10 of 19
+Q10. Do you support single sign-on (SSO)? A: Yes, SAML 2.0-based SSO is supported and enabled for Brookfield's environment. Page 11 of 19
+Q11. Are background checks performed on employees with data access? A: Yes, prior to hire and periodically thereafter for sensitive roles. Page 12 of 19
+Q12. Is there a documented vulnerability management program? A: Yes, including regular scanning and defined remediation SLAs by severity. Page 13 of 19
+Q13. What sub-processors are used for hosting? A: A current sub-processor list is maintained and available upon request. Page 14 of 19
+Q14. Do you maintain cyber liability insurance? A: Yes, current certificate of insurance is on file. Page 15 of 19
+Q15. Is there a documented business continuity plan? A: Yes, reviewed annually and covering key personnel and facility dependencies. Page 16 of 19
+Q16. How is access reviewed for terminated employees? A: Access is revoked within 24 hours of a termination event per HR integration. Page 17 of 19
+Q17. Do you support customer-managed encryption keys? A: Available for Enterprise-tier customers; standard tier uses vendor-managed keys. Page 18 of 19
+Q18. What is your platform's historical uptime? A: 99.9%+ over the trailing 12 months, consistent with the published SLA. Page 19 of 19

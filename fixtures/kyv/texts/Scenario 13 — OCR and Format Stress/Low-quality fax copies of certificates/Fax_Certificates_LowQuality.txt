@@ -1,0 +1,29 @@
+```
+Workday, Inc.                                 CERTIFICATE OF LIABILITY INSURANCE
+6230 Stoneridge Mall Road, Pleasanton, CA 94588                     January 3, 2013
+
+This certificate is issued as a matter of information only and confers no rights
+upon the certificate holder.
+
+Insured: Workday, Inc., 6230 Stoneridge Mall Road, Pleasanton, CA 94588
+Certificate Holder: Brookfield Corporate Operations LLC
+
+Commercial General Liability: $1,000,000 per occurrence / $2,000,000 aggregate
+Umbrella/Excess Liability: $5,000,000 per occurrence
+Workers' Compensation & Employers' Liability: $1,000,000
+
+Insurer: Liberty Mutual Insurance Company
+Policy Number: TBZ-661-004829-013
+Expiration Date: January 1, 2014
+```
+```
+Workday, Inc.                       TECHNOLOGY ERRORS & OMISSIONS CERTIFICATE
+6230 Stoneridge Mall Road, Pleasanton, CA 94588                             January 3, 2013
+
+Insured: Workday, Inc.
+Coverage: Technology Errors & Omissions / Cyber Liability
+Limit: $5,000,000 per claim / $5,000,000 aggregate
+Insurer: XL Specialty Insurance Company
+Policy Number: ELU-148820-13
+Expiration Date: January 1, 2014
+```

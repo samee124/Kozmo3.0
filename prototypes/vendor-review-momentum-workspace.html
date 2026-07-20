@@ -1,0 +1,1597 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kozmo — Vendor Review · Momentum Workspace (Design Prototype)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ── Tokens ─────────────────────────────────────────────────────────── */
+:root{
+  --canvas:#F4F5F7; --surface:#FFFFFF; --ink:#14171F; --muted:#5B6270; --line:#E3E6EB;
+  --accent:#1F5FA6;
+  --critical:#B23A48; --atrisk:#C77D24; --healthy:#2E7D5B; --strategic:#1F5FA6;
+  --critical-bg:#F7E9EB; --atrisk-bg:#F7EFDF; --healthy-bg:#E4F0EA; --strategic-bg:#E9EFF7;
+  --r-sm:8px; --r-md:12px; --r-lg:16px;
+  --sp1:4px; --sp2:8px; --sp3:12px; --sp4:16px; --sp5:24px; --sp6:32px; --sp7:56px;
+  --shadow:0 1px 2px rgba(20,23,31,.04), 0 1px 1px rgba(20,23,31,.03);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--canvas); color:var(--ink);
+  font-family:'Inter',system-ui,-apple-system,sans-serif;
+  font-feature-settings:'tnum' 1; -webkit-font-smoothing:antialiased;
+  min-height:100vh;
+}
+h1,h2,h3,.display{ font-family:'Fraunces',Georgia,serif; font-weight:600; letter-spacing:-.01em; }
+.num{ font-feature-settings:'tnum' 1; }
+a{color:var(--accent)}
+button{font-family:inherit; cursor:pointer}
+:focus-visible{outline:2px solid var(--accent); outline-offset:2px; border-radius:4px}
+@media (prefers-reduced-motion: reduce){ *{animation-duration:.001ms !important; transition-duration:.001ms !important;} }
+
+/* ── Top bar ────────────────────────────────────────────────────────── */
+.topbar{
+  position:sticky; top:0; z-index:40; background:var(--surface); border-bottom:1px solid var(--line);
+  display:flex; align-items:center; gap:var(--sp5); padding:14px var(--sp6);
+}
+.wordmark{ font-family:'Inter'; font-weight:600; letter-spacing:.14em; text-transform:uppercase; font-size:14px; color:var(--ink); background:none; border:none; padding:0; cursor:pointer; }
+.wordmark:hover{ color:var(--accent); }
+.topbar .party-name{ font-size:14px; color:var(--muted); border-left:1px solid var(--line); padding-left:var(--sp5); }
+.topbar-spacer{flex:1}
+.nav-pills{ display:flex; gap:6px; }
+.nav-pill{
+  border:1px solid var(--line); background:transparent; color:var(--muted); font-size:13px; font-weight:500;
+  padding:7px 14px; border-radius:999px; transition:border-color .15s, color .15s, background .15s;
+}
+.nav-pill:hover{border-color:var(--accent); color:var(--ink)}
+.nav-pill.on{ background:var(--ink); color:#fff; border-color:var(--ink); }
+.proto-badge{
+  font-size:11px; font-weight:600; letter-spacing:.05em; text-transform:uppercase; color:var(--muted);
+  background:var(--surface); border:1px solid var(--line); padding:6px 10px; border-radius:999px;
+  white-space:nowrap;
+}
+.proto-badge b{color:var(--ink)}
+
+/* ── Screen shell ───────────────────────────────────────────────────── */
+main{ max-width:1080px; margin:0 auto; padding:var(--sp6) var(--sp5) 96px; }
+.screen{ display:none; }
+.screen.on{ display:block; animation:fadeUp .4s ease-out; }
+@keyframes fadeUp{ from{opacity:0; transform:translateY(8px)} to{opacity:1; transform:translateY(0)} }
+.eyebrow{ font-size:11px; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); }
+.screen-title{ font-size:32px; margin:6px 0 var(--sp2); }
+.screen-sub{ font-size:15px; color:var(--muted); margin:0 0 var(--sp6); max-width:640px; line-height:1.5; }
+section.block{ margin-bottom:var(--sp7); }
+.section-heading{ font-size:22px; margin:0 0 var(--sp4); }
+
+/* ── Cards & chips ──────────────────────────────────────────────────── */
+.card{ background:var(--surface); border:1px solid var(--line); border-radius:var(--r-md); padding:20px 22px; box-shadow:var(--shadow); }
+.card.hoverable{ cursor:pointer; transition:border-color .15s, transform .15s; }
+.card.hoverable:hover{ border-color:var(--accent); transform:translateY(-1px); }
+.chip{
+  display:inline-flex; align-items:center; gap:6px; font-size:13px; color:var(--ink);
+  background:var(--canvas); border:1px solid var(--line); border-radius:999px; padding:6px 12px;
+}
+.chip .type{ font-size:10px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); }
+.badge{ display:inline-flex; align-items:center; gap:5px; font-size:12px; font-weight:600; padding:4px 10px; border-radius:999px; }
+.badge.critical{ background:var(--critical-bg); color:var(--critical); }
+.badge.atrisk{ background:var(--atrisk-bg); color:var(--atrisk); }
+.badge.healthy{ background:var(--healthy-bg); color:var(--healthy); }
+.badge.strategic{ background:var(--strategic-bg); color:var(--strategic); }
+.status-pill{ font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.04em; padding:3px 9px; border-radius:999px; }
+.status-pill.urgent{ background:var(--critical-bg); color:var(--critical); }
+.status-pill.open{ background:var(--strategic-bg); color:var(--accent); }
+.trend{ font-weight:600; }
+.trend.down{ color:var(--critical); }
+.trend.up{ color:var(--healthy); }
+.trend.flat{ color:var(--muted); }
+
+/* ── Screen 1: Launch ───────────────────────────────────────────────── */
+.party-header{ display:flex; align-items:flex-start; justify-content:space-between; gap:var(--sp5); flex-wrap:wrap; margin-bottom:var(--sp6); }
+.party-tags{ display:flex; gap:8px; margin-top:10px; flex-wrap:wrap; }
+.tag{ font-size:12px; font-weight:500; color:var(--muted); background:var(--surface); border:1px solid var(--line); padding:5px 10px; border-radius:6px; }
+.vector-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:var(--sp4); margin-bottom:var(--sp6); }
+.vector-card{ display:flex; flex-direction:column; gap:10px; padding:20px; }
+.vector-card.selected{ border-color:var(--accent); box-shadow:0 0 0 3px var(--strategic-bg); }
+.vector-card .vname{ font-size:15px; font-weight:600; }
+.vector-card .vdesc{ font-size:13px; color:var(--muted); line-height:1.5; flex:1; }
+.vector-card .vdates{ font-size:11px; color:var(--muted); }
+.vector-card .vfoot{ display:flex; align-items:center; gap:8px; }
+.vector-card .vscore{ font-family:'Fraunces'; font-size:20px; font-weight:600; }
+.evidence-panel .chips{ display:flex; flex-wrap:wrap; gap:8px; }
+.launch-cta{ display:flex; justify-content:flex-end; margin-top:var(--sp5); }
+.btn-primary{
+  background:var(--ink); color:#fff; border:none; border-radius:var(--r-sm); padding:13px 26px;
+  font-size:14px; font-weight:600; transition:background .15s, opacity .15s;
+}
+.btn-primary:hover{ background:var(--accent); }
+.btn-primary:disabled{ opacity:.35; cursor:not-allowed; }
+.btn-ghost{
+  background:transparent; color:var(--ink); border:1px solid var(--line); border-radius:var(--r-sm);
+  padding:9px 16px; font-size:13px; font-weight:500; transition:border-color .15s;
+}
+.btn-ghost:hover{ border-color:var(--accent); color:var(--accent); }
+
+/* ── Screen 2: Processing ───────────────────────────────────────────── */
+.processing-wrap{ display:flex; flex-direction:column; align-items:center; text-align:center; padding:64px 0; gap:var(--sp5); }
+.spinner{ width:44px; height:44px; border-radius:50%; border:3px solid var(--line); border-top-color:var(--accent); animation:spin 1s linear infinite; }
+@keyframes spin{ to{ transform:rotate(360deg); } }
+.status-line{ font-size:16px; color:var(--muted); min-height:24px; }
+.proc-checklist{ list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:10px; width:100%; max-width:420px; text-align:left; }
+.proc-checklist li{ display:flex; align-items:center; gap:10px; font-size:14px; color:var(--muted); padding:10px 14px; border:1px solid var(--line); border-radius:var(--r-sm); background:var(--surface); transition:color .2s, border-color .2s; }
+.proc-checklist li .mark{ width:18px; height:18px; border-radius:50%; border:2px solid var(--line); flex:0 0 auto; display:flex; align-items:center; justify-content:center; font-size:11px; color:transparent; transition:.2s; }
+.proc-checklist li.done{ color:var(--ink); border-color:var(--healthy); }
+.proc-checklist li.done .mark{ border-color:var(--healthy); background:var(--healthy); color:#fff; }
+.proc-sub{ font-size:13px; color:var(--muted); }
+
+/* ── Screen 3: Instrument header (signature element) ───────────────── */
+.instrument{ padding:26px 28px; margin-bottom:var(--sp6); }
+.instrument-top{ display:flex; align-items:center; justify-content:space-between; margin-bottom:var(--sp4); flex-wrap:wrap; gap:10px; }
+.instrument-top .eyebrow{ color:var(--ink); }
+.instrument-body{ display:flex; align-items:baseline; gap:var(--sp5); flex-wrap:wrap; }
+.super-index{ font-family:'Fraunces'; font-size:64px; line-height:1; font-weight:600; color:var(--accent); }
+.super-index-unit{ font-size:16px; color:var(--muted); font-family:'Inter'; margin-left:2px; }
+.instrument-meta{ display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
+.momentum-label{ font-size:13px; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; }
+.sparkline{ display:block; }
+.delta-chip{ font-size:12px; font-weight:600; padding:3px 9px; border-radius:6px; }
+.delta-chip.down{ color:var(--critical); background:var(--critical-bg); }
+.delta-chip.up{ color:var(--healthy); background:var(--healthy-bg); }
+.delta-chip.flat{ color:var(--muted); background:var(--canvas); }
+.super-index-sub{ font-size:13px; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; margin-top:4px; }
+.review-dates{ font-size:12px; color:var(--muted); margin-top:8px; }
+.review-dates b{ color:var(--ink); font-weight:600; }
+.contribution-row{ margin-top:var(--sp5); }
+.contribution-label{ font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; margin-bottom:8px; }
+.contribution-bar{ display:flex; height:14px; border-radius:6px; overflow:hidden; gap:2px; }
+.contribution-seg{ height:100%; transition:width .6s ease-out; }
+.contribution-legend{ display:flex; gap:14px; margin-top:8px; flex-wrap:wrap; }
+.contribution-legend span{ font-size:11px; color:var(--muted); display:flex; align-items:center; gap:5px; }
+.contribution-legend .dot{ width:8px; height:8px; border-radius:50%; display:inline-block; }
+
+/* ── Dimension grid ─────────────────────────────────────────────────── */
+.dim-grid{ display:grid; grid-template-columns:1fr 1fr; gap:var(--sp4); }
+.dim-card{ display:flex; flex-direction:column; gap:10px; }
+.dim-card-top{ display:flex; justify-content:space-between; align-items:flex-start; gap:8px; }
+.dim-name{ font-size:14px; font-weight:600; }
+.dim-weight{ font-size:12px; color:var(--muted); }
+.dim-score-row{ display:flex; align-items:baseline; gap:8px; }
+.dim-score{ font-family:'Fraunces'; font-size:28px; font-weight:600; }
+.dim-bar-track{ height:6px; background:var(--line); border-radius:4px; overflow:hidden; }
+.dim-bar-fill{ height:100%; border-radius:4px; transition:width .6s ease-out; }
+.dim-meta-row{ display:flex; gap:10px; align-items:center; font-size:12px; color:var(--muted); flex-wrap:wrap; }
+.dim-finding{ font-size:13px; color:var(--muted); line-height:1.5; }
+.focus-flag{ font-size:11px; font-weight:600; color:var(--critical); text-transform:uppercase; letter-spacing:.04em; }
+
+/* ── Two panel: position + strategy ─────────────────────────────────── */
+.twopanel{ display:grid; grid-template-columns:1fr 1fr; gap:var(--sp4); }
+.twopanel .card{ border-top:3px solid var(--accent); }
+.twopanel .panel-label{ font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); margin-bottom:8px; }
+.twopanel .panel-body{ font-size:14px; line-height:1.6; }
+
+/* ── Matters ────────────────────────────────────────────────────────── */
+.matter-card{ display:flex; flex-direction:column; gap:8px; border-left:4px solid var(--accent); margin-bottom:var(--sp3); }
+.matter-card.urgent{ border-left-color:var(--critical); }
+.matter-top{ display:flex; justify-content:space-between; align-items:center; gap:10px; }
+.matter-title{ font-size:15px; font-weight:600; }
+.matter-row{ font-size:13px; color:var(--muted); line-height:1.6; }
+.matter-row b{ color:var(--ink); font-weight:600; }
+.matter-list{ margin:2px 0 0 18px; padding:0; font-size:13px; color:var(--muted); }
+
+/* ── Approvals + next actions ───────────────────────────────────────── */
+.approvals-list{ display:flex; flex-wrap:wrap; gap:8px; }
+.phase-list{ display:flex; flex-direction:column; gap:var(--sp4); }
+.phase{ display:flex; gap:var(--sp4); }
+.phase-name{ flex:0 0 140px; font-size:12px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:.04em; padding-top:2px; }
+.phase-items{ flex:1; margin:0; padding:0 0 0 18px; font-size:14px; line-height:1.7; }
+
+/* ── Vector switcher ────────────────────────────────────────────────── */
+.switcher-strip{ display:grid; grid-template-columns:repeat(5,1fr); gap:10px; }
+.switch-card{ padding:14px 16px; display:flex; flex-direction:column; gap:6px; }
+.switch-card.active{ border-color:var(--accent); box-shadow:0 0 0 3px var(--strategic-bg); }
+.switch-card .sname{ font-size:12px; font-weight:600; }
+.switch-card .sscore{ font-family:'Fraunces'; font-size:18px; font-weight:600; }
+.switch-card .snote{ font-size:11px; color:var(--muted); }
+
+/* ── Screen 4: dimension detail ─────────────────────────────────────── */
+.dim-detail-head{ display:flex; align-items:baseline; gap:var(--sp5); margin-bottom:var(--sp5); flex-wrap:wrap; }
+.dim-detail-nav{ display:flex; justify-content:space-between; margin-top:var(--sp6); }
+.qa-card{ margin-bottom:var(--sp3); cursor:pointer; transition:border-color .15s; }
+.qa-card:hover{ border-color:var(--accent); }
+.qa-q{ font-size:13px; font-weight:600; color:var(--ink); margin-bottom:6px; }
+.qa-a{ font-size:14px; color:var(--ink); line-height:1.6; margin:0 0 8px; padding-left:14px; border-left:2px solid var(--line); }
+.qa-inference{ font-size:12px; color:var(--muted); margin-bottom:2px; }
+.qa-inference b{ font-weight:600; color:var(--muted); }
+.qa-toggle{ font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.04em; color:var(--accent); margin-top:8px; }
+.qa-citation{ display:none; margin-top:10px; padding-top:10px; border-top:1px dashed var(--line); }
+.qa-card.expanded .qa-citation{ display:block; }
+.qa-citation-row{ font-size:12px; color:var(--muted); margin-bottom:6px; }
+.qa-citation-row b{ color:var(--ink); font-weight:600; }
+.qa-citation-excerpt{ font-size:13px; color:var(--ink); font-style:italic; background:var(--canvas); border-radius:6px; padding:8px 10px; margin:4px 0 8px; border-left:3px solid var(--accent); }
+.belief-id{ font-family:'Inter'; font-size:11px; color:var(--muted); }
+
+/* ── Screen 5: momentum & history ───────────────────────────────────── */
+.chart-wrap{ padding:24px 26px 16px; }
+.timeline-row{ display:flex; gap:var(--sp4); padding:14px 0; border-bottom:1px solid var(--line); }
+.timeline-row:last-child{ border-bottom:none; }
+.timeline-date{ flex:0 0 130px; font-size:13px; color:var(--muted); }
+.timeline-index{ flex:0 0 60px; font-family:'Fraunces'; font-weight:600; font-size:16px; }
+.timeline-note{ flex:1; font-size:13px; color:var(--muted); }
+.compare-row{ display:flex; align-items:center; justify-content:space-between; padding:9px 0; border-bottom:1px solid var(--line); font-size:13px; }
+.compare-row:last-child{border-bottom:none}
+.compare-delta{ font-weight:600; font-family:'Fraunces'; }
+
+@media (max-width:760px){
+  .vector-grid, .dim-grid, .twopanel{ grid-template-columns:1fr; }
+  .switcher-strip{ grid-template-columns:repeat(2,1fr); }
+  .topbar .party-name{ display:none; }
+  .super-index{ font-size:48px; }
+  .topbar{ flex-wrap:wrap; padding:12px 16px; gap:10px; }
+  .proto-badge{ order:3; font-size:10px; padding:4px 8px; }
+  .proto-badge b{ display:block; }
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <button class="wordmark" onclick="goToLaunch()" title="Back to launch">Kozmo</button>
+  <div class="party-name" id="tb-party"></div>
+  <div class="topbar-spacer"></div>
+  <div class="nav-pills">
+    <button class="nav-pill" id="nav-review" onclick="navReview()">Review</button>
+    <button class="nav-pill" id="nav-momentum" onclick="navMomentum()">Momentum</button>
+  </div>
+  <div class="proto-badge">Design prototype — <b>illustrative data</b></div>
+</div>
+
+<main>
+
+  <!-- ══════════════ SCREEN 1 — Launch Review ══════════════ -->
+  <section class="screen" data-screen="launch">
+    <div class="eyebrow">Vichara · Commercial Party</div>
+    <div class="party-header">
+      <div>
+        <h1 class="screen-title" id="launch-party-name" style="margin-bottom:0"></h1>
+        <div class="party-tags" id="launch-party-tags"></div>
+      </div>
+    </div>
+
+    <section class="block">
+      <h2 class="section-heading">What would you like to review?</h2>
+      <div class="vector-grid" id="vector-grid"></div>
+      <div class="launch-cta">
+        <button class="btn-primary" id="launch-btn" disabled onclick="launchReview()">Launch Review</button>
+      </div>
+    </section>
+
+    <section class="block evidence-panel">
+      <h2 class="section-heading">Evidence on file</h2>
+      <p class="screen-sub" style="margin-bottom:14px">What Kozmo already holds for this party — the Review will draw on these.</p>
+      <div class="chips" id="evidence-chips"></div>
+    </section>
+  </section>
+
+  <!-- ══════════════ SCREEN 2 — Review in progress ══════════════ -->
+  <section class="screen" data-screen="processing">
+    <div class="processing-wrap">
+      <div class="spinner" role="status" aria-label="Reviewing"></div>
+      <div class="status-line" id="proc-status">Starting review…</div>
+      <ul class="proc-checklist" id="proc-checklist"></ul>
+      <div class="proc-sub" id="proc-sub"></div>
+    </div>
+  </section>
+
+  <!-- ══════════════ SCREEN 3 — The Review / Momentum Workspace ══════════════ -->
+  <section class="screen" data-screen="review">
+    <div class="card instrument">
+      <div class="instrument-top">
+        <div class="eyebrow" id="rv-vector-name"></div>
+        <div style="display:flex; gap:8px;">
+          <button class="btn-ghost" onclick="goToLaunch()">← Back to launch</button>
+          <button class="btn-ghost" onclick="reReview()">Re-review</button>
+        </div>
+      </div>
+      <div class="instrument-body">
+        <div><span class="super-index num" id="rv-score"></span><span class="super-index-unit">/100</span></div>
+        <div class="instrument-meta">
+          <span class="badge" id="rv-band"></span>
+          <span class="momentum-label"><span id="rv-momentum-arrow" class="trend"></span> <span id="rv-momentum-word"></span></span>
+          <svg class="sparkline" id="rv-sparkline" width="70" height="22"></svg>
+          <span class="delta-chip" id="rv-delta"></span>
+        </div>
+      </div>
+      <div class="super-index-sub">Super Index</div>
+      <div class="review-dates" id="rv-dates"></div>
+      <div class="contribution-row">
+        <div class="contribution-label">Dimension contribution</div>
+        <div class="contribution-bar" id="rv-contribution"></div>
+        <div class="contribution-legend" id="rv-legend"></div>
+      </div>
+    </div>
+
+    <section class="block">
+      <h2 class="section-heading">Executive summary</h2>
+      <p class="card" id="rv-summary" style="font-size:15px; line-height:1.7"></p>
+    </section>
+
+    <section class="block">
+      <h2 class="section-heading">Review by dimension</h2>
+      <div class="dim-grid" id="rv-dims"></div>
+    </section>
+
+    <section class="block">
+      <h2 class="section-heading" id="rv-twopanel-heading">Recommended position &amp; strategy</h2>
+      <div class="twopanel">
+        <div class="card">
+          <div class="panel-label" id="rv-position-label">Recommended position</div>
+          <div class="panel-body" id="rv-position-body"></div>
+        </div>
+        <div class="card">
+          <div class="panel-label" id="rv-action-label">Counteroffer strategy</div>
+          <div class="panel-body" id="rv-action-body"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="block">
+      <h2 class="section-heading">Matters</h2>
+      <div id="rv-matters"></div>
+    </section>
+
+    <section class="block">
+      <h2 class="section-heading">Required approvals &amp; next actions</h2>
+      <div class="card">
+        <div class="panel-label">Required approvals</div>
+        <div class="approvals-list" id="rv-approvals" style="margin-bottom:18px"></div>
+        <div class="panel-label">Next actions</div>
+        <div class="phase-list" id="rv-nextactions" style="margin-top:10px"></div>
+      </div>
+    </section>
+
+    <section class="block">
+      <h2 class="section-heading">Other Impact Vectors</h2>
+      <div class="switcher-strip" id="rv-switcher"></div>
+    </section>
+  </section>
+
+  <!-- ══════════════ SCREEN 4 — Dimension detail ══════════════ -->
+  <section class="screen" data-screen="dimension">
+    <div class="eyebrow" id="dd-vector-name"></div>
+    <div class="dim-detail-head">
+      <h1 class="screen-title" id="dd-name" style="margin-bottom:0"></h1>
+      <span class="super-index num" id="dd-score" style="font-size:40px"></span>
+    </div>
+    <div class="review-dates" id="dd-dates" style="margin-top:-8px; margin-bottom:var(--sp5)"></div>
+    <div class="dim-bar-track" style="max-width:420px; height:8px; margin-bottom:var(--sp6)">
+      <div class="dim-bar-fill" id="dd-bar"></div>
+    </div>
+
+    <section class="block">
+      <h2 class="section-heading">What we found</h2>
+      <p class="card" id="dd-finding" style="font-size:14px; line-height:1.7"></p>
+    </section>
+
+    <section class="block">
+      <h2 class="section-heading">Why it matters</h2>
+      <p class="card" id="dd-why" style="font-size:14px; line-height:1.7"></p>
+    </section>
+
+    <section class="block">
+      <h2 class="section-heading">Vichara Q&amp;A</h2>
+      <p class="screen-sub" style="margin-bottom:14px">The enquiry behind this finding — what was asked, what came back, and what it means.</p>
+      <div id="dd-qa"></div>
+    </section>
+
+    <section class="block">
+      <h2 class="section-heading">Evidence</h2>
+      <div class="chips" id="dd-evidence"></div>
+    </section>
+
+    <section class="block">
+      <h2 class="section-heading">Confidence &amp; freshness</h2>
+      <p class="card" id="dd-confidence" style="font-size:14px"></p>
+    </section>
+
+    <section class="block">
+      <h2 class="section-heading">Recommended actions</h2>
+      <ul class="card" id="dd-actions" style="font-size:14px; line-height:1.8; margin:0; padding-left:36px"></ul>
+    </section>
+
+    <div class="dim-detail-nav">
+      <button class="btn-ghost" onclick="dimNav(-1)">← Previous dimension</button>
+      <div style="display:flex; gap:8px;">
+        <button class="btn-ghost" onclick="goToLaunch()">Back to launch</button>
+        <button class="btn-ghost" onclick="backToReview()">Back to Review</button>
+      </div>
+      <button class="btn-ghost" onclick="dimNav(1)">Next dimension →</button>
+    </div>
+  </section>
+
+  <!-- ══════════════ SCREEN 5 — Momentum & history ══════════════ -->
+  <section class="screen" data-screen="history">
+    <div class="eyebrow" id="hist-vector-name"></div>
+    <h1 class="screen-title">Momentum &amp; history</h1>
+    <p class="screen-sub">Momentum is a derivative, not a level — this is the Super Index over time for this Impact Vector.</p>
+    <div class="review-dates" id="hist-dates" style="margin-bottom:var(--sp5)"></div>
+
+    <section class="block">
+      <div class="card chart-wrap">
+        <svg id="hist-chart" width="100%" height="180" viewBox="0 0 1000 180" preserveAspectRatio="none"></svg>
+      </div>
+    </section>
+
+    <section class="block">
+      <h2 class="section-heading">Review timeline</h2>
+      <div class="card" id="hist-timeline"></div>
+    </section>
+
+    <section class="block">
+      <h2 class="section-heading">Compare reviews</h2>
+      <p class="screen-sub" id="hist-compare-narrative" style="margin-bottom:14px"></p>
+      <div class="card" id="hist-compare"></div>
+    </section>
+
+    <section class="block">
+      <h2 class="section-heading">Matters status over time</h2>
+      <div class="card" id="hist-matters"></div>
+    </section>
+
+    <div class="dim-detail-nav" style="justify-content:flex-end">
+      <button class="btn-ghost" onclick="goToLaunch()">Back to launch</button>
+      <button class="btn-ghost" onclick="backToReview()">Back to Review</button>
+    </div>
+  </section>
+
+</main>
+
+<script>
+/* ══════════════════════════════════════════════════════════════════
+   DATA — everything below is curated mock data for one worked example
+   (Cyberdyne Systems Inc.). Not wired to any backend.
+   ══════════════════════════════════════════════════════════════════ */
+
+const PARTY = {
+  name: "Cyberdyne Systems Inc.",
+  tags: ["Software / SaaS", "Strategic tier", "VND-004431"],
+  evidence: [
+    { label: "Contract and amendments", type: "document" },
+    { label: "Spend from ERP", type: "system" },
+    { label: "Tickets from Jira / Zendesk", type: "system" },
+    { label: "SLA history", type: "system" },
+    { label: "Security questionnaire", type: "document" },
+    { label: "Business-owner feedback check-in", type: "human" },
+    { label: "Previous renewal decision", type: "record" },
+    { label: "Open obligations", type: "record" },
+    { label: "Market benchmark", type: "external" }
+  ]
+};
+
+const VECTORS = [
+  {
+    id: "renewal", name: "Renewal Optimization",
+    description: "Is this renewal heading toward a good commercial outcome?",
+    superIndex: 58, band: "AT_RISK", momentum: "down",
+    lastReviewDate: "Jul 09, 2026", nextReviewDate: "Jul 23, 2026",
+    history: [
+      { date: "Jan 14, 2026", index: 68, note: "Healthy renewal posture; no urgent flags." },
+      { date: "Apr 22, 2026", index: 61, note: "Cost trend emerging; SLA breach recorded." },
+      { date: "Jul 09, 2026", index: 58, note: "Renewal urgency rising as the notice window approaches." }
+    ],
+    executiveSummary: "Cyberdyne's renewal is trending the wrong way: a benchmark-beating price increase, a closing notice window, and thin negotiation prep are compounding. Operational dependency and compliance are stable, but they don't offset the commercial and timing risk. Renegotiate now, before the window closes, not after.",
+    positionLabel: "Recommended position",
+    recommendedPosition: "Renegotiate before the notice window closes.",
+    actionLabel: "Counteroffer strategy",
+    counteroffer: "Target uplift at or below the 6% category benchmark, seek two quarters of SLA credits for the Q3 breaches, and reduce the minimum annual commitment by one tier to reflect actual utilization.",
+    approvals: ["Procurement lead", "Finance", "Legal (clause changes)"],
+    nextActions: [
+      { phase: "This week", items: ["Prepare benchmark pack", "Issue conditional non-renewal notice", "Book business-owner review"] },
+      { phase: "Next 2 weeks", items: ["Deliver counteroffer to vendor", "Close out 2 open compliance items"] },
+      { phase: "Before signature", items: ["Confirm SLA credit terms in writing", "Re-review the Renewal Urgency dimension"] }
+    ],
+    dimensions: [
+      { name: "Cost Increase Risk", weight: 22, score: 41, confidence: "High", trend: "down",
+        finding: "Proposed uplift is 18% YoY, well above the 6% benchmark for this category.",
+        why: "Unchecked, this uplift compounds into the renewal baseline and resets the ceiling for every future negotiation.",
+        evidence: ["Market benchmark", "Spend from ERP", "Contract and amendments"],
+        actions: ["Request formal benchmark citation from vendor", "Cap counter-ask at benchmark + 2 points", "Model 3-year TCO at both uplift scenarios"],
+        freshness: "Benchmark 40 days old",
+        qa: [
+          { q: "What is the proposed renewal price increase?", a: "18% year-over-year, per the renewal notice.", inference: "Uplift exceeds the category benchmark by 12 points — flagged as a cost outlier.",
+            citation: { source: "Contract and amendments", type: "document", excerpt: "Renewal notice, Section 3: proposed uplift 18% effective next term.", date: "May 30, 2026", beliefId: "BLF-1001" } },
+          { q: "What is the category benchmark uplift for SaaS renewals at this tier?", a: "6%, per the Q2 2026 market benchmark report.", inference: "Benchmark comparison confirms the ask is not market-standard.",
+            citation: { source: "Market benchmark", type: "external", excerpt: "Q2 2026 SaaS renewal benchmark: median uplift 6% for this category.", date: "May 30, 2026", beliefId: "BLF-1002" } },
+          { q: "Has the vendor provided written justification for the increase?", a: "No formal justification found in the contract file or correspondence.", inference: "Absence of justification weakens the vendor's negotiating position.",
+            citation: { source: "Contract and amendments", type: "document", excerpt: "No addendum or cover letter justifying the increase found in the file.", date: "May 30, 2026", beliefId: "BLF-1003" } },
+          { q: "What was the uplift at the last renewal cycle?", a: "4%, per the prior renewal decision record.", inference: "This cycle's ask is more than 4x the prior cycle's — an escalating pattern, not a one-off.",
+            citation: { source: "Previous renewal decision", type: "record", excerpt: "FY25 renewal closed at 4% uplift, accepted without negotiation.", date: "Feb 03, 2026", beliefId: "BLF-1004" } },
+          { q: "Does spend run through the ERP match the invoiced contract terms?", a: "Yes, spend matches contracted rates with no discrepancy.", inference: "Rules out billing error as an explanation for the increase; it's a genuine repricing ask.",
+            citation: { source: "Spend from ERP", type: "system", excerpt: "Invoiced amounts reconcile to contracted unit rates for all periods.", date: "Jul 02, 2026", beliefId: "BLF-1005" } }
+        ] },
+      { name: "Operational Dependency", weight: 18, score: 72, confidence: "High", trend: "flat",
+        finding: "Deeply embedded in two production workflows; switching cost is high.",
+        why: "High switching cost caps our negotiation leverage — the vendor can price in the fact that walking away is expensive for us.",
+        evidence: ["Tickets from Jira / Zendesk", "Business-owner feedback check-in"],
+        actions: ["Scope a phased migration plan as a credible walk-away signal", "Identify which workflow is least entangled first"],
+        freshness: "Check-in 12 days old",
+        qa: [
+          { q: "How many production workflows depend on this vendor?", a: "Two, per ticket and check-in data.", inference: "Multi-workflow embedding raises switching cost materially.",
+            citation: { source: "Tickets from Jira / Zendesk", type: "system", excerpt: "Ticket volume concentrated across 2 production workflows: billing sync, order fulfillment.", date: "Jul 02, 2026", beliefId: "BLF-1006" } },
+          { q: "Is there a documented alternative vendor or workaround?", a: "None identified in current records.", inference: "No fallback path increases our exposure if leverage is pushed too far.",
+            citation: { source: "Business-owner feedback check-in", type: "human", excerpt: "No alternative vendor or workaround discussed in the last three check-ins.", date: "Jun 27, 2026", beliefId: "BLF-1007" } },
+          { q: "How long has this vendor been embedded in these workflows?", a: "Since the original contract, over 3 years, per contract and amendments.", inference: "Long tenure signals deep integration, not a recent or shallow dependency.",
+            citation: { source: "Contract and amendments", type: "document", excerpt: "Original SOW dated over 3 years prior to current review.", date: "Jun 17, 2026", beliefId: "BLF-1008" } },
+          { q: "What did the business owner report about switching feasibility?", a: "Check-in described switching as 'high effort, multi-quarter project.'", inference: "First-hand account corroborates the high switching-cost finding.",
+            citation: { source: "Business-owner feedback check-in", type: "human", excerpt: "\"Switching would be a high-effort, multi-quarter project.\"", date: "Jun 27, 2026", beliefId: "BLF-1009" } },
+          { q: "Are there redundant vendors already in place for either workflow?", a: "No redundant vendor found for either workflow.", inference: "Confirms single point of dependency, not a diversified vendor footprint.",
+            citation: { source: "Tickets from Jira / Zendesk", type: "system", excerpt: "No secondary vendor referenced in ticket history for either workflow.", date: "Jul 02, 2026", beliefId: "BLF-1010" } }
+        ] },
+      { name: "SLA Performance", weight: 15, score: 55, confidence: "Medium", trend: "down",
+        finding: "Priority-response SLA missed 4× in Q3; average resolution time trending up.",
+        why: "Repeated SLA misses are the strongest lever available for service credits or termination-for-cause language.",
+        evidence: ["SLA history", "Tickets from Jira / Zendesk"],
+        actions: ["Compile the 4 SLA breach tickets into an evidence packet", "Request retroactive service credits"],
+        freshness: "SLA history 7 days old",
+        qa: [
+          { q: "How many priority-response SLA breaches occurred in Q3?", a: "4 breaches, per SLA history.", inference: "Recurring, not isolated — a pattern worth flagging.",
+            citation: { source: "SLA history", type: "system", excerpt: "4 priority-response breach records logged in Q3.", date: "Jul 02, 2026", beliefId: "BLF-1011" } },
+          { q: "What is the average resolution-time trend over the past two quarters?", a: "Trending up, per ticket data.", inference: "Degradation, not just a Q3 anomaly.",
+            citation: { source: "Tickets from Jira / Zendesk", type: "system", excerpt: "Average resolution time up across the last two quarterly rollups.", date: "Jul 02, 2026", beliefId: "BLF-1012" } },
+          { q: "Were any of the breaches escalated to the vendor formally?", a: "No formal escalation found in tickets or correspondence.", inference: "Breaches went unaddressed — an opening for retroactive credit requests.",
+            citation: { source: "Tickets from Jira / Zendesk", type: "system", excerpt: "No escalation tag or vendor-facing complaint found on the 4 breach tickets.", date: "Jul 02, 2026", beliefId: "BLF-1013" } },
+          { q: "Does the contract include an SLA credit clause?", a: "Yes, a service-credit clause for priority-response misses, per contract and amendments.", inference: "Credits are contractually available but haven't been claimed.",
+            citation: { source: "Contract and amendments", type: "document", excerpt: "Service-credit clause, Section 7.2: credits available for priority-response misses.", date: "Jun 17, 2026", beliefId: "BLF-1014" } },
+          { q: "What SLA tier is currently contracted?", a: "Priority-response tier, per contract terms.", inference: "Confirms the breaches are against the tier we're actually paying for.",
+            citation: { source: "Contract and amendments", type: "document", excerpt: "SLA schedule confirms priority-response tier as the contracted service level.", date: "Jun 17, 2026", beliefId: "BLF-1015" } }
+        ] },
+      { name: "Compliance Exposure", weight: 15, score: 63, confidence: "Medium", trend: "flat",
+        finding: "SOC 2 current, but the security questionnaire has two open items.",
+        why: "Open compliance items are a real but modest risk — worth closing before signature, not worth blocking the renewal on.",
+        evidence: ["Security questionnaire"],
+        actions: ["Send follow-up questionnaire for the 2 open items", "Set a compliance close-out deadline before signature"],
+        freshness: "Questionnaire 18 days old",
+        qa: [
+          { q: "Is the vendor's SOC 2 certification current?", a: "Yes, current per the security questionnaire.", inference: "No certification-lapse risk.",
+            citation: { source: "Security questionnaire", type: "document", excerpt: "SOC 2 Type II certificate on file, valid through current term.", date: "Jun 21, 2026", beliefId: "BLF-1016" } },
+          { q: "How many items remain open on the security questionnaire?", a: "Two open items.", inference: "Modest, not severe — worth closing but not blocking.",
+            citation: { source: "Security questionnaire", type: "document", excerpt: "2 items marked 'in progress' in the latest questionnaire response.", date: "Jun 21, 2026", beliefId: "BLF-1017" } },
+          { q: "What is the nature of the two open items?", a: "Data-retention policy documentation and a subprocessor list update, per questionnaire.", inference: "Administrative gaps, not active vulnerabilities.",
+            citation: { source: "Security questionnaire", type: "document", excerpt: "Open items: data-retention policy doc, subprocessor list update.", date: "Jun 21, 2026", beliefId: "BLF-1018" } },
+          { q: "When were the open items first raised?", a: "18 days ago, at the last questionnaire refresh.", inference: "Recent enough that a close-out deadline is reasonable, not overdue yet.",
+            citation: { source: "Security questionnaire", type: "document", excerpt: "Questionnaire response dated 18 days prior to this review.", date: "Jun 21, 2026", beliefId: "BLF-1019" } },
+          { q: "Has the vendor had a security incident in the past 12 months?", a: "None found in current records.", inference: "No incident history to weigh against the open items.",
+            citation: { source: "Security questionnaire", type: "document", excerpt: "No incident disclosure section populated in current or prior questionnaire.", date: "Jun 21, 2026", beliefId: "BLF-1020" } }
+        ] },
+      { name: "Negotiation Leverage", weight: 15, score: 38, confidence: "Medium", trend: "down",
+        finding: "Late in the window, no benchmark pack prepared, few alternatives scoped.",
+        why: "Leverage erodes daily as the notice window closes — this is the dimension most within our control to fix fast.",
+        evidence: ["Market benchmark", "Previous renewal decision"],
+        actions: ["Prepare benchmark pack this week", "Scope at least one credible alternative vendor"],
+        freshness: "Benchmark 40 days old",
+        qa: [
+          { q: "Has a benchmark pack been prepared for this renewal?", a: "No benchmark pack found in the file.", inference: "We're entering the negotiation unprepared relative to the vendor.",
+            citation: { source: "Market benchmark", type: "external", excerpt: "No benchmark citation attached to the renewal case file.", date: "May 30, 2026", beliefId: "BLF-1021" } },
+          { q: "How many alternative vendors have been scoped?", a: "None scoped in current records.", inference: "No credible walk-away option weakens our position further.",
+            citation: { source: "Previous renewal decision", type: "record", excerpt: "No alternative vendor scoping found in current procurement records.", date: "Feb 03, 2026", beliefId: "BLF-1022" } },
+          { q: "How many days remain before the notice window closes?", a: "47 days, per the contract's notice clause.", inference: "Leverage is time-bound and actively eroding.",
+            citation: { source: "Contract and amendments", type: "document", excerpt: "Notice clause: 47 days remain before the window closes.", date: "Jun 17, 2026", beliefId: "BLF-1023" } },
+          { q: "Has Legal or Procurement flagged this renewal as high-priority?", a: "Not yet, per current workflow status.", inference: "Lack of internal urgency compounds the external time pressure.",
+            citation: { source: "Business-owner feedback check-in", type: "human", excerpt: "No high-priority flag logged for this renewal in current workflow.", date: "Jun 27, 2026", beliefId: "BLF-1024" } },
+          { q: "What did the previous renewal decision record note about leverage?", a: "Prior cycle noted 'moderate leverage, one alternative scoped.'", inference: "Leverage has weakened since the last cycle, not improved.",
+            citation: { source: "Previous renewal decision", type: "record", excerpt: "FY25 decision record: 'moderate leverage, one alternative scoped.'", date: "Feb 03, 2026", beliefId: "BLF-1025" } }
+        ] },
+      { name: "Renewal Urgency", weight: 15, score: 30, confidence: "High", trend: "down",
+        finding: "Notice window closes in 47 days; auto-renewal clause is active.",
+        why: "Missing the notice window forfeits all leverage for a full term — this is the hard deadline everything else has to fit inside.",
+        evidence: ["Contract and amendments", "Open obligations"],
+        actions: ["Issue conditional non-renewal notice this week", "Calendar the hard deadline for Legal and Procurement"],
+        freshness: "Contract review 5 days old",
+        qa: [
+          { q: "When does the auto-renewal clause trigger?", a: "60 days before term end, per contract and amendments.", inference: "A hard, contractually-fixed deadline, not a soft estimate.",
+            citation: { source: "Contract and amendments", type: "document", excerpt: "Auto-renewal clause, Section 12: triggers 60 days before term end.", date: "Jul 04, 2026", beliefId: "BLF-1026" } },
+          { q: "How many days remain before that trigger?", a: "47 days.", inference: "Inside the trigger window already — action is time-critical.",
+            citation: { source: "Contract and amendments", type: "document", excerpt: "Current date is within the 60-day auto-renewal trigger window.", date: "Jul 04, 2026", beliefId: "BLF-1027" } },
+          { q: "Has a conditional non-renewal notice been issued?", a: "Not yet, per open obligations.", inference: "The single most time-sensitive action item is still outstanding.",
+            citation: { source: "Open obligations", type: "record", excerpt: "No conditional non-renewal notice logged in the obligations register.", date: "Jun 24, 2026", beliefId: "BLF-1028" } },
+          { q: "What is the term length if auto-renewal proceeds unchallenged?", a: "A full 12-month term, per contract terms.", inference: "Missing the window forfeits a full year of leverage, not a partial one.",
+            citation: { source: "Contract and amendments", type: "document", excerpt: "Term length on auto-renewal: 12 months, per contract Section 12.", date: "Jul 04, 2026", beliefId: "BLF-1029" } },
+          { q: "Is this deadline calendared for Legal and Procurement?", a: "No calendar entry found in current workflow records.", inference: "The deadline exists on paper but isn't yet operationally tracked.",
+            citation: { source: "Open obligations", type: "record", excerpt: "No calendar entry linked to this deadline in Legal or Procurement workflows.", date: "Jun 24, 2026", beliefId: "BLF-1030" } }
+        ] }
+    ],
+    matters: [
+      { title: "Repricing Matter", trigger: "Cost Increase Risk 41 + Negotiation Leverage 38",
+        objective: "Bring uplift to benchmark before signature.",
+        interventions: ["Request benchmark", "Prepare negotiation brief"], owner: "Procurement", status: "Open" },
+      { title: "Renewal Recovery Matter", trigger: "Renewal Urgency 30 (notice closes in 47 days)",
+        objective: "Protect options before auto-renewal.",
+        interventions: ["Issue conditional non-renewal notice"], owner: "Procurement + Legal", status: "Urgent" }
+    ],
+    mattersHistory: [
+      { title: "Security Questionnaire Matter", opened: "Feb 03, 2026", closed: "Apr 18, 2026", outcome: "Resolved — both open items closed before the Q2 checkpoint." },
+      { title: "Repricing Matter", opened: "Jul 09, 2026", closed: null, outcome: "Open — awaiting benchmark pack." },
+      { title: "Renewal Recovery Matter", opened: "Jul 09, 2026", closed: null, outcome: "Urgent — notice window closes in 47 days." }
+    ],
+    compareNarrative: "Renewal Urgency and Negotiation Leverage drove the decline this period as the notice window closed in without renegotiation prep having started; Operational Dependency held steady and is the one dimension moving the right direction.",
+    compareDeltas: [
+      { name: "Cost Increase Risk", prev: 46, curr: 41 },
+      { name: "Operational Dependency", prev: 70, curr: 72 },
+      { name: "SLA Performance", prev: 58, curr: 55 },
+      { name: "Compliance Exposure", prev: 65, curr: 63 },
+      { name: "Negotiation Leverage", prev: 45, curr: 38 },
+      { name: "Renewal Urgency", prev: 42, curr: 30 }
+    ]
+  },
+  {
+    id: "contractRisk", name: "Contract Risk",
+    description: "How exposed are we in this contract's terms, obligations, and clauses?",
+    superIndex: 47, band: "CRITICAL", momentum: "flat",
+    lastReviewDate: "Jul 09, 2026", nextReviewDate: "Aug 20, 2026",
+    history: [
+      { date: "Jan 14, 2026", index: 48, note: "Liability exposure already below floor; otherwise stable." },
+      { date: "Apr 22, 2026", index: 47, note: "Obligation ownership gap first identified." },
+      { date: "Jul 09, 2026", index: 47, note: "No remediation yet — risk posture stuck, not improving." }
+    ],
+    executiveSummary: "Cyberdyne's contract posture is critical and not improving: liability exposure sits below our tolerance floor, one obligation has no assigned owner, and the auto-renewal clause is unusually exposed. None of this is new this quarter — the flat momentum is the real signal. This needs deliberate remediation, not another wait-and-see review.",
+    positionLabel: "Recommended position",
+    recommendedPosition: "Remediate before the next amendment cycle — do not let this ride into the next renewal unresolved.",
+    actionLabel: "Remediation plan",
+    counteroffer: "Reassign the unowned obligation immediately, negotiate a liability cap amendment at the next contract touch, and set an auto-renewal opt-out reminder 90 days ahead of the clause date.",
+    approvals: ["Legal", "Contract owner", "Risk & Compliance"],
+    nextActions: [
+      { phase: "This week", items: ["Assign an owner to the unassigned obligation", "Flag liability exposure to Legal for amendment scoping"] },
+      { phase: "Next 2 weeks", items: ["Draft liability cap amendment language", "Set auto-renewal opt-out reminder 90 days ahead"] },
+      { phase: "Before next amendment", items: ["Confirm all obligations have owners", "Re-review deviation-from-standard clauses"] }
+    ],
+    dimensions: [
+      { name: "Termination Risk", weight: 20, score: 44, confidence: "High", trend: "flat",
+        finding: "Termination-for-convenience is one-sided in the vendor's favor; our termination-for-cause bar is high.",
+        why: "An imbalanced termination clause limits our exit options if the relationship deteriorates.",
+        evidence: ["Contract and amendments"],
+        actions: ["Flag clause asymmetry for the next amendment negotiation"],
+        freshness: "Contract review 22 days old",
+        qa: [
+          { q: "What does the termination-for-convenience clause allow the vendor to do?", a: "Terminate with 30 days' notice, no cause required, per contract and amendments.", inference: "One-sided exit right for the vendor; we hold no equivalent.",
+            citation: { source: "Contract and amendments", type: "document", excerpt: "Termination-for-convenience, Section 14: vendor may terminate on 30 days' notice, no cause required.", date: "Jun 17, 2026", beliefId: "BLF-1031" } },
+          { q: "What termination-for-cause bar applies to us?", a: "Requires a material breach uncured after 60 days, per contract terms.", inference: "High bar makes our own exit-for-cause option difficult to invoke quickly.",
+            citation: { source: "Contract and amendments", type: "document", excerpt: "Termination-for-cause, Section 14.2: requires uncured material breach after 60 days.", date: "Jun 17, 2026", beliefId: "BLF-1032" } },
+          { q: "Has this clause been flagged in any prior amendment negotiation?", a: "No, first flagged in this review cycle.", inference: "A previously unexamined risk, not a known and accepted one.",
+            citation: { source: "Contract and amendments", type: "document", excerpt: "No prior amendment negotiation notes reference this clause.", date: "Jun 17, 2026", beliefId: "BLF-1033" } },
+          { q: "Do peer contracts at this spend tier carry a mutual termination-for-convenience right?", a: "No peer benchmark on file for this clause.", inference: "Confidence capped at High rather than definitive without a peer comparison.",
+            citation: { source: "Contract and amendments", type: "document", excerpt: "No peer-contract benchmark attached for termination clause comparison.", date: "Jun 17, 2026", beliefId: "BLF-1034" } },
+          { q: "Is there a notice-method requirement tied to termination?", a: "Yes, written notice via the address specified in the contract.", inference: "Mechanical requirement is clear; the asymmetry is about rights, not process.",
+            citation: { source: "Contract and amendments", type: "document", excerpt: "Notice-method clause: written notice to the address specified in Section 20.", date: "Jun 17, 2026", beliefId: "BLF-1035" } }
+        ] },
+      { name: "Liability Exposure", weight: 20, score: 39, confidence: "Medium", trend: "down",
+        finding: "Liability cap sits below our standard floor for a vendor at this spend tier.",
+        why: "A below-floor liability cap leaves us underprotected if a major incident occurs.",
+        evidence: ["Contract and amendments", "Previous renewal decision"],
+        actions: ["Scope a liability cap amendment", "Benchmark against peer contracts at this spend tier"],
+        freshness: "Contract review 22 days old",
+        qa: [
+          { q: "What is the current liability cap in the contract?", a: "1x annual contract value, per contract and amendments.", inference: "Below our standard floor for a vendor at this spend tier.",
+            citation: { source: "Contract and amendments", type: "document", excerpt: "Liability cap, Section 16: capped at 1x annual contract value.", date: "Jun 17, 2026", beliefId: "BLF-1036" } },
+          { q: "What is our standard liability cap floor for this spend tier?", a: "2x annual contract value, per internal policy referenced in the previous renewal decision.", inference: "Confirms a real, policy-defined gap — not a subjective read.",
+            citation: { source: "Previous renewal decision", type: "record", excerpt: "Internal policy note: liability floor for this spend tier is 2x annual contract value.", date: "Feb 03, 2026", beliefId: "BLF-1037" } },
+          { q: "Was this cap negotiated at signing or inherited from a template?", a: "Inherited from the vendor's standard template, per contract history.", inference: "Never actually negotiated — an open item, not a settled position.",
+            citation: { source: "Contract and amendments", type: "document", excerpt: "Liability cap language matches the vendor's standard template, unmodified at signing.", date: "Jun 17, 2026", beliefId: "BLF-1038" } },
+          { q: "Has liability exposure been raised in a prior renewal cycle?", a: "No, per the previous renewal decision record.", inference: "Sat unaddressed across at least one full renewal cycle already.",
+            citation: { source: "Previous renewal decision", type: "record", excerpt: "No liability discussion found in the prior renewal decision record.", date: "Feb 03, 2026", beliefId: "BLF-1039" } },
+          { q: "Does the vendor carry cyber / E&O insurance that could offset the gap?", a: "Not confirmed in current records.", inference: "No corroborating insurance evidence to offset the below-floor cap.",
+            citation: { source: "Security questionnaire", type: "document", excerpt: "No cyber or E&O insurance certificate on file.", date: "Jun 21, 2026", beliefId: "BLF-1040" } }
+        ] },
+      { name: "Obligation Coverage", weight: 20, score: 52, confidence: "Medium", trend: "flat",
+        finding: "One data-handling obligation has no assigned internal owner.",
+        why: "Unowned obligations are the most common source of compliance drift — nobody is watching it.",
+        evidence: ["Open obligations"],
+        actions: ["Assign an owner this week", "Add to the quarterly obligation review"],
+        freshness: "Obligations register 15 days old",
+        qa: [
+          { q: "How many data-handling obligations exist in the contract?", a: "One, per the open obligations register.", inference: "Single obligation, but it's the one currently unowned.",
+            citation: { source: "Open obligations", type: "record", excerpt: "1 data-handling obligation tracked, tagged 'owner: unassigned.'", date: "Jun 24, 2026", beliefId: "BLF-1041" } },
+          { q: "Who is the assigned internal owner for this obligation?", a: "None assigned, per the register.", inference: "Direct evidence of the ownership gap driving the score.",
+            citation: { source: "Open obligations", type: "record", excerpt: "Owner field blank on the data-handling obligation record.", date: "Jun 24, 2026", beliefId: "BLF-1042" } },
+          { q: "When was this obligation last reviewed?", a: "15 days ago, at the last register refresh.", inference: "Gap is current, not stale data.",
+            citation: { source: "Open obligations", type: "record", excerpt: "Register last refreshed 15 days prior to this review.", date: "Jun 24, 2026", beliefId: "BLF-1043" } },
+          { q: "Are there other obligations in the register with assigned owners?", a: "Yes, all other tracked obligations show an assigned owner.", inference: "This is an isolated gap, not a systemic tracking failure.",
+            citation: { source: "Open obligations", type: "record", excerpt: "All other tracked obligations show a populated owner field.", date: "Jun 24, 2026", beliefId: "BLF-1044" } },
+          { q: "Does the quarterly obligation review currently include this item?", a: "Not yet added, per register status.", inference: "Confirms the fix (add to quarterly review) is still outstanding.",
+            citation: { source: "Open obligations", type: "record", excerpt: "Quarterly obligation review checklist does not yet include this item.", date: "Jun 24, 2026", beliefId: "BLF-1045" } }
+        ] },
+      { name: "Auto-Renewal Exposure", weight: 15, score: 35, confidence: "High", trend: "down",
+        finding: "Auto-renewal clause triggers 60 days before term end with no internal reminder set.",
+        why: "This is the same failure mode already surfacing on the Renewal Optimization vector — a missed window forfeits all leverage.",
+        evidence: ["Contract and amendments"],
+        actions: ["Set a 90-day-ahead reminder", "Confirm the notice method required by the clause"],
+        freshness: "Contract review 22 days old",
+        qa: [
+          { q: "How many days before term end does the auto-renewal clause trigger?", a: "60 days, per contract and amendments.", inference: "A firm, contractually fixed trigger point.",
+            citation: { source: "Contract and amendments", type: "document", excerpt: "Auto-renewal clause, Section 12: 60-day pre-term trigger.", date: "Jun 17, 2026", beliefId: "BLF-1046" } },
+          { q: "Is there an internal reminder set for this trigger?", a: "No reminder found in current workflow records.", inference: "The clause is live and untracked — the core exposure.",
+            citation: { source: "Open obligations", type: "record", excerpt: "No reminder task found in workflow records for this trigger.", date: "Jun 24, 2026", beliefId: "BLF-1047" } },
+          { q: "What notice method does the clause require to opt out?", a: "Written notice via certified mail, per contract terms.", inference: "A specific, non-trivial process that needs lead time to execute correctly.",
+            citation: { source: "Contract and amendments", type: "document", excerpt: "Opt-out requires written notice via certified mail, Section 12.3.", date: "Jun 17, 2026", beliefId: "BLF-1048" } },
+          { q: "Has this same exposure surfaced on the Renewal Optimization vector?", a: "Yes, the Renewal Urgency dimension flags the same notice window.", inference: "Confirms this is one real deadline surfacing across two vectors, not two separate risks.",
+            citation: { source: "Contract and amendments", type: "document", excerpt: "Cross-referenced against the Renewal Optimization vector's Renewal Urgency finding — same clause.", date: "Jun 17, 2026", beliefId: "BLF-1049" } },
+          { q: "How much runway remains before the 60-day trigger?", a: "Inside the window already, per current contract date tracking.", inference: "Time-critical — the reminder needs to be set immediately, not scheduled for later.",
+            citation: { source: "Contract and amendments", type: "document", excerpt: "Current date confirmed inside the 60-day trigger window.", date: "Jun 17, 2026", beliefId: "BLF-1050" } }
+        ] },
+      { name: "Deviation from Standard", weight: 15, score: 58, confidence: "Low", trend: "flat",
+        finding: "Governing law and dispute-resolution clauses deviate from our standard template.",
+        why: "Deviations are usually fine individually but compound risk when several stack in one contract.",
+        evidence: ["Contract and amendments"],
+        actions: ["Log deviations in the contract risk register"],
+        freshness: "Contract review 22 days old — low confidence pending full clause-by-clause pass",
+        qa: [
+          { q: "Which clauses deviate from our standard template?", a: "Governing law and dispute-resolution clauses, per contract and amendments.", inference: "Two specific, named deviations — not a vague concern.",
+            citation: { source: "Contract and amendments", type: "document", excerpt: "Governing law, Section 19, and dispute resolution, Section 20, both marked non-standard on template diff.", date: "Jun 17, 2026", beliefId: "BLF-1051" } },
+          { q: "Has a full clause-by-clause comparison against the template been completed?", a: "No, only a partial pass has been done.", inference: "Explains the Low confidence rating — the picture may be incomplete.",
+            citation: { source: "Contract and amendments", type: "document", excerpt: "Full clause-by-clause comparison marked 'partial — in progress.'", date: "Jun 17, 2026", beliefId: "BLF-1052" } },
+          { q: "Does either deviation individually create material risk?", a: "Not identified as individually material in current review.", inference: "Risk here is about stacking, not any single clause.",
+            citation: { source: "Contract and amendments", type: "document", excerpt: "No individual materiality flag raised on either deviating clause.", date: "Jun 17, 2026", beliefId: "BLF-1053" } },
+          { q: "Is this contract's dispute-resolution jurisdiction different from our other vendor contracts?", a: "Yes, a non-standard jurisdiction is specified, per contract terms.", inference: "Adds real friction if a dispute ever needs to be litigated.",
+            citation: { source: "Contract and amendments", type: "document", excerpt: "Dispute-resolution jurisdiction differs from our standard governing-law template.", date: "Jun 17, 2026", beliefId: "BLF-1054" } },
+          { q: "Has this deviation been logged in the contract risk register?", a: "Not yet, per current action status.", inference: "The recommended action (log it) has not yet been taken.",
+            citation: { source: "Open obligations", type: "record", excerpt: "No contract risk register entry found for either deviation.", date: "Jun 24, 2026", beliefId: "BLF-1055" } }
+        ] },
+      { name: "Amendment Currency", weight: 10, score: 61, confidence: "Medium", trend: "up",
+        finding: "Most recent amendment is 8 months old and reflects current commercial terms.",
+        why: "Recent amendments reduce the risk of stale terms — this dimension is actually a bright spot.",
+        evidence: ["Contract and amendments"],
+        actions: ["No action needed this cycle"],
+        freshness: "Amendment dated 8 months ago",
+        qa: [
+          { q: "When was the most recent amendment executed?", a: "8 months ago, per contract and amendments.", inference: "Recent enough to reflect current commercial terms.",
+            citation: { source: "Contract and amendments", type: "document", excerpt: "Most recent amendment executed 8 months prior to this review.", date: "Nov 09, 2025", beliefId: "BLF-1056" } },
+          { q: "What did the most recent amendment change?", a: "Updated pricing and scope terms, per the amendment record.", inference: "Substantive, not administrative — a real refresh of terms.",
+            citation: { source: "Contract and amendments", type: "document", excerpt: "Amendment scope: updated pricing and scope terms.", date: "Nov 09, 2025", beliefId: "BLF-1057" } },
+          { q: "How does this compare to the average amendment age across our contract portfolio?", a: "No portfolio benchmark on file for direct comparison.", inference: "Confidence held at Medium without a portfolio-wide comparison point.",
+            citation: { source: "Contract and amendments", type: "document", excerpt: "No portfolio-wide amendment-age benchmark attached.", date: "Jun 17, 2026", beliefId: "BLF-1058" } },
+          { q: "Are there any pending amendments currently in negotiation?", a: "None found in current records.", inference: "Terms are settled, not mid-negotiation — a stable baseline for other dimensions.",
+            citation: { source: "Open obligations", type: "record", excerpt: "No pending amendment or in-negotiation flag found in current records.", date: "Jun 24, 2026", beliefId: "BLF-1059" } },
+          { q: "Does the current amendment reflect the liability cap gap noted elsewhere?", a: "No, the liability cap was not touched in the most recent amendment.", inference: "Confirms the liability gap is a separate, still-open issue, not something recently addressed.",
+            citation: { source: "Contract and amendments", type: "document", excerpt: "Liability cap language unchanged in the most recent amendment.", date: "Nov 09, 2025", beliefId: "BLF-1060" } }
+        ] }
+    ],
+    matters: [
+      { title: "Contract Evidence Matter", trigger: "Liability deviation unresolved, one obligation owner unassigned",
+        objective: "Close the ownership and liability gaps before the next amendment cycle.",
+        interventions: ["Assign obligation owner", "Scope liability cap amendment"], owner: "Legal + Contract owner", status: "Open" }
+    ],
+    mattersHistory: [
+      { title: "Contract Evidence Matter", opened: "Apr 22, 2026", closed: null, outcome: "Open — ownership gap and liability deviation both still unresolved." }
+    ],
+    compareNarrative: "Nothing materially changed between checkpoints — the flat momentum is the finding. Liability Exposure and Auto-Renewal Exposure remain the weakest dimensions with no remediation started.",
+    compareDeltas: [
+      { name: "Termination Risk", prev: 45, curr: 44 },
+      { name: "Liability Exposure", prev: 40, curr: 39 },
+      { name: "Obligation Coverage", prev: 51, curr: 52 },
+      { name: "Auto-Renewal Exposure", prev: 37, curr: 35 },
+      { name: "Deviation from Standard", prev: 57, curr: 58 },
+      { name: "Amendment Currency", prev: 58, curr: 61 }
+    ]
+  },
+  {
+    id: "supplierReadiness", name: "Supplier Readiness",
+    description: "How resilient and reliable is this supplier's delivery capability?",
+    superIndex: 66, band: "HEALTHY", momentum: "up",
+    lastReviewDate: "Jul 09, 2026", nextReviewDate: "Oct 08, 2026",
+    history: [
+      { date: "Jan 14, 2026", index: 60, note: "Stable delivery, key-person turnover just beginning." },
+      { date: "Apr 22, 2026", index: 63, note: "Financial position improved; first BCP retest scheduled." },
+      { date: "Jul 09, 2026", index: 66, note: "Delivery capacity scaled up; still watching account-team turnover." }
+    ],
+    executiveSummary: "Cyberdyne's delivery capability is trending well: capacity has scaled ahead of our growth, financials are improving, and there's real headroom before they'd need a new tier. The one soft spot is account-team turnover — two of three contacts have changed in two quarters — worth a stability commitment, not a stance change.",
+    positionLabel: "Recommended position",
+    recommendedPosition: "Maintain — no readiness concerns serious enough to act on this cycle.",
+    actionLabel: "Monitoring plan",
+    counteroffer: "Ask for a named point-of-contact commitment and a subcontractor disclosure at the next business review; no commercial ask needed.",
+    approvals: ["Business owner"],
+    nextActions: [
+      { phase: "This week", items: ["Send point-of-contact stability ask to account team"] },
+      { phase: "Next 2 weeks", items: ["Request subcontractor disclosure"] },
+      { phase: "Before next amendment", items: ["Add subcontractor flow-down clause"] }
+    ],
+    dimensions: [
+      { name: "Delivery Capacity", weight: 20, score: 74, confidence: "High", trend: "up",
+        finding: "Cyberdyne has scaled delivery headcount 15% this year and cleared its backlog of overdue tickets.",
+        why: "Delivery capacity is the leading indicator for whether they can absorb our growth without service degradation.",
+        evidence: ["Tickets from Jira / Zendesk", "Business-owner feedback check-in"],
+        actions: ["Confirm capacity plan covers our Q4 volume forecast"],
+        freshness: "Ticket data 7 days old",
+        qa: [
+          { q: "How much has delivery headcount grown this year?", a: "15%, reflected in vendor-reported staffing tied to ticket-handling capacity.", inference: "Direct capacity growth, not just a claim.",
+            citation: { source: "Tickets from Jira / Zendesk", type: "system", excerpt: "Vendor staffing update referenced in ticket-handling capacity notes: +15% headcount YTD.", date: "Jul 02, 2026", beliefId: "BLF-1061" } },
+          { q: "What is the current status of the overdue ticket backlog?", a: "Cleared, per Jira / Zendesk ticket data.", inference: "Backlog clearance is a concrete, observable capacity signal.",
+            citation: { source: "Tickets from Jira / Zendesk", type: "system", excerpt: "Overdue-ticket queue shows zero items past due as of latest pull.", date: "Jul 02, 2026", beliefId: "BLF-1062" } },
+          { q: "Does the vendor have a documented capacity plan for our forecasted growth?", a: "Not yet confirmed in current records.", inference: "The one open action — confirming plan coverage — is still outstanding.",
+            citation: { source: "Business-owner feedback check-in", type: "human", excerpt: "No capacity plan document referencing our Q4 forecast on file.", date: "Jun 27, 2026", beliefId: "BLF-1063" } },
+          { q: "What did the business owner report about recent responsiveness?", a: "Check-in noted 'ticket turnaround has visibly improved this quarter.'", inference: "First-hand account corroborates the ticket-data trend.",
+            citation: { source: "Business-owner feedback check-in", type: "human", excerpt: "\"Ticket turnaround has visibly improved this quarter.\"", date: "Jun 27, 2026", beliefId: "BLF-1064" } },
+          { q: "Were there any capacity-related escalations in the past quarter?", a: "None found in ticket records.", inference: "Absence of escalations supports the improving trend, not just steady-state.",
+            citation: { source: "Tickets from Jira / Zendesk", type: "system", excerpt: "No escalation-tagged tickets in the past quarter's capacity-related queue.", date: "Jul 02, 2026", beliefId: "BLF-1065" } }
+        ] },
+      { name: "Business Continuity Plan", weight: 15, score: 70, confidence: "Medium", trend: "flat",
+        finding: "BCP was last tested 9 months ago; passed with two minor findings, both closed.",
+        why: "An untested or stale BCP is a hidden single point of failure we'd only discover during an actual outage.",
+        evidence: ["Security questionnaire"],
+        actions: ["Request the next BCP test date", "Confirm both prior findings stayed closed"],
+        freshness: "Questionnaire 18 days old",
+        qa: [
+          { q: "When was the BCP last tested?", a: "9 months ago, per the security questionnaire.", inference: "Within a reasonable testing cadence, though due for refresh soon.",
+            citation: { source: "Security questionnaire", type: "document", excerpt: "BCP test date logged 9 months prior to this review.", date: "Jun 21, 2026", beliefId: "BLF-1066" } },
+          { q: "What was the outcome of the last test?", a: "Passed, with two minor findings.", inference: "Overall sound, not a failed or skipped test.",
+            citation: { source: "Security questionnaire", type: "document", excerpt: "Test outcome: passed, 2 minor findings noted.", date: "Jun 21, 2026", beliefId: "BLF-1067" } },
+          { q: "Have both findings from the last test been closed?", a: "Yes, both closed per questionnaire follow-up.", inference: "Full closure supports reasonable confidence in the plan's current state.",
+            citation: { source: "Security questionnaire", type: "document", excerpt: "Follow-up section shows both findings marked 'closed.'", date: "Jun 21, 2026", beliefId: "BLF-1068" } },
+          { q: "Is a next BCP test date documented?", a: "Not specified in the current questionnaire.", inference: "The recommended action (request next test date) targets a real gap.",
+            citation: { source: "Security questionnaire", type: "document", excerpt: "Next-test-date field left blank in current questionnaire.", date: "Jun 21, 2026", beliefId: "BLF-1069" } },
+          { q: "Does the BCP cover the specific workflows we depend on?", a: "Not explicitly confirmed — questionnaire covers BCP only at a general level.", inference: "Confidence held at Medium pending workflow-specific confirmation.",
+            citation: { source: "Security questionnaire", type: "document", excerpt: "BCP scope described at a general-operations level, not workflow-specific.", date: "Jun 21, 2026", beliefId: "BLF-1070" } }
+        ] },
+      { name: "Key Personnel Stability", weight: 15, score: 62, confidence: "Medium", trend: "down",
+        finding: "Two of the three named account-team contacts have changed in the past two quarters.",
+        why: "High account-team turnover often precedes service quality dips even when delivery metrics haven't moved yet.",
+        evidence: ["Business-owner feedback check-in"],
+        actions: ["Ask for a stable point-of-contact commitment", "Request a transition / knowledge-handoff summary"],
+        freshness: "Check-in 12 days old",
+        qa: [
+          { q: "How many named account-team contacts have changed in the past two quarters?", a: "Two of three, per business-owner check-in.", inference: "High turnover on a small, critical team.",
+            citation: { source: "Business-owner feedback check-in", type: "human", excerpt: "Check-in log: 2 of 3 named account contacts replaced across two quarters.", date: "Jun 27, 2026", beliefId: "BLF-1071" } },
+          { q: "Were the departures voluntary or vendor-initiated reassignments?", a: "Not specified in current check-in notes.", inference: "Cause is unknown — worth asking directly rather than assuming.",
+            citation: { source: "Business-owner feedback check-in", type: "human", excerpt: "Check-in notes do not specify voluntary vs. reassigned departures.", date: "Jun 27, 2026", beliefId: "BLF-1072" } },
+          { q: "Was a transition or knowledge-handoff summary provided for either change?", a: "None found in current records.", inference: "No documented handoff increases continuity risk beyond the turnover itself.",
+            citation: { source: "Business-owner feedback check-in", type: "human", excerpt: "No transition or handoff document referenced in check-in records.", date: "Jun 27, 2026", beliefId: "BLF-1073" } },
+          { q: "Has service quality measurably dipped alongside the turnover?", a: "Not yet, per current delivery and SLA data.", inference: "The risk is leading, not yet realized — worth acting on before it shows up elsewhere.",
+            citation: { source: "Tickets from Jira / Zendesk", type: "system", excerpt: "SLA and delivery metrics show no measurable dip over the same period.", date: "Jul 02, 2026", beliefId: "BLF-1074" } },
+          { q: "Is there a single named executive sponsor on the vendor side who has remained stable?", a: "Yes, the executive sponsor named at contract signing remains in place.", inference: "Some continuity exists at the top even as day-to-day contacts turn over.",
+            citation: { source: "Previous renewal decision", type: "record", excerpt: "Executive sponsor named at contract signing still listed as current.", date: "Feb 03, 2026", beliefId: "BLF-1075" } }
+        ] },
+      { name: "Financial Stability", weight: 20, score: 68, confidence: "Medium", trend: "up",
+        finding: "Latest available financials show improving margins and no covenant concerns.",
+        why: "A financially strained supplier is a going-concern risk that shows up nowhere else in this Review.",
+        evidence: ["Market benchmark", "Previous renewal decision"],
+        actions: ["Refresh financial screen at next renewal cycle"],
+        freshness: "Benchmark 40 days old",
+        qa: [
+          { q: "What do the latest available financials show for margin trend?", a: "Improving, per market benchmark data.", inference: "Positive trajectory, not just a stable snapshot.",
+            citation: { source: "Market benchmark", type: "external", excerpt: "Latest financial screen: margin trend marked 'improving.'", date: "May 30, 2026", beliefId: "BLF-1076" } },
+          { q: "Are there any noted covenant concerns?", a: "None identified in current benchmark data.", inference: "No red flag on debt or covenant compliance.",
+            citation: { source: "Market benchmark", type: "external", excerpt: "No covenant-concern flag in current financial screen.", date: "May 30, 2026", beliefId: "BLF-1077" } },
+          { q: "How does this compare to the financial position noted at the last renewal?", a: "Improved, per the previous renewal decision record.", inference: "Direction of travel is positive across at least one full cycle.",
+            citation: { source: "Previous renewal decision", type: "record", excerpt: "FY25 renewal record: financial position noted as 'stable, no concerns.'", date: "Feb 03, 2026", beliefId: "BLF-1078" } },
+          { q: "How recent is the financial data underlying this assessment?", a: "40 days old, per the market benchmark refresh.", inference: "Reasonably current, though a full refresh at next renewal is still warranted.",
+            citation: { source: "Market benchmark", type: "external", excerpt: "Financial screen dated 40 days prior to this review.", date: "May 30, 2026", beliefId: "BLF-1079" } },
+          { q: "Is Cyberdyne's financial data self-reported or third-party sourced?", a: "Third-party sourced via the market benchmark provider.", inference: "Independent sourcing supports reasonable confidence rather than relying on vendor self-report.",
+            citation: { source: "Market benchmark", type: "external", excerpt: "Financial data sourced from third-party benchmark provider, not vendor self-report.", date: "May 30, 2026", beliefId: "BLF-1080" } }
+        ] },
+      { name: "Subcontractor Risk", weight: 15, score: 58, confidence: "Low", trend: "flat",
+        finding: "Vendor confirmed use of two subcontractors for support functions; neither has been vetted by us directly.",
+        why: "Unvetted subcontractors extend our risk surface past the primary contract without our visibility.",
+        evidence: ["Security questionnaire"],
+        actions: ["Request subcontractor disclosure and vetting status", "Add subcontractor flow-down clause at next amendment"],
+        freshness: "Questionnaire 18 days old — low confidence, self-reported only",
+        qa: [
+          { q: "How many subcontractors does the vendor use for support functions?", a: "Two, per the security questionnaire.", inference: "A defined, bounded number — not an open-ended risk.",
+            citation: { source: "Security questionnaire", type: "document", excerpt: "Questionnaire response: 2 subcontractors disclosed for support functions.", date: "Jun 21, 2026", beliefId: "BLF-1081" } },
+          { q: "Have either subcontractor been vetted directly by us?", a: "No, neither has been vetted directly.", inference: "The core gap — visibility relies entirely on the vendor's own disclosure.",
+            citation: { source: "Security questionnaire", type: "document", excerpt: "No independent vetting record found for either named subcontractor.", date: "Jun 21, 2026", beliefId: "BLF-1082" } },
+          { q: "Is subcontractor use disclosed in the current contract?", a: "Not explicitly addressed in contract and amendments.", inference: "No contractual flow-down clause exists to govern this today.",
+            citation: { source: "Contract and amendments", type: "document", excerpt: "No subcontractor flow-down clause present in current contract language.", date: "Jun 17, 2026", beliefId: "BLF-1083" } },
+          { q: "Is this information self-reported or independently confirmed?", a: "Self-reported via the questionnaire only.", inference: "Explains the Low confidence rating on this dimension specifically.",
+            citation: { source: "Security questionnaire", type: "document", excerpt: "Subcontractor disclosure is self-attested; no third-party verification attached.", date: "Jun 21, 2026", beliefId: "BLF-1084" } },
+          { q: "Have either subcontractor been named in any prior security incident?", a: "None found in current records.", inference: "No known incident history, but that's not the same as vetted.",
+            citation: { source: "Security questionnaire", type: "document", excerpt: "No incident history disclosed for either subcontractor.", date: "Jun 21, 2026", beliefId: "BLF-1085" } }
+        ] },
+      { name: "Scalability Headroom", weight: 15, score: 65, confidence: "Medium", trend: "up",
+        finding: "Current utilization is 55% of the contracted capacity ceiling, with room to grow without a new tier.",
+        why: "Headroom here is a quiet strength — it removes a scaling risk we might otherwise have to plan around.",
+        evidence: ["Spend from ERP"],
+        actions: ["No action needed this cycle"],
+        freshness: "ERP data 7 days old",
+        qa: [
+          { q: "What is current utilization against the contracted capacity ceiling?", a: "55%, per ERP spend and usage data.", inference: "Meaningful headroom before hitting the ceiling.",
+            citation: { source: "Spend from ERP", type: "system", excerpt: "Current utilization: 55% of contracted capacity ceiling.", date: "Jul 02, 2026", beliefId: "BLF-1086" } },
+          { q: "At current growth rate, when would the ceiling be reached?", a: "Not explicitly modeled in current data.", inference: "A reasonable next step, though not urgent given the current 55% mark.",
+            citation: { source: "Spend from ERP", type: "system", excerpt: "No growth-rate-to-ceiling projection modeled in current ERP export.", date: "Jul 02, 2026", beliefId: "BLF-1087" } },
+          { q: "Would growing usage require a new pricing tier?", a: "Not at current utilization levels, per contract structure.", inference: "Confirms real headroom exists within the current commercial terms.",
+            citation: { source: "Contract and amendments", type: "document", excerpt: "Current tier terms support usage growth without a tier change.", date: "Jun 17, 2026", beliefId: "BLF-1088" } },
+          { q: "Has utilization trended up or down over the past two quarters?", a: "Trending up, per ERP data.", inference: "Headroom is being used, not just theoretical — a genuinely improving trend.",
+            citation: { source: "Spend from ERP", type: "system", excerpt: "Utilization trend line rising over the past two quarterly pulls.", date: "Jul 02, 2026", beliefId: "BLF-1089" } },
+          { q: "Is this headroom specific to one product module or across the full contracted suite?", a: "Not broken out by module in current ERP data.", inference: "Confidence held at Medium pending a module-level breakdown.",
+            citation: { source: "Spend from ERP", type: "system", excerpt: "ERP export not broken out by individual product module.", date: "Jul 02, 2026", beliefId: "BLF-1090" } }
+        ] }
+    ],
+    matters: [
+      { title: "Subcontractor Disclosure Matter", trigger: "Subcontractor Risk 58, self-reported only",
+        objective: "Get direct visibility into subcontractor vetting.",
+        interventions: ["Request disclosure", "Draft flow-down clause"], owner: "Procurement", status: "Open" }
+    ],
+    mattersHistory: [
+      { title: "Subcontractor Disclosure Matter", opened: "Jul 09, 2026", closed: null, outcome: "Open — awaiting vendor disclosure." }
+    ],
+    compareNarrative: "Delivery Capacity and Financial Stability both improved this period, driving the overall gain; Key Personnel Stability is the one dimension moving the wrong way.",
+    compareDeltas: [
+      { name: "Delivery Capacity", prev: 68, curr: 74 },
+      { name: "Business Continuity Plan", prev: 70, curr: 70 },
+      { name: "Key Personnel Stability", prev: 67, curr: 62 },
+      { name: "Financial Stability", prev: 63, curr: 68 },
+      { name: "Subcontractor Risk", prev: 58, curr: 58 },
+      { name: "Scalability Headroom", prev: 62, curr: 65 }
+    ]
+  },
+  {
+    id: "contractCompliance", name: "Contract Compliance",
+    description: "Are we and the vendor meeting the contract's operational obligations?",
+    superIndex: 54, band: "AT_RISK", momentum: "flat",
+    lastReviewDate: "Jul 09, 2026", nextReviewDate: "Aug 08, 2026",
+    history: [
+      { date: "Jan 14, 2026", index: 57, note: "SLA miss pattern first flagged." },
+      { date: "Apr 22, 2026", index: 55, note: "Audit findings raised, no remediation dates set." },
+      { date: "Jul 09, 2026", index: 54, note: "Data handling obligation still unowned; little movement." }
+    ],
+    executiveSummary: "Cyberdyne's compliance posture is stuck, not improving: the same SLA miss pattern persists, two audit findings have no remediation date, and one data-handling obligation has no owner on either side. Nothing here is acute, but the flat trend across three checkpoints means it won't fix itself without a push.",
+    positionLabel: "Recommended position",
+    recommendedPosition: "Monitor closely and force remediation dates — do not let this drift into the next renewal unresolved.",
+    actionLabel: "Escalation plan",
+    counteroffer: "Request documented remediation dates for both audit findings and a named owner for the data-handling obligation within 30 days.",
+    approvals: ["Risk & Compliance", "Contract owner"],
+    nextActions: [
+      { phase: "This week", items: ["Assign an owner to the unowned data-handling obligation", "Request remediation dates for both audit findings"] },
+      { phase: "Next 2 weeks", items: ["Set a firm monthly report delivery date", "Close out the 2 open security questionnaire items"] },
+      { phase: "Before next review", items: ["Stand up a shared deliverable tracker"] }
+    ],
+    dimensions: [
+      { name: "SLA Adherence", weight: 20, score: 55, confidence: "High", trend: "flat",
+        finding: "Priority-response SLA met in 8 of 12 months; same shortfall pattern as last review.",
+        why: "Persistent SLA misses without escalation risk becoming the accepted baseline instead of a fixable gap.",
+        evidence: ["SLA history"],
+        actions: ["Escalate the recurring miss pattern in the next business review"],
+        freshness: "SLA history 7 days old",
+        qa: [
+          { q: "In how many of the past 12 months was the priority-response SLA met?", a: "8 of 12, per SLA history.", inference: "A persistent, roughly one-in-three miss rate.",
+            citation: { source: "SLA history", type: "system", excerpt: "12-month rollup: priority-response SLA met in 8 of 12 months.", date: "Jul 02, 2026", beliefId: "BLF-1091" } },
+          { q: "Is this the same pattern as the last compliance review?", a: "Yes, same shortfall pattern as last review.", inference: "Confirms the issue is chronic, not a one-quarter blip.",
+            citation: { source: "SLA history", type: "system", excerpt: "Miss pattern matches the prior compliance review's rollup.", date: "Jul 02, 2026", beliefId: "BLF-1092" } },
+          { q: "Has the vendor been formally escalated for these misses?", a: "No formal escalation found in records.", inference: "Explains why the pattern has persisted unaddressed.",
+            citation: { source: "SLA history", type: "system", excerpt: "No escalation record attached to any of the 4 missed months.", date: "Jul 02, 2026", beliefId: "BLF-1093" } },
+          { q: "What is the average miss severity, time over the SLA threshold?", a: "Not broken out by severity in current SLA history data.", inference: "A useful next data pull, though not required to flag the pattern itself.",
+            citation: { source: "SLA history", type: "system", excerpt: "Miss severity not broken out in the current SLA history export.", date: "Jul 02, 2026", beliefId: "BLF-1094" } },
+          { q: "Does the contract include a credit or remedy clause for repeated misses?", a: "Yes, per contract terms.", inference: "A contractual remedy exists but hasn't been invoked.",
+            citation: { source: "Contract and amendments", type: "document", excerpt: "SLA remedy clause, Section 7.2, applies to repeated priority-response misses.", date: "Jun 17, 2026", beliefId: "BLF-1095" } }
+        ] },
+      { name: "Reporting Cadence", weight: 15, score: 60, confidence: "Medium", trend: "flat",
+        finding: "Quarterly business reviews are happening on schedule; monthly ops reports arrive 5-10 days late.",
+        why: "Late reporting delays our own visibility into problems before they compound.",
+        evidence: ["Business-owner feedback check-in"],
+        actions: ["Request a firm monthly report delivery date"],
+        freshness: "Check-in 12 days old",
+        qa: [
+          { q: "Are quarterly business reviews happening on schedule?", a: "Yes, per business-owner check-in.", inference: "The higher-stakes cadence is healthy.",
+            citation: { source: "Business-owner feedback check-in", type: "human", excerpt: "Check-in confirms quarterly business reviews are on schedule.", date: "Jun 27, 2026", beliefId: "BLF-1096" } },
+          { q: "How late do monthly ops reports typically arrive?", a: "5 to 10 days late, per check-in.", inference: "A consistent, moderate delay — not catastrophic, but a real pattern.",
+            citation: { source: "Business-owner feedback check-in", type: "human", excerpt: "\"Monthly ops reports typically land 5 to 10 days late.\"", date: "Jun 27, 2026", beliefId: "BLF-1097" } },
+          { q: "Has a firm delivery date ever been requested?", a: "Not yet, per current action status.", inference: "The recommended fix is simple and not yet attempted.",
+            citation: { source: "Business-owner feedback check-in", type: "human", excerpt: "No record of a formal delivery-date request being sent.", date: "Jun 27, 2026", beliefId: "BLF-1098" } },
+          { q: "Does the delay affect any downstream decision-making?", a: "Not directly quantified, though check-in flags it as a visibility concern.", inference: "Impact is about lag in awareness, not a hard operational failure.",
+            citation: { source: "Business-owner feedback check-in", type: "human", excerpt: "Check-in flags the delay as a visibility concern, not quantified further.", date: "Jun 27, 2026", beliefId: "BLF-1099" } },
+          { q: "Is the delay consistent across report types or specific to one?", a: "Reported generally against monthly ops reports, not broken out further.", inference: "Confidence held at Medium without a report-type breakdown.",
+            citation: { source: "Business-owner feedback check-in", type: "human", excerpt: "Delay reported generally against monthly ops reports; no per-report breakdown given.", date: "Jun 27, 2026", beliefId: "BLF-1100" } }
+        ] },
+      { name: "Security Controls Compliance", weight: 20, score: 63, confidence: "Medium", trend: "flat",
+        finding: "SOC 2 current; two questionnaire items still open from last cycle.",
+        why: "Open security items left unresolved across cycles tend to signal a process gap, not a one-off.",
+        evidence: ["Security questionnaire"],
+        actions: ["Set a hard close-out date for the 2 open items"],
+        freshness: "Questionnaire 18 days old",
+        qa: [
+          { q: "Is the SOC 2 certification current?", a: "Yes, current per the security questionnaire.", inference: "No lapse in the primary security credential.",
+            citation: { source: "Security questionnaire", type: "document", excerpt: "SOC 2 Type II certificate current for this cycle.", date: "Jun 21, 2026", beliefId: "BLF-1101" } },
+          { q: "How many questionnaire items remain open?", a: "Two, carried over from last cycle.", inference: "Same items unresolved across cycles — a process gap, not a new finding.",
+            citation: { source: "Security questionnaire", type: "document", excerpt: "2 items carried over from prior cycle, marked still open.", date: "Jun 21, 2026", beliefId: "BLF-1102" } },
+          { q: "What is the nature of the two open items?", a: "Data-retention documentation and a subprocessor list update.", inference: "Administrative in nature, not active vulnerabilities.",
+            citation: { source: "Security questionnaire", type: "document", excerpt: "Open items: data-retention documentation, subprocessor list update.", date: "Jun 21, 2026", beliefId: "BLF-1103" } },
+          { q: "Has a close-out date been set for either item?", a: "No, per current status.", inference: "The recommended action (set a hard close-out date) is still open.",
+            citation: { source: "Security questionnaire", type: "document", excerpt: "No close-out date field populated for either open item.", date: "Jun 21, 2026", beliefId: "BLF-1104" } },
+          { q: "Has the vendor had any security incidents this compliance cycle?", a: "None found in current records.", inference: "No incident to weigh against the open administrative items.",
+            citation: { source: "Security questionnaire", type: "document", excerpt: "No incident disclosure logged for this compliance cycle.", date: "Jun 21, 2026", beliefId: "BLF-1105" } }
+        ] },
+      { name: "Data Handling Compliance", weight: 15, score: 48, confidence: "Medium", trend: "down",
+        finding: "One data-handling obligation from the contract has no assigned internal owner on either side.",
+        why: "An unowned data obligation is the kind of gap that surfaces during an audit, not before one.",
+        evidence: ["Open obligations"],
+        actions: ["Assign an owner this week", "Confirm data-handling terms against current contract language"],
+        freshness: "Obligations register 15 days old",
+        qa: [
+          { q: "Which data-handling obligation lacks an assigned owner?", a: "The single data-handling obligation tracked in the open obligations register.", inference: "One specific, identifiable gap — not a vague concern.",
+            citation: { source: "Open obligations", type: "record", excerpt: "1 data-handling obligation on record, owner field blank.", date: "Jun 24, 2026", beliefId: "BLF-1106" } },
+          { q: "Is this gap on our side, the vendor's side, or both?", a: "Neither side has an assigned owner, per the register.", inference: "A shared gap — the fix needs both parties, not just an internal assignment.",
+            citation: { source: "Open obligations", type: "record", excerpt: "Owner field blank on both our side and vendor side of the record.", date: "Jun 24, 2026", beliefId: "BLF-1107" } },
+          { q: "Does current contract language clearly define who should own this obligation?", a: "Not explicitly assigned in contract and amendments.", inference: "The ambiguity traces back to the contract itself, not just process failure.",
+            citation: { source: "Contract and amendments", type: "document", excerpt: "Contract language does not explicitly name an obligation owner.", date: "Jun 17, 2026", beliefId: "BLF-1108" } },
+          { q: "How long has this obligation been unowned?", a: "At least 15 days, per register history — exact origin not tracked further back.", inference: "Confidence held at Medium without a full origin timeline.",
+            citation: { source: "Open obligations", type: "record", excerpt: "Register history shows the gap present for at least 15 days; earlier origin untracked.", date: "Jun 24, 2026", beliefId: "BLF-1109" } },
+          { q: "Has this gap been raised with the vendor directly?", a: "Not yet, per current action status.", inference: "The next step (assign an owner, confirm terms) hasn't been initiated.",
+            citation: { source: "Open obligations", type: "record", excerpt: "No outreach-to-vendor entry logged against this obligation.", date: "Jun 24, 2026", beliefId: "BLF-1110" } }
+        ] },
+      { name: "Audit Findings", weight: 15, score: 46, confidence: "Medium", trend: "down",
+        finding: "Last internal audit raised two findings against this vendor; neither has a documented remediation date.",
+        why: "Open audit findings without remediation dates are the first thing an external auditor will flag.",
+        evidence: ["Open obligations"],
+        actions: ["Request remediation dates for both findings"],
+        freshness: "Obligations register 15 days old",
+        qa: [
+          { q: "How many findings did the last internal audit raise against this vendor?", a: "Two, per the open obligations register.", inference: "A specific, bounded number of open items.",
+            citation: { source: "Open obligations", type: "record", excerpt: "2 audit findings logged against this vendor in the register.", date: "Jun 24, 2026", beliefId: "BLF-1111" } },
+          { q: "Does either finding have a documented remediation date?", a: "No, neither has a remediation date.", inference: "The core gap — findings exist but aren't on a resolution track.",
+            citation: { source: "Open obligations", type: "record", excerpt: "Remediation-date field blank on both finding records.", date: "Jun 24, 2026", beliefId: "BLF-1112" } },
+          { q: "When was the audit that raised these findings conducted?", a: "Not specified beyond 'last internal audit' in current records.", inference: "Confidence held at Medium without an exact audit date.",
+            citation: { source: "Open obligations", type: "record", excerpt: "Audit-date field references 'last internal audit' without a specific date.", date: "Jun 24, 2026", beliefId: "BLF-1113" } },
+          { q: "Have these findings been communicated to the vendor?", a: "Not confirmed in current records.", inference: "Unclear if the vendor is even aware — worth confirming alongside requesting dates.",
+            citation: { source: "Open obligations", type: "record", excerpt: "No vendor-communication record attached to either finding.", date: "Jun 24, 2026", beliefId: "BLF-1114" } },
+          { q: "Would these findings likely resurface in an external audit?", a: "Not directly assessed, though open, undated findings are typically what external audits flag first.", inference: "Raises the urgency of getting remediation dates before an external review.",
+            citation: { source: "Open obligations", type: "record", excerpt: "No external-audit cross-reference on file for these findings.", date: "Jun 24, 2026", beliefId: "BLF-1115" } }
+        ] },
+      { name: "Deliverable Timeliness", weight: 15, score: 52, confidence: "Low", trend: "flat",
+        finding: "Contracted deliverables are tracked informally; no single system of record for due dates.",
+        why: "Without a system of record, timeliness is whatever the last person remembers — hard to act on with confidence.",
+        evidence: ["Business-owner feedback check-in"],
+        actions: ["Stand up a shared deliverable tracker with the vendor"],
+        freshness: "Check-in 12 days old — low confidence, informal tracking only",
+        qa: [
+          { q: "Is there a system of record for contracted deliverable due dates?", a: "No, tracked informally, per check-in.", inference: "The root cause of the Low confidence rating on this dimension.",
+            citation: { source: "Business-owner feedback check-in", type: "human", excerpt: "Check-in confirms no system of record exists for deliverable due dates.", date: "Jun 27, 2026", beliefId: "BLF-1116" } },
+          { q: "How does the business owner currently track deliverables?", a: "Informally, via email and memory, per check-in.", inference: "No durable record means timeliness assessments rely on recall, not data.",
+            citation: { source: "Business-owner feedback check-in", type: "human", excerpt: "\"We track it informally, mostly over email.\"", date: "Jun 27, 2026", beliefId: "BLF-1117" } },
+          { q: "Have any deliverables been missed outright in the past two quarters?", a: "Not conclusively determined without a system of record.", inference: "We can't currently answer this with confidence — that's the gap itself.",
+            citation: { source: "Business-owner feedback check-in", type: "human", excerpt: "No missed-deliverable log available to confirm or rule out misses.", date: "Jun 27, 2026", beliefId: "BLF-1118" } },
+          { q: "Would a shared tracker with the vendor be feasible to stand up?", a: "Not yet attempted, per current action status.", inference: "The recommended fix hasn't been tried, so feasibility is untested.",
+            citation: { source: "Business-owner feedback check-in", type: "human", excerpt: "No record of a shared-tracker proposal being raised with the vendor.", date: "Jun 27, 2026", beliefId: "BLF-1119" } },
+          { q: "Does the vendor have their own internal deliverable tracking system?", a: "Not confirmed in current records.", inference: "Unknown whether the gap is purely on our side or shared with the vendor.",
+            citation: { source: "Business-owner feedback check-in", type: "human", excerpt: "Vendor-side tracking system not confirmed in current check-in notes.", date: "Jun 27, 2026", beliefId: "BLF-1120" } }
+        ] }
+    ],
+    matters: [
+      { title: "Compliance Remediation Matter", trigger: "2 open audit findings, no remediation dates",
+        objective: "Get documented remediation dates and close the ownership gap.",
+        interventions: ["Request remediation dates", "Assign obligation owner"], owner: "Risk & Compliance", status: "Open" }
+    ],
+    mattersHistory: [
+      { title: "Compliance Remediation Matter", opened: "Apr 22, 2026", closed: null, outcome: "Open — remediation dates still not documented." }
+    ],
+    compareNarrative: "Data Handling Compliance and Audit Findings both declined this period as neither gap was closed; SLA Adherence and Security Controls held flat rather than improving.",
+    compareDeltas: [
+      { name: "SLA Adherence", prev: 56, curr: 55 },
+      { name: "Reporting Cadence", prev: 60, curr: 60 },
+      { name: "Security Controls Compliance", prev: 64, curr: 63 },
+      { name: "Data Handling Compliance", prev: 53, curr: 48 },
+      { name: "Audit Findings", prev: 50, curr: 46 },
+      { name: "Deliverable Timeliness", prev: 53, curr: 52 }
+    ]
+  },
+  {
+    id: "spendOptimization", name: "Spend Optimization",
+    description: "Is spend with this vendor efficient relative to usage and market rate?",
+    superIndex: 71, band: "HEALTHY", momentum: "up",
+    lastReviewDate: "Jul 09, 2026", nextReviewDate: "Oct 08, 2026",
+    history: [
+      { date: "Jan 14, 2026", index: 64, note: "Utilization climbing; pricing still at parity with benchmark." },
+      { date: "Apr 22, 2026", index: 68, note: "Pricing dipped below benchmark; utilization kept climbing." },
+      { date: "Jul 09, 2026", index: 71, note: "TCO trend now three quarters declining — spend efficiency is a genuine bright spot." }
+    ],
+    executiveSummary: "Spend with Cyberdyne is genuinely efficient and getting more so: pricing sits below benchmark, seat utilization is up to 88%, and total cost of ownership has declined three quarters running. The only real lever left on the table is volume-discount tier qualification, worth modeling ahead of the next renewal — but there's no urgency here.",
+    positionLabel: "Recommended position",
+    recommendedPosition: "Maintain — spend efficiency is strong and improving; no commercial action needed this cycle.",
+    actionLabel: "Opportunity to bank",
+    counteroffer: "Model the case for early volume-discount tier qualification so it's ready to use at the next renewal, not discovered during it.",
+    approvals: ["Finance"],
+    nextActions: [
+      { phase: "This week", items: ["Document below-benchmark pricing for the renewal case file"] },
+      { phase: "Next 2 weeks", items: ["Model volume-discount tier qualification case"] },
+      { phase: "Before next renewal", items: ["Re-check contract structure fit against updated usage"] }
+    ],
+    dimensions: [
+      { name: "Unit Cost vs Market", weight: 20, score: 70, confidence: "High", trend: "up",
+        finding: "Current unit pricing sits 3% below the category benchmark, an improvement from last cycle's parity.",
+        why: "Below-benchmark pricing is real leverage we can bank rather than re-litigate at renewal.",
+        evidence: ["Market benchmark", "Spend from ERP"],
+        actions: ["Document the below-benchmark position for the renewal case file"],
+        freshness: "Benchmark 40 days old",
+        qa: [
+          { q: "How does current unit pricing compare to the category benchmark?", a: "3% below benchmark, per market benchmark data.", inference: "A genuine, quantified pricing advantage.",
+            citation: { source: "Market benchmark", type: "external", excerpt: "Current unit pricing benchmarked 3% below category median.", date: "May 30, 2026", beliefId: "BLF-1121" } },
+          { q: "How does this compare to the prior cycle's position?", a: "Prior cycle was at benchmark parity, per ERP spend history.", inference: "The advantage is new and improving, not a longstanding position.",
+            citation: { source: "Spend from ERP", type: "system", excerpt: "Prior-cycle ERP pull showed pricing at benchmark parity.", date: "Jul 02, 2026", beliefId: "BLF-1122" } },
+          { q: "Has this below-benchmark position been documented for the renewal case file?", a: "Not yet, per current action status.", inference: "The recommended action is straightforward and still outstanding.",
+            citation: { source: "Spend from ERP", type: "system", excerpt: "No renewal-case-file entry documenting the below-benchmark position yet.", date: "Jul 02, 2026", beliefId: "BLF-1123" } },
+          { q: "Is the benchmark comparison based on the same product tier we're contracted at?", a: "Yes, per the market benchmark methodology on file.", inference: "Confirms an apples-to-apples comparison, not a mismatched tier.",
+            citation: { source: "Market benchmark", type: "external", excerpt: "Benchmark methodology confirms same product tier as our contract.", date: "May 30, 2026", beliefId: "BLF-1124" } },
+          { q: "How recent is the benchmark data underlying this comparison?", a: "40 days old.", inference: "Reasonably current; a refresh closer to renewal would still be prudent.",
+            citation: { source: "Market benchmark", type: "external", excerpt: "Benchmark data pull dated 40 days prior to this review.", date: "May 30, 2026", beliefId: "BLF-1125" } }
+        ] },
+      { name: "Utilization Efficiency", weight: 20, score: 76, confidence: "High", trend: "up",
+        finding: "Licensed seat utilization is 88%, up from 74% two quarters ago.",
+        why: "High utilization means we're not paying for shelfware — this is the strongest efficiency signal we have.",
+        evidence: ["Spend from ERP", "Tickets from Jira / Zendesk"],
+        actions: ["No action needed this cycle"],
+        freshness: "ERP data 7 days old",
+        qa: [
+          { q: "What is current licensed seat utilization?", a: "88%, per ERP data.", inference: "High utilization — most of what we pay for is being used.",
+            citation: { source: "Spend from ERP", type: "system", excerpt: "Licensed seat utilization: 88% of total seats active in latest ERP pull.", date: "Jul 02, 2026", beliefId: "BLF-1126" } },
+          { q: "What was utilization two quarters ago?", a: "74%, per ERP history.", inference: "A genuine upward trend, not a one-time snapshot.",
+            citation: { source: "Spend from ERP", type: "system", excerpt: "Two-quarters-prior utilization recorded at 74%.", date: "Jul 02, 2026", beliefId: "BLF-1127" } },
+          { q: "Does ticket volume corroborate active usage across seats?", a: "Yes, ticket activity is distributed across a broad user base, per Jira / Zendesk data.", inference: "Usage data corroborates the utilization figure rather than relying on license counts alone.",
+            citation: { source: "Tickets from Jira / Zendesk", type: "system", excerpt: "Ticket activity spans a broad set of distinct user accounts.", date: "Jul 02, 2026", beliefId: "BLF-1128" } },
+          { q: "Are there any dormant or unused licenses identified?", a: "Minimal, per current ERP breakdown.", inference: "Low shelfware — the 88% figure isn't masking a large unused pool.",
+            citation: { source: "Spend from ERP", type: "system", excerpt: "Dormant-license count minimal in current ERP breakdown.", date: "Jul 02, 2026", beliefId: "BLF-1129" } },
+          { q: "Is any action needed on this dimension this cycle?", a: "No, per current review status.", inference: "A genuine bright spot requiring no intervention.",
+            citation: { source: "Spend from ERP", type: "system", excerpt: "No corrective action flagged against this dimension in current review.", date: "Jul 02, 2026", beliefId: "BLF-1130" } }
+        ] },
+      { name: "Contract Structure Fit", weight: 15, score: 65, confidence: "Medium", trend: "flat",
+        finding: "Tiered pricing structure still fits actual usage; no tier change needed this cycle.",
+        why: "A structure that no longer fits usage is a common source of silent overpay — worth re-checking every cycle even when it still fits.",
+        evidence: ["Spend from ERP", "Contract and amendments"],
+        actions: ["Re-check tier fit at next usage review"],
+        freshness: "ERP data 7 days old",
+        qa: [
+          { q: "Does the current tiered pricing structure match actual usage patterns?", a: "Yes, per ERP usage data against contract and amendments terms.", inference: "Structure and usage are aligned today.",
+            citation: { source: "Spend from ERP", type: "system", excerpt: "Usage pattern matches the tiered pricing structure in the current contract.", date: "Jul 02, 2026", beliefId: "BLF-1131" } },
+          { q: "When was tier fit last formally re-checked?", a: "Not specified as a recurring formal review in current records.", inference: "Fit is currently good, but there's no standing process confirming it stays that way.",
+            citation: { source: "Contract and amendments", type: "document", excerpt: "No recurring formal tier-fit review scheduled in current contract terms.", date: "Jun 17, 2026", beliefId: "BLF-1132" } },
+          { q: "Would growing usage push us into a different tier?", a: "Not imminently, per current utilization trend.", inference: "No near-term structural change expected, consistent with the flat trend.",
+            citation: { source: "Spend from ERP", type: "system", excerpt: "Utilization trend does not project a near-term tier change.", date: "Jul 02, 2026", beliefId: "BLF-1133" } },
+          { q: "Has this structure been reviewed since the last amendment?", a: "Yes, reflected in the most recent contract amendment.", inference: "The fit assessment is based on current, not stale, contract terms.",
+            citation: { source: "Contract and amendments", type: "document", excerpt: "Structure fit reassessed against the terms in the most recent amendment.", date: "Jun 17, 2026", beliefId: "BLF-1134" } },
+          { q: "Is there a cheaper structure available at this usage level?", a: "Not identified as a gap in current comparison.", inference: "No missed savings currently visible from a structure mismatch.",
+            citation: { source: "Spend from ERP", type: "system", excerpt: "No lower-cost structure identified at current usage level.", date: "Jul 02, 2026", beliefId: "BLF-1135" } }
+        ] },
+      { name: "Volume Discount Capture", weight: 15, score: 68, confidence: "Medium", trend: "up",
+        finding: "Currently capturing the mid volume-discount tier; within 8% of qualifying for the next tier down in unit cost.",
+        why: "Being this close to the next discount tier is a concrete, quantifiable ask for the next commercial conversation.",
+        evidence: ["Spend from ERP", "Contract and amendments"],
+        actions: ["Model the case for early tier qualification ahead of renewal"],
+        freshness: "ERP data 7 days old",
+        qa: [
+          { q: "Which volume-discount tier are we currently capturing?", a: "The mid tier, per contract and amendments terms.", inference: "Not the top tier — room to improve exists.",
+            citation: { source: "Contract and amendments", type: "document", excerpt: "Volume-discount schedule confirms current placement at the mid tier.", date: "Jun 17, 2026", beliefId: "BLF-1136" } },
+          { q: "How close is current spend to qualifying for the next tier?", a: "Within 8% of the next tier's unit-cost threshold, per ERP data.", inference: "A concrete, nearly-achievable target, not a distant aspiration.",
+            citation: { source: "Spend from ERP", type: "system", excerpt: "Current spend sits within 8% of the next tier's unit-cost threshold.", date: "Jul 02, 2026", beliefId: "BLF-1137" } },
+          { q: "Has a case for early tier qualification been modeled?", a: "Not yet, per current action status.", inference: "The recommended next step is specific and hasn't been started.",
+            citation: { source: "Spend from ERP", type: "system", excerpt: "No tier-qualification case document found in current file.", date: "Jul 02, 2026", beliefId: "BLF-1138" } },
+          { q: "Would qualifying early require a contract amendment?", a: "Likely, per current contract structure, though not yet scoped in detail.", inference: "There's a process step beyond just hitting the spend threshold.",
+            citation: { source: "Contract and amendments", type: "document", excerpt: "Tier changes require a contract amendment per current structure.", date: "Jun 17, 2026", beliefId: "BLF-1139" } },
+          { q: "Is spend trending toward or away from the next tier?", a: "Trending toward it, per ERP data over the past two quarters.", inference: "Momentum favors closing this gap if we act on it.",
+            citation: { source: "Spend from ERP", type: "system", excerpt: "Spend trend over two quarters moves toward the next discount tier.", date: "Jul 02, 2026", beliefId: "BLF-1140" } }
+        ] },
+      { name: "Renewal Timing Leverage", weight: 15, score: 60, confidence: "Medium", trend: "flat",
+        finding: "Contract is mid-term; no near-term renewal event to use as a pricing lever right now.",
+        why: "Without a renewal event on the horizon, there's little near-term leverage to renegotiate spend — a structural, not a performance, constraint.",
+        evidence: ["Contract and amendments"],
+        actions: ["No action needed until closer to renewal"],
+        freshness: "Contract review 22 days old",
+        qa: [
+          { q: "Where are we in the current contract term?", a: "Mid-term, per contract and amendments.", inference: "No renewal event nearby to use as a pricing lever right now.",
+            citation: { source: "Contract and amendments", type: "document", excerpt: "Contract term dates confirm current position as mid-term.", date: "Jun 17, 2026", beliefId: "BLF-1141" } },
+          { q: "When is the next renewal event?", a: "Not within the near-term horizon, per contract dates.", inference: "Confirms the structural, not performance-driven, nature of this score.",
+            citation: { source: "Contract and amendments", type: "document", excerpt: "No renewal event within the near-term horizon per contract dates.", date: "Jun 17, 2026", beliefId: "BLF-1142" } },
+          { q: "Is there any other contractual trigger that could be used as leverage before then?", a: "None identified in current contract terms.", inference: "No alternative lever exists — timing is genuinely the constraint.",
+            citation: { source: "Contract and amendments", type: "document", excerpt: "No alternative contractual trigger identified before the renewal date.", date: "Jun 17, 2026", beliefId: "BLF-1143" } },
+          { q: "Has this dimension changed since the last checkpoint?", a: "No, held flat, per compare history.", inference: "Consistent with there being no new timing event between checkpoints.",
+            citation: { source: "Spend from ERP", type: "system", excerpt: "Checkpoint comparison shows this dimension held flat between reviews.", date: "Jul 02, 2026", beliefId: "BLF-1144" } },
+          { q: "Is any action recommended on this dimension right now?", a: "No, per current review status — revisit closer to renewal.", inference: "Correctly scored as a wait, not a gap to close.",
+            citation: { source: "Contract and amendments", type: "document", excerpt: "No action flagged on this dimension pending proximity to renewal.", date: "Jun 17, 2026", beliefId: "BLF-1145" } }
+        ] },
+      { name: "Total Cost of Ownership Trend", weight: 15, score: 87, confidence: "Medium", trend: "up",
+        finding: "All-in cost per active user has declined for three consecutive quarters.",
+        why: "A declining TCO trend is the clearest evidence spend discipline here is actually working, not just holding steady.",
+        evidence: ["Spend from ERP"],
+        actions: ["No action needed this cycle"],
+        freshness: "ERP data 7 days old",
+        qa: [
+          { q: "How has all-in cost per active user trended over the past three quarters?", a: "Declined for three consecutive quarters, per ERP data.", inference: "A sustained, multi-quarter trend — not a single favorable data point.",
+            citation: { source: "Spend from ERP", type: "system", excerpt: "All-in cost per active user declined across the last three quarterly pulls.", date: "Jul 02, 2026", beliefId: "BLF-1146" } },
+          { q: "What is driving the decline — pricing, utilization, or both?", a: "Both, per ERP data — falling unit pricing and rising utilization together.", inference: "Two independent levers reinforcing each other, a stronger signal than either alone.",
+            citation: { source: "Spend from ERP", type: "system", excerpt: "Decline attributable to both falling unit pricing and rising utilization.", date: "Jul 02, 2026", beliefId: "BLF-1147" } },
+          { q: "Is this trend expected to continue, plateau, or reverse?", a: "Not explicitly forecast in current data, though no reversal signal is present.", inference: "Confidence held at Medium without a forward-looking model, but nothing contradicts the trend continuing.",
+            citation: { source: "Spend from ERP", type: "system", excerpt: "No forward-looking TCO forecast model attached to current data.", date: "Jul 02, 2026", beliefId: "BLF-1148" } },
+          { q: "How does this compare to typical TCO trends for peer vendors?", a: "No peer benchmark on file for direct comparison.", inference: "The finding is self-referential (trend over time) rather than benchmarked against peers.",
+            citation: { source: "Market benchmark", type: "external", excerpt: "No peer-vendor TCO benchmark available for direct comparison.", date: "May 30, 2026", beliefId: "BLF-1149" } },
+          { q: "Is any action needed on this dimension this cycle?", a: "No, per current review status.", inference: "Clearest evidence in this vector that spend discipline is working, not just holding.",
+            citation: { source: "Spend from ERP", type: "system", excerpt: "No corrective action flagged against this dimension in current review.", date: "Jul 02, 2026", beliefId: "BLF-1150" } }
+        ] }
+    ],
+    matters: [],
+    mattersHistory: [],
+    compareNarrative: "Total Cost of Ownership Trend and Unit Cost vs Market drove this period's gain; Renewal Timing Leverage is the one dimension holding flat, as expected mid-term.",
+    compareDeltas: [
+      { name: "Unit Cost vs Market", prev: 66, curr: 70 },
+      { name: "Utilization Efficiency", prev: 71, curr: 76 },
+      { name: "Contract Structure Fit", prev: 65, curr: 65 },
+      { name: "Volume Discount Capture", prev: 64, curr: 68 },
+      { name: "Renewal Timing Leverage", prev: 60, curr: 60 },
+      { name: "Total Cost of Ownership Trend", prev: 80, curr: 87 }
+    ]
+  }
+];
+
+/* ══════════════════════════════════════════════════════════════════
+   HELPERS
+   ══════════════════════════════════════════════════════════════════ */
+
+const BAND_META = {
+  CRITICAL:   { label: "Critical",   cls: "critical" },
+  AT_RISK:    { label: "At Risk",    cls: "atrisk" },
+  HEALTHY:    { label: "Healthy",    cls: "healthy" },
+  STRATEGIC:  { label: "Strategic",  cls: "strategic" }
+};
+const TREND_META = {
+  up:   { arrow: "↑", word: "Improving", cls: "up" },
+  down: { arrow: "↓", word: "Declining", cls: "down" },
+  flat: { arrow: "→", word: "Stuck",     cls: "flat" }
+};
+function scoreBand(score){
+  if (score >= 65) return "HEALTHY";
+  if (score >= 45) return "AT_RISK";
+  return "CRITICAL";
+}
+function bandColorVar(band){
+  return band === "HEALTHY" ? "var(--healthy)" : band === "AT_RISK" ? "var(--atrisk)" : "var(--critical)";
+}
+function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+function findVector(id){ return VECTORS.find(v => v.id === id); }
+
+/* ══════════════════════════════════════════════════════════════════
+   STATE + ROUTING
+   ══════════════════════════════════════════════════════════════════ */
+
+const STATE = { screen: "launch", selectedLaunchId: null, vectorId: null, dimIndex: 0 };
+
+function showScreen(name){
+  document.querySelectorAll(".screen").forEach(s => s.classList.toggle("on", s.dataset.screen === name));
+  STATE.screen = name;
+  document.getElementById("nav-review").classList.toggle("on", name === "review" || name === "dimension");
+  document.getElementById("nav-momentum").classList.toggle("on", name === "history");
+  window.scrollTo({ top: 0, behavior: "instant" in window ? "instant" : "auto" });
+}
+
+function navReview(){
+  if (STATE.vectorId) renderReview(STATE.vectorId);
+  else showScreen("launch");
+}
+function navMomentum(){
+  if (STATE.vectorId) renderHistory(STATE.vectorId);
+  else showScreen("launch");
+}
+function backToReview(){ renderReview(STATE.vectorId); }
+function goToLaunch(){
+  STATE.vectorId = null;
+  STATE.selectedLaunchId = null;
+  renderLaunch();
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   SCREEN 1 — Launch Review
+   ══════════════════════════════════════════════════════════════════ */
+
+function renderLaunch(){
+  document.getElementById("tb-party").textContent = PARTY.name;
+  document.getElementById("launch-party-name").textContent = PARTY.name;
+  document.getElementById("launch-party-tags").innerHTML =
+    PARTY.tags.map(t => `<span class="tag">${esc(t)}</span>`).join("");
+
+  document.getElementById("vector-grid").innerHTML = VECTORS.map(v => {
+    const bm = BAND_META[v.band];
+    return `<div class="card vector-card hoverable${v.id === STATE.selectedLaunchId ? " selected" : ""}" onclick="selectLaunchVector('${v.id}')">
+      <div class="vname">${esc(v.name)}</div>
+      <div class="vdesc">${esc(v.description)}</div>
+      <div class="vdates">Last reviewed ${esc(v.lastReviewDate)} · Next due ${esc(v.nextReviewDate)}</div>
+      <div class="vfoot">
+        <span class="vscore num" style="color:${bandColorVar(v.band)}">${v.superIndex}</span>
+        <span class="badge ${bm.cls}">${bm.label}</span>
+      </div>
+    </div>`;
+  }).join("");
+
+  document.getElementById("evidence-chips").innerHTML = PARTY.evidence.map(e =>
+    `<span class="chip">${esc(e.label)} <span class="type">${esc(e.type)}</span></span>`
+  ).join("");
+
+  document.getElementById("launch-btn").disabled = !STATE.selectedLaunchId;
+  showScreen("launch");
+}
+
+function selectLaunchVector(id){
+  STATE.selectedLaunchId = id;
+  renderLaunch();
+}
+
+function launchReview(){
+  if (!STATE.selectedLaunchId) return;
+  startProcessing(STATE.selectedLaunchId);
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   SCREEN 2 — Review in progress
+   ══════════════════════════════════════════════════════════════════ */
+
+function startProcessing(vectorId){
+  const v = findVector(vectorId);
+  const dims = v.dimensions || [];
+  const statusEl = document.getElementById("proc-status");
+  const listEl = document.getElementById("proc-checklist");
+  const subEl = document.getElementById("proc-sub");
+
+  listEl.innerHTML = dims.map(d =>
+    `<li id="proc-item-${d.name.replace(/\s+/g,'-')}"><span class="mark">✓</span>${esc(d.name)}</li>`
+  ).join("");
+  subEl.textContent = `Running Vichara enquiry across ${dims.length} dimensions · grounding in ${PARTY.evidence.length} evidence sources.`;
+  statusEl.textContent = `Reviewing ${dims.length ? dims[0].name.toLowerCase() : "vector"}…`;
+
+  showScreen("processing");
+
+  let i = 0;
+  function tick(){
+    if (i >= dims.length){
+      setTimeout(() => renderReview(vectorId), 400);
+      return;
+    }
+    const item = document.getElementById(`proc-item-${dims[i].name.replace(/\s+/g,'-')}`);
+    if (item) item.classList.add("done");
+    statusEl.textContent = i + 1 < dims.length
+      ? `Reviewing ${dims[i + 1].name.toLowerCase()}…`
+      : "Synthesizing findings…";
+    i++;
+    setTimeout(tick, 500);
+  }
+  setTimeout(tick, 400);
+}
+
+function reReview(){ startProcessing(STATE.vectorId); }
+
+/* ══════════════════════════════════════════════════════════════════
+   SCREEN 3 — The Review / Momentum Workspace
+   ══════════════════════════════════════════════════════════════════ */
+
+function sparklinePoints(history, w, h){
+  const values = history.map(pt => pt.index);
+  const min = Math.min(...values), max = Math.max(...values);
+  const range = (max - min) || 1;
+  return values.map((val, i) => {
+    const x = (i / (values.length - 1 || 1)) * w;
+    const y = h - ((val - min) / range) * h;
+    return `${x.toFixed(1)},${y.toFixed(1)}`;
+  }).join(" ");
+}
+
+function renderReview(vectorId){
+  const v = findVector(vectorId);
+  if (!v) return;
+  STATE.vectorId = vectorId;
+  STATE.selectedLaunchId = vectorId;
+
+  document.getElementById("rv-vector-name").textContent = v.name.toUpperCase() + " · REVIEW";
+  document.getElementById("rv-score").textContent = v.superIndex;
+  const bm = BAND_META[v.band];
+  const rvBand = document.getElementById("rv-band");
+  rvBand.textContent = bm.label.toUpperCase();
+  rvBand.className = "badge " + bm.cls;
+
+  const tm = TREND_META[v.momentum];
+  document.getElementById("rv-momentum-arrow").textContent = tm.arrow;
+  document.getElementById("rv-momentum-arrow").className = "trend " + tm.cls;
+  document.getElementById("rv-momentum-word").textContent = tm.word;
+
+  const hist = v.history || [];
+  const spark = document.getElementById("rv-sparkline");
+  spark.innerHTML = hist.length > 1
+    ? `<polyline points="${sparklinePoints(hist, 70, 22)}" fill="none" stroke="${bandColorVar(v.band)}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`
+    : "";
+  spark.setAttribute("title", hist.map(h => h.index).join(" → "));
+
+  if (hist.length >= 2){
+    const d = hist[hist.length - 1].index - hist[hist.length - 2].index;
+    const chip = document.getElementById("rv-delta");
+    chip.textContent = (d > 0 ? "▲ +" : d < 0 ? "▼ " : "▬ ") + d;
+    chip.className = "delta-chip " + (d > 0 ? "up" : d < 0 ? "down" : "flat");
+  }
+
+  document.getElementById("rv-dates").innerHTML =
+    `Last reviewed <b>${esc(v.lastReviewDate)}</b> · Next review due <b>${esc(v.nextReviewDate)}</b>`;
+
+  document.getElementById("rv-summary").textContent = v.executiveSummary;
+
+  // Dimension-contribution bar — segments sized by weight, colored by that dimension's own band
+  const contribEl = document.getElementById("rv-contribution");
+  const legendEl = document.getElementById("rv-legend");
+  contribEl.innerHTML = (v.dimensions || []).map(d => {
+    const band = scoreBand(d.score);
+    return `<div class="contribution-seg" style="width:${d.weight}%; background:${bandColorVar(band)}" title="${esc(d.name)} — ${d.score}/100"></div>`;
+  }).join("");
+  legendEl.innerHTML = (v.dimensions || []).map(d =>
+    `<span><span class="dot" style="background:${bandColorVar(scoreBand(d.score))}"></span>${esc(d.name)}</span>`
+  ).join("");
+
+  // Dimension grid
+  document.getElementById("rv-dims").innerHTML = (v.dimensions || []).map((d, idx) => {
+    const band = scoreBand(d.score);
+    const tmd = TREND_META[d.trend];
+    return `<div class="card dim-card hoverable" onclick="renderDimension('${v.id}', ${idx})">
+      <div class="dim-card-top">
+        <div class="dim-name">${esc(d.name)}</div>
+        ${d.score < 45 ? '<span class="focus-flag">Focus</span>' : ""}
+      </div>
+      <div class="dim-score-row">
+        <span class="dim-score num" style="color:${bandColorVar(band)}">${d.score}</span>
+        <span class="dim-weight">/100 · weight ${d.weight}%</span>
+      </div>
+      <div class="dim-bar-track"><div class="dim-bar-fill" style="width:${d.score}%; background:${bandColorVar(band)}"></div></div>
+      <div class="dim-meta-row">
+        <span>Confidence: ${esc(d.confidence)}</span>
+        <span class="trend ${tmd.cls}">${tmd.arrow} ${tmd.word}</span>
+      </div>
+      <div class="dim-finding">${esc(d.finding)}</div>
+    </div>`;
+  }).join("");
+
+  document.getElementById("rv-twopanel-heading").textContent = "Recommended position & strategy";
+  document.getElementById("rv-position-label").textContent = v.positionLabel || "Recommended position";
+  document.getElementById("rv-position-body").textContent = v.recommendedPosition;
+  document.getElementById("rv-action-label").textContent = v.actionLabel || "Strategy";
+  document.getElementById("rv-action-body").textContent = v.counteroffer;
+
+  document.getElementById("rv-matters").innerHTML = (v.matters || []).map(m => `
+    <div class="card matter-card${m.status === "Urgent" ? " urgent" : ""}">
+      <div class="matter-top">
+        <div class="matter-title">${esc(m.title)}</div>
+        <span class="status-pill ${m.status === "Urgent" ? "urgent" : "open"}">${esc(m.status)}</span>
+      </div>
+      <div class="matter-row"><b>Trigger:</b> ${esc(m.trigger)}</div>
+      <div class="matter-row"><b>Objective:</b> ${esc(m.objective)}</div>
+      <div class="matter-row"><b>Owner:</b> ${esc(m.owner)}</div>
+      <div class="matter-row"><b>Interventions:</b></div>
+      <ul class="matter-list">${m.interventions.map(i => `<li>${esc(i)}</li>`).join("")}</ul>
+    </div>`).join("");
+
+  document.getElementById("rv-approvals").innerHTML = (v.approvals || []).map(a => `<span class="chip">${esc(a)}</span>`).join("");
+  document.getElementById("rv-nextactions").innerHTML = (v.nextActions || []).map(p => `
+    <div class="phase">
+      <div class="phase-name">${esc(p.phase)}</div>
+      <ul class="phase-items">${p.items.map(i => `<li>${esc(i)}</li>`).join("")}</ul>
+    </div>`).join("");
+
+  document.getElementById("rv-switcher").innerHTML = VECTORS.map(sv => {
+    const sbm = BAND_META[sv.band];
+    const stm = TREND_META[sv.momentum];
+    return `<div class="card switch-card hoverable${sv.id === v.id ? " active" : ""}" onclick="renderReview('${sv.id}')">
+      <div class="sname">${esc(sv.name)}</div>
+      <div class="sscore num" style="color:${bandColorVar(sv.band)}">${sv.superIndex}</div>
+      <div class="snote"><span class="badge ${sbm.cls}" style="padding:2px 7px; font-size:10px">${sbm.label}</span> ${stm.arrow}</div>
+    </div>`;
+  }).join("");
+
+  showScreen("review");
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   SCREEN 4 — Dimension detail
+   ══════════════════════════════════════════════════════════════════ */
+
+function renderDimension(vectorId, idx){
+  const v = findVector(vectorId);
+  const dims = v.dimensions || [];
+  idx = ((idx % dims.length) + dims.length) % dims.length;
+  STATE.vectorId = vectorId;
+  STATE.dimIndex = idx;
+  const d = dims[idx];
+  const band = scoreBand(d.score);
+
+  document.getElementById("dd-vector-name").textContent = v.name.toUpperCase() + " · DIMENSION " + (idx + 1) + " OF " + dims.length;
+  document.getElementById("dd-dates").innerHTML =
+    `Last reviewed <b>${esc(v.lastReviewDate)}</b> · Next review due <b>${esc(v.nextReviewDate)}</b>`;
+  document.getElementById("dd-name").textContent = d.name;
+  document.getElementById("dd-score").textContent = d.score;
+  document.getElementById("dd-score").style.color = bandColorVar(band);
+  document.getElementById("dd-bar").style.width = d.score + "%";
+  document.getElementById("dd-bar").style.background = bandColorVar(band);
+  document.getElementById("dd-finding").textContent = d.finding;
+  document.getElementById("dd-why").textContent = d.why;
+  document.getElementById("dd-qa").innerHTML = (d.qa || []).map(item => {
+    const c = item.citation || {};
+    return `<div class="card qa-card" onclick="toggleQaCitation(this)">
+      <div class="qa-q">Q: ${esc(item.q)}</div>
+      <div class="qa-a">${esc(item.a)}</div>
+      <div class="qa-inference"><b>Inference:</b> ${esc(item.inference)}</div>
+      <div class="qa-toggle">▸ View citation</div>
+      <div class="qa-citation">
+        <div class="qa-citation-row"><b>Source:</b> ${esc(c.source)} <span class="chip" style="padding:2px 8px; font-size:10px; margin-left:4px">${esc(c.type)}</span></div>
+        <div class="qa-citation-excerpt">"${esc(c.excerpt)}"</div>
+        <div class="qa-citation-row"><b>Captured:</b> ${esc(c.date)} &nbsp;·&nbsp; <b>Belief:</b> <span class="belief-id">${esc(c.beliefId)}</span></div>
+      </div>
+    </div>`;
+  }).join("");
+  document.getElementById("dd-evidence").innerHTML = d.evidence.map(e => `<span class="chip">${esc(e)}</span>`).join("");
+  document.getElementById("dd-confidence").textContent = `${d.confidence} confidence · ${d.freshness}`;
+  document.getElementById("dd-actions").innerHTML = d.actions.map(a => `<li>${esc(a)}</li>`).join("");
+
+  showScreen("dimension");
+}
+
+function dimNav(delta){ renderDimension(STATE.vectorId, STATE.dimIndex + delta); }
+
+function toggleQaCitation(el){
+  el.classList.toggle("expanded");
+  const toggle = el.querySelector(".qa-toggle");
+  toggle.textContent = el.classList.contains("expanded") ? "▾ Hide citation" : "▸ View citation";
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   SCREEN 5 — Momentum & history
+   ══════════════════════════════════════════════════════════════════ */
+
+function renderHistory(vectorId){
+  const v = findVector(vectorId);
+  if (!v) return;
+  STATE.vectorId = vectorId;
+
+  document.getElementById("hist-vector-name").textContent = v.name.toUpperCase() + " · MOMENTUM";
+  document.getElementById("hist-dates").innerHTML =
+    `Last reviewed <b>${esc(v.lastReviewDate)}</b> · Next review due <b>${esc(v.nextReviewDate)}</b>`;
+
+  const hist = v.history || [];
+  const values = hist.map(h => h.index);
+  const min = Math.min(...values) - 8, max = Math.max(...values) + 8;
+  const range = (max - min) || 1;
+  const W = 1000, H = 180, PAD = 60;
+  const pts = values.map((val, i) => {
+    const x = PAD + (i / (values.length - 1 || 1)) * (W - PAD * 2);
+    const y = H - PAD - ((val - min) / range) * (H - PAD * 2);
+    return { x, y, val };
+  });
+  const line = pts.map(p => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" ");
+  const dots = pts.map(p => `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="5" fill="${bandColorVar(v.band)}"/>
+     <text x="${p.x.toFixed(1)}" y="${(p.y - 14).toFixed(1)}" font-size="15" font-weight="600" text-anchor="middle" fill="#14171F" font-family="Fraunces, serif">${p.val}</text>`).join("");
+  const labels = hist.map((h, i) =>
+    `<text x="${pts[i].x.toFixed(1)}" y="${H - 6}" font-size="11" text-anchor="middle" fill="#5B6270" font-family="Inter, sans-serif">${esc(h.date)}</text>`).join("");
+
+  document.getElementById("hist-chart").innerHTML =
+    `<line x1="${PAD}" y1="${H - PAD}" x2="${W - PAD}" y2="${H - PAD}" stroke="#E3E6EB" stroke-width="1"/>
+     <polyline points="${line}" fill="none" stroke="${bandColorVar(v.band)}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+     ${dots}${labels}`;
+
+  document.getElementById("hist-timeline").innerHTML = hist.slice().reverse().map(h => `
+    <div class="timeline-row">
+      <div class="timeline-date">${esc(h.date)}</div>
+      <div class="timeline-index num" style="color:${bandColorVar(scoreBand(h.index))}">${h.index}</div>
+      <div class="timeline-note">${esc(h.note)}</div>
+    </div>`).join("");
+
+  document.getElementById("hist-compare-narrative").textContent = v.compareNarrative || "";
+  document.getElementById("hist-compare").innerHTML = (v.compareDeltas || []).map(c => {
+    const d = c.curr - c.prev;
+    const cls = d > 0 ? "up" : d < 0 ? "down" : "flat";
+    const arrow = d > 0 ? "▲" : d < 0 ? "▼" : "▬";
+    return `<div class="compare-row">
+      <span>${esc(c.name)}</span>
+      <span>${c.prev} → ${c.curr} <span class="compare-delta trend ${cls}">${arrow} ${d > 0 ? "+" : ""}${d}</span></span>
+    </div>`;
+  }).join("");
+
+  document.getElementById("hist-matters").innerHTML = (v.mattersHistory || []).map(m => `
+    <div class="matter-row" style="margin-bottom:10px">
+      <b>${esc(m.title)}</b> — opened ${esc(m.opened)}${m.closed ? `, closed ${esc(m.closed)}` : ""}<br>
+      ${esc(m.outcome)}
+    </div>`).join("");
+
+  showScreen("history");
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   INIT
+   ══════════════════════════════════════════════════════════════════ */
+renderLaunch();
+</script>
+</body>
+</html>

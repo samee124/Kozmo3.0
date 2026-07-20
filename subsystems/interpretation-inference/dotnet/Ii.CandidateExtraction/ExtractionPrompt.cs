@@ -60,13 +60,34 @@ public static class ExtractionPrompt
            - A party described as "engaged" or "retained" is the CUSTOMER
            - A party described as "retained by" or "providing services to" is the VENDOR
         6. Do NOT invent organisations not present in the document text.
+        7. BANKS ON PAYMENT-ROUTING FORMS ARE NEVER VENDORS, NEVER "UNKNOWN": a bank or other
+           financial institution named ONLY in an ACH form, wire/routing instructions, a direct
+           deposit or "banking details" section, or any other payment-routing/payment-instruction
+           context is providing payment-routing information — nothing else is known about a
+           commercial relationship with it. This is exactly the "issuer" case in rule 4, made
+           explicit: classify it role="issuer". Do NOT return "unknown" for this case merely
+           because no vendor/customer relationship is stated — the routing context IS the
+           relationship, and it is "issuer". Only classify a bank as "vendor" if the document
+           itself describes the bank as providing contracted services to the reader (e.g. a
+           banking-services agreement) — a routing/account-number listing alone never does.
         """;
 
-    public static string User(string documentText)
+    public static string User(string documentText, bool isBankingContext = false)
     {
         var text = documentText.Length > MaxDocChars
             ? documentText[..MaxDocChars] + "\n[... truncated ...]"
             : documentText;
-        return $"Document text:\n\n{text}";
+
+        // Document-level signal (filename-driven — DocTypeInferrer.IsBankingContext), not
+        // extracted from documentText itself: tells the model up front that ANY bank/financial
+        // institution named below is here for payment-routing purposes only (rule 7), removing
+        // the ambiguity that previously produced role="unknown" for these parties.
+        var contextNote = isBankingContext
+            ? "Document context: this is an ACH / banking-details / wire-instruction form. " +
+              "Any bank or financial institution named below is providing payment-routing " +
+              "information only — apply rule 7.\n\n"
+            : "";
+
+        return $"{contextNote}Document text:\n\n{text}";
     }
 }

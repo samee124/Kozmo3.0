@@ -541,27 +541,36 @@ app.MapGet("/vendors/{id}/vendor-file", async (
 // Agent-facing only: never confidence-scored, never read by scoring/completeness (CI-enforced
 // metadata wall in Kozmo.Architecture.Tests).
 app.MapGet("/vendors/{id}/metadata", async (
-    string          id,
-    EntityRegistry  reg,
-    IMetadataStore  metadataStore) =>
+    string            id,
+    EntityRegistry    reg,
+    IMetadataStore    metadataStore,
+    SqliteEntityStore storeInst) =>
 {
     if (!Guid.TryParse(id, out var guid)) return Results.BadRequest("Invalid GUID");
     if (reg.GetEntity(guid) is null) return Results.NotFound();
 
     var knowledge = await metadataStore.GetForEntityAsync(guid);
 
-    return Results.Ok(new
+    // documentId is only included when it resolves to a real, retained documents.id row — never
+    // fabricated. MetadataPersistenceStage falls back to a fresh Guid.NewGuid() per run when no
+    // document store was supplied at persistence time, so a raw DocumentId here can't be trusted
+    // without checking it actually exists (see "view source" wiring in Pages/Workspace.cshtml).
+    var clauses = new List<object>();
+    foreach (var m in knowledge.Metadata)
     {
-        vendorId = guid,
-        clauses  = knowledge.Metadata.Select(m => new
+        var doc = m.DocumentId != Guid.Empty ? await storeInst.GetDocumentAsync(m.DocumentId) : null;
+        clauses.Add(new
         {
             field        = m.FieldName,
             value        = m.Value,
             derivation   = m.Derivation,
             documentType = m.DocumentType,
-            observedAt   = m.ObservedAt
-        })
-    });
+            observedAt   = m.ObservedAt,
+            documentId   = doc is not null ? m.DocumentId : (Guid?)null
+        });
+    }
+
+    return Results.Ok(new { vendorId = guid, clauses });
 });
 
 // GET /vendors/{id}/questions?dimension=Operational — ALL SIX authored completeness questions
@@ -1019,6 +1028,9 @@ app.MapGet("/documents/{id}", async (string id, SqliteEntityStore storeInst) =>
 });
 
 // GET /documents/{id}/raw — the actual retained PDF bytes, only when explicitly requested.
+// No fileDownloadName passed to Results.File — passing one makes ASP.NET Core emit
+// Content-Disposition: attachment, which forces a download instead of letting the browser render
+// the PDF inline (the "view original PDF" link in the vendor detail UI expects inline viewing).
 app.MapGet("/documents/{id}/raw", async (string id, SqliteEntityStore storeInst) =>
 {
     if (!Guid.TryParse(id, out var docId))
@@ -1027,7 +1039,7 @@ app.MapGet("/documents/{id}/raw", async (string id, SqliteEntityStore storeInst)
     var doc = await storeInst.GetDocumentAsync(docId);
     if (doc is null || doc.Content is null) return Results.NotFound();
 
-    return Results.File(doc.Content, "application/pdf", doc.Filename);
+    return Results.File(doc.Content, "application/pdf");
 });
 
 // GET /programs — real programs (just one today: "Vendor Cleanup Program"). A Program is a
