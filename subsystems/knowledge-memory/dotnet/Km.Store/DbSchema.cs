@@ -123,5 +123,11 @@ internal static class DbSchema
             expires_at     TEXT NOT NULL,
             user_email     TEXT NOT NULL
         );
+
+        CREATE TABLE IF NOT EXISTS owner_channel_prefs (
+            owner_id          TEXT NOT NULL PRIMARY KEY,
+            channel           TEXT NOT NULL DEFAULT 'Email',
+            slack_destination TEXT
+        );
         """;
 }

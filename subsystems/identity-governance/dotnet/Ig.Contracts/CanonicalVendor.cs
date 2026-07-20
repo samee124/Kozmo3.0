@@ -45,4 +45,12 @@ public sealed record CanonicalVendor(
     // alongside the vendor instead of thrown away after the gate check. Null for any vendor
     // resolved before this field existed (legacy rows).
     string?               EntityRole = null
-);
+)
+{
+    /// <summary>
+    /// Email domains associated with this vendor (e.g. "northstarsoftware.com").
+    /// Used by VendorCallEntityMatcher to resolve calendar attendees to canonical vendors.
+    /// Defaults to empty — set via object initializer: new CanonicalVendor(...) { KnownDomains = [...] }
+    /// </summary>
+    public IReadOnlyList<string> KnownDomains { get; init; } = [];
+}

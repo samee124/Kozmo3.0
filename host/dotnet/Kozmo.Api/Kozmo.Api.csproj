@@ -19,6 +19,8 @@
     <ProjectReference Include="..\..\..\subsystems\identity-governance\dotnet\Ig.Resolution\Ig.Resolution.csproj" />
     <ProjectReference Include="..\..\..\subsystems\operations\dotnet\Kyv.ProgramRunner\Kyv.ProgramRunner.csproj" />
     <ProjectReference Include="..\..\..\libs\Kozmo.Connector.GoogleDrive\Kozmo.Connector.GoogleDrive.csproj" />
+    <ProjectReference Include="..\..\..\subsystems\integration-fabric\dotnet\If.MicrosoftGraph\If.MicrosoftGraph.csproj" />
+    <ProjectReference Include="..\..\..\subsystems\programme-orchestration\dotnet\Po.VendorCall\Po.VendorCall.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.BannedApiAnalyzers" Version="3.3.4" PrivateAssets="all" />

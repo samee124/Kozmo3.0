@@ -1,0 +1,547 @@
+@page "/vendor-calls/{runId}/review"
+@using Kozmo.Api.Pages
+@model VendorCallReviewModel
+@{
+    Layout = null;
+    var isInvalid   = Model.State == VendorCallReviewModel.ReviewState.Invalid;
+    var isSubmitted = Model.State == VendorCallReviewModel.ReviewState.Submitted;
+    var isPending   = Model.State == VendorCallReviewModel.ReviewState.Pending;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Kozmo — Meeting Review</title>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --canvas:       #F9F9FA;
+            --surface:      #FFFFFF;
+            --surface-soft: #F6F6F7;
+            --line-1:       #EDEAE9;
+            --line-3:       #E5E5E7;
+
+            --ink-0: #1E1F21;
+            --ink-2: #54545A;
+            --ink-3: #6D6E72;
+            --ink-4: #9C9CA0;
+
+            --accent:        #F06A6A;
+            --accent-soft:   #FDECEC;
+            --accent-border: #F8D2D2;
+
+            --affirm:        #14A085;
+            --affirm-soft:   #E6F4F0;
+            --affirm-border: #C8E8DE;
+            --affirm-ink:    #0C7860;
+
+            --urgent:        #E8384F;
+            --urgent-soft:   #FCE6E9;
+            --urgent-border: #F4C2C9;
+            --urgent-ink:    #B81B33;
+
+            --watch:         #4573D2;
+            --watch-soft:    #E5EDFA;
+            --watch-border:  #C3D5F1;
+            --watch-ink:     #2A56B5;
+
+            --gold: #A9762F;
+
+            --font: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            --font-mono: ui-monospace, "Cascadia Code", "Fira Mono", monospace;
+
+            --r-md:  6px;
+            --r-lg:  8px;
+            --r-pill: 999px;
+
+            --shadow-sm: 0 1px 2px rgba(0,0,0,.05);
+            --shadow-md: 0 2px 8px rgba(0,0,0,.07), 0 1px 2px rgba(0,0,0,.04);
+        }
+
+        html, body {
+            background: var(--canvas);
+            font-family: var(--font);
+            font-size: 14px;
+            line-height: 1.5;
+            color: var(--ink-0);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body { padding: 2rem 1rem; min-height: 100vh; }
+
+        .wrap { max-width: 640px; margin: 0 auto; }
+
+        /* ── Logo ─────────────────────────────────────── */
+        .logo-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 28px;
+        }
+        .logo-k {
+            width: 26px; height: 26px;
+            background: var(--gold);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 11px; font-weight: 700; color: #fff;
+            flex-shrink: 0;
+        }
+        .logo-name { font-size: 15px; font-weight: 700; color: var(--ink-0); letter-spacing: -0.2px; }
+
+        /* ── Page header ──────────────────────────────── */
+        .page-header { margin-bottom: 28px; }
+        .page-header h1 { font-size: 20px; font-weight: 700; color: var(--ink-0); margin-bottom: 4px; }
+        .page-header .meta { font-size: 13px; color: var(--ink-3); }
+
+        /* ── Step indicator ───────────────────────────── */
+        .steps {
+            display: flex;
+            gap: 0;
+            margin-bottom: 24px;
+            border: 1px solid var(--line-3);
+            border-radius: var(--r-lg);
+            overflow: hidden;
+        }
+        .step {
+            flex: 1;
+            padding: 8px 12px;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--ink-4);
+            background: var(--surface);
+            text-align: center;
+            border-right: 1px solid var(--line-3);
+        }
+        .step:last-child { border-right: none; }
+        .step.active { background: var(--watch-soft); color: var(--watch-ink); font-weight: 600; }
+        .step.done   { background: var(--affirm-soft); color: var(--affirm-ink); }
+
+        /* ── Card ─────────────────────────────────────── */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--line-1);
+            border-radius: 12px;
+            box-shadow: var(--shadow-md);
+            padding: 24px;
+            margin-bottom: 16px;
+        }
+        .card-title {
+            font-size: 15px; font-weight: 600; color: var(--ink-0);
+            margin-bottom: 4px;
+        }
+        .card-sub {
+            font-size: 13px; color: var(--ink-3);
+            margin-bottom: 20px; line-height: 1.5;
+        }
+
+        /* ── Section ──────────────────────────────────── */
+        .section { margin-bottom: 20px; }
+        .section-heading {
+            font-size: 11px; font-weight: 700; letter-spacing: 0.5px;
+            color: var(--ink-4); text-transform: uppercase;
+            margin-bottom: 8px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid var(--line-3);
+        }
+        .section-content {
+            font-size: 13px; color: var(--ink-2);
+            margin-bottom: 10px; line-height: 1.55;
+        }
+
+        /* ── Item row ─────────────────────────────────── */
+        .item-row { margin-bottom: 12px; }
+        .item-label {
+            font-size: 12px; color: var(--ink-3);
+            margin-bottom: 4px;
+        }
+        .item-textarea {
+            width: 100%;
+            font-family: var(--font);
+            font-size: 13px;
+            color: var(--ink-0);
+            border: 1px solid var(--line-3);
+            border-radius: var(--r-md);
+            padding: 8px 10px;
+            resize: vertical;
+            min-height: 48px;
+            background: var(--surface);
+            line-height: 1.5;
+            transition: border-color 120ms ease;
+        }
+        .item-textarea:focus { outline: none; border-color: var(--watch); }
+        .item-textarea.modified { border-color: var(--watch); background: var(--watch-soft); }
+
+        /* ── Accuracy radio ───────────────────────────── */
+        .radio-group { display: flex; flex-direction: column; gap: 8px; }
+        .radio-option {
+            display: flex; align-items: center; gap: 10px;
+            padding: 10px 14px;
+            border: 1px solid var(--line-3);
+            border-radius: var(--r-md);
+            cursor: pointer;
+            transition: border-color 120ms ease, background 120ms ease;
+        }
+        .radio-option:hover { border-color: var(--watch-border); background: var(--watch-soft); }
+        .radio-option input[type=radio] { accent-color: var(--watch); }
+        .radio-option.selected { border-color: var(--watch); background: var(--watch-soft); }
+        .radio-label { font-size: 13px; font-weight: 500; color: var(--ink-0); }
+        .radio-sub   { font-size: 12px; color: var(--ink-3); margin-top: 1px; }
+
+        /* ── Evidence decision ────────────────────────── */
+        .evidence-box {
+            border: 1px solid var(--line-3);
+            border-radius: var(--r-md);
+            padding: 14px;
+        }
+        .evidence-checkbox-row {
+            display: flex; align-items: flex-start; gap: 10px;
+        }
+        .evidence-checkbox-row input[type=checkbox] { accent-color: var(--affirm); margin-top: 2px; flex-shrink: 0; }
+        .evidence-text strong { font-size: 13px; font-weight: 600; color: var(--ink-0); }
+        .evidence-text p { font-size: 12px; color: var(--ink-3); margin-top: 3px; line-height: 1.5; }
+
+        /* ── Additions ────────────────────────────────── */
+        .additions-textarea {
+            width: 100%;
+            font-family: var(--font);
+            font-size: 13px;
+            color: var(--ink-0);
+            border: 1px solid var(--line-3);
+            border-radius: var(--r-md);
+            padding: 8px 10px;
+            resize: vertical;
+            min-height: 80px;
+            background: var(--surface);
+            line-height: 1.5;
+        }
+        .additions-textarea:focus { outline: none; border-color: var(--watch); }
+
+        /* ── Buttons ──────────────────────────────────── */
+        .btn-row { display: flex; gap: 10px; margin-top: 8px; }
+        .btn-primary {
+            flex: 1;
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            border-radius: var(--r-md);
+            padding: 10px 16px;
+            font-size: 14px; font-weight: 600;
+            cursor: pointer;
+            transition: background 120ms ease;
+            font-family: var(--font);
+        }
+        .btn-primary:hover { background: #E15555; }
+        .btn-primary:disabled { opacity: 0.5; cursor: default; }
+        .btn-secondary {
+            background: transparent;
+            border: 1px solid var(--line-1);
+            border-radius: var(--r-md);
+            padding: 10px 16px;
+            font-size: 13px; font-weight: 500;
+            color: var(--ink-3);
+            cursor: pointer;
+            font-family: var(--font);
+            transition: border-color 120ms ease, color 120ms ease;
+        }
+        .btn-secondary:hover { border-color: var(--ink-4); color: var(--ink-2); }
+
+        /* ── Status icon ──────────────────────────────── */
+        .status-icon {
+            width: 44px; height: 44px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 18px; margin-bottom: 14px;
+        }
+        .icon-ok  { background: var(--affirm-soft); color: var(--affirm); }
+        .icon-err { background: var(--urgent-soft);  color: var(--urgent); }
+
+        /* ── Typography ───────────────────────────────── */
+        .page-title { font-size: 16px; font-weight: 600; margin-bottom: 6px; }
+        .page-sub   { font-size: 13px; color: var(--ink-3); line-height: 1.5; margin-bottom: 20px; }
+
+        .badge {
+            display: inline-flex; align-items: center; gap: 4px;
+            padding: 2px 8px;
+            border-radius: var(--r-pill);
+            font-size: 11px; font-weight: 600;
+            border: 1px solid transparent;
+        }
+        .badge-warn { background: var(--urgent-soft); color: var(--urgent-ink); border-color: var(--urgent-border); }
+
+        .divider { border: none; border-top: 1px solid var(--line-3); margin: 20px 0; }
+
+        /* ── Hidden step panels ───────────────────────── */
+        .step-panel { display: none; }
+        .step-panel.active { display: block; }
+    </style>
+</head>
+<body>
+<div class="wrap">
+
+    <div class="logo-row">
+        <div class="logo-k">K</div>
+        <span class="logo-name">Kozmo</span>
+    </div>
+
+    @if (isInvalid)
+    {
+        <div class="card">
+            <div class="status-icon icon-err">&#10005;</div>
+            <p class="page-title">Link invalid or expired</p>
+            <p class="page-sub">This review link is not valid, has already been used, or has expired. Review links are active for 48 hours after the post-meeting email is sent.</p>
+            <button class="btn-secondary" style="width:100%" onclick="history.length > 1 ? history.back() : window.close()">
+                &larr; Back to email
+            </button>
+        </div>
+    }
+    else if (isSubmitted)
+    {
+        <div class="card">
+            <div class="status-icon icon-ok">&#10003;</div>
+            <p class="page-title">Review submitted &mdash; thank you.</p>
+            <p class="page-sub">
+                Your review has been saved.
+                @if (Model.PromotedToEvidence)
+                {
+                    <text>These insights have been flagged for promotion to the vendor evidence record.</text>
+                }
+                else
+                {
+                    <text>The meeting record has been closed.</text>
+                }
+            </p>
+        </div>
+    }
+    else @* Pending — show the 3-step review form *@
+    {
+        <div class="page-header">
+            <h1>Post-meeting review</h1>
+            <p class="meta">@Model.Summary!.VendorName &mdash; @Model.Summary.MeetingTime.ToString("ddd d MMM yyyy, HH:mm") UTC</p>
+        </div>
+
+        <div class="steps" id="step-indicator">
+            <div class="step active" id="ind-1">1. Summary</div>
+            <div class="step"        id="ind-2">2. Corrections</div>
+            <div class="step"        id="ind-3">3. Evidence</div>
+        </div>
+
+        <form id="review-form" method="post">
+            <input type="hidden" name="RunId"          value="@Model.RunId">
+            <input type="hidden" name="Token"          value="@Model.Token">
+            <input type="hidden" id="summaryAccurate"  name="SummaryAccurate"  value="true">
+            <input type="hidden" id="revisionsJson"    name="RevisionsJson"    value="[]">
+            <input type="hidden" id="promoteEvidence"  name="PromoteToEvidence" value="false">
+
+            @* ── Step 1: Summary review ────────────────────────────────────── *@
+            <div class="step-panel active" id="step-1">
+
+                <div class="card">
+                    <p class="card-title">Summary</p>
+                    <p class="card-sub">Review the key points from the meeting with @Model.Summary.VendorName.</p>
+
+                    @foreach (var sec in new[] {
+                        Model.Summary.MeetingOutcome,
+                        Model.Summary.DecisionsMade,
+                        Model.Summary.NewCommitments,
+                        Model.Summary.ResolvedFromPreBrief,
+                        Model.Summary.CommercialStateChange,
+                        Model.Summary.StillOpen,
+                        Model.Summary.RecommendedNextAction
+                    })
+                    {
+                        <div class="section">
+                            <p class="section-heading">@sec.Heading</p>
+                            <p class="section-content">@sec.Content</p>
+                        </div>
+                    }
+
+                    <hr class="divider">
+                    <p class="card-title" style="margin-bottom:12px">Is this summary accurate?</p>
+                    <div class="radio-group" id="accuracy-group">
+                        <label class="radio-option selected" id="opt-yes">
+                            <input type="radio" name="accuracyChoice" value="yes" checked>
+                            <div>
+                                <div class="radio-label">Yes, this looks right</div>
+                                <div class="radio-sub">Proceed directly to the evidence decision</div>
+                            </div>
+                        </label>
+                        <label class="radio-option" id="opt-no">
+                            <input type="radio" name="accuracyChoice" value="no">
+                            <div>
+                                <div class="radio-label">No, I need to make corrections</div>
+                                <div class="radio-sub">I'll edit the items on the next screen</div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="btn-row">
+                    <button type="button" class="btn-primary" id="btn-step1-next">Next &rarr;</button>
+                </div>
+            </div>
+
+            @* ── Step 2: Corrections ───────────────────────────────────────── *@
+            <div class="step-panel" id="step-2">
+                <div class="card">
+                    <p class="card-title">Edit items</p>
+                    <p class="card-sub">Edit any text that is incorrect or incomplete. Leave unchanged text as-is.</p>
+
+                    @{
+                        var allSections = new[]
+                        {
+                            ("decisions",   Model.Summary.DecisionsMade),
+                            ("commitments", Model.Summary.NewCommitments),
+                            ("resolved",    Model.Summary.ResolvedFromPreBrief),
+                            ("open",        Model.Summary.StillOpen),
+                        };
+                    }
+
+                    @foreach (var (sectionKey, sec) in allSections)
+                    {
+                        if (sec.Items.Count > 0)
+                        {
+                            <div class="section">
+                                <p class="section-heading">@sec.Heading</p>
+                                @for (var i = 0; i < sec.Items.Count; i++)
+                                {
+                                    var item = sec.Items[i];
+                                    var hasWarning = item.RequiresUserConfirmation;
+                                    <div class="item-row">
+                                        <div class="item-label">
+                                            @if (hasWarning) { <span class="badge badge-warn">&#9888; Needs confirmation</span> }
+                                        </div>
+                                        <textarea class="item-textarea"
+                                                  data-section="@sectionKey"
+                                                  data-index="@i"
+                                                  data-original="@item.Text"
+                                                  rows="2">@item.Text</textarea>
+                                    </div>
+                                }
+                            </div>
+                        }
+                    }
+
+                    <div class="section">
+                        <p class="section-heading">Additional notes</p>
+                        <textarea class="additions-textarea" id="additions-text" name="Additions"
+                                  placeholder="Anything the summary missed? Add free-text notes here (optional)."></textarea>
+                    </div>
+                </div>
+
+                <div class="btn-row">
+                    <button type="button" class="btn-secondary" id="btn-step2-back">&larr; Back</button>
+                    <button type="button" class="btn-primary"   id="btn-step2-next">Next &rarr;</button>
+                </div>
+            </div>
+
+            @* ── Step 3: Evidence decision ─────────────────────────────────── *@
+            <div class="step-panel" id="step-3">
+                <div class="card">
+                    <p class="card-title">Evidence decision</p>
+                    <p class="card-sub">Should the insights from this meeting be added to the vendor&rsquo;s evidence record for scoring?</p>
+
+                    <div class="evidence-box">
+                        <div class="evidence-checkbox-row">
+                            <input type="checkbox" id="promote-checkbox">
+                            <div class="evidence-text">
+                                <strong>Promote to vendor evidence</strong>
+                                <p>Commitments, decisions, and open questions will be recorded as structured evidence for @Model.Summary.VendorName. This improves scoring accuracy over time.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="btn-row">
+                    <button type="button" class="btn-secondary" id="btn-step3-back">&larr; Back</button>
+                    <button type="submit" class="btn-primary"   id="btn-submit">Submit review</button>
+                </div>
+            </div>
+
+        </form>
+    }
+
+</div>
+
+@if (isPending)
+{
+    <script>
+    (function () {
+        var currentStep = 1;
+        var accuracyYes = true;
+
+        function showStep(n) {
+            for (var i = 1; i <= 3; i++) {
+                var panel = document.getElementById('step-' + i);
+                var ind   = document.getElementById('ind-' + i);
+                if (panel) panel.className = 'step-panel' + (i === n ? ' active' : '');
+                if (ind) {
+                    ind.className = 'step' + (i < n ? ' done' : (i === n ? ' active' : ''));
+                }
+            }
+            currentStep = n;
+            window.scrollTo(0, 0);
+        }
+
+        // Step 1 — accuracy radio
+        var optYes = document.getElementById('opt-yes');
+        var optNo  = document.getElementById('opt-no');
+        var radios = document.querySelectorAll('input[name=accuracyChoice]');
+        radios.forEach(function(r) {
+            r.addEventListener('change', function() {
+                accuracyYes = (this.value === 'yes');
+                optYes.className = 'radio-option' + (accuracyYes ? ' selected' : '');
+                optNo.className  = 'radio-option' + (!accuracyYes ? ' selected' : '');
+                document.getElementById('summaryAccurate').value = accuracyYes ? 'true' : 'false';
+            });
+        });
+
+        document.getElementById('btn-step1-next').addEventListener('click', function() {
+            showStep(accuracyYes ? 3 : 2);
+        });
+
+        // Step 2 — corrections
+        var textareas = document.querySelectorAll('.item-textarea');
+        textareas.forEach(function(ta) {
+            ta.addEventListener('input', function() {
+                var changed = this.value !== this.dataset.original;
+                this.className = 'item-textarea' + (changed ? ' modified' : '');
+            });
+        });
+
+        document.getElementById('btn-step2-back').addEventListener('click', function() { showStep(1); });
+        document.getElementById('btn-step2-next').addEventListener('click', function() { showStep(3); });
+
+        // Step 3 — evidence
+        var promoteBox = document.getElementById('promote-checkbox');
+        promoteBox.addEventListener('change', function() {
+            document.getElementById('promoteEvidence').value = this.checked ? 'true' : 'false';
+        });
+
+        document.getElementById('btn-step3-back').addEventListener('click', function() {
+            showStep(accuracyYes ? 1 : 2);
+        });
+
+        // Submit — build corrections JSON from modified textareas
+        document.getElementById('review-form').addEventListener('submit', function(e) {
+            var corrections = [];
+            textareas.forEach(function(ta) {
+                if (ta.value !== ta.dataset.original) {
+                    corrections.push({
+                        sectionKey:   ta.dataset.section,
+                        itemIndex:    parseInt(ta.dataset.index, 10),
+                        originalText: ta.dataset.original,
+                        editedText:   ta.value
+                    });
+                }
+            });
+            document.getElementById('revisionsJson').value = JSON.stringify(corrections);
+            document.getElementById('btn-submit').disabled = true;
+            document.getElementById('btn-submit').textContent = 'Submitting\u2026';
+        });
+    }());
+    </script>
+}
+</body>
+</html>

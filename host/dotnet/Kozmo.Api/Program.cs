@@ -23,6 +23,8 @@ using Wc.CheckIn;
 using Wc.Contracts;
 using Kozmo.Connector.GoogleDrive;
 using Kyv.ProgramRunner;
+using If.MicrosoftGraph;
+using Po.VendorCall;
 
 // ── JSON options (shared by SSE serialisation) ─────────────────────────────
 
@@ -45,7 +47,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 var catalogueDir  = FindCatalogueDir();
 var profile       = new Catalogue().Load(catalogueDir);
-var dbPath        = Path.Combine(AppContext.BaseDirectory, "kozmo-demo.db");
+var dbPath        = ResolveDbPath();
 var store         = new SqliteEntityStore($"Data Source={dbPath}", profile);
 var registry      = BuildRegistry();
 await LoadPersistedVendorsAsync(store, registry);
@@ -54,8 +56,16 @@ var liveCachePath         = FindLlmCachePath();         // resolved once; used f
 var completenessCache     = FindCompletenessCachePath(); // separate cassette for Q&A answering
 var checkInRepo           = new CheckInRepository(store);
 var checkInTokenOptions   = BuildCheckInTokenOptions(builder.Configuration);
-var checkInTransport      = BuildCheckInTransport(builder.Configuration, store, checkInTokenOptions);
-var (facade, kyvCompleteness) = BuildKyvFacade(store, profile, registry, liveCachePath, checkInRepo, completenessCache, checkInTransport);
+var checkInPhrasingLlm    = liveCachePath is not null ? new CachingLlmClient(liveCachePath, recordMode: false) : null;
+var checkInTransport      = BuildCheckInTransport(builder.Configuration, store, checkInTokenOptions, checkInPhrasingLlm);
+var slackBotToken         = Environment.GetEnvironmentVariable("KOZMO_SLACK_BOT_TOKEN") ?? builder.Configuration["Slack:BotToken"];
+var slackSigningSecret    = Environment.GetEnvironmentVariable("KOZMO_SLACK_SIGNING_SECRET") ?? builder.Configuration["Slack:SigningSecret"];
+var slackAckWarnMs        = int.TryParse(builder.Configuration["Slack:AckWarnThresholdMs"], out var t) ? t : 2000;
+var slackHomePublisher    = new Wc.CheckIn.SlackHomeTabPublisher(slackBotToken);
+var slackResponsePoster   = new Wc.CheckIn.SlackResponsePoster();
+var checkInRouter         = new CheckInChannelRouter(store, checkInTransport, slackBotToken,
+                               vendorId => registry.GetEntity(vendorId)?.CanonicalName);
+var (facade, kyvCompleteness) = BuildKyvFacade(store, profile, registry, liveCachePath, checkInRepo, completenessCache, checkInRouter);
 var sseHub                = new SseHub();
 var kyvTracker            = new KyvVendorTracker();
 
@@ -79,9 +89,22 @@ builder.Services.AddSingleton(sseHub);
 builder.Services.AddSingleton(store);
 builder.Services.AddSingleton<ICheckInRowStore>(store);
 builder.Services.AddSingleton<ICheckInStore>(checkInRepo);
-builder.Services.AddSingleton<ICheckInTransport>(checkInTransport);
+builder.Services.AddSingleton<ICheckInTransport>(checkInRouter);
+builder.Services.AddSingleton<IOwnerChannelPrefStore>(store);
+builder.Services.AddSingleton(slackHomePublisher);
+builder.Services.AddSingleton(slackResponsePoster);
 builder.Services.AddSingleton(checkInTokenOptions);
 builder.Services.AddSingleton(kyvTracker);
+
+// ── Vendor call run store (Phase 9d review page) ───────────────────────────
+var vendorCallRunStore    = new SqliteVendorCallRunStore($"Data Source={dbPath}");
+var reviewStore           = new SqlitePostMeetingReviewStore($"Data Source={dbPath}");
+var reviewCheckpointStore = new SqliteReviewCheckpointStore($"Data Source={dbPath}");
+var vendorUpdateNoteStore = new SqliteVendorUpdateNoteStore($"Data Source={dbPath}");
+builder.Services.AddSingleton(vendorCallRunStore);
+builder.Services.AddSingleton(reviewStore);
+builder.Services.AddSingleton(reviewCheckpointStore);
+builder.Services.AddSingleton(vendorUpdateNoteStore);
 
 // Live LLM factory: record-mode CachingLlmClient wrapping real OpenAiLlmClient.
 // Returns null when OPENAI_API_KEY is absent or fixture cache path unavailable → endpoint returns 503.
@@ -99,6 +122,25 @@ const string GoogleRedirectUri = "http://localhost:5000/auth/google/callback";
 
 builder.Services.AddSingleton(new GoogleOAuthService(googleClientId, googleClientSecret, GoogleRedirectUri));
 builder.Services.AddSingleton(new GoogleDriveDownloader(googleClientId, googleClientSecret));
+
+// ── Microsoft Graph connector ──────────────────────────────────────────────
+var msGraphTenantId     = Environment.GetEnvironmentVariable("MSGRAPH_TENANT_ID")     ?? builder.Configuration["MicrosoftGraph:TenantId"]     ?? "";
+var msGraphClientId     = Environment.GetEnvironmentVariable("MSGRAPH_CLIENT_ID")     ?? builder.Configuration["MicrosoftGraph:ClientId"]     ?? "";
+var msGraphClientSecret = Environment.GetEnvironmentVariable("MSGRAPH_CLIENT_SECRET") ?? builder.Configuration["MicrosoftGraph:ClientSecret"]  ?? "";
+const string MicrosoftCallbackUri = "http://localhost:5000/auth/microsoft/callback";
+
+MicrosoftGraphTokenProvider? msGraphProvider = null;
+if (!string.IsNullOrWhiteSpace(msGraphTenantId) && !string.IsNullOrWhiteSpace(msGraphClientId) && !string.IsNullOrWhiteSpace(msGraphClientSecret))
+{
+    msGraphProvider = new MicrosoftGraphTokenProvider(new MicrosoftGraphOptions
+    {
+        TenantId     = msGraphTenantId,
+        ClientId     = msGraphClientId,
+        ClientSecret = msGraphClientSecret,
+        RedirectUri  = MicrosoftCallbackUri,
+        Scopes       = ["Calendars.Read", "Mail.Read", "User.Read", "offline_access"],
+    });
+}
 
 var app = builder.Build();
 app.UseStaticFiles();
@@ -556,6 +598,261 @@ app.MapPost("/checkins/{id}/answer", async (
     return Results.Ok(new { outcome = "Ok", checkInId = result.Updated!.CheckInId });
 });
 
+// POST /slack/interactivity — receives Slack block_actions button clicks (interactive components).
+//
+// Security model (four steps, in order):
+//   1. Verify X-Slack-Signature using the signing secret and raw body — before any parsing.
+//      Uses HMACSHA256 + constant-time compare. Rejects if timestamp is older than 5 minutes.
+//      On any verification failure: 401, no further processing, ProcessAnswerAsync never called.
+//   2. Decode the block_actions payload; extract checkInId + answer from the button value JSON.
+//   3. Call ProcessAnswerAsync with "slack-user:{userId}" provenance (same path as email).
+//   4. Return 200 with a JSON body that replaces the original Slack message with the recorded
+//      answer — within the 3-second Slack response window; no separate outbound HTTP call needed.
+//
+// Anyone in the channel may answer (restriction is additive; see Part 5 of the spec).
+// Idempotency is handled by ProcessAnswerAsync (second click on a PROCESSED check-in is a no-op).
+app.MapPost("/slack/interactivity", async (
+    HttpContext          ctx,
+    ICheckInStore        checkInStore,
+    IIiFacade            f,
+    SaasProfile          profile,
+    SqliteEntityStore    storeInst,
+    SlackResponsePoster  responsePoster) =>
+{
+    // STEP 1 — signature verification (must happen first, using the raw body)
+    if (string.IsNullOrWhiteSpace(slackSigningSecret))
+    {
+        Console.WriteLine("[slack] KOZMO_SLACK_SIGNING_SECRET not configured — rejecting.");
+        return Results.StatusCode(401);
+    }
+
+    using var ms = new System.IO.MemoryStream();
+    await ctx.Request.Body.CopyToAsync(ms);
+    var rawBodyBytes = ms.ToArray();
+    var rawBody      = System.Text.Encoding.UTF8.GetString(rawBodyBytes);
+
+    var tsHeader  = ctx.Request.Headers["X-Slack-Request-Timestamp"].FirstOrDefault();
+    var sigHeader = ctx.Request.Headers["X-Slack-Signature"].FirstOrDefault();
+
+    if (!Wc.CheckIn.SlackSignatureVerifier.Verify(rawBody, tsHeader, sigHeader, slackSigningSecret))
+        return Results.StatusCode(401);
+
+    // STEP 2 — decode block_actions payload
+    var form = ParseUrlEncodedForm(rawBody);
+    if (!form.TryGetValue("payload", out var payloadJson) || string.IsNullOrWhiteSpace(payloadJson))
+        return Results.Ok();  // ack unknown payloads silently
+
+    Guid   checkInId;
+    string answer;
+    string userId;
+    string responseUrl;
+    try
+    {
+        using var doc  = System.Text.Json.JsonDocument.Parse(payloadJson);
+        var root = doc.RootElement;
+
+        if (!root.TryGetProperty("type", out var typeProp) || typeProp.GetString() != "block_actions")
+            return Results.Ok();
+
+        userId = root.TryGetProperty("user", out var userProp)
+              && userProp.TryGetProperty("id",  out var idProp)
+            ? idProp.GetString() ?? "unknown"
+            : "unknown";
+
+        responseUrl = root.TryGetProperty("response_url", out var ruProp)
+            ? ruProp.GetString() ?? ""
+            : "";
+
+        if (!root.TryGetProperty("actions", out var actions) || actions.GetArrayLength() == 0)
+            return Results.Ok();
+
+        var actionValue = actions[0].TryGetProperty("value", out var vp) ? vp.GetString() : null;
+        if (string.IsNullOrWhiteSpace(actionValue))
+            return Results.Ok();
+
+        using var av   = System.Text.Json.JsonDocument.Parse(actionValue);
+        var avRoot = av.RootElement;
+        if (!avRoot.TryGetProperty("checkInId", out var cidProp)
+         || !avRoot.TryGetProperty("answer",    out var ansProp)
+         || !Guid.TryParse(cidProp.GetString(), out checkInId))
+            return Results.Ok();
+
+        answer = ansProp.GetString() ?? "";
+        if (string.IsNullOrWhiteSpace(answer))
+            return Results.Ok();
+    }
+    catch
+    {
+        return Results.Ok(); // malformed payload — ack silently
+    }
+
+    // STEP 3 — fire processing in background, ack Slack immediately.
+    // ProcessAnswerAsync runs the full scoring pipeline which can exceed Slack's 3-second
+    // ack window. We return 200 right away and post the result back via response_url once done.
+    var capturedCheckInId  = checkInId;
+    var capturedAnswer     = answer;
+    var capturedUserId     = userId;
+    var capturedResponseUrl = responseUrl;
+    _ = Task.Run(async () =>
+    {
+        var answerSvc = new AnswerCheckInService();
+        var writeSvc  = new VendorFileWriteService(storeInst, profile);
+        AnswerResult result;
+        try
+        {
+            result = await answerSvc.ProcessAnswerAsync(
+                capturedCheckInId,
+                capturedAnswer.Equals("UNKNOWN", StringComparison.OrdinalIgnoreCase) ? null : capturedAnswer,
+                DateTimeOffset.UtcNow,
+                checkInStore, writeSvc, profile, f,
+                new IdentityRegistry(storeInst),
+                answeredBy: $"slack-user:{capturedUserId}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[slack] ProcessAnswerAsync exception for {capturedCheckInId}: {ex.Message}");
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(capturedResponseUrl)) return;
+
+        var displayAnswer = capturedAnswer switch
+        {
+            "true"    => "Yes",
+            "false"   => "No",
+            "UNKNOWN" => "Unsure",
+            _         => capturedAnswer
+        };
+
+        object followUp = result.Outcome == AnswerOutcome.AlreadyAnswered
+            ? new { replace_original = true, text = "This check-in is already answered." }
+            : (object)new
+            {
+                replace_original = true,
+                blocks = new[]
+                {
+                    new
+                    {
+                        type = "section",
+                        text = new { type = "mrkdwn", text = $"\u2713 Recorded: *{displayAnswer}* \u2014 by <@{capturedUserId}>" }
+                    }
+                }
+            };
+
+        await responsePoster.PostAsync(capturedResponseUrl, followUp);
+    });
+
+    // Immediate 200 ack — keeps Slack happy within the 3-second window
+    return Results.Ok();
+});
+
+// POST /slack/command — /kozmo slash command (read-only; never writes beliefs or resolves check-ins).
+//
+// Subcommands (fixed strings only — no NLP):
+//   /kozmo pending           → open check-ins for the calling user (owner-pref lookup)
+//   /kozmo vendor <name>     → posture card for the named vendor (substring match)
+//   /kozmo help | <anything> → usage message
+//
+// Security: same HMACSHA256 signing-secret verification as /slack/interactivity.
+// Response: application/json ephemeral message (only the caller sees it).
+app.MapPost("/slack/command", async (
+    HttpContext            ctx,
+    ICheckInStore          checkInStore,
+    IIiFacade              f,
+    EntityRegistry         reg,
+    SaasProfile            profile,
+    IOwnerChannelPrefStore prefStore) =>
+{
+    if (string.IsNullOrWhiteSpace(slackSigningSecret))
+        return Results.StatusCode(401);
+
+    using var ms = new System.IO.MemoryStream();
+    await ctx.Request.Body.CopyToAsync(ms);
+    var rawBody = System.Text.Encoding.UTF8.GetString(ms.ToArray());
+
+    var tsHeader  = ctx.Request.Headers["X-Slack-Request-Timestamp"].FirstOrDefault();
+    var sigHeader = ctx.Request.Headers["X-Slack-Signature"].FirstOrDefault();
+
+    if (!Wc.CheckIn.SlackSignatureVerifier.Verify(rawBody, tsHeader, sigHeader, slackSigningSecret))
+        return Results.StatusCode(401);
+
+    var form   = ParseUrlEncodedForm(rawBody);
+    var userId = form.TryGetValue("user_id", out var uid) ? uid : "unknown";
+    var text   = (form.TryGetValue("text",   out var tx)  ? tx  : "").Trim();
+
+    var spaceIdx = text.IndexOf(' ');
+    var sub = (spaceIdx < 0 ? text : text[..spaceIdx]).ToLowerInvariant();
+    var arg = spaceIdx < 0 ? "" : text[(spaceIdx + 1)..].Trim();
+
+    return sub switch
+    {
+        "pending" => await SlackCommandPendingAsync(userId, checkInStore, prefStore),
+        "vendor"  => await SlackCommandVendorAsync(arg, f, reg, profile),
+        _         => Results.Ok(SlackUsagePayload())
+    };
+});
+
+// POST /slack/events — Home tab event callbacks (read-only; never writes beliefs).
+//
+// Handles two event types:
+//   url_verification  — echo the challenge string back (no signature check; Slack sends
+//                       this when you first set the Request URL to validate it).
+//   app_home_opened   — publish a Home tab view listing the user's open check-ins via
+//                       views.publish (outbound HTTP handled by SlackHomeTabPublisher in Wc.CheckIn).
+//
+// All non-challenge payloads are signature-verified before processing.
+app.MapPost("/slack/events", async (
+    HttpContext                          ctx,
+    ICheckInStore                        checkInStore,
+    Wc.CheckIn.SlackHomeTabPublisher     homePublisher,
+    IOwnerChannelPrefStore               prefStore) =>
+{
+    using var ms = new System.IO.MemoryStream();
+    await ctx.Request.Body.CopyToAsync(ms);
+    var rawBody = System.Text.Encoding.UTF8.GetString(ms.ToArray());
+
+    // Handle url_verification BEFORE signature check — this is Slack's one-time URL validation
+    // handshake. Per Slack's spec it must succeed before the signing secret is usable.
+    try
+    {
+        using var doc = System.Text.Json.JsonDocument.Parse(rawBody);
+        if (doc.RootElement.TryGetProperty("type", out var tp) && tp.GetString() == "url_verification"
+         && doc.RootElement.TryGetProperty("challenge", out var cp))
+            return Results.Ok(new { challenge = cp.GetString() });
+    }
+    catch { /* not JSON — fall through */ }
+
+    // All other payloads must be signature-verified
+    if (string.IsNullOrWhiteSpace(slackSigningSecret))
+        return Results.StatusCode(401);
+
+    var tsHeader  = ctx.Request.Headers["X-Slack-Request-Timestamp"].FirstOrDefault();
+    var sigHeader = ctx.Request.Headers["X-Slack-Signature"].FirstOrDefault();
+
+    if (!Wc.CheckIn.SlackSignatureVerifier.Verify(rawBody, tsHeader, sigHeader, slackSigningSecret))
+        return Results.StatusCode(401);
+
+    // Dispatch event
+    try
+    {
+        using var doc = System.Text.Json.JsonDocument.Parse(rawBody);
+        var root = doc.RootElement;
+        if (!root.TryGetProperty("event", out var evtProp)) return Results.Ok();
+        if (!evtProp.TryGetProperty("type", out var evtTypeProp)) return Results.Ok();
+
+        if (evtTypeProp.GetString() == "app_home_opened"
+         && evtProp.TryGetProperty("user", out var evtUserProp))
+        {
+            var slackUserId  = evtUserProp.GetString() ?? "unknown";
+            var openCheckIns = await SlackResolveCheckInsForUserAsync(slackUserId, checkInStore, prefStore);
+            await homePublisher.PublishAsync(slackUserId, openCheckIns);
+        }
+    }
+    catch { /* malformed event — ack silently */ }
+
+    return Results.Ok();
+});
+
 // ── Google Drive OAuth2 endpoints ─────────────────────────────────────────
 
 // GET /auth/google — redirect browser to Google consent page
@@ -599,6 +896,57 @@ app.MapGet("/auth/google/callback", async (
 app.MapGet("/auth/google/status", async (SqliteEntityStore storeInst) =>
 {
     var t = await storeInst.GetOAuthTokenAsync("google");
+    if (t is null)
+        return Results.Ok(new { connected = false, email = (string?)null });
+
+    var expired = t.Value.ExpiresAt < DateTimeOffset.UtcNow;
+    return Results.Ok(new { connected = true, email = t.Value.UserEmail, tokenExpired = expired });
+});
+
+// ── Microsoft Graph OAuth2 endpoints ──────────────────────────────────────
+
+// GET /auth/microsoft — redirect browser to Microsoft Entra consent page
+app.MapGet("/auth/microsoft", async (CancellationToken ct) =>
+{
+    if (msGraphProvider is null)
+        return Results.Problem(
+            detail:     "MSGRAPH_TENANT_ID, MSGRAPH_CLIENT_ID, and MSGRAPH_CLIENT_SECRET are not configured.",
+            statusCode: 503);
+    var url = await msGraphProvider.BuildWebAuthorizationUrlAsync(ct);
+    return Results.Redirect(url);
+});
+
+// GET /auth/microsoft/callback — Entra redirects here after user approves
+app.MapGet("/auth/microsoft/callback", async (
+    string?           code,
+    string?           error,
+    SqliteEntityStore storeInst,
+    CancellationToken ct) =>
+{
+    if (!string.IsNullOrEmpty(error))
+        return Results.BadRequest(new { error });
+    if (string.IsNullOrEmpty(code))
+        return Results.BadRequest(new { error = "No authorization code returned by Microsoft." });
+    if (msGraphProvider is null)
+        return Results.Problem(detail: "Microsoft Graph is not configured.", statusCode: 503);
+
+    try
+    {
+        var token = await msGraphProvider.AcquireByCodeAsync(code, ct);
+        await storeInst.SaveOAuthTokenAsync(
+            "microsoft", token.AccessToken, "", token.ExpiresOn, token.UserUpn, ct);
+        return Results.Redirect("/connect");
+    }
+    catch (Exception ex)
+    {
+        return Results.Problem(detail: ex.Message, statusCode: 502);
+    }
+});
+
+// GET /auth/microsoft/status — check whether a Microsoft account is connected
+app.MapGet("/auth/microsoft/status", async (SqliteEntityStore storeInst, CancellationToken ct) =>
+{
+    var t = await storeInst.GetOAuthTokenAsync("microsoft", ct);
     if (t is null)
         return Results.Ok(new { connected = false, email = (string?)null });
 
@@ -760,7 +1108,7 @@ app.MapGet("/kyv/vendors", async (IIiFacade f, EntityRegistry reg, SaasProfile p
     if (!tracker.HasRun) return Results.Ok(Array.Empty<VendorSummaryDto>());
     var now     = DemoClock.AsOf;
     var vendors = new List<VendorSummaryDto>();
-    foreach (var id in tracker.DiscoveredIds)
+    foreach (var id in tracker.DiscoveredIds    )
     {
         var entity = reg.GetEntity(id);
         if (entity is null) continue;
@@ -774,6 +1122,25 @@ app.MapGet("/kyv/vendors", async (IIiFacade f, EntityRegistry reg, SaasProfile p
 app.Run();
 
 // ── Local helpers ─────────────────────────────────────────────────────────
+
+static string ResolveDbPath()
+{
+    var envPath = Environment.GetEnvironmentVariable("KOZMO_DB_PATH");
+    if (!string.IsNullOrWhiteSpace(envPath)) return envPath;
+
+    var dir = AppContext.BaseDirectory;
+    while (!string.IsNullOrEmpty(dir))
+    {
+        var candidate = Path.Combine(dir, "kozmo-demo.db");
+        if (File.Exists(candidate)) return candidate;
+        var parent = Path.GetDirectoryName(dir);
+        if (parent == dir) break;
+        dir = parent;
+    }
+
+    // Fall back to output directory (fresh DB will be created there)
+    return Path.Combine(AppContext.BaseDirectory, "kozmo-demo.db");
+}
 
 static string FindCatalogueDir()
 {
@@ -794,9 +1161,6 @@ static async Task LoadPersistedVendorsAsync(SqliteEntityStore store, EntityRegis
     foreach (var (id, name, renewalDate) in persisted)
         registry.Register(id, name, renewalDate);
 
-    // KYV-discovered vendors are excluded from LoadVendorsAsync by design (run isolation), but
-    // still need to survive a process restart — otherwise a vendor ingested by a prior process
-    // instance vanishes from /vendors even though its beliefs/checkins remain in SQLite.
     var kyvVendors = await store.LoadAllKyvVendorsAsync();
     foreach (var (id, name, renewalDate) in kyvVendors)
         registry.Register(id, name, renewalDate);
@@ -812,6 +1176,10 @@ static EntityRegistry BuildRegistry()
     reg.Register(SeedData.MeridianId, "Meridian IT Services Ltd.",
         new DateTimeOffset(2027, 1, 15, 0, 0, 0, TimeSpan.Zero));
     reg.Register(SeedData.HelixId, "Helix Systems Ltd.");
+    reg.Register(Guid.Parse("eeeeeeee-0005-0000-0000-000000000001"), "Northwind Systems");
+    reg.Register(Guid.Parse("eeeeeeee-0006-0000-0000-000000000001"), "Ridgeline Software");
+    reg.Register(Guid.Parse("dd000001-0000-0000-0000-000000000001"), "Northstar Software",
+        new DateTimeOffset(2026, 9, 28, 0, 0, 0, TimeSpan.Zero));
     return reg;
 }
 
@@ -895,8 +1263,123 @@ static CheckInTokenOptions BuildCheckInTokenOptions(IConfiguration config)
 // Logs a warning if Brevo is active but KOZMO_CHECKIN_TOKEN_SECRET is still the dev placeholder.
 // The page model resolves CheckInTokenOptions from DI (where the fixture can override it),
 // so the guard is advisory rather than a hard throw.
+// ── Slack Phase 3 read-only helpers ──────────────────────────────────────
+// None of these call ProcessAnswerAsync or any belief-write path.
+
+static async Task<IResult> SlackCommandPendingAsync(
+    string                 userId,
+    ICheckInStore          checkInStore,
+    IOwnerChannelPrefStore prefStore)
+{
+    var checkIns = await SlackResolveCheckInsForUserAsync(userId, checkInStore, prefStore);
+
+    if (checkIns.Count == 0)
+        return Results.Ok(new { response_type = "ephemeral",
+            text = "No open check-ins \u2014 all clear." });
+
+    var blocks = new List<object>
+    {
+        new { type = "header", text = new { type = "plain_text",
+            text = $"Open Check-ins ({checkIns.Count})", emoji = false } },
+        new { type = "divider" }
+    };
+    foreach (var ci in checkIns)
+    {
+        blocks.Add(new { type = "section",
+            text = new { type = "mrkdwn",
+                text = $"*{ci.Question}*\n_Raised:_ {ci.RaisedAt:MMM d, yyyy}" } });
+    }
+    return Results.Ok(new { response_type = "ephemeral", blocks });
+}
+
+static async Task<IResult> SlackCommandVendorAsync(
+    string         vendorName,
+    IIiFacade      f,
+    EntityRegistry reg,
+    SaasProfile    profile)
+{
+    if (string.IsNullOrWhiteSpace(vendorName))
+        return Results.Ok(SlackUsagePayload());
+
+    var matches = reg.GetAllIds()
+        .Select(id => (id, entity: reg.GetEntity(id)))
+        .Where(m => m.entity is not null &&
+                    m.entity.CanonicalName.Contains(vendorName, StringComparison.OrdinalIgnoreCase))
+        .ToList();
+
+    if (matches.Count == 0)
+        return Results.Ok(new { response_type = "ephemeral",
+            text = $"No vendor found matching \"{vendorName}\"." });
+
+    if (matches.Count > 1)
+    {
+        var names = string.Join(", ", matches.Select(m => $"*{m.entity!.CanonicalName}*"));
+        return Results.Ok(new { response_type = "ephemeral",
+            text = $"Multiple vendors match \"{vendorName}\": {names}. Please be more specific." });
+    }
+
+    var (vendorId, vendorEntity) = matches[0];
+    var idx     = await f.GetIndexAsync(vendorId);
+    var posture = await f.GetPostureAsync(vendorId);
+
+    var fields = new object[]
+    {
+        new { type = "mrkdwn", text = $"*Band:* {idx?.Band.ToString() ?? "Unknown"}" },
+        new { type = "mrkdwn", text = $"*Stance:* {posture?.Stance.ToString() ?? "Unknown"}" },
+        new { type = "mrkdwn",
+              text = $"*Confidence:* {(posture is not null ? posture.Confidence.ToString("P0") : "\u2014")}" },
+        new { type = "mrkdwn",
+              text = $"*Composite:* {(idx is not null ? idx.Composite.ToString("P0") : "\u2014")}" }
+    };
+    var blocks = new object[]
+    {
+        new { type = "header", text = new { type = "plain_text",
+            text = vendorEntity!.CanonicalName, emoji = false } },
+        new { type = "section", fields }
+    };
+    return Results.Ok(new { response_type = "ephemeral", blocks });
+}
+
+static object SlackUsagePayload() => new
+{
+    response_type = "ephemeral",
+    text = "*Kozmo \u2014 Usage*\n`/kozmo pending` \u2014 list your open check-ins\n" +
+           "`/kozmo vendor <name>` \u2014 vendor posture card\n`/kozmo help` \u2014 this message"
+};
+
+static async Task<IReadOnlyList<Wc.Contracts.CheckIn>> SlackResolveCheckInsForUserAsync(
+    string                 slackUserId,
+    ICheckInStore          checkInStore,
+    IOwnerChannelPrefStore prefStore)
+{
+    var allOpen  = await checkInStore.GetOpenAsync();
+    var allPrefs = await prefStore.GetAllOwnerChannelPrefsAsync();
+    // DM-pref lookup: find the owner email mapped to this Slack user ID
+    var pref = allPrefs.FirstOrDefault(p =>
+        p.Channel == "Slack" && p.SlackDestination == slackUserId);
+    return pref is not null
+        ? allOpen.Where(ci => ci.Owner == pref.OwnerId).ToList()
+        : allOpen.ToList();
+}
+
+static Dictionary<string, string> ParseUrlEncodedForm(string body)
+{
+    var result = new Dictionary<string, string>(StringComparer.Ordinal);
+    if (string.IsNullOrEmpty(body)) return result;
+    foreach (var pair in body.Split('&'))
+    {
+        var idx = pair.IndexOf('=');
+        if (idx <= 0) continue;
+        var key = Uri.UnescapeDataString(pair[..idx].Replace('+', ' '));
+        var val = Uri.UnescapeDataString(pair[(idx + 1)..].Replace('+', ' '));
+        result[key] = val;
+    }
+    return result;
+}
+
 static ICheckInTransport BuildCheckInTransport(
-    IConfiguration config, SqliteEntityStore store, CheckInTokenOptions tokenOptions)
+    IConfiguration config, SqliteEntityStore store, CheckInTokenOptions tokenOptions,
+    IKozmoLlm? phrasingLlm = null)
 {
     var smtpHost  = Environment.GetEnvironmentVariable("BREVO_SMTP_HOST")  ?? "smtp-relay.brevo.com";
     var smtpPort  = int.TryParse(Environment.GetEnvironmentVariable("BREVO_SMTP_PORT"), out var p) ? p : 587;
@@ -933,7 +1416,8 @@ static ICheckInTransport BuildCheckInTransport(
                        $"recipient=<logged-in Google account>, host={smtpHost}:{smtpPort}.");
     return new BrevoCheckInTransport(
         smtpHost, smtpPort, smtpLogin, smtpKey, senderEmail, senderName,
-        recipientResolver, recipientName, tokenOptions);
+        recipientResolver, recipientName, tokenOptions,
+        llm: phrasingLlm, entityStore: store);
 }
 
 static string? FindLlmCachePath()

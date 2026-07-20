@@ -1,0 +1,161 @@
+@page "/vendor-calls/{runId}/update"
+@using Kozmo.Api.Pages
+@model VendorCallUpdateModel
+@{
+    Layout = null;
+    var isInvalid  = Model.State == VendorCallUpdateModel.UpdateState.Invalid;
+    var isSaved    = Model.State == VendorCallUpdateModel.UpdateState.Saved;
+    var isForm     = Model.State == VendorCallUpdateModel.UpdateState.Form;
+    var vendorName = Model.Run?.VendorName ?? "Northstar Software";
+    var vendorInitial = vendorName.Length > 0 ? vendorName[0].ToString().ToUpper() : "N";
+    var meetingSubject = Model.Run?.MeetingSubject ?? "Quarterly Vendor Review";
+    var meetingDate    = Model.Run?.StartUtc.ToString("MMM d · HH:mm") + " UTC" ?? "Jul 16 · 09:00 UTC";
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Kozmo — Post an update</title>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --canvas: #EEF1F6; --surface: #FFFFFF;
+            --line-1: #E8E8EC; --line-2: #D8D8DC;
+            --ink-0: #1A1A1A; --ink-2: #444; --ink-3: #666; --ink-4: #999;
+            --affirm: #14A085; --affirm-dk: #0E7A65; --affirm-soft: #E8F5F1; --affirm-ink: #0C6B57;
+            --urgent: #E8384F; --urgent-soft: #FCE6E9;
+            --gold: #A9762F;
+            --font: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            --shadow: 0 2px 16px rgba(0,0,0,.08), 0 1px 3px rgba(0,0,0,.04);
+        }
+        html, body { background: var(--canvas); font-family: var(--font); font-size: 14px; line-height: 1.5; color: var(--ink-0); -webkit-font-smoothing: antialiased; }
+        body { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px 16px; }
+        .wrap { width: 100%; max-width: 540px; }
+
+        /* card */
+        .card { background: var(--surface); border-radius: 16px; box-shadow: var(--shadow); padding: 32px 28px; }
+
+        /* invalid / error */
+        .icon-circle { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; margin-bottom: 16px; }
+        .icon-err { background: var(--urgent-soft); color: var(--urgent); }
+        .icon-ok  { background: var(--affirm-soft); color: var(--affirm); }
+
+        /* header */
+        .section-label { font-size: 11px; font-weight: 700; letter-spacing: .7px; text-transform: uppercase; color: var(--affirm); margin-bottom: 6px; }
+        .page-heading   { font-size: 22px; font-weight: 700; color: var(--ink-0); margin-bottom: 8px; line-height: 1.2; }
+        .page-sub       { font-size: 14px; color: var(--ink-3); line-height: 1.6; margin-bottom: 20px; }
+
+        /* vendor chip */
+        .vendor-chip { display: flex; align-items: center; gap: 10px; border: 1px solid var(--line-1); border-radius: 10px; padding: 10px 14px; margin-bottom: 20px; background: #FAFAFA; }
+        .vendor-avatar { width: 30px; height: 30px; border-radius: 50%; background: var(--affirm-soft); color: var(--affirm-dk); font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .vendor-chip-text { font-size: 13px; color: var(--ink-0); font-weight: 500; }
+        .vendor-chip-text span { color: var(--ink-3); font-weight: 400; }
+
+        /* form */
+        .field-label { font-size: 13px; font-weight: 600; color: var(--ink-2); margin-bottom: 6px; }
+        .note-area { width: 100%; font-family: var(--font); font-size: 14px; color: var(--ink-0); border: 1px solid var(--line-2); border-radius: 10px; padding: 12px 14px; resize: vertical; min-height: 130px; background: var(--surface); line-height: 1.6; transition: border-color 150ms ease; }
+        .note-area:focus { outline: none; border-color: var(--affirm); box-shadow: 0 0 0 3px rgba(20,160,133,.12); }
+        .note-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 5px; }
+        .note-hint  { font-size: 12px; color: var(--ink-4); }
+        .char-count { font-size: 12px; color: var(--ink-4); }
+
+        /* info box */
+        .info-box { display: flex; align-items: flex-start; gap: 10px; background: var(--affirm-soft); border: 1px solid #B6DDD4; border-radius: 10px; padding: 12px 14px; margin-top: 14px; margin-bottom: 20px; }
+        .info-icon { font-size: 14px; color: var(--affirm); margin-top: 1px; flex-shrink: 0; font-weight: 700; font-style: italic; font-family: Georgia, serif; }
+        .info-text { font-size: 13px; color: var(--affirm-ink); line-height: 1.55; }
+
+        /* buttons */
+        .btn-row { display: flex; gap: 10px; }
+        .btn-cancel { flex: 1; background: #F0F0F2; color: var(--ink-0); border: 1px solid var(--line-1); border-radius: 10px; padding: 12px 16px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: var(--font); transition: background 120ms; }
+        .btn-cancel:hover { background: #E4E4E8; }
+        .btn-save { flex: 1; background: var(--affirm); color: #fff; border: none; border-radius: 10px; padding: 12px 16px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: var(--font); transition: background 120ms; }
+        .btn-save:hover { background: var(--affirm-dk); }
+        .btn-save:disabled { opacity: 0.45; cursor: default; }
+        .btn-full { width: 100%; background: #F0F0F2; color: var(--ink-0); border: 1px solid var(--line-1); border-radius: 10px; padding: 12px 16px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: var(--font); }
+
+        .footer-note { text-align: center; font-size: 12px; color: var(--ink-4); margin-top: 14px; line-height: 1.5; }
+
+        /* saved note */
+        .saved-box { background: var(--affirm-soft); border: 1px solid #B6DDD4; border-radius: 10px; padding: 12px 14px; font-size: 13px; color: var(--affirm-ink); margin-top: 12px; line-height: 1.55; }
+    </style>
+</head>
+<body>
+<div class="wrap">
+
+@if (isInvalid)
+{
+    <div class="card">
+        <div class="icon-circle icon-err">&#10005;</div>
+        <p class="page-heading">Link invalid or expired</p>
+        <p class="page-sub">This update link is not valid or has expired. Update links are active for 48 hours after the review email is sent.</p>
+        <button class="btn-full" onclick="history.length > 1 ? history.back() : window.close()">&larr; Back to email</button>
+    </div>
+}
+else if (isSaved)
+{
+    <div class="card">
+        <div class="icon-circle icon-ok">&#10003;</div>
+        <p class="page-heading">Update saved</p>
+        <p class="page-sub">Your note has been added and will appear in the next review for <strong>@vendorName</strong>.</p>
+        <div class="saved-box">@Model.SavedNoteText</div>
+        <p class="footer-note" style="margin-top:16px">You can post another update using the link in the original email.</p>
+    </div>
+}
+else
+{
+    <div class="card">
+        <p class="section-label">Post an Update</p>
+        <h1 class="page-heading">Add context before the meeting</h1>
+        <p class="page-sub">Anything you know that isn&rsquo;t in the brief? Add it here &mdash; it&rsquo;ll be reflected the next time this review runs, before your <strong>@vendorName</strong> meeting.</p>
+
+        <div class="vendor-chip">
+            <div class="vendor-avatar">@vendorInitial</div>
+            <span class="vendor-chip-text"><strong>@vendorName</strong> <span>&mdash; @meetingSubject, @meetingDate</span></span>
+        </div>
+
+        <form method="post">
+            <input type="hidden" name="RunId" value="@Model.RunId" />
+            <input type="hidden" name="Token" value="@Model.Token" />
+
+            <p class="field-label">Your note</p>
+            <textarea class="note-area" name="NoteText" id="noteText"
+                      placeholder="e.g. They verbally agreed to cap the uplift at 5% — confirm in writing next week."
+                      maxlength="1000">@Model.NoteText</textarea>
+            <div class="note-footer">
+                <span class="note-hint">This note is saved with your name and today&rsquo;s date.</span>
+                <span class="char-count" id="charCount">0 / 1000</span>
+            </div>
+
+            <div class="info-box">
+                <span class="info-icon">i</span>
+                <span class="info-text">This will be added as context for <strong>@vendorName</strong>&rsquo;s next review &mdash; it does not resend the current brief.</span>
+            </div>
+
+            <div class="btn-row">
+                <button type="button" class="btn-cancel" onclick="history.length > 1 ? history.back() : window.close()">Cancel</button>
+                <button type="submit" class="btn-save" id="btn-submit">Save update</button>
+            </div>
+        </form>
+    </div>
+    <p class="footer-note">You can post more than one update before the meeting &mdash; this link doesn&rsquo;t expire after use.</p>
+}
+
+</div>
+<script>
+(function () {
+    var btn   = document.getElementById('btn-submit');
+    var ta    = document.getElementById('noteText');
+    var cnt   = document.getElementById('charCount');
+    if (!ta) return;
+    function update() {
+        var len = ta.value.length;
+        if (cnt) cnt.textContent = len + ' / 1000';
+        if (btn) btn.disabled = ta.value.trim().length === 0;
+    }
+    ta.addEventListener('input', update);
+    update();
+}());
+</script>
+</body>
+</html>

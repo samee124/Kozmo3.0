@@ -9,6 +9,7 @@ using Ii.Posture;
 using Ii.Decay;
 using Ii.Spine;
 using Km.Store;
+using Po.VendorCall;
 using NetArchTest.Rules;
 using Xunit;
 
@@ -30,6 +31,7 @@ public sealed class InvariantTests
     private static readonly Assembly SpineAsm        = typeof(IiFacade).Assembly;
     private static readonly Assembly KmStoreAsm      = typeof(SqliteEntityStore).Assembly;
     private static readonly Assembly CompletenessAsm = typeof(CompletenessRubric).Assembly;
+    private static readonly Assembly PoVendorCallAsm = typeof(VendorCallRecognizer).Assembly;
 
     private static readonly string CataloguePath = ArchTestHelpers.FindCatalogueDirectory();
 
@@ -178,6 +180,19 @@ public sealed class InvariantTests
                 $"{runtimeNames[i]} has a forbidden live dependency: " +
                 string.Join(", ", result.FailingTypeNames ?? new List<string>()));
         }
+    }
+
+    // ── Po.VendorCall isolation ───────────────────────────────────────────────
+
+    [Fact, Trait("Category", "Invariant")]
+    public void PoVendorCall_does_not_reference_Microsoft_Graph_or_If_MicrosoftGraph()
+    {
+        var result = Types.InAssembly(PoVendorCallAsm)
+            .ShouldNot().HaveDependencyOnAny("Microsoft.Graph", "If.MicrosoftGraph")
+            .GetResult();
+        Assert.True(result.IsSuccessful,
+            "Po.VendorCall must be integration-agnostic — no Microsoft.Graph or If.MicrosoftGraph reference allowed: " +
+            string.Join(", ", result.FailingTypeNames ?? new List<string>()));
     }
 
     // ── The metadata wall (E1 Part 7 Step 4) ──────────────────────────────────

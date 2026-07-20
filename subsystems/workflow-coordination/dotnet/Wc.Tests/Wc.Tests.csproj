@@ -26,5 +26,6 @@
     <ProjectReference Include="..\..\..\interpretation-inference\dotnet\Ii.Contracts\Ii.Contracts.csproj" />
     <ProjectReference Include="..\..\..\..\libs\Kozmo.Contracts\Kozmo.Contracts.csproj" />
     <ProjectReference Include="..\..\..\knowledge-memory\dotnet\Km.Store\Km.Store.csproj" />
+    <ProjectReference Include="..\..\..\..\libs\Kozmo.Llm\Kozmo.Llm.csproj" />
   </ItemGroup>
 </Project>

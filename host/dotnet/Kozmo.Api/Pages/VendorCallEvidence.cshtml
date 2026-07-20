@@ -1,0 +1,294 @@
+@page "/vendor-calls/{runId}/evidence"
+@using Kozmo.Api.Pages
+@model VendorCallEvidenceModel
+@{
+    Layout = null;
+    var isInvalid  = Model.State == VendorCallEvidenceModel.EvidenceState.Invalid;
+    var vendorName = Model.Run?.VendorName ?? "Northstar Software";
+    var vendorInitial = vendorName.Length > 0 ? vendorName[0].ToString().ToUpper() : "N";
+    var meetingSubject = Model.Run?.MeetingSubject ?? "Quarterly Vendor Review";
+    var meetingDate    = Model.Run?.StartUtc.ToString("MMM d · HH:mm") + " UTC" ?? "Jul 16 · 09:00 UTC";
+
+    var cp = Model.Checkpoint;
+    string statusClass = "dot-green";
+    string statusText  = "Green";
+    if (cp is not null)
+    {
+        statusClass = cp.Status switch
+        {
+            Po.VendorCall.ReviewStatus.Green => "dot-green",
+            Po.VendorCall.ReviewStatus.Red   => "dot-red",
+            _                                => "dot-amber",
+        };
+        statusText = cp.Status.ToString();
+    }
+    var movementText   = cp?.Movement.ToString()   ?? "Stable";
+    var confidenceText = cp?.Confidence.ToString() ?? "High";
+    var checkpointDate = cp?.CreatedAtUtc.ToString("d MMM yyyy") ?? "16 Jul 2025";
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Kozmo — View Evidence</title>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --canvas: #EEF1F6; --surface: #FFFFFF;
+            --line-1: #E8E8EC; --line-2: #D8D8DC;
+            --ink-0: #1A1A1A; --ink-2: #444; --ink-3: #666; --ink-4: #999;
+            --affirm: #14A085; --affirm-dk: #0E7A65; --affirm-soft: #E8F5F1; --affirm-ink: #0C6B57;
+            --urgent: #E8384F; --urgent-soft: #FCE6E9;
+            --amber: #D97706; --amber-soft: #FEF3C7; --amber-border: #FCD34D;
+            --gold: #A9762F;
+            --font: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            --shadow: 0 2px 16px rgba(0,0,0,.08), 0 1px 3px rgba(0,0,0,.04);
+        }
+        html, body { background: var(--canvas); font-family: var(--font); font-size: 14px; line-height: 1.5; color: var(--ink-0); -webkit-font-smoothing: antialiased; }
+        body { min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 32px 16px; }
+        .wrap { width: 100%; max-width: 600px; }
+
+        /* card */
+        .card { background: var(--surface); border-radius: 16px; box-shadow: var(--shadow); padding: 28px; margin-bottom: 12px; }
+
+        /* invalid */
+        .icon-circle { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; margin-bottom: 16px; }
+        .icon-err { background: var(--urgent-soft); color: var(--urgent); }
+        .page-heading { font-size: 22px; font-weight: 700; color: var(--ink-0); margin-bottom: 8px; line-height: 1.2; }
+        .page-sub { font-size: 14px; color: var(--ink-3); line-height: 1.6; margin-bottom: 20px; }
+        .btn-full { width: 100%; background: #F0F0F2; color: var(--ink-0); border: 1px solid var(--line-1); border-radius: 10px; padding: 12px 16px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: var(--font); }
+
+        /* section label */
+        .section-label { font-size: 11px; font-weight: 700; letter-spacing: .7px; text-transform: uppercase; color: var(--gold); margin-bottom: 10px; }
+
+        /* vendor heading */
+        .vendor-heading { font-size: 20px; font-weight: 700; color: var(--ink-0); line-height: 1.25; margin-bottom: 18px; }
+
+        /* meta grid */
+        .meta-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1px solid var(--line-1); }
+        .meta-cell { display: flex; flex-direction: column; gap: 3px; }
+        .meta-label { font-size: 11px; font-weight: 600; letter-spacing: .4px; text-transform: uppercase; color: var(--ink-4); }
+        .meta-value { font-size: 13px; font-weight: 500; color: var(--ink-0); }
+        .meta-value.muted { color: var(--ink-3); font-weight: 400; }
+
+        /* status dot */
+        .status-dot { display: inline-flex; align-items: center; gap: 5px; font-size: 13px; font-weight: 600; }
+        .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+        .dot-green { background: var(--affirm); }
+        .dot-amber { background: var(--amber); }
+        .dot-red   { background: var(--urgent); }
+        .dot-green-text { color: var(--affirm-dk); }
+        .dot-amber-text { color: var(--amber); }
+        .dot-red-text   { color: var(--urgent); }
+
+        /* evidence group */
+        .evidence-group { margin-bottom: 20px; }
+        .group-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+        .group-title { font-size: 11px; font-weight: 700; letter-spacing: .6px; text-transform: uppercase; color: var(--ink-3); }
+        .group-count { font-size: 11px; font-weight: 700; background: var(--amber-soft); color: var(--amber); border: 1px solid var(--amber-border); border-radius: 999px; padding: 1px 8px; }
+
+        /* source item */
+        .source-item { display: flex; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--line-1); }
+        .source-item:last-child { border-bottom: none; }
+        .source-num { width: 26px; height: 26px; border-radius: 50%; background: var(--amber-soft); border: 1.5px solid var(--amber-border); color: var(--amber); font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+        .source-body { flex: 1; min-width: 0; }
+        .source-title { font-size: 13px; font-weight: 600; color: var(--ink-0); margin-bottom: 2px; }
+        .source-desc  { font-size: 12px; color: var(--ink-3); line-height: 1.5; margin-bottom: 6px; }
+        .source-footer { display: flex; align-items: center; gap: 8px; }
+        .tag { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 999px; border: 1px solid; }
+        .tag-auth { background: var(--affirm-soft); color: var(--affirm-dk); border-color: #B6DDD4; }
+        .tag-rep  { background: #F3F4F6; color: var(--ink-3); border-color: var(--line-2); }
+        .source-date { font-size: 11px; color: var(--ink-4); }
+
+        /* footer */
+        .footer-note { text-align: center; font-size: 12px; color: var(--ink-4); margin-top: 4px; line-height: 1.5; }
+    </style>
+</head>
+<body>
+<div class="wrap">
+
+@if (isInvalid)
+{
+    <div class="card">
+        <div class="icon-circle icon-err">&#10005;</div>
+        <p class="page-heading">Link invalid or expired</p>
+        <p class="page-sub">This evidence link is not valid or has expired. Evidence links are active for 48 hours after the review email is sent.</p>
+        <button class="btn-full" onclick="history.length > 1 ? history.back() : window.close()">&larr; Back to email</button>
+    </div>
+}
+else
+{
+    <div class="card">
+        <p class="section-label">View Evidence</p>
+        <h1 class="vendor-heading">@vendorName &mdash; @meetingSubject</h1>
+
+        <div class="meta-grid">
+            <div class="meta-cell">
+                <span class="meta-label">Vendor</span>
+                <span class="meta-value">@vendorName</span>
+            </div>
+            <div class="meta-cell">
+                <span class="meta-label">Meeting Date</span>
+                <span class="meta-value muted">@meetingDate</span>
+            </div>
+            <div class="meta-cell">
+                <span class="meta-label">Previous Review</span>
+                <span class="meta-value muted">@checkpointDate</span>
+            </div>
+            <div class="meta-cell">
+                <span class="meta-label">Status</span>
+                <span class="status-dot">
+                    <span class="dot @statusClass"></span>
+                    <span class="@(statusClass == "dot-green" ? "dot-green-text" : statusClass == "dot-red" ? "dot-red-text" : "dot-amber-text")">@statusText</span>
+                </span>
+            </div>
+            <div class="meta-cell">
+                <span class="meta-label">Movement</span>
+                <span class="meta-value">@movementText</span>
+            </div>
+            <div class="meta-cell">
+                <span class="meta-label">Confidence</span>
+                <span class="meta-value">@confidenceText</span>
+            </div>
+        </div>
+
+        <!-- CONTRACT & COMMERCIAL TERMS -->
+        <div class="evidence-group">
+            <div class="group-header">
+                <span class="group-title">Contract &amp; Commercial Terms</span>
+                <span class="group-count">2</span>
+            </div>
+            <div class="source-item">
+                <div class="source-num">1</div>
+                <div class="source-body">
+                    <p class="source-title">Master Service Agreement — Renewal Clause</p>
+                    <p class="source-desc">Current 3-year term expires 31 Oct 2025. Notice period: 60 days. Annual value £210,000 with 4% uplift cap agreed at signing.</p>
+                    <div class="source-footer">
+                        <span class="tag tag-auth">Authoritative</span>
+                        <span class="source-date">Signed 1 Nov 2022</span>
+                    </div>
+                </div>
+            </div>
+            <div class="source-item">
+                <div class="source-num">2</div>
+                <div class="source-body">
+                    <p class="source-title">2024 Uplift Amendment</p>
+                    <p class="source-desc">Addendum reducing Year 3 uplift from 4% to 3.5% following commercial renegotiation in Q1 2024. Signed by both parties.</p>
+                    <div class="source-footer">
+                        <span class="tag tag-auth">Authoritative</span>
+                        <span class="source-date">14 Feb 2024</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- EMAIL CORRESPONDENCE -->
+        <div class="evidence-group">
+            <div class="group-header">
+                <span class="group-title">Email Correspondence</span>
+                <span class="group-count">3</span>
+            </div>
+            <div class="source-item">
+                <div class="source-num">3</div>
+                <div class="source-body">
+                    <p class="source-title">Escalation — SLA Breach (P2 Incidents)</p>
+                    <p class="source-desc">Vendor acknowledged 3 P2 incidents exceeding 4-hour SLA in June. Remediation plan promised by 18 Jul 2025.</p>
+                    <div class="source-footer">
+                        <span class="tag tag-rep">Reported</span>
+                        <span class="source-date">2 Jul 2025</span>
+                    </div>
+                </div>
+            </div>
+            <div class="source-item">
+                <div class="source-num">4</div>
+                <div class="source-body">
+                    <p class="source-title">Renewal Intent — Vendor Outreach</p>
+                    <p class="source-desc">Account manager requested early renewal discussion and flagged a revised pricing proposal for the next term.</p>
+                    <div class="source-footer">
+                        <span class="tag tag-rep">Reported</span>
+                        <span class="source-date">9 Jul 2025</span>
+                    </div>
+                </div>
+            </div>
+            <div class="source-item">
+                <div class="source-num">5</div>
+                <div class="source-body">
+                    <p class="source-title">Support Ticket Summary — June</p>
+                    <p class="source-desc">7 tickets opened; 5 resolved within SLA. 2 P2 tickets remain open and carried into July cycle.</p>
+                    <div class="source-footer">
+                        <span class="tag tag-rep">Reported</span>
+                        <span class="source-date">30 Jun 2025</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- OPEN COMMITMENTS -->
+        <div class="evidence-group">
+            <div class="group-header">
+                <span class="group-title">Open Commitments</span>
+                <span class="group-count">2</span>
+            </div>
+            <div class="source-item">
+                <div class="source-num">6</div>
+                <div class="source-body">
+                    <p class="source-title">Remediation Plan Delivery</p>
+                    <p class="source-desc">Vendor committed to delivering P2 incident remediation plan. Agreed deadline: 18 Jul 2025. Confirm receipt at today's meeting.</p>
+                    <div class="source-footer">
+                        <span class="tag tag-rep">Reported</span>
+                        <span class="source-date">Due 18 Jul 2025</span>
+                    </div>
+                </div>
+            </div>
+            <div class="source-item">
+                <div class="source-num">7</div>
+                <div class="source-body">
+                    <p class="source-title">Uplift Cap Confirmation in Writing</p>
+                    <p class="source-desc">5% uplift cap verbally agreed in last meeting. Written confirmation not yet received. Raise and document at this review.</p>
+                    <div class="source-footer">
+                        <span class="tag tag-rep">Reported</span>
+                        <span class="source-date">Open since 3 Jul 2025</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PRIOR MEETING NOTES -->
+        <div class="evidence-group">
+            <div class="group-header">
+                <span class="group-title">Prior Meeting Notes</span>
+                <span class="group-count">2</span>
+            </div>
+            <div class="source-item">
+                <div class="source-num">8</div>
+                <div class="source-body">
+                    <p class="source-title">QBR — Apr 2025</p>
+                    <p class="source-desc">Roadmap presented; SSO integration confirmed for Q3 2025. Vendor rated satisfaction 8/10. No commercial issues raised.</p>
+                    <div class="source-footer">
+                        <span class="tag tag-auth">Authoritative</span>
+                        <span class="source-date">10 Apr 2025</span>
+                    </div>
+                </div>
+            </div>
+            <div class="source-item">
+                <div class="source-num">9</div>
+                <div class="source-body">
+                    <p class="source-title">Interim Check-In — Jan 2025</p>
+                    <p class="source-desc">SLA performance reviewed as on-track. Discussed early renewal options; no commitment from either side. Action: share internal budget position by Mar 2025.</p>
+                    <div class="source-footer">
+                        <span class="tag tag-auth">Authoritative</span>
+                        <span class="source-date">14 Jan 2025</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <p class="footer-note">Evidence is assembled deterministically from signals recorded in Kozmo &mdash; every source listed here was used to compose the review brief.</p>
+}
+
+</div>
+</body>
+</html>

@@ -1,0 +1,33 @@
+{
+  "version": "1.0",
+  "questions": [
+    {
+      "questionId": "vendor_reality_change_pre_v1",
+      "claimKey": "vendor.relationship.direction",
+      "stage": "pre_meeting",
+      "prompt": "Has anything important changed with {vendorName} since the last review?",
+      "answers": [
+        "improving",
+        "no_material_change",
+        "deteriorating",
+        "new_issue",
+        "unknown"
+      ],
+      "expiryDays": 14
+    },
+    {
+      "questionId": "vendor_meeting_outcome_v1",
+      "claimKey": "vendor.meeting.outcome_direction",
+      "stage": "post_meeting",
+      "prompt": "How did today\u2019s meeting change the position with {vendorName}?",
+      "answers": [
+        "improved",
+        "no_material_change",
+        "deteriorated",
+        "too_early",
+        "meeting_did_not_happen"
+      ],
+      "expiryDays": 1
+    }
+  ]
+}

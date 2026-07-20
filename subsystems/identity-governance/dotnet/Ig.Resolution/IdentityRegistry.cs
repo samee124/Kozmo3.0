@@ -32,7 +32,10 @@ public sealed class IdentityRegistry : IIdentityRegistry
             AcquisitionMapRef:    vendor.AcquisitionMapRef,
             AbsorbedIntoVendorId: vendor.AbsorbedIntoVendorId,
             ProgramRunId:         programRunId,
-            EntityRole:           vendor.EntityRole);
+            EntityRole:           vendor.EntityRole,
+            DomainsJson:          vendor.KnownDomains.Count > 0
+                                      ? JsonSerializer.Serialize(vendor.KnownDomains, _json)
+                                      : null);
 
         await _store.SaveRegistryVendorAsync(row, ct);
 
@@ -95,6 +98,10 @@ public sealed class IdentityRegistry : IIdentityRegistry
         var status = Enum.TryParse<RegistryStatus>(row.Status, out var rs)
             ? rs : RegistryStatus.Triage;
 
+        var domains = row.DomainsJson is not null
+            ? JsonSerializer.Deserialize<List<string>>(row.DomainsJson, _json) ?? []
+            : (List<string>)[];
+
         return new CanonicalVendor(
             VendorId:             row.VendorId,
             CanonicalName:        row.CanonicalName,
@@ -108,6 +115,9 @@ public sealed class IdentityRegistry : IIdentityRegistry
             AcquisitionMapRef:    row.AcquisitionMapRef,
             CreatedAt:            row.CreatedAt,
             AbsorbedIntoVendorId: row.AbsorbedIntoVendorId,
-            EntityRole:           row.EntityRole);
+            EntityRole:           row.EntityRole)
+        {
+            KnownDomains = domains,
+        };
     }
 }

@@ -12,6 +12,7 @@
     <ProjectReference Include="..\..\..\identity-governance\dotnet\Ig.Contracts\Ig.Contracts.csproj" />
     <ProjectReference Include="..\..\..\interpretation-inference\dotnet\Ii.Contracts\Ii.Contracts.csproj" />
     <ProjectReference Include="..\..\..\..\libs\Kozmo.Contracts\Kozmo.Contracts.csproj" />
+    <ProjectReference Include="..\..\..\..\libs\Kozmo.Llm\Kozmo.Llm.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="MailKit" Version="4.17.0" />

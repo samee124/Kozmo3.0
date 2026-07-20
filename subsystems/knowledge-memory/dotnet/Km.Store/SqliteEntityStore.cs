@@ -11,7 +11,7 @@ namespace Km.Store;
 /// IEntityStore over SQLite. Beliefs and postures are append-only; no edit/delete path.
 /// Behind IEntityStore so Azure SQL drops in without caller changes.
 /// </summary>
-public sealed class SqliteEntityStore : IEntityStore, IRegistryStore, ICheckInRowStore, IDisposable
+public sealed class SqliteEntityStore : IEntityStore, IRegistryStore, ICheckInRowStore, IOwnerChannelPrefStore, IDisposable
 {
     private readonly SqliteConnection _conn;
     private readonly SaasProfile?     _profile;
@@ -589,6 +589,7 @@ public sealed class SqliteEntityStore : IEntityStore, IRegistryStore, ICheckInRo
             ("absorbed_into_vendor_id","TEXT"),
             ("program_run_id",         "TEXT"),
             ("entity_role",            "TEXT"),
+            ("domains_json",           "TEXT"),
         };
         foreach (var (col, def) in vendorCols)
             TryAddColumn("vendors", col, def);
@@ -726,12 +727,12 @@ public sealed class SqliteEntityStore : IEntityStore, IRegistryStore, ICheckInRo
               (id, canonical_name, created_at,
                comparison_key, entity_type, confidence, flags, status,
                rebrand_map_ref, acquisition_map_ref, absorbed_into_vendor_id,
-               program_run_id, entity_role)
+               program_run_id, entity_role, domains_json)
             VALUES
               (@id, @name, @created_at,
                @comparison_key, @entity_type, @confidence, @flags, @status,
                @rebrand_map_ref, @acquisition_map_ref, @absorbed_into_vendor_id,
-               @program_run_id, @entity_role)
+               @program_run_id, @entity_role, @domains_json)
             """;
         cmd.Parameters.AddWithValue("@id",                      vendor.VendorId.ToString());
         cmd.Parameters.AddWithValue("@name",                    vendor.CanonicalName);
@@ -749,7 +750,8 @@ public sealed class SqliteEntityStore : IEntityStore, IRegistryStore, ICheckInRo
         cmd.Parameters.AddWithValue("@program_run_id",          vendor.ProgramRunId.HasValue
                                                                     ? vendor.ProgramRunId.Value.ToString()
                                                                     : (object)DBNull.Value);
-        cmd.Parameters.AddWithValue("@entity_role",             vendor.EntityRole ?? (object)DBNull.Value);
+        cmd.Parameters.AddWithValue("@entity_role",             vendor.EntityRole   ?? (object)DBNull.Value);
+        cmd.Parameters.AddWithValue("@domains_json",            vendor.DomainsJson  ?? (object)DBNull.Value);
         cmd.ExecuteNonQuery();
         return Task.CompletedTask;
     }
@@ -778,7 +780,7 @@ public sealed class SqliteEntityStore : IEntityStore, IRegistryStore, ICheckInRo
         cmd.CommandText =
             "SELECT id, canonical_name, created_at, comparison_key, entity_type, " +
             "       confidence, flags, status, rebrand_map_ref, acquisition_map_ref, " +
-            "       absorbed_into_vendor_id, program_run_id, entity_role " +
+            "       absorbed_into_vendor_id, program_run_id, entity_role, domains_json " +
             "FROM vendors WHERE id = @id";
         cmd.Parameters.AddWithValue("@id", vendorId.ToString());
         using var reader = cmd.ExecuteReader();
@@ -811,7 +813,7 @@ public sealed class SqliteEntityStore : IEntityStore, IRegistryStore, ICheckInRo
         cmd.CommandText =
             "SELECT id, canonical_name, created_at, comparison_key, entity_type, " +
             "       confidence, flags, status, rebrand_map_ref, acquisition_map_ref, " +
-            "       absorbed_into_vendor_id, program_run_id, entity_role " +
+            "       absorbed_into_vendor_id, program_run_id, entity_role, domains_json " +
             "FROM vendors";
         var results = new List<RegistryVendorRow>();
         using var reader = cmd.ExecuteReader();
@@ -834,7 +836,8 @@ public sealed class SqliteEntityStore : IEntityStore, IRegistryStore, ICheckInRo
             AcquisitionMapRef:    reader.IsDBNull(9)  ? null : reader.GetString(9),
             AbsorbedIntoVendorId: reader.IsDBNull(10) ? null : Guid.Parse(reader.GetString(10)),
             ProgramRunId:         reader.IsDBNull(11) ? null : Guid.Parse(reader.GetString(11)),
-            EntityRole:           reader.IsDBNull(12) ? null : reader.GetString(12));
+            EntityRole:           reader.IsDBNull(12) ? null : reader.GetString(12),
+            DomainsJson:          reader.IsDBNull(13) ? null : reader.GetString(13));
 
     // ── ICheckInRowStore ──────────────────────────────────────────────────────
 
@@ -1020,6 +1023,51 @@ public sealed class SqliteEntityStore : IEntityStore, IRegistryStore, ICheckInRo
              reader.GetString(1),
              DateTimeOffset.Parse(reader.GetString(2)),
              reader.GetString(3)));
+    }
+
+    // ── IOwnerChannelPrefStore ─────────────────────────────────────────────────
+
+    public Task SaveOwnerChannelPrefAsync(OwnerChannelPrefRow row, CancellationToken ct = default)
+    {
+        using var cmd = _conn.CreateCommand();
+        cmd.CommandText = """
+            INSERT OR REPLACE INTO owner_channel_prefs
+              (owner_id, channel, slack_destination)
+            VALUES
+              (@owner_id, @channel, @slack_destination)
+            """;
+        cmd.Parameters.AddWithValue("@owner_id",          row.OwnerId);
+        cmd.Parameters.AddWithValue("@channel",           row.Channel);
+        cmd.Parameters.AddWithValue("@slack_destination", row.SlackDestination ?? (object)DBNull.Value);
+        cmd.ExecuteNonQuery();
+        return Task.CompletedTask;
+    }
+
+    public Task<OwnerChannelPrefRow?> GetOwnerChannelPrefAsync(string ownerId, CancellationToken ct = default)
+    {
+        using var cmd = _conn.CreateCommand();
+        cmd.CommandText = "SELECT owner_id, channel, slack_destination FROM owner_channel_prefs WHERE owner_id = @owner_id";
+        cmd.Parameters.AddWithValue("@owner_id", ownerId);
+        using var reader = cmd.ExecuteReader();
+        if (!reader.Read()) return Task.FromResult<OwnerChannelPrefRow?>(null);
+        return Task.FromResult<OwnerChannelPrefRow?>(new OwnerChannelPrefRow(
+            OwnerId:          reader.GetString(0),
+            Channel:          reader.GetString(1),
+            SlackDestination: reader.IsDBNull(2) ? null : reader.GetString(2)));
+    }
+
+    public Task<IReadOnlyList<OwnerChannelPrefRow>> GetAllOwnerChannelPrefsAsync(CancellationToken ct = default)
+    {
+        using var cmd = _conn.CreateCommand();
+        cmd.CommandText = "SELECT owner_id, channel, slack_destination FROM owner_channel_prefs ORDER BY owner_id";
+        var results = new List<OwnerChannelPrefRow>();
+        using var reader = cmd.ExecuteReader();
+        while (reader.Read())
+            results.Add(new OwnerChannelPrefRow(
+                OwnerId:          reader.GetString(0),
+                Channel:          reader.GetString(1),
+                SlackDestination: reader.IsDBNull(2) ? null : reader.GetString(2)));
+        return Task.FromResult<IReadOnlyList<OwnerChannelPrefRow>>(results);
     }
 
     public void Dispose() => _conn.Dispose();

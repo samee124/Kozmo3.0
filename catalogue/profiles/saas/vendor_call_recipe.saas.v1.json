@@ -1,0 +1,25 @@
+{
+  "recipeId": "vendor-call-v1",
+  "version": "1.0",
+  "meetingType": "vendor_call",
+  "calendarWindowDays": 14,
+  "emailLookbackDays": 90,
+  "preMeetingCheckInHours": 24,
+  "briefingOffsetMinutes": 10,
+  "postMeetingCheckInMinutes": 15,
+  "sections": [
+    "meeting_context",
+    "recent_vendor_communications",
+    "open_commitments",
+    "service_issues",
+    "commercial_signals",
+    "evidence_gaps",
+    "recommended_questions"
+  ],
+  "limits": {
+    "maximumEmails": 30,
+    "maximumCheckInsPerMeeting": 2,
+    "maximumQuestionsInBriefing": 6,
+    "maximumPrioritiesInQ4": 3
+  }
+}

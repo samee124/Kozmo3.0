@@ -16,6 +16,10 @@ node_modules/
 *.sqlite
 *.sqlite3
 
+# MSAL persistent token cache (shared between GraphAuthHarness and Wj.MeetingPulse)
+msal_cache.bin
+msal_cache*.bin
+
 # Test output
 TestResults/
 *.trx

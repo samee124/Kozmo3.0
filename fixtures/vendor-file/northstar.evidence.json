@@ -1,0 +1,133 @@
+[
+  {
+    "_proves": "Current contract (effective 2026-01-15, renews 2026-09-28): £285k ACV, 60-day notice, auto-renewal, SLA 99.5%",
+    "evidence": {
+      "evidence_id": "dd000001-0001-0000-0000-000000000001",
+      "vendor_id":   "dd000001-0000-0000-0000-000000000001",
+      "doc_type":    "SignedContract",
+      "source_tier": "Primary",
+      "ref":         "contracts/northstar-msa-2026.pdf",
+      "doc_version": 1,
+      "ingested_at": "2026-01-20T00:00:00Z"
+    },
+    "observed_at": "2026-01-15T00:00:00Z",
+    "claims": [
+      { "claim_key": "annual_value",     "raw_value": 285000,     "locator": "page:1 cover",  "extractor_confidence": 1.00 },
+      { "claim_key": "renewal_date",     "raw_value": 1790553600, "locator": "page:3 §8.1",   "extractor_confidence": 1.00 },
+      { "claim_key": "notice_period",    "raw_value": 60,         "locator": "page:3 §8.2",   "extractor_confidence": 0.95 },
+      { "claim_key": "auto_renewal",     "raw_value": 1,          "locator": "page:3 §8.1",   "extractor_confidence": 0.90 },
+      { "claim_key": "sla_uptime",       "raw_value": 0.995,      "locator": "page:5 §10.1",  "extractor_confidence": 1.00 },
+      { "claim_key": "payment_terms",    "raw_value": 30,         "locator": "page:4 §6.1",   "extractor_confidence": 0.90 },
+      { "claim_key": "contract_on_file", "raw_value": 1,          "locator": "page:1 cover",  "extractor_confidence": 1.00 }
+    ]
+  },
+  {
+    "_proves": "Prior contract (expired 2026-01-15): £270k ACV — establishes 5.6% year-on-year uplift baseline",
+    "evidence": {
+      "evidence_id": "dd000001-0002-0000-0000-000000000001",
+      "vendor_id":   "dd000001-0000-0000-0000-000000000001",
+      "doc_type":    "SignedContract",
+      "source_tier": "Primary",
+      "ref":         "contracts/northstar-msa-2025.pdf",
+      "doc_version": 1,
+      "ingested_at": "2026-01-20T00:00:00Z"
+    },
+    "observed_at": "2025-01-15T00:00:00Z",
+    "claims": [
+      { "claim_key": "annual_value",  "raw_value": 270000,     "locator": "page:1 cover", "extractor_confidence": 1.00 },
+      { "claim_key": "renewal_date",  "raw_value": 1768435200, "locator": "page:3 §8.1",  "extractor_confidence": 1.00 },
+      { "claim_key": "notice_period", "raw_value": 60,         "locator": "page:3 §8.2",  "extractor_confidence": 0.95 },
+      { "claim_key": "auto_renewal",  "raw_value": 0,          "locator": "page:3 §8.1",  "extractor_confidence": 0.90 }
+    ]
+  },
+  {
+    "_proves": "Meeting notes Apr 2026: vendor confirmed 99% uptime last quarter; formal Q2 SLA report not yet delivered",
+    "evidence": {
+      "evidence_id": "dd000001-0003-0000-0000-000000000001",
+      "vendor_id":   "dd000001-0000-0000-0000-000000000001",
+      "doc_type":    "OwnerNote",
+      "source_tier": "Reported",
+      "ref":         "notes/northstar-sla-meeting-2026-04-10.txt",
+      "doc_version": 1,
+      "ingested_at": "2026-04-10T00:00:00Z"
+    },
+    "observed_at": "2026-04-10T00:00:00Z",
+    "claims": [
+      { "claim_key": "sla_uptime", "raw_value": 0.99, "locator": "meeting-notes:para:2", "extractor_confidence": 0.75 }
+    ]
+  },
+  {
+    "_proves": "Commercial review meeting Jun 2026: 7% pricing uplift flagged for renewal; renewal intent positive but price-dependent",
+    "evidence": {
+      "evidence_id": "dd000001-0004-0000-0000-000000000001",
+      "vendor_id":   "dd000001-0000-0000-0000-000000000001",
+      "doc_type":    "OwnerNote",
+      "source_tier": "Reported",
+      "ref":         "notes/northstar-commercial-review-2026-06-30.txt",
+      "doc_version": 1,
+      "ingested_at": "2026-06-30T00:00:00Z"
+    },
+    "observed_at": "2026-06-30T00:00:00Z",
+    "claims": [
+      { "claim_key": "renewal_intent", "raw_value": 0.65, "locator": "meeting-notes:para:3", "extractor_confidence": 0.70 }
+    ]
+  },
+  {
+    "_proves": "Vendor email Jul 8: formal 7% uplift proposal for renewal; counter-proposal under discussion internally",
+    "evidence": {
+      "evidence_id": "dd000001-0005-0000-0000-000000000001",
+      "vendor_id":   "dd000001-0000-0000-0000-000000000001",
+      "doc_type":    "Email",
+      "source_tier": "Correspondence",
+      "ref":         "email/northstar-pricing-uplift-proposal-2026-07-08.eml",
+      "doc_version": 1,
+      "ingested_at": "2026-07-08T00:00:00Z"
+    },
+    "observed_at": "2026-07-08T00:00:00Z",
+    "claims": [
+      { "claim_key": "renewal_intent", "raw_value": 0.55, "locator": "email:para:2", "extractor_confidence": 0.65 }
+    ]
+  },
+  {
+    "_proves": "Open commitment: Q2 2026 formal SLA performance report requested from vendor — not yet received (Phase 7 gap)",
+    "evidence": {
+      "evidence_id": "dd000001-0006-0000-0000-000000000001",
+      "vendor_id":   "dd000001-0000-0000-0000-000000000001",
+      "doc_type":    "OwnerNote",
+      "source_tier": "Reported",
+      "ref":         "notes/northstar-commitment-sla-report-request-2026-07-10.txt",
+      "doc_version": 1,
+      "ingested_at": "2026-07-10T00:00:00Z"
+    },
+    "observed_at": "2026-07-10T00:00:00Z",
+    "claims": []
+  },
+  {
+    "_proves": "Open commitment: internal pricing counter-proposal draft in preparation — targeting 3% uplift cap",
+    "evidence": {
+      "evidence_id": "dd000001-0007-0000-0000-000000000001",
+      "vendor_id":   "dd000001-0000-0000-0000-000000000001",
+      "doc_type":    "OwnerNote",
+      "source_tier": "Reported",
+      "ref":         "notes/northstar-commitment-counter-proposal-draft-2026-07-12.txt",
+      "doc_version": 1,
+      "ingested_at": "2026-07-12T00:00:00Z"
+    },
+    "observed_at": "2026-07-12T00:00:00Z",
+    "claims": []
+  },
+  {
+    "_proves": "Open commitment: 60-day non-renewal notice deadline is 2026-07-29 — action required before auto-renewal triggers",
+    "evidence": {
+      "evidence_id": "dd000001-0008-0000-0000-000000000001",
+      "vendor_id":   "dd000001-0000-0000-0000-000000000001",
+      "doc_type":    "OwnerNote",
+      "source_tier": "Reported",
+      "ref":         "notes/northstar-commitment-notice-deadline-alert-2026-07-14.txt",
+      "doc_version": 1,
+      "ingested_at": "2026-07-14T00:00:00Z"
+    },
+    "observed_at": "2026-07-14T00:00:00Z",
+    "claims": []
+  }
+]

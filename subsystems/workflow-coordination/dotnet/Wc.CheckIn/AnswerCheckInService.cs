@@ -69,6 +69,7 @@ public sealed class AnswerCheckInService
         SaasProfile            profile,
         IIiFacade              facade,
         IIdentityRegistry      registry,
+        string?                answeredBy = null,  // optional — when provided, captured in belief provenance
         CancellationToken      ct = default)
     {
         var checkIn = await checkInStore.GetAsync(checkInId, ct);
@@ -97,7 +98,7 @@ public sealed class AnswerCheckInService
                 // Write belief BEFORE stamping status — so a write failure leaves the
                 // check-in OPEN and retryable (status stays OPEN if this throws).
                 var phantom = checkIn with { AnsweredAt = now, ResponseValue = responseValue };
-                await WriteDimensionGapBeliefAsync(phantom, writeService, profile, now, ct);
+                await WriteDimensionGapBeliefAsync(phantom, writeService, profile, now, answeredBy, ct);
                 await facade.RecomputeVendorAsync(checkIn.VendorId, ct);
                 var done = checkIn with
                 {
@@ -155,6 +156,7 @@ public sealed class AnswerCheckInService
         VendorFileWriteService writeService,
         SaasProfile            profile,
         DateTimeOffset         now,
+        string?                answeredBy,
         CancellationToken      ct)
     {
         var claimKey  = checkIn.TargetField ?? "human_answer";
@@ -166,6 +168,10 @@ public sealed class AnswerCheckInService
         // but still stamp PROCESSED (the check-in is answered, just not evidence-mapped).
         if (rawScore is null) return;
 
+        var provenanceLocator = answeredBy is not null
+            ? $"check-in:{checkIn.Kind}|answered-by:{answeredBy}"
+            : $"check-in:{checkIn.Kind}";
+
         await writeService.WriteBeliefAsync(
             vendorId:            checkIn.VendorId,
             claimKey:            claimKey,
@@ -175,7 +181,7 @@ public sealed class AnswerCheckInService
             tier:                SourceTier.Reported,
             extractorConfidence: 0.50,
             observedAt:          now,
-            provenance:          new BeliefProvenance(checkIn.CheckInId, $"check-in:{checkIn.Kind}"),
+            provenance:          new BeliefProvenance(checkIn.CheckInId, provenanceLocator),
             ingestedAt:          now,
             derivation:          $"Check-in answer to \"{checkIn.Question}\": {checkIn.ResponseValue}",
             ct:                  ct);

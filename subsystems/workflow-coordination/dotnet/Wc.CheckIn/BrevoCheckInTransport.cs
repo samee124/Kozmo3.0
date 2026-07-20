@@ -1,3 +1,5 @@
+using Kozmo.Contracts.Interfaces;
+using Kozmo.Llm;
 using MailKit.Net.Smtp;
 using MailKit.Security;
 using MimeKit;
@@ -16,8 +18,19 @@ using CheckIn = global::Wc.Contracts.CheckIn;
 /// Accepts a batch of check-ins and renders one branded digest email per call using an
 /// email-client-safe table layout (VML fallbacks for Outlook, inline CSS throughout).
 /// YES_NO questions get inline Yes / No / Unsure answer links; STATUS_SELECT and TYPED_VALUE
-/// questions get an "Answer in Kozmo →" deep-link button. A "View full queue →" CTA at the
-/// bottom links to /pending.
+/// questions get an "Answer in Kozmo →" deep-link button, or evidence-option buttons when the
+/// optional LLM + entity store are provided and matching beliefs exist.
+/// A "View full queue →" CTA at the bottom links to /pending.
+///
+/// Evidence-aware enrichment (optional):
+///   When both <c>llm</c> and <c>entityStore</c> are supplied, each TYPED_VALUE / STATUS_SELECT
+///   check-in is enriched before sending:
+///     Part 1 (deterministic): existing beliefs for (vendorId, claimKey) → EvidenceContext.
+///     Part 2 (deterministic): EvidenceContext → evidence-option buttons with signed tokens.
+///     Part 3 (live, with fallback): LLM rephrases the question; on any failure the fixed question
+///     text is used and the send is never blocked.
+///   YES_NO questions are never changed: evidence context may inform LLM phrasing of the wording
+///   but the Yes / No / Unsure buttons are always identical.
 ///
 /// All config (SMTP login/key, sender identity, recipient) is supplied by the caller — the SMTP
 /// key specifically comes from config/environment at the call site (Program.cs), never hardcoded.
@@ -35,6 +48,8 @@ public sealed class BrevoCheckInTransport : ICheckInTransport
     private readonly Func<CancellationToken, Task<string?>>  _recipientResolver;
     private readonly string                                  _recipientName;
     private readonly CheckInTokenOptions?                    _tokenOptions;
+    private readonly IKozmoLlm?                              _llm;
+    private readonly IEntityStore?                           _entityStore;
 
     public BrevoCheckInTransport(
         string                                           smtpHost,
@@ -45,7 +60,9 @@ public sealed class BrevoCheckInTransport : ICheckInTransport
         string                                           senderName,
         Func<CancellationToken, Task<string?>>           recipientResolver,
         string                                           recipientName,
-        CheckInTokenOptions?                             tokenOptions = null)
+        CheckInTokenOptions?                             tokenOptions  = null,
+        IKozmoLlm?                                       llm           = null,
+        IEntityStore?                                    entityStore   = null)
     {
         _smtpHost          = smtpHost;
         _smtpPort          = smtpPort;
@@ -56,6 +73,8 @@ public sealed class BrevoCheckInTransport : ICheckInTransport
         _recipientResolver = recipientResolver;
         _recipientName     = recipientName;
         _tokenOptions      = tokenOptions;
+        _llm               = llm;
+        _entityStore       = entityStore;
     }
 
     public async Task SendAsync(IReadOnlyList<CheckIn> checkIns, CancellationToken ct = default)
@@ -85,7 +104,6 @@ public sealed class BrevoCheckInTransport : ICheckInTransport
         message.To.Add(new MailboxAddress(_recipientName, recipientEmail));
         message.Subject = $"Kozmo — {count} open question{(count == 1 ? "" : "s")} for {vendorName}";
 
-        // Build per-question rows for both text and HTML bodies.
         var textRows = new System.Text.StringBuilder();
         var htmlRows = new System.Text.StringBuilder();
 
@@ -93,10 +111,46 @@ public sealed class BrevoCheckInTransport : ICheckInTransport
         {
             var ci     = checkIns[i];
             var isLast = i == checkIns.Count - 1;
-            htmlRows.Append(BuildQuestionRowHtml(i + 1, ci, uiBaseUrl, apiBaseUrl, _tokenOptions, tokenNow, isLast));
 
+            // ── Part 1: evidence context (deterministic) ──────────────────────
+            var evidenceContext = EvidenceContext.Empty;
+            if (_entityStore != null && !string.IsNullOrWhiteSpace(ci.TargetField))
+            {
+                try
+                {
+                    evidenceContext = await CheckInPhrasingService.BuildEvidenceContextAsync(
+                        ci.VendorId, ci.TargetField, _entityStore, ct);
+                }
+                catch
+                {
+                    // Evidence lookup failure is non-blocking — plain question used.
+                }
+            }
+
+            // ── Part 2: answer options (deterministic) ────────────────────────
+            var answerOptions = CheckInPhrasingService.BuildAnswerOptions(ci, evidenceContext);
+
+            // ── Part 3: LLM phrasing (live, with fallback) ───────────────────
+            var phrasingQuestion = ci.Question;
+            var contextSummary   = (string?)null;
+            if (_llm != null && evidenceContext.HasEvidence)
+            {
+                (phrasingQuestion, contextSummary) = await CheckInPhrasingService.PhraseAsync(
+                    ci.Question, evidenceContext, _llm, ct);
+            }
+
+            // ── Render question row ───────────────────────────────────────────
+            htmlRows.Append(BuildQuestionRowHtml(
+                i + 1, ci, uiBaseUrl, apiBaseUrl, _tokenOptions, tokenNow, isLast,
+                phrasingQuestion, contextSummary,
+                answerOptions.Count > 0 ? answerOptions : null));
+
+            // Text body
             var pendingLink = $"{uiBaseUrl}/pending?highlight={ci.CheckInId}";
-            textRows.AppendLine($"{i + 1}. {ci.Question}");
+            textRows.AppendLine($"{i + 1}. {phrasingQuestion}");
+            if (contextSummary != null)
+                textRows.AppendLine($"   [{contextSummary}]");
+
             if (ci.ResponseShape == ResponseShape.YES_NO && _tokenOptions is not null)
             {
                 var yesToken = CheckInLinkToken.Generate(ci.CheckInId, "YES", _tokenOptions.Secret, _tokenOptions.TtlDays, tokenNow);
@@ -110,6 +164,19 @@ public sealed class BrevoCheckInTransport : ICheckInTransport
                 textRows.AppendLine($"   Yes    → {pendingLink}&answer=YES");
                 textRows.AppendLine($"   No     → {pendingLink}&answer=NO");
                 textRows.AppendLine($"   Unsure → {pendingLink}&answer=UNSURE");
+            }
+            else if (answerOptions.Count > 0 && _tokenOptions is not null)
+            {
+                foreach (var opt in answerOptions)
+                {
+                    if (opt.Value is null || opt.IsOpenInput)
+                        textRows.AppendLine($"   {opt.Label} → {pendingLink}");
+                    else
+                    {
+                        var optToken = CheckInLinkToken.Generate(ci.CheckInId, opt.Value, _tokenOptions.Secret, _tokenOptions.TtlDays, tokenNow);
+                        textRows.AppendLine($"   {opt.Label} → {apiBaseUrl}/check-ins/{ci.CheckInId}/confirm?token={optToken}");
+                    }
+                }
             }
             else
             {
@@ -141,21 +208,26 @@ public sealed class BrevoCheckInTransport : ICheckInTransport
         await client.DisconnectAsync(true, ct);
     }
 
-    // ── HTML builders ─────────────────────────────────────────────────────────
+    // ── HTML builders ──────────────────────────────────────────────────────────
 
     /// <summary>Renders one question card row matching the Kozmo email template design.</summary>
     private static string BuildQuestionRowHtml(
         int number, CheckIn ci,
         string uiBaseUrl, string apiBaseUrl,
         CheckInTokenOptions? tokenOptions, DateTimeOffset tokenNow,
-        bool isLast)
+        bool isLast,
+        string?                      phrasingQuestion = null,
+        string?                      contextSummary   = null,
+        IReadOnlyList<AnswerOption>? answerOptions    = null)
     {
-        var qEsc       = System.Net.WebUtility.HtmlEncode(ci.Question);
-        var pendingLink = $"{uiBaseUrl}/pending?highlight={ci.CheckInId}";
-        var padding    = isLast ? "0 24px 20px 24px" : "0 24px 10px 24px";
+        var displayQuestion = phrasingQuestion ?? ci.Question;
+        var qEsc            = System.Net.WebUtility.HtmlEncode(displayQuestion);
+        var pendingLink     = $"{uiBaseUrl}/pending?highlight={ci.CheckInId}";
+        var padding         = isLast ? "0 24px 20px 24px" : "0 24px 10px 24px";
 
         string answerHtml;
         string qMarginBottom;
+
         if (ci.ResponseShape == ResponseShape.YES_NO)
         {
             qMarginBottom = "10px";
@@ -167,7 +239,7 @@ public sealed class BrevoCheckInTransport : ICheckInTransport
                 var noToken  = CheckInLinkToken.Generate(ci.CheckInId, "NO",  tokenOptions.Secret, tokenOptions.TtlDays, tokenNow);
                 yesUrl    = $"{apiBaseUrl}/check-ins/{ci.CheckInId}/confirm?token={Uri.EscapeDataString(yesToken)}";
                 noUrl     = $"{apiBaseUrl}/check-ins/{ci.CheckInId}/confirm?token={Uri.EscapeDataString(noToken)}";
-                unsureUrl = pendingLink; // UNKNOWN cannot be recorded via YES_NO validator — go to pending queue
+                unsureUrl = pendingLink; // UNKNOWN cannot be recorded via YES_NO validator
             }
             else
             {
@@ -185,6 +257,43 @@ public sealed class BrevoCheckInTransport : ICheckInTransport
                 $"<a href=\"{unsureUrl}\" style=\"color:#9AA0A6;font-weight:600;text-decoration:none;\">&#9675; Unsure</a>" +
                 $"</p>";
         }
+        else if (answerOptions is { Count: > 0 } && tokenOptions is not null)
+        {
+            // Evidence-option buttons for TYPED_VALUE / STATUS_SELECT.
+            qMarginBottom = "8px";
+
+            var optHtml = new System.Text.StringBuilder();
+            optHtml.Append("<p style=\"margin:0;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:2;\">");
+
+            foreach (var opt in answerOptions)
+            {
+                string optUrl;
+                string color;
+
+                if (opt.Value is null || opt.IsOpenInput)
+                {
+                    // "Something else" and "Not sure" → pending queue
+                    optUrl = pendingLink;
+                    color  = "#9AA0A6";
+                }
+                else
+                {
+                    var tok = CheckInLinkToken.Generate(ci.CheckInId, opt.Value, tokenOptions.Secret, tokenOptions.TtlDays, tokenNow);
+                    optUrl  = $"{apiBaseUrl}/check-ins/{ci.CheckInId}/confirm?token={Uri.EscapeDataString(tok)}";
+                    color   = "#2F6B4F";
+                }
+
+                var labelEsc = System.Net.WebUtility.HtmlEncode(opt.Label);
+                optHtml.Append(
+                    $"<a href=\"{optUrl}\" style=\"display:inline-block;margin:2px 6px 2px 0;" +
+                    $"background:#F5F5F5;border:1px solid #E0E0E0;border-radius:12px;" +
+                    $"padding:3px 10px;color:{color};font-weight:600;text-decoration:none;\">" +
+                    $"{labelEsc}</a>");
+            }
+
+            optHtml.Append("</p>");
+            answerHtml = optHtml.ToString();
+        }
         else
         {
             qMarginBottom = "12px";
@@ -194,6 +303,12 @@ public sealed class BrevoCheckInTransport : ICheckInTransport
                 $"font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:600;\">" +
                 $"Answer in Kozmo &#8594;</a>";
         }
+
+        // Optional context summary line (LLM "here's what we found").
+        var summaryHtml = string.IsNullOrWhiteSpace(contextSummary)
+            ? ""
+            : $"<p style=\"margin:0 0 6px 0;font-family:Arial,Helvetica,sans-serif;font-size:11px;" +
+              $"color:#6B7280;font-style:italic;\">{System.Net.WebUtility.HtmlEncode(contextSummary)}</p>\n";
 
         return
             $"<tr>\n" +
@@ -210,6 +325,7 @@ public sealed class BrevoCheckInTransport : ICheckInTransport
             $"            </td>\n" +
             $"            <td style=\"vertical-align:top;padding-left:10px;\">\n" +
             $"              <p style=\"margin:0 0 {qMarginBottom} 0;font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.45;color:#171B24;font-weight:600;\">{qEsc}</p>\n" +
+            summaryHtml +
             $"              {answerHtml}\n" +
             $"              <p style=\"margin:10px 0 0 0;font-family:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace;font-size:9px;color:#BEBEBE;\">REF {ci.CheckInId}</p>\n" +
             $"            </td>\n" +
@@ -229,7 +345,6 @@ public sealed class BrevoCheckInTransport : ICheckInTransport
         int count, string vendorName, Guid vendorId, Guid runId,
         string questionRows, string pendingUrl, string unsubUrl)
     {
-        // CSS extracted to avoid {{ }} escaping inside the interpolated template below.
         const string css =
             "body,table,td{margin:0;padding:0;}" +
             "img{border:0;display:block;}" +
@@ -254,16 +369,10 @@ public sealed class BrevoCheckInTransport : ICheckInTransport
             $"<style>{css}</style>" +
             "</head>" +
             "<body style=\"margin:0;padding:0;background:#F2F3F5;\">" +
-
-            // Preheader
             $"<div style=\"display:none;max-height:0;overflow:hidden;opacity:0;\">Kozmo &#8212; {count} open question{plural} for {vendorNameEsc}. Tap to answer.</div>" +
-
-            // Outer wrapper
             "<table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#F2F3F5;\">" +
             "<tr><td align=\"center\" style=\"padding:28px 16px;\">" +
             "<table role=\"presentation\" class=\"email-container\" width=\"560\" cellpadding=\"0\" cellspacing=\"0\" style=\"width:560px;max-width:560px;background:#FFFFFF;border-radius:20px;overflow:hidden;\">" +
-
-            // Header
             "<tr>" +
             "  <td style=\"background:#171B24;padding:20px 24px;\">" +
             "    <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\">" +
@@ -285,8 +394,6 @@ public sealed class BrevoCheckInTransport : ICheckInTransport
             "    </table>" +
             "  </td>" +
             "</tr>" +
-
-            // Headline
             "<tr>" +
             "  <td class=\"px\" style=\"padding:22px 24px 4px 24px;\">" +
             $"    <h1 style=\"margin:0;font-family:Arial,Helvetica,sans-serif;font-size:19px;line-height:1.4;color:#171B24;font-weight:bold;\">{count} open question{plural} for {vendorNameEsc}</h1>" +
@@ -297,11 +404,7 @@ public sealed class BrevoCheckInTransport : ICheckInTransport
             "    <p style=\"margin:0;font-family:Arial,Helvetica,sans-serif;font-size:13px;line-height:1.5;color:#6B7280;\">Tap an answer below &#8212; each one saves individually.</p>" +
             "  </td>" +
             "</tr>" +
-
-            // Question rows (injected)
             questionRows +
-
-            // Primary CTA
             "<tr>" +
             "  <td class=\"px\" align=\"center\" style=\"padding:0 24px 26px 24px;\">" +
             "    <!--[if mso]>" +
@@ -315,8 +418,6 @@ public sealed class BrevoCheckInTransport : ICheckInTransport
             "    <!--<![endif]-->" +
             "  </td>" +
             "</tr>" +
-
-            // Footer
             "<tr>" +
             "  <td style=\"background:#FAFAFA;padding:16px 24px;border-top:1px solid #ECECEC;\">" +
             $"    <p style=\"margin:0;font-family:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace;font-size:9px;color:#B0B0B0;\">VENDOR {vendorId} &#183; RUN {runId}</p>" +
@@ -326,7 +427,6 @@ public sealed class BrevoCheckInTransport : ICheckInTransport
             "    </p>" +
             "  </td>" +
             "</tr>" +
-
             "</table>" +
             "</td></tr>" +
             "</table>" +

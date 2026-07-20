@@ -1,0 +1,41 @@
+{
+  "schema": "vendor_call_recognition.saas.v1",
+  "thresholds": {
+    "auto_relevant":   0.85,
+    "review_relevant": 0.55
+  },
+  "internal_domains": [
+    "econtracts.onmicrosoft.com"
+  ],
+  "recognition": {
+    "title_terms": [
+      "renewal",
+      "contract",
+      "pricing",
+      "sla",
+      "agreement",
+      "vendor",
+      "service review",
+      "support",
+      "license",
+      "upgrade",
+      "negotiation",
+      "commercial",
+      "review",
+      "evaluation",
+      "assessment"
+    ],
+    "body_terms": [
+      "uplift",
+      "discount",
+      "renewal date",
+      "contract term",
+      "sla breach",
+      "service credit",
+      "invoice",
+      "statement of work",
+      "purchase order",
+      "price increase"
+    ]
+  }
+}

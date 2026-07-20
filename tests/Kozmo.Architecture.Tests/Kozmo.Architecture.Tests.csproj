@@ -26,5 +26,6 @@
     <ProjectReference Include="..\..\subsystems\knowledge-memory\dotnet\Km.Store\Km.Store.csproj" />
     <ProjectReference Include="..\..\subsystems\interpretation-inference\dotnet\Ii.Completeness\Ii.Completeness.csproj" />
     <ProjectReference Include="..\..\libs\Kozmo.Contracts\Kozmo.Contracts.csproj" />
+    <ProjectReference Include="..\..\subsystems\programme-orchestration\dotnet\Po.VendorCall\Po.VendorCall.csproj" />
   </ItemGroup>
 </Project>

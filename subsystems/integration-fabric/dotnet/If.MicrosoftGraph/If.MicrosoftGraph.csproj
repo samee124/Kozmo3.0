@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>If.MicrosoftGraph</RootNamespace>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\If.Contracts\If.Contracts.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Identity.Client"                          Version="4.86.0" />
+    <PackageReference Include="Microsoft.Identity.Client.Extensions.Msal"         Version="4.56.0" />
+    <PackageReference Include="Microsoft.Graph"                                    Version="6.2.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder"          Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.2" />
+  </ItemGroup>
+</Project>

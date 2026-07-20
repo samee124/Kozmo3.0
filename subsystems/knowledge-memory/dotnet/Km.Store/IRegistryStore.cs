@@ -28,7 +28,8 @@ public sealed record RegistryVendorRow(
     string?        AcquisitionMapRef,
     Guid?          AbsorbedIntoVendorId = null,
     Guid?          ProgramRunId         = null,
-    string?        EntityRole           = null
+    string?        EntityRole           = null,
+    string?        DomainsJson          = null
 );
 
 /// <summary>Storage row for a vendor alias (vendor_aliases table).</summary>

@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Rm.Contracts\Rm.Contracts.csproj" />
+    <ProjectReference Include="..\..\..\..\libs\Kozmo.Contracts\Kozmo.Contracts.csproj" />
+    <ProjectReference Include="..\..\..\..\libs\Kozmo.Llm\Kozmo.Llm.csproj" />
+    <ProjectReference Include="..\..\..\interpretation-inference\dotnet\Ii.Contracts\Ii.Contracts.csproj" />
+    <ProjectReference Include="..\..\..\interpretation-inference\dotnet\Ii.Spine\Ii.Spine.csproj" />
+    <ProjectReference Include="..\..\..\workflow-coordination\dotnet\Wc.Contracts\Wc.Contracts.csproj" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,191 @@
+[
+  {
+    "message_id":       "northstar-email-001",
+    "conversation_id":  "northstar-conv-001",
+    "subject":          "Northstar Software — initial engagement and proposal",
+    "sender":           "alex.hamilton@northstarsoftware.com",
+    "recipients":       ["procurement@econtracts.onmicrosoft.com"],
+    "sent_at_utc":      "2024-06-15T09:30:00Z",
+    "body_preview":     "Thank you for considering Northstar Software. I have attached our commercial proposal for the 12-month SaaS subscription at £270,000 per annum. We look forward to partnering with you."
+  },
+  {
+    "message_id":       "northstar-email-002",
+    "conversation_id":  "northstar-conv-001",
+    "subject":          "RE: Northstar Software — initial engagement and proposal",
+    "sender":           "procurement@econtracts.onmicrosoft.com",
+    "recipients":       ["alex.hamilton@northstarsoftware.com"],
+    "sent_at_utc":      "2024-06-18T14:10:00Z",
+    "body_preview":     "Alex, thank you for the proposal. We have reviewed the commercial terms and would like to proceed to contract negotiation. Please arrange a call to discuss the SLA commitments in §10."
+  },
+  {
+    "message_id":       "northstar-email-003",
+    "conversation_id":  "northstar-conv-002",
+    "subject":          "Northstar MSA 2025 — execution confirmation",
+    "sender":           "contracts@northstarsoftware.com",
+    "recipients":       ["legal@econtracts.onmicrosoft.com"],
+    "sent_at_utc":      "2025-01-15T11:00:00Z",
+    "body_preview":     "Please find attached the fully executed Master Services Agreement. The effective date is 15 January 2025, with a 12-month initial term. Annual contract value: £270,000."
+  },
+  {
+    "message_id":       "northstar-email-004",
+    "conversation_id":  "northstar-conv-003",
+    "subject":          "Q1 2025 service review — Northstar",
+    "sender":           "alex.hamilton@northstarsoftware.com",
+    "recipients":       ["pm@econtracts.onmicrosoft.com"],
+    "sent_at_utc":      "2025-03-28T10:00:00Z",
+    "body_preview":     "Sharing the Q1 2025 SLA report. Platform uptime for the quarter was 99.3%. One incident on 14 March (P2, 47-minute outage) has been remediated. No service credits are due under the current threshold."
+  },
+  {
+    "message_id":       "northstar-email-005",
+    "conversation_id":  "northstar-conv-003",
+    "subject":          "RE: Q1 2025 service review — Northstar",
+    "sender":           "pm@econtracts.onmicrosoft.com",
+    "recipients":       ["alex.hamilton@northstarsoftware.com"],
+    "sent_at_utc":      "2025-04-02T09:15:00Z",
+    "body_preview":     "Thanks Alex. The Q1 report is noted. We would like to discuss the March incident in more detail at our next QBR — please confirm availability for the week of 28 April."
+  },
+  {
+    "message_id":       "northstar-email-006",
+    "conversation_id":  "northstar-conv-004",
+    "subject":          "Q2 2025 SLA report — Northstar",
+    "sender":           "alex.hamilton@northstarsoftware.com",
+    "recipients":       ["pm@econtracts.onmicrosoft.com"],
+    "sent_at_utc":      "2025-06-30T16:00:00Z",
+    "body_preview":     "Platform uptime for Q2 2025 was 99.6%. No P1 or P2 incidents recorded. Support response times averaged 2.1 hours against a 4-hour SLA. Full report attached."
+  },
+  {
+    "message_id":       "northstar-email-007",
+    "conversation_id":  "northstar-conv-005",
+    "subject":          "URGENT — service degradation affecting batch processing",
+    "sender":           "support@northstarsoftware.com",
+    "recipients":       ["operations@econtracts.onmicrosoft.com"],
+    "sent_at_utc":      "2025-08-12T08:30:00Z",
+    "body_preview":     "We are aware of an ongoing incident affecting batch processing for a subset of customers. Engineering is actively working on a fix. Current impact: estimated 4-hour processing delay. ETA for resolution: 12:00 UTC."
+  },
+  {
+    "message_id":       "northstar-email-008",
+    "conversation_id":  "northstar-conv-005",
+    "subject":          "RE: URGENT — service degradation affecting batch processing",
+    "sender":           "operations@econtracts.onmicrosoft.com",
+    "recipients":       ["support@northstarsoftware.com", "alex.hamilton@northstarsoftware.com"],
+    "sent_at_utc":      "2025-08-12T09:45:00Z",
+    "body_preview":     "This incident is causing downstream impact on our weekly reporting cycle. We expect a full root-cause analysis and formal SLA credit calculation within 5 business days of resolution, per §10.3 of the MSA."
+  },
+  {
+    "message_id":       "northstar-email-009",
+    "conversation_id":  "northstar-conv-005",
+    "subject":          "Batch processing incident — RCA and SLA credit",
+    "sender":           "alex.hamilton@northstarsoftware.com",
+    "recipients":       ["operations@econtracts.onmicrosoft.com", "pm@econtracts.onmicrosoft.com"],
+    "sent_at_utc":      "2025-08-19T14:00:00Z",
+    "body_preview":     "Please find attached the root-cause analysis for the Aug 12 incident. Total downtime: 3h 48m. Under §10.3, a service credit of £1,200 (pro-rated) is applied to your next invoice. We apologise for the impact."
+  },
+  {
+    "message_id":       "northstar-email-010",
+    "conversation_id":  "northstar-conv-006",
+    "subject":          "Q3 2025 SLA report and year-end commercial review",
+    "sender":           "alex.hamilton@northstarsoftware.com",
+    "recipients":       ["pm@econtracts.onmicrosoft.com"],
+    "sent_at_utc":      "2025-09-30T17:00:00Z",
+    "body_preview":     "Q3 uptime: 99.1% (slightly below 99.5% target due to Aug incident). Remediation measures are in place. Would like to schedule a commercial review for October to discuss the upcoming renewal."
+  },
+  {
+    "message_id":       "northstar-email-011",
+    "conversation_id":  "northstar-conv-007",
+    "subject":          "Northstar renewal 2026 — early discussion",
+    "sender":           "alex.hamilton@northstarsoftware.com",
+    "recipients":       ["pm@econtracts.onmicrosoft.com"],
+    "sent_at_utc":      "2025-11-20T10:30:00Z",
+    "body_preview":     "With the current contract term expiring in January, I wanted to open early renewal discussions. We are proposing a 12-month extension at £285,000 (a 5.6% uplift, in line with CPI). Terms otherwise unchanged."
+  },
+  {
+    "message_id":       "northstar-email-012",
+    "conversation_id":  "northstar-conv-007",
+    "subject":          "RE: Northstar renewal 2026 — early discussion",
+    "sender":           "pm@econtracts.onmicrosoft.com",
+    "recipients":       ["alex.hamilton@northstarsoftware.com"],
+    "sent_at_utc":      "2025-12-03T11:00:00Z",
+    "body_preview":     "Alex, we are happy to proceed with the renewal at £285k. Please prepare the 2026 MSA draft for legal review. Note we will need the auto-renewal clause included this time given the tight Jan deadline."
+  },
+  {
+    "message_id":       "northstar-email-013",
+    "conversation_id":  "northstar-conv-008",
+    "subject":          "Northstar MSA 2026 — execution confirmation",
+    "sender":           "contracts@northstarsoftware.com",
+    "recipients":       ["legal@econtracts.onmicrosoft.com"],
+    "sent_at_utc":      "2026-01-15T11:00:00Z",
+    "body_preview":     "Attached is the fully executed 2026 MSA. Effective date: 15 January 2026. Annual contract value: £285,000. 60-day notice required to trigger manual renewal or terminate. Auto-renewal applies."
+  },
+  {
+    "message_id":       "northstar-email-014",
+    "conversation_id":  "northstar-conv-009",
+    "subject":          "Q1 2026 SLA report — Northstar",
+    "sender":           "alex.hamilton@northstarsoftware.com",
+    "recipients":       ["pm@econtracts.onmicrosoft.com"],
+    "sent_at_utc":      "2026-04-02T15:30:00Z",
+    "body_preview":     "Q1 2026 uptime: 99.5%. No service credits due. Support SLA: 1.8h average response time. All P1 incidents: zero. Platform stability has improved significantly since the August 2025 incident."
+  },
+  {
+    "message_id":       "northstar-email-015",
+    "conversation_id":  "northstar-conv-010",
+    "subject":          "Q2 2026 SLA report request",
+    "sender":           "pm@econtracts.onmicrosoft.com",
+    "recipients":       ["alex.hamilton@northstarsoftware.com"],
+    "sent_at_utc":      "2026-07-10T09:00:00Z",
+    "body_preview":     "Alex, the Q2 2026 SLA performance report is now overdue (due 30 June per §10.4). Please arrange for this to be sent no later than 17 July. This is required prior to our renewal review meeting."
+  },
+  {
+    "message_id":       "northstar-email-016",
+    "conversation_id":  "northstar-conv-010",
+    "subject":          "RE: Q2 2026 SLA report request",
+    "sender":           "alex.hamilton@northstarsoftware.com",
+    "recipients":       ["pm@econtracts.onmicrosoft.com"],
+    "sent_at_utc":      "2026-07-11T14:20:00Z",
+    "body_preview":     "Apologies for the delay — our reporting team has been restructured. I will have the Q2 report to you by 18 July. I also wanted to flag our 2026/27 renewal pricing proposal which I will share at the same time."
+  },
+  {
+    "message_id":       "northstar-email-017",
+    "conversation_id":  "northstar-conv-011",
+    "subject":          "Northstar 2026/27 renewal — pricing proposal",
+    "sender":           "alex.hamilton@northstarsoftware.com",
+    "recipients":       ["pm@econtracts.onmicrosoft.com", "procurement@econtracts.onmicrosoft.com"],
+    "sent_at_utc":      "2026-07-08T10:00:00Z",
+    "body_preview":     "For the 2026/27 renewal term, we are proposing an uplift of 7% (£285,000 → £304,950), reflecting infrastructure investment and increased support headcount. We would welcome a meeting to discuss. Renewal date: 28 September 2026."
+  },
+  {
+    "message_id":       "northstar-email-018",
+    "conversation_id":  "northstar-conv-011",
+    "subject":          "RE: Northstar 2026/27 renewal — pricing proposal",
+    "sender":           "pm@econtracts.onmicrosoft.com",
+    "recipients":       ["alex.hamilton@northstarsoftware.com"],
+    "sent_at_utc":      "2026-07-14T16:45:00Z",
+    "body_preview":     "Alex, thank you for the proposal. A 7% uplift is above our approved budget band. We are reviewing internally and will revert with a counter-position. In the meantime, please confirm the 28 Sept renewal date and note that the 60-day notice window closes 29 July."
+  },
+  {
+    "message_id":       "northstar-noise-001",
+    "conversation_id":  "northstar-noise-conv-001",
+    "subject":          "Northstar Software — June product release recap",
+    "sender":           "events@northstarsoftware.com",
+    "recipients":       ["pm@econtracts.onmicrosoft.com"],
+    "sent_at_utc":      "2026-06-20T08:00:00Z",
+    "body_preview":     "Join us for a recap of our June product release webinar. See what's new in the platform and register for our upcoming roadmap session."
+  },
+  {
+    "message_id":       "northstar-noise-002",
+    "conversation_id":  "northstar-noise-conv-002",
+    "subject":          "Northstar Software — monthly customer newsletter — July 2026",
+    "sender":           "newsletter@northstarsoftware.com",
+    "recipients":       ["pm@econtracts.onmicrosoft.com"],
+    "sent_at_utc":      "2026-07-01T07:00:00Z",
+    "body_preview":     "Welcome to the July 2026 edition of the Northstar Software customer newsletter. This month: platform updates, upcoming webinars, and customer spotlight."
+  },
+  {
+    "message_id":       "northstar-noise-003",
+    "conversation_id":  "northstar-noise-conv-003",
+    "subject":          "Your Northstar Software invoice — June 2026",
+    "sender":           "noreply@northstarsoftware.com",
+    "recipients":       ["finance@econtracts.onmicrosoft.com"],
+    "sent_at_utc":      "2026-07-05T06:00:00Z",
+    "body_preview":     "Your invoice for the period 1–30 June 2026 is now available. Amount due: £23,750. Please log in to the billing portal to view and download. Do not reply to this automated message."
+  }
+]

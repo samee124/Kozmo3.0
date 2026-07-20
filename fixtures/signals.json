@@ -233,5 +233,103 @@
     "observed_at": "2026-06-01T11:00:00Z",
     "received_at": "2026-06-01T11:05:00Z",
     "trace_id": "e4e4e4e4-0000-0000-0000-000000000104"
+  },
+
+  {
+    "_comment": "N1 — Northwind Systems: uptime 99.7% → Operational/uptime_sla = 1.00 (Verified). Above 99.5% threshold → top band.",
+    "id": "22222222-0001-0000-0000-000000000001",
+    "entity_id": "eeeeeeee-0005-0000-0000-000000000001",
+    "customer_id": "cccccccc-0000-0000-0000-000000000001",
+    "source_system": "MonitoringPlatform",
+    "external_id": "mon-nw-2026-0520-001",
+    "payload": { "uptime_pct": 99.7 },
+    "observed_at": "2026-05-20T08:00:00Z",
+    "received_at": "2026-05-20T08:05:00Z",
+    "trace_id": "f1f1f1f1-0000-0000-0000-000000000001"
+  },
+  {
+    "_comment": "N2 — Northwind Systems: CSAT 4.7/5 → Experiential/csat_score = 1.00 (Verified). Above 4.5 threshold → top band.",
+    "id": "22222222-0002-0000-0000-000000000001",
+    "entity_id": "eeeeeeee-0005-0000-0000-000000000001",
+    "customer_id": "cccccccc-0000-0000-0000-000000000001",
+    "source_system": "CRM",
+    "external_id": "crm-nw-2026-0521-csat",
+    "payload": { "csat_score": 4.7 },
+    "observed_at": "2026-05-21T10:00:00Z",
+    "received_at": "2026-05-21T10:05:00Z",
+    "trace_id": "f2f2f2f2-0000-0000-0000-000000000001"
+  },
+  {
+    "_comment": "N3 — Northwind Systems: 0 days overdue → Financial/payment_timeliness = 1.00 (Verified). Clean payment record.",
+    "id": "22222222-0003-0000-0000-000000000001",
+    "entity_id": "eeeeeeee-0005-0000-0000-000000000001",
+    "customer_id": "cccccccc-0000-0000-0000-000000000001",
+    "source_system": "BillingSystem",
+    "external_id": "bill-nw-2026-0522-001",
+    "payload": { "days_overdue": 0 },
+    "observed_at": "2026-05-22T09:00:00Z",
+    "received_at": "2026-05-22T09:02:00Z",
+    "trace_id": "f3f3f3f3-0000-0000-0000-000000000001"
+  },
+  {
+    "_comment": "N4 — Northwind Systems: roadmap_fit 0.85 → Strategic/roadmap_alignment = 1.00 (Verified). Above 0.75 threshold → top band.",
+    "id": "22222222-0004-0000-0000-000000000001",
+    "entity_id": "eeeeeeee-0005-0000-0000-000000000001",
+    "customer_id": "cccccccc-0000-0000-0000-000000000001",
+    "source_system": "CRM",
+    "external_id": "crm-nw-2026-0523-roadmap",
+    "payload": { "roadmap_fit_score": 0.85 },
+    "observed_at": "2026-05-23T11:00:00Z",
+    "received_at": "2026-05-23T11:05:00Z",
+    "trace_id": "f4f4f4f4-0000-0000-0000-000000000001"
+  },
+
+  {
+    "_comment": "R1 — Ridgeline Software: uptime 98.3% → Operational/uptime_sla = 0.45 (Verified). In 98.0-99.0 band → moderate.",
+    "id": "33333333-0001-0000-0000-000000000001",
+    "entity_id": "eeeeeeee-0006-0000-0000-000000000001",
+    "customer_id": "cccccccc-0000-0000-0000-000000000001",
+    "source_system": "MonitoringPlatform",
+    "external_id": "mon-rg-2026-0525-001",
+    "payload": { "uptime_pct": 98.3 },
+    "observed_at": "2026-05-25T08:00:00Z",
+    "received_at": "2026-05-25T08:05:00Z",
+    "trace_id": "a1a1a1a1-0001-0000-0000-000000000006"
+  },
+  {
+    "_comment": "R2 — Ridgeline Software: roadmap_fit 0.80 → Strategic/roadmap_alignment = 1.00 (Verified). Above 0.75 threshold → top band.",
+    "id": "33333333-0002-0000-0000-000000000001",
+    "entity_id": "eeeeeeee-0006-0000-0000-000000000001",
+    "customer_id": "cccccccc-0000-0000-0000-000000000001",
+    "source_system": "CRM",
+    "external_id": "crm-rg-2026-0527-roadmap",
+    "payload": { "roadmap_fit_score": 0.80 },
+    "observed_at": "2026-05-27T11:00:00Z",
+    "received_at": "2026-05-27T11:05:00Z",
+    "trace_id": "a2a2a2a2-0002-0000-0000-000000000006"
+  },
+  {
+    "_comment": "R3a — Ridgeline Software: 0 days overdue → Financial/payment_timeliness = 1.00 (Verified). Clean baseline — will be superseded by R3b, creating a contradiction (|1.00-0.30|=0.70 ≥ 0.30 threshold).",
+    "id": "33333333-0003-0000-0000-000000000001",
+    "entity_id": "eeeeeeee-0006-0000-0000-000000000001",
+    "customer_id": "cccccccc-0000-0000-0000-000000000001",
+    "source_system": "BillingSystem",
+    "external_id": "bill-rg-2026-0529-payment-clean",
+    "payload": { "days_overdue": 0 },
+    "observed_at": "2026-05-29T09:00:00Z",
+    "received_at": "2026-05-29T09:02:00Z",
+    "trace_id": "a3a3a3a3-0003-0000-0000-000000000006"
+  },
+  {
+    "_comment": "R3b — Ridgeline Software: 25 days overdue → Financial/payment_timeliness = 0.30 (Verified). Supersedes R3a. Contradiction fired: prior=1.00, current=0.30, delta=0.70 ≥ 0.30. Composite drops: 0.6125→0.4375 → trajectory=Declining → AtRisk/Renegotiate.",
+    "id": "33333333-0004-0000-0000-000000000001",
+    "entity_id": "eeeeeeee-0006-0000-0000-000000000001",
+    "customer_id": "cccccccc-0000-0000-0000-000000000001",
+    "source_system": "BillingSystem",
+    "external_id": "bill-rg-2026-0601-payment-overdue",
+    "payload": { "days_overdue": 25 },
+    "observed_at": "2026-06-01T09:00:00Z",
+    "received_at": "2026-06-01T09:02:00Z",
+    "trace_id": "a4a4a4a4-0004-0000-0000-000000000006"
   }
 ]

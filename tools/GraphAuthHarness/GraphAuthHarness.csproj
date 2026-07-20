@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>GraphAuthHarness</RootNamespace>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <UserSecretsId>graph-auth-harness-2026</UserSecretsId>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\subsystems\integration-fabric\dotnet\If.MicrosoftGraph\If.MicrosoftGraph.csproj" />
+    <ProjectReference Include="..\..\libs\Kozmo.Llm.OpenAi\Kozmo.Llm.OpenAi.csproj" />
+    <ProjectReference Include="..\..\subsystems\identity-governance\dotnet\Ig.Resolution\Ig.Resolution.csproj" />
+    <ProjectReference Include="..\..\subsystems\programme-orchestration\dotnet\Po.VendorCall\Po.VendorCall.csproj" />
+    <ProjectReference Include="..\..\subsystems\knowledge-memory\dotnet\Km.Store\Km.Store.csproj" />
+    <ProjectReference Include="..\..\subsystems\workflow-coordination\dotnet\Wc.Contracts\Wc.Contracts.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="appsettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="fixtures\northstar_emails.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="MailKit"                                    Version="4.17.0" />
+    <PackageReference Include="OpenAI"                                     Version="2.2.0" />
+    <PackageReference Include="Microsoft.Graph"                            Version="6.2.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json"   Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="8.0.0" />
+  </ItemGroup>
+</Project>
