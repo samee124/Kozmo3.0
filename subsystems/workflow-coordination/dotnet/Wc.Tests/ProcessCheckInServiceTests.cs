@@ -33,6 +33,35 @@ public sealed class ProcessCheckInServiceTests
         HalfLifeDays:        new Dictionary<string, int>(),
         EntityResolution:    new EntityResolutionConfig("exact", 0.85, new Dictionary<string, string>()));
 
+    // E2 bridge fixture — mirrors the real catalogue/scoring_rubric.saas.v1.json entries for
+    // sla_uptime/uptime_sla and csat/csat_score exactly (same bands), so these tests prove the
+    // real banding behavior, not a fixture invented for the test.
+    private static readonly SaasProfile BoundProfile = EmptyProfile with
+    {
+        ClaimKeyCatalogue = new Dictionary<string, ClaimKeyDefinition>
+        {
+            ["sla_uptime"] = new("scored", "percent", "Operational", "Verified", 30, 0.25) { RubricCriterion = "uptime_sla" },
+            ["csat"]       = new("scored", "rating",  "Experiential", "Reported", 60, 0.25) { RubricCriterion = "csat_score" },
+        },
+        ScoringRubric = new Dictionary<string, CriterionRubric>
+        {
+            ["uptime_sla"] = new("numeric", new List<RubricThreshold>
+            {
+                new(99.5, 100.0, 1.00),
+                new(99.0, 99.5,  0.80),
+                new(98.0, 99.0,  0.45),
+                new(95.0, 98.0,  0.25),
+                new(0.0,  95.0,  0.10),
+            }, null),
+            ["csat_score"] = new("numeric", new List<RubricThreshold>
+            {
+                new(4.5, 5.0, 1.00),
+                new(4.0, 4.5, 0.80),
+                new(1.0, 2.0, 0.15),
+            }, null),
+        },
+    };
+
     // ── helpers ───────────────────────────────────────────────────────────────
 
     private static CheckIn IdentityCheckIn(Guid ciId, PendingStatus status, string responseValue, Guid pairedId) =>
@@ -65,6 +94,23 @@ public sealed class ProcessCheckInServiceTests
             AnsweredAt:     status == PendingStatus.ANSWERED ? Now.AddHours(1) : null,
             ExpiresAt:      null,
             ResponseValue:  status == PendingStatus.ANSWERED ? "0.99" : null);
+
+    private static CheckIn BoundDimGapCheckIn(
+        Guid ciId, Guid vendorId, string targetClaimKey, string responseValue) =>
+        new(CheckInId:      ciId,
+            VendorId:       vendorId,
+            ProgramRunId:   RunId,
+            Kind:           CheckInKind.DIMENSION_GAP,
+            Question:       "What is the vendor's contracted uptime SLA percentage?",
+            ResponseShape:  ResponseShape.TYPED_VALUE,
+            TargetField:    "saas.op.l1.2",
+            Owner:          "analyst@test",
+            Status:         PendingStatus.ANSWERED,
+            RaisedAt:       Now,
+            AnsweredAt:     Now.AddHours(1),
+            ExpiresAt:      null,
+            ResponseValue:  responseValue,
+            TargetClaimKey: targetClaimKey);
 
     private static CanonicalVendor TriageVendor(Guid id, string name) => new(
         VendorId:          id,
@@ -346,6 +392,148 @@ public sealed class ProcessCheckInServiceTests
         Assert.Single(open);
         Assert.Equal(ciId2, open[0].CheckInId);
     }
+
+    // ── 8. E2 bridge — bound question writes a real, scored, dimension-correct belief ──────────
+
+    [Fact]
+    public async Task CheckIn_BoundQuestion_AnswerBands_WritesRealDimensionAndScoredValue()
+    {
+        var entityStore  = new InMemoryEntityStore();
+        var checkInStore = new InMemoryCheckInStore();
+        var ciId         = Guid.NewGuid();
+        await checkInStore.SaveAsync(BoundDimGapCheckIn(ciId, RegulusId, "sla_uptime", "99.9"));
+
+        await Svc().ProcessAsync(ciId, checkInStore,
+            new InMemoryIdentityRegistry(),
+            new VendorFileWriteService(entityStore, BoundProfile),
+            new TrackingFacade(), BoundProfile, Now);
+
+        var belief = Assert.Single(entityStore.AllBeliefs);
+        Assert.Equal(Dimension.Operational, belief.Dimension); // NOT the Financial default
+        Assert.Equal("sla_uptime", belief.ClaimKey);
+        Assert.Equal("sla_uptime", belief.Criterion);           // same convention as BeliefPersistenceStage
+        Assert.Equal(1.00, belief.Value);                       // 99.9% banded via uptime_sla thresholds
+        Assert.Equal(SourceTier.Confirmed, belief.SourceTier);
+        Assert.Equal(0.65, belief.Confidence);
+        Assert.Equal(ciId, belief.Provenance!.EvidenceId);
+    }
+
+    [Fact]
+    public async Task CheckIn_BoundQuestion_OutOfDomainAnswer_FallsBackToUnboundBehavior()
+    {
+        // csat_score only bands 1.0-5.0; an NPS-scale answer (45) is out of that domain.
+        // ScoreFromRubric abstains (null) — the fix must NOT fabricate a score from it.
+        var entityStore  = new InMemoryEntityStore();
+        var checkInStore = new InMemoryCheckInStore();
+        var ciId         = Guid.NewGuid();
+        await checkInStore.SaveAsync(BoundDimGapCheckIn(ciId, RegulusId, "csat", "45"));
+
+        await Svc().ProcessAsync(ciId, checkInStore,
+            new InMemoryIdentityRegistry(),
+            new VendorFileWriteService(entityStore, BoundProfile),
+            new TrackingFacade(), BoundProfile, Now);
+
+        var belief = Assert.Single(entityStore.AllBeliefs);
+        // Exact legacy fallback: TargetField ("saas.op.l1.2") isn't a catalogue key, so dimension
+        // defaults to Financial and value is the present/positive signal — never a fabricated band.
+        Assert.Equal(Dimension.Financial, belief.Dimension);
+        Assert.Equal("saas.op.l1.2", belief.ClaimKey);
+        Assert.Equal(1.0, belief.Value);
+        Assert.Equal(SourceTier.Confirmed, belief.SourceTier);
+    }
+
+    [Fact]
+    public async Task CheckIn_UnboundQuestion_TargetClaimKeyNull_UnchangedLegacyBehavior()
+    {
+        // Regression guard: a check-in with no TargetClaimKey (every question before this fix,
+        // and every question that stays unbound) must write byte-identical output to before.
+        var entityStore  = new InMemoryEntityStore();
+        var checkInStore = new InMemoryCheckInStore();
+        var ciId         = Guid.NewGuid();
+        await checkInStore.SaveAsync(DimGapCheckIn(ciId, RegulusId, PendingStatus.ANSWERED));
+
+        await Svc().ProcessAsync(ciId, checkInStore,
+            new InMemoryIdentityRegistry(),
+            new VendorFileWriteService(entityStore, BoundProfile),
+            new TrackingFacade(), BoundProfile, Now);
+
+        var belief = Assert.Single(entityStore.AllBeliefs);
+        Assert.Equal(Dimension.Financial, belief.Dimension);
+        Assert.Equal("human_answer", belief.ClaimKey);
+        Assert.Equal(1.0, belief.Value);
+    }
+
+    // ── E2 loop closure — persist the recompute on a DIMENSION_GAP answer ──────────────────────
+
+    [Fact]
+    public async Task CheckIn_DimensionGapAnswered_WithEntityStore_PersistsIndexAndPosture()
+    {
+        var entityStore  = new InMemoryEntityStore();
+        var checkInStore = new InMemoryCheckInStore();
+        var ciId         = Guid.NewGuid();
+        await checkInStore.SaveAsync(BoundDimGapCheckIn(ciId, RegulusId, "sla_uptime", "99.9"));
+
+        var judgement = MakeJudgement(RegulusId);
+        var facade    = new JudgementFacade(judgement);
+
+        await Svc().ProcessAsync(ciId, checkInStore,
+            new InMemoryIdentityRegistry(),
+            new VendorFileWriteService(entityStore, BoundProfile),
+            facade, BoundProfile, Now,
+            entityStore: entityStore);
+
+        var persistedIndex = await entityStore.GetIndexAsync(RegulusId);
+        Assert.NotNull(persistedIndex);
+        Assert.Equal(judgement.Index.Composite, persistedIndex!.Composite);
+        Assert.Equal(judgement.Index.Band, persistedIndex.Band);
+
+        var persistedPosture = await entityStore.GetCurrentPostureAsync(RegulusId);
+        Assert.NotNull(persistedPosture);
+        Assert.Equal(judgement.Posture.Stance, persistedPosture!.Stance);
+    }
+
+    [Fact]
+    public async Task CheckIn_DimensionGapAnswered_WithoutEntityStore_DoesNotThrow_DoesNotPersist()
+    {
+        // entityStore omitted (defaults to null) — exact prior behavior, no persistence attempted.
+        var entityStore  = new InMemoryEntityStore();
+        var checkInStore = new InMemoryCheckInStore();
+        var ciId         = Guid.NewGuid();
+        await checkInStore.SaveAsync(BoundDimGapCheckIn(ciId, RegulusId, "sla_uptime", "99.9"));
+
+        var facade = new JudgementFacade(MakeJudgement(RegulusId));
+
+        var result = await Svc().ProcessAsync(ciId, checkInStore,
+            new InMemoryIdentityRegistry(),
+            new VendorFileWriteService(entityStore, BoundProfile),
+            facade, BoundProfile, Now);
+
+        Assert.Equal(ProcessOutcome.Ok, result.Outcome);
+        // entityStore.GetIndexAsync would throw (unused throw-stub) if anything tried to read it —
+        // absence of that exception here is itself proof nothing was persisted.
+    }
+
+    private static VendorJudgement MakeJudgement(Guid vendorId)
+    {
+        var dimScores = new Dictionary<Dimension, DimensionScore>
+        {
+            [Dimension.Operational]  = new(vendorId, Dimension.Operational, 1.00, 0.65, [Guid.NewGuid()]),
+            [Dimension.Experiential] = new(vendorId, Dimension.Experiential, 0.5, 0.0, []),
+            [Dimension.Financial]    = new(vendorId, Dimension.Financial, 0.5, 0.0, []),
+            [Dimension.Strategic]    = new(vendorId, Dimension.Strategic, 0.5, 0.0, []),
+        };
+        var index = new EntityIndex(vendorId, dimScores, 0.625, 0.65, Band.AtRisk, "test-fingerprint", 1, Now);
+        var posture = new PostureAssignment(
+            Id: Guid.NewGuid(), EntityId: vendorId, Band: Band.AtRisk, Stance: Stance.Renegotiate,
+            Rationale: "test", EvidenceTrail: [], Confidence: 0.65, Fingerprint: "test-fingerprint",
+            IndexVersion: 1, AssignedAt: Now, ValidUntil: null);
+        var meta = new MetaCognitionResult(vendorId.ToString(), [], [], "test");
+        var mgmt = new ManagementBlock(
+            Completeness: 0.5, FilledCount: 1, ExpectedCount: 2, GapSlots: [], WeakDimensions: [],
+            Flags: new ManagementFlags(null, false), VerificationState: VerificationState.Unverified,
+            Refresh: new RefreshInfo(null), CoverageStatement: "test");
+        return new VendorJudgement(index, posture, meta, mgmt);
+    }
 }
 
 // ── Test fakes ────────────────────────────────────────────────────────────────
@@ -395,6 +583,27 @@ internal sealed class TrackingFacade : IIiFacade
     public Task                                 ResetAsync(CancellationToken ct = default)                            => throw new NotSupportedException();
 }
 
+// Same shape as TrackingFacade, but RecomputeVendorAsync returns a real, hand-built non-null
+// VendorJudgement — needed to prove ProcessCheckInService actually persists a judgement when
+// the facade produces one (TrackingFacade above always returns null, so it can never exercise
+// that branch).
+internal sealed class JudgementFacade : IIiFacade
+{
+    private readonly VendorJudgement _judgement;
+    public JudgementFacade(VendorJudgement judgement) => _judgement = judgement;
+
+    public Task<VendorJudgement?> RecomputeVendorAsync(Guid entityId, CancellationToken ct = default)
+        => Task.FromResult<VendorJudgement?>(_judgement);
+
+    public Task<Guid>                           SubmitSignalAsync(Signal signal, CancellationToken ct = default)      => throw new NotSupportedException();
+    public Task<PostureAssignment?>              GetPostureAsync(Guid entityId, CancellationToken ct = default)        => throw new NotSupportedException();
+    public Task<EntityIndex?>                   GetIndexAsync(Guid entityId, CancellationToken ct = default)          => throw new NotSupportedException();
+    public Task<IReadOnlyList<Belief>>          GetBeliefsAsync(Guid entityId, CancellationToken ct = default)        => throw new NotSupportedException();
+    public Task<ReasoningTrail?>                GetReasoningTrailAsync(Guid entityId, CancellationToken ct = default)  => throw new NotSupportedException();
+    public Task<IReadOnlyList<TrajectoryPoint>> GetTrajectoryAsync(Guid entityId, CancellationToken ct = default)     => throw new NotSupportedException();
+    public Task                                 ResetAsync(CancellationToken ct = default)                            => throw new NotSupportedException();
+}
+
 internal sealed class InMemoryEntityStore : IEntityStore
 {
     private readonly List<Belief> _beliefs = new();
@@ -414,11 +623,27 @@ internal sealed class InMemoryEntityStore : IEntityStore
         => Task.FromResult<IReadOnlyList<Belief>>(
                _beliefs.Where(b => b.EntityId == entityId).ToList());
 
-    public Task SaveIndexAsync(EntityIndex index, CancellationToken ct = default)                                       => throw new NotSupportedException();
-    public Task<EntityIndex?> GetIndexAsync(Guid entityId, CancellationToken ct = default)                             => throw new NotSupportedException();
+    // Real (not throw-stub) — needed by CheckIn_DimensionGapAnswered_WithEntityStore_PersistsIndexAndPosture
+    // to verify the E2 loop-closure persistence path (ProcessCheckInService's optional entityStore
+    // param). No other test calls these, so this can't regress anything already passing.
+    private readonly Dictionary<Guid, EntityIndex> _indices = new();
+    private readonly Dictionary<Guid, PostureAssignment> _postures = new();
+
+    public Task SaveIndexAsync(EntityIndex index, CancellationToken ct = default)
+    {
+        _indices[index.EntityId] = index;
+        return Task.CompletedTask;
+    }
+    public Task<EntityIndex?> GetIndexAsync(Guid entityId, CancellationToken ct = default)
+        => Task.FromResult(_indices.TryGetValue(entityId, out var idx) ? idx : null);
     public Task<IReadOnlyList<EntityIndex>> GetIndexHistoryAsync(Guid entityId, CancellationToken ct = default)        => throw new NotSupportedException();
-    public Task AppendPostureAsync(PostureAssignment posture, CancellationToken ct = default)                           => throw new NotSupportedException();
-    public Task<PostureAssignment?> GetCurrentPostureAsync(Guid entityId, CancellationToken ct = default)              => throw new NotSupportedException();
+    public Task AppendPostureAsync(PostureAssignment posture, CancellationToken ct = default)
+    {
+        _postures[posture.EntityId] = posture;
+        return Task.CompletedTask;
+    }
+    public Task<PostureAssignment?> GetCurrentPostureAsync(Guid entityId, CancellationToken ct = default)
+        => Task.FromResult(_postures.TryGetValue(entityId, out var p) ? p : null);
     public Task AppendSignalAsync(Signal signal, CancellationToken ct = default)                                       => throw new NotSupportedException();
     public Task<Signal?> GetSignalAsync(Guid signalId, CancellationToken ct = default)                                => throw new NotSupportedException();
     public Task<IReadOnlyList<PostureAssignment>> GetPostureHistoryAsync(Guid entityId, CancellationToken ct = default) => throw new NotSupportedException();

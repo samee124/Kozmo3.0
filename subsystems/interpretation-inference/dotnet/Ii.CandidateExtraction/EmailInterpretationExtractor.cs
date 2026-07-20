@@ -33,7 +33,8 @@ public sealed class EmailInterpretationExtractor
     // schema entry — mirrors DocumentBeliefExtractor.ResolveExtractionSchema's defensive pattern
     // (never leave a document/email type without a key set just because a schema is missing).
     private static readonly string[] FallbackBeliefKeys =
-        ["payment_terms", "renewal_date", "annual_value", "invoice_amount", "sla_uptime"];
+        ["payment_terms", "renewal_date", "annual_value", "invoice_amount", "sla_uptime", "support_responsiveness",
+         "incident_duration_hours"];
     private static readonly string[] FallbackSignalFields =
         ["sentiment", "commitment", "issue_raised", "stakeholder_signal", "request"];
 

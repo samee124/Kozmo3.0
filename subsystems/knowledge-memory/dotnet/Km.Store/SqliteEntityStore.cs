@@ -1,4 +1,4 @@
-using System.Linq;
+﻿using System.Linq;
 using System.Text.Json;
 using Kozmo.Contracts;
 using Kozmo.Contracts.Config;
@@ -11,7 +11,7 @@ namespace Km.Store;
 /// IEntityStore over SQLite. Beliefs and postures are append-only; no edit/delete path.
 /// Behind IEntityStore so Azure SQL drops in without caller changes.
 /// </summary>
-public sealed class SqliteEntityStore : IEntityStore, IRegistryStore, ICheckInRowStore, IOwnerChannelPrefStore, IDisposable
+public sealed class SqliteEntityStore : IEntityStore, IRegistryStore, ICheckInRowStore, IOwnerChannelPrefStore, IDocumentStore, IDisposable
 {
     private readonly SqliteConnection _conn;
     private readonly SaasProfile?     _profile;
@@ -419,20 +419,27 @@ public sealed class SqliteEntityStore : IEntityStore, IRegistryStore, ICheckInRo
     /// boot-time re-registration into EntityRegistry — without this, a vendor discovered by a
     /// prior process instance vanishes from /vendors on restart even though its beliefs/checkins
     /// remain in SQLite (LoadVendorsAsync deliberately excludes them; see its doc comment).
-    /// Rows are deduped per comparison_key (falling back to canonical_name), preferring whichever
-    /// duplicate has beliefs recorded — a re-run can leave behind an empty duplicate row, and that
-    /// one should never win over the real one just for being newer.
+    /// Rows are deduped per comparison_key (falling back to canonical_name); tiebreak matches
+    /// <see cref="LoadKyvVendorsByProgramAsync"/> exactly (assessed-state, then belief count, then
+    /// recency) — this is the query that populates EntityRegistry at boot, so GET /vendors/{id}
+    /// (which reads EntityRegistry.GetEntity, not the vendors table directly) would otherwise keep
+    /// resolving to whichever duplicate this method picks, regardless of which one is fixed there.
+    /// Excludes status='Absorbed' rows (B2 reconciliation, retired duplicates/false-positives) —
+    /// without this filter an absorbed row would still surface here even though it carries no
+    /// unique data, since it isn't the comparison_key group's dedup winner either way.
     /// </summary>
     public Task<IReadOnlyList<(Guid Id, string Name, DateTimeOffset? RenewalDate)>> LoadAllKyvVendorsAsync()
     {
         using var cmd = _conn.CreateCommand();
         cmd.CommandText = @"
             SELECT v.id, v.canonical_name, v.renewal_date, v.comparison_key, v.created_at,
-                   (SELECT COUNT(*) FROM beliefs b WHERE b.entity_id = v.id) AS belief_count
+                   (SELECT COUNT(*) FROM beliefs b WHERE b.entity_id = v.id) AS belief_count,
+                   (SELECT COUNT(*) FROM entity_indices ei WHERE ei.entity_id = v.id) AS index_count
             FROM vendors v
-            WHERE v.program_run_id IS NOT NULL";
+            WHERE v.program_run_id IS NOT NULL
+              AND (v.status IS NULL OR v.status <> 'Absorbed')";
 
-        var rows = new List<(Guid Id, string Name, DateTimeOffset? Renewal, string GroupKey, DateTimeOffset CreatedAt, long BeliefCount)>();
+        var rows = new List<(Guid Id, string Name, DateTimeOffset? Renewal, string GroupKey, DateTimeOffset CreatedAt, long BeliefCount, long IndexCount)>();
         using (var reader = cmd.ExecuteReader())
         {
             while (reader.Read())
@@ -444,13 +451,88 @@ public sealed class SqliteEntityStore : IEntityStore, IRegistryStore, ICheckInRo
                 var comparisonKey = reader.IsDBNull(3) ? name : reader.GetString(3);
                 var createdAt    = DateTimeOffset.Parse(reader.GetString(4));
                 var beliefCount  = reader.GetInt64(5);
-                rows.Add((id, name, renewal, comparisonKey, createdAt, beliefCount));
+                var indexCount   = reader.GetInt64(6);
+                rows.Add((id, name, renewal, comparisonKey, createdAt, beliefCount, indexCount));
             }
         }
 
         var deduped = rows
             .GroupBy(r => r.GroupKey, StringComparer.OrdinalIgnoreCase)
-            .Select(g => g.OrderByDescending(r => r.BeliefCount).ThenByDescending(r => r.CreatedAt).First())
+            .Select(g => g
+                .OrderByDescending(r => r.IndexCount > 0)
+                .ThenByDescending(r => r.BeliefCount)
+                .ThenByDescending(r => r.CreatedAt)
+                .First())
+            .Select(r => (r.Id, r.Name, r.Renewal))
+            .ToList();
+
+        return Task.FromResult<IReadOnlyList<(Guid, string, DateTimeOffset?)>>(deduped);
+    }
+
+    // ── Programs — durable containers spanning multiple runs ───────────────────
+
+    /// <summary>Lists every real program (just one today — see VendorCleanupProgramId).</summary>
+    public Task<IReadOnlyList<ProgramRow>> GetAllProgramsAsync()
+    {
+        using var cmd = _conn.CreateCommand();
+        cmd.CommandText = "SELECT id, name, created_at FROM programs ORDER BY created_at";
+        var results = new List<ProgramRow>();
+        using var reader = cmd.ExecuteReader();
+        while (reader.Read())
+            results.Add(new ProgramRow(
+                Guid.Parse(reader.GetString(0)),
+                reader.GetString(1),
+                DateTimeOffset.Parse(reader.GetString(2))));
+        return Task.FromResult<IReadOnlyList<ProgramRow>>(results);
+    }
+
+    /// <summary>
+    /// Loads every KYV-discovered vendor belonging to <paramref name="programId"/>, across all of
+    /// that program's runs — the program-scoped counterpart to <see cref="LoadAllKyvVendorsAsync"/>,
+    /// same dedup-by-comparison-key discipline (a re-run can leave behind an empty duplicate row).
+    /// Tiebreak (not identity resolution — the comparison_key grouping itself is untouched, this
+    /// only orders which surviving duplicate wins): prefer a duplicate that has actually been
+    /// assessed (a persisted Index — see IEntityStore.SaveIndexAsync) over one that hasn't, since a
+    /// real, banded posture is more useful to surface than raw belief volume. Belief count, then
+    /// recency, remain the tiebreak among duplicates tied on assessed-state.
+    /// </summary>
+    public Task<IReadOnlyList<(Guid Id, string Name, DateTimeOffset? RenewalDate)>> LoadKyvVendorsByProgramAsync(
+        Guid programId)
+    {
+        using var cmd = _conn.CreateCommand();
+        cmd.CommandText = @"
+            SELECT v.id, v.canonical_name, v.renewal_date, v.comparison_key, v.created_at,
+                   (SELECT COUNT(*) FROM beliefs b WHERE b.entity_id = v.id) AS belief_count,
+                   (SELECT COUNT(*) FROM entity_indices ei WHERE ei.entity_id = v.id) AS index_count
+            FROM vendors v
+            WHERE v.program_id = @program_id
+              AND (v.status IS NULL OR v.status <> 'Absorbed')";
+        cmd.Parameters.AddWithValue("@program_id", programId.ToString());
+
+        var rows = new List<(Guid Id, string Name, DateTimeOffset? Renewal, string GroupKey, DateTimeOffset CreatedAt, long BeliefCount, long IndexCount)>();
+        using (var reader = cmd.ExecuteReader())
+        {
+            while (reader.Read())
+            {
+                var id           = Guid.Parse(reader.GetString(0));
+                var name         = reader.GetString(1);
+                var renewalRaw   = reader.IsDBNull(2) ? null : reader.GetString(2);
+                DateTimeOffset? renewal = renewalRaw is null ? null : DateTimeOffset.Parse(renewalRaw);
+                var comparisonKey = reader.IsDBNull(3) ? name : reader.GetString(3);
+                var createdAt    = DateTimeOffset.Parse(reader.GetString(4));
+                var beliefCount  = reader.GetInt64(5);
+                var indexCount   = reader.GetInt64(6);
+                rows.Add((id, name, renewal, comparisonKey, createdAt, beliefCount, indexCount));
+            }
+        }
+
+        var deduped = rows
+            .GroupBy(r => r.GroupKey, StringComparer.OrdinalIgnoreCase)
+            .Select(g => g
+                .OrderByDescending(r => r.IndexCount > 0)
+                .ThenByDescending(r => r.BeliefCount)
+                .ThenByDescending(r => r.CreatedAt)
+                .First())
             .Select(r => (r.Id, r.Name, r.Renewal))
             .ToList();
 
@@ -572,6 +654,136 @@ public sealed class SqliteEntityStore : IEntityStore, IRegistryStore, ICheckInRo
         MigrateRegistryColumns();
         MigrateCheckInColumns();
         MigrateOAuthTokenTable();
+        MigratePrograms();
+        MigrateDocuments();
+    }
+
+    /// <summary>
+    /// Fixed, well-known id for the one real program that exists today ("Vendor Cleanup Program").
+    /// Multiple, user-creatable programs are future work — this keeps the id stable across every
+    /// process start via INSERT OR IGNORE, the same fixed-GUID convention SeedData.cs uses for the
+    /// legacy demo vendors.
+    /// </summary>
+    internal static readonly Guid VendorCleanupProgramId = Guid.Parse("aaaaaaaa-0001-0000-0000-000000000001");
+
+    /// <summary>
+    /// Adds the programs table + vendors.program_id column, and ensures every existing KYV-
+    /// discovered vendor (program_run_id IS NOT NULL) is backfilled onto the one real program. A
+    /// Program is a durable container that can span multiple ingestion runs — NOT one-run-equals-
+    /// one-program; program_run_id (a single ingestion event) and program_id (its durable
+    /// container) are deliberately separate columns.
+    /// </summary>
+    private void MigratePrograms()
+    {
+        using (var create = _conn.CreateCommand())
+        {
+            create.CommandText = """
+                CREATE TABLE IF NOT EXISTS programs (
+                    id         TEXT NOT NULL PRIMARY KEY,
+                    name       TEXT NOT NULL,
+                    created_at TEXT NOT NULL
+                );
+                """;
+            create.ExecuteNonQuery();
+        }
+
+        TryAddColumn("vendors", "program_id", "TEXT");
+
+        using (var seed = _conn.CreateCommand())
+        {
+            seed.CommandText =
+                "INSERT OR IGNORE INTO programs (id, name, created_at) VALUES (@id, @name, @created_at)";
+            seed.Parameters.AddWithValue("@id",         VendorCleanupProgramId.ToString());
+            seed.Parameters.AddWithValue("@name",       "Vendor Cleanup Program");
+            seed.Parameters.AddWithValue("@created_at", DateTimeOffset.UtcNow.ToString("O"));
+            seed.ExecuteNonQuery();
+        }
+
+        // Backfill: every KYV-discovered vendor from any run, not yet assigned a program, belongs
+        // to the one real program. Legacy demo vendors (program_run_id IS NULL) are untouched.
+        using (var backfill = _conn.CreateCommand())
+        {
+            backfill.CommandText =
+                "UPDATE vendors SET program_id = @pid WHERE program_run_id IS NOT NULL AND program_id IS NULL";
+            backfill.Parameters.AddWithValue("@pid", VendorCleanupProgramId.ToString());
+            backfill.ExecuteNonQuery();
+        }
+    }
+
+    /// <summary>
+    /// Adds the documents table — retained source documents (see IDocumentStore). All three
+    /// retention options (raw bytes, extracted text, Drive pointer) are additive columns on the
+    /// same row, not separate tables — a document may populate any or all of them.
+    /// </summary>
+    private void MigrateDocuments()
+    {
+        using var cmd = _conn.CreateCommand();
+        cmd.CommandText = """
+            CREATE TABLE IF NOT EXISTS documents (
+                id            TEXT NOT NULL PRIMARY KEY,
+                program_id    TEXT,
+                vendor_id     TEXT,
+                filename      TEXT NOT NULL,
+                content       BLOB,
+                content_text  TEXT,
+                drive_file_id TEXT,
+                ingested_at   TEXT NOT NULL
+            );
+            CREATE INDEX IF NOT EXISTS ix_documents_vendor ON documents(vendor_id);
+            """;
+        cmd.ExecuteNonQuery();
+    }
+
+    // ── IDocumentStore ───────────────────────────────────────────────────────
+
+    /// <summary>
+    /// Insert-or-replace keyed on Id — callers (DocumentPersistenceStage) compute a deterministic
+    /// Id from the Drive file id (or a content hash when no Drive id exists), so re-ingesting the
+    /// same document updates its existing row (fresh content/vendor/timestamp) instead of minting
+    /// a new orphan row every run.
+    /// </summary>
+    public Task UpsertDocumentAsync(DocumentRow doc, CancellationToken ct = default)
+    {
+        using var cmd = _conn.CreateCommand();
+        cmd.CommandText = """
+            INSERT OR REPLACE INTO documents
+              (id, program_id, vendor_id, filename, content, content_text, drive_file_id, ingested_at)
+            VALUES
+              (@id, @program_id, @vendor_id, @filename, @content, @content_text, @drive_file_id, @ingested_at)
+            """;
+        cmd.Parameters.AddWithValue("@id",            doc.Id.ToString());
+        cmd.Parameters.AddWithValue("@program_id",    doc.ProgramId.HasValue ? doc.ProgramId.Value.ToString() : (object)DBNull.Value);
+        cmd.Parameters.AddWithValue("@vendor_id",     doc.VendorId.HasValue  ? doc.VendorId.Value.ToString()  : (object)DBNull.Value);
+        cmd.Parameters.AddWithValue("@filename",      doc.Filename);
+        cmd.Parameters.AddWithValue("@content",       (object?)doc.Content     ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("@content_text",  (object?)doc.ContentText ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("@drive_file_id", (object?)doc.DriveFileId ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("@ingested_at",   doc.IngestedAt.ToString("O"));
+        cmd.ExecuteNonQuery();
+        return Task.CompletedTask;
+    }
+
+    public Task<DocumentRow?> GetDocumentAsync(Guid id, CancellationToken ct = default)
+    {
+        using var cmd = _conn.CreateCommand();
+        cmd.CommandText = """
+            SELECT id, program_id, vendor_id, filename, content, content_text, drive_file_id, ingested_at
+            FROM documents WHERE id = @id
+            """;
+        cmd.Parameters.AddWithValue("@id", id.ToString());
+        using var reader = cmd.ExecuteReader();
+        if (!reader.Read()) return Task.FromResult<DocumentRow?>(null);
+
+        var row = new DocumentRow(
+            Id:          Guid.Parse(reader.GetString(0)),
+            ProgramId:   reader.IsDBNull(1) ? null : Guid.Parse(reader.GetString(1)),
+            VendorId:    reader.IsDBNull(2) ? null : Guid.Parse(reader.GetString(2)),
+            Filename:    reader.GetString(3),
+            Content:     reader.IsDBNull(4) ? null : (byte[])reader.GetValue(4),
+            ContentText: reader.IsDBNull(5) ? null : reader.GetString(5),
+            DriveFileId: reader.IsDBNull(6) ? null : reader.GetString(6),
+            IngestedAt:  DateTimeOffset.Parse(reader.GetString(7)));
+        return Task.FromResult<DocumentRow?>(row);
     }
 
     /// <summary>Adds identity-resolution columns to the vendors table and creates vendor_aliases if absent.</summary>
@@ -727,12 +939,12 @@ public sealed class SqliteEntityStore : IEntityStore, IRegistryStore, ICheckInRo
               (id, canonical_name, created_at,
                comparison_key, entity_type, confidence, flags, status,
                rebrand_map_ref, acquisition_map_ref, absorbed_into_vendor_id,
-               program_run_id, entity_role, domains_json)
+               program_run_id, entity_role, domains_json, program_id)
             VALUES
               (@id, @name, @created_at,
                @comparison_key, @entity_type, @confidence, @flags, @status,
                @rebrand_map_ref, @acquisition_map_ref, @absorbed_into_vendor_id,
-               @program_run_id, @entity_role, @domains_json)
+               @program_run_id, @entity_role, @domains_json, @program_id)
             """;
         cmd.Parameters.AddWithValue("@id",                      vendor.VendorId.ToString());
         cmd.Parameters.AddWithValue("@name",                    vendor.CanonicalName);
@@ -752,6 +964,14 @@ public sealed class SqliteEntityStore : IEntityStore, IRegistryStore, ICheckInRo
                                                                     : (object)DBNull.Value);
         cmd.Parameters.AddWithValue("@entity_role",             vendor.EntityRole   ?? (object)DBNull.Value);
         cmd.Parameters.AddWithValue("@domains_json",            vendor.DomainsJson  ?? (object)DBNull.Value);
+        // A Program is a durable container that can span multiple runs (program_run_id is one
+        // ingestion event; program_id is its container) — every KYV-discovered vendor belongs to
+        // the one real program that exists today. Legacy demo vendors (no program_run_id) get no
+        // program_id either. When multi-program support lands, this is the seam where a real
+        // caller-supplied programId replaces the fixed constant.
+        cmd.Parameters.AddWithValue("@program_id",              vendor.ProgramRunId.HasValue
+                                                                    ? VendorCleanupProgramId.ToString()
+                                                                    : (object)DBNull.Value);
         cmd.ExecuteNonQuery();
         return Task.CompletedTask;
     }
@@ -848,11 +1068,11 @@ public sealed class SqliteEntityStore : IEntityStore, IRegistryStore, ICheckInRo
             INSERT OR REPLACE INTO checkins
               (checkin_id, vendor_id, program_run_id, kind, question, response_shape,
                target_field, owner, status, raised_at, answered_at, expires_at,
-               response_value, paired_vendor_id)
+               response_value, paired_vendor_id, target_claim_key)
             VALUES
               (@checkin_id, @vendor_id, @program_run_id, @kind, @question, @response_shape,
                @target_field, @owner, @status, @raised_at, @answered_at, @expires_at,
-               @response_value, @paired_vendor_id)
+               @response_value, @paired_vendor_id, @target_claim_key)
             """;
         cmd.Parameters.AddWithValue("@checkin_id",       row.CheckInId.ToString());
         cmd.Parameters.AddWithValue("@vendor_id",        row.VendorId.ToString());
@@ -868,6 +1088,7 @@ public sealed class SqliteEntityStore : IEntityStore, IRegistryStore, ICheckInRo
         cmd.Parameters.AddWithValue("@expires_at",       row.ExpiresAt.HasValue     ? row.ExpiresAt.Value.ToString("O")     : (object)DBNull.Value);
         cmd.Parameters.AddWithValue("@response_value",   row.ResponseValue          ?? (object)DBNull.Value);
         cmd.Parameters.AddWithValue("@paired_vendor_id", row.PairedVendorId.HasValue ? row.PairedVendorId.Value.ToString() : (object)DBNull.Value);
+        cmd.Parameters.AddWithValue("@target_claim_key", row.TargetClaimKey  ?? (object)DBNull.Value);
         cmd.ExecuteNonQuery();
         return Task.CompletedTask;
     }
@@ -941,6 +1162,7 @@ public sealed class SqliteEntityStore : IEntityStore, IRegistryStore, ICheckInRo
     private static CheckInRow ReadCheckInRow(Microsoft.Data.Sqlite.SqliteDataReader reader)
     {
         var pairedCol = reader.GetOrdinal("paired_vendor_id");
+        var claimKeyCol = reader.GetOrdinal("target_claim_key");
         return new CheckInRow(
             CheckInId:      Guid.Parse(reader.GetString(reader.GetOrdinal("checkin_id"))),
             VendorId:       Guid.Parse(reader.GetString(reader.GetOrdinal("vendor_id"))),
@@ -955,12 +1177,14 @@ public sealed class SqliteEntityStore : IEntityStore, IRegistryStore, ICheckInRo
             AnsweredAt:     reader.IsDBNull(reader.GetOrdinal("answered_at"))   ? null : DateTimeOffset.Parse(reader.GetString(reader.GetOrdinal("answered_at"))),
             ExpiresAt:      reader.IsDBNull(reader.GetOrdinal("expires_at"))    ? null : DateTimeOffset.Parse(reader.GetString(reader.GetOrdinal("expires_at"))),
             ResponseValue:  reader.IsDBNull(reader.GetOrdinal("response_value")) ? null : reader.GetString(reader.GetOrdinal("response_value")),
-            PairedVendorId: reader.IsDBNull(pairedCol) ? null : Guid.Parse(reader.GetString(pairedCol)));
+            PairedVendorId: reader.IsDBNull(pairedCol)   ? null : Guid.Parse(reader.GetString(pairedCol)),
+            TargetClaimKey: reader.IsDBNull(claimKeyCol) ? null : reader.GetString(claimKeyCol));
     }
 
     private void MigrateCheckInColumns()
     {
         TryAddColumn("checkins", "paired_vendor_id", "TEXT");
+        TryAddColumn("checkins", "target_claim_key", "TEXT");
     }
 
     private void MigrateOAuthTokenTable()

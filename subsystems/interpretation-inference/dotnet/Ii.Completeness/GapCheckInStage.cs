@@ -76,7 +76,8 @@ public sealed class GapCheckInStage
                 AnsweredAt:     null,
                 ExpiresAt:      null,
                 ResponseValue:  null,
-                PairedVendorId: null);
+                PairedVendorId: null,
+                TargetClaimKey: q.TargetClaimKey);  // E2 bridge — null for unbound questions
 
             await checkInStore.SaveAsync(checkIn, ct);
             raised.Add(checkIn);

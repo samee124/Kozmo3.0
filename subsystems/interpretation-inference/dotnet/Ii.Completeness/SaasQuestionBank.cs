@@ -21,8 +21,11 @@ public static class SaasQuestionBank
         // L1: baseline — every SaaS vendor
         new("saas.op.l1.1", Dimension.Operational, "Does the vendor have a documented uptime SLA?",
             AnswerType.YesNo,      DepthLevel.L1, 0.60),
+        // E2 bridge: bound to claim_key "sla_uptime" (rubric_criterion "uptime_sla", already
+        // banded in scoring_rubric.saas.v1.json) — a human answer here writes a real scored
+        // Operational belief, not just a present-field signal.
         new("saas.op.l1.2", Dimension.Operational, "What is the vendor's contracted uptime SLA percentage?",
-            AnswerType.TypedValue, DepthLevel.L1, 0.60),
+            AnswerType.TypedValue, DepthLevel.L1, 0.60, TargetClaimKey: "sla_uptime"),
         // L2: standard
         new("saas.op.l2.1", Dimension.Operational, "Does the vendor have a documented incident response procedure?",
             AnswerType.YesNo,      DepthLevel.L2, 0.65),
@@ -37,8 +40,11 @@ public static class SaasQuestionBank
         // ── Experiential ─────────────────────────────────────────────────────
         new("saas.exp.l1.1", Dimension.Experiential, "Has the vendor met their contracted SLA over the past 12 months?",
             AnswerType.YesNo,       DepthLevel.L1, 0.60),
+        // E2 bridge: bound to claim_key "csat" (rubric_criterion "csat_score", banded 1.0-5.0).
+        // An out-of-range answer (e.g. an NPS-scale number) fails to band and falls back to the
+        // unbound present-field behavior — never a fabricated score (ProcessCheckInService).
         new("saas.exp.l1.2", Dimension.Experiential, "What is the current CSAT or NPS score recorded for the vendor?",
-            AnswerType.TypedValue,  DepthLevel.L1, 0.60),
+            AnswerType.TypedValue,  DepthLevel.L1, 0.60, TargetClaimKey: "csat"),
         new("saas.exp.l2.1", Dimension.Experiential, "Have there been unresolved escalations with the vendor in the past 6 months?",
             AnswerType.YesNo,       DepthLevel.L2, 0.65),
         new("saas.exp.l2.2", Dimension.Experiential, "What is the vendor's support ticket average resolution time?",

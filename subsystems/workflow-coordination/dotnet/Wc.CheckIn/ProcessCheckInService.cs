@@ -1,7 +1,9 @@
 using Ig.Contracts;
 using Ii.Contracts;
+using Ii.Observation;
 using Kozmo.Contracts;
 using Kozmo.Contracts.Config;
+using Kozmo.Contracts.Interfaces;
 using Km.Store;
 using Wc.Contracts;
 
@@ -32,7 +34,15 @@ public sealed class ProcessCheckInService
         IIiFacade             facade,
         SaasProfile           profile,
         DateTimeOffset        now,
-        CancellationToken     ct = default)
+        CancellationToken     ct = default,
+        // E2 loop-closure — optional. When supplied, a DIMENSION_GAP answer's recompute is
+        // persisted the same way Kyv.ProgramRunner Stage 9 persists it (SaveIndexAsync +
+        // AppendPostureAsync), so /vendors/{id} and /vendors/{id}/trail see it immediately
+        // instead of staying 404/not-assessed forever. Null (the default) preserves the exact
+        // prior read-only-recompute behavior — every existing caller that doesn't pass one is
+        // unaffected. IDENTITY_CONFIRM's own recomputes (MergeVendorsAsync/LiftBothToConfirmedAsync)
+        // are untouched — out of scope here (identity resolution, not this loop).
+        IEntityStore?         entityStore = null)
     {
         // ── §5 wrong-match guard ──────────────────────────────────────────────
         var checkIn = await checkInStore.GetAsync(checkInId, ct);
@@ -54,7 +64,12 @@ public sealed class ProcessCheckInService
 
             case CheckInKind.DIMENSION_GAP:
                 await ProcessDimensionGapAsync(checkIn, writeService, profile, now, ct);
-                await facade.RecomputeVendorAsync(affectedVendorId, ct);
+                var judgement = await facade.RecomputeVendorAsync(affectedVendorId, ct);
+                if (judgement is not null && entityStore is not null)
+                {
+                    await entityStore.SaveIndexAsync(judgement.Index, ct);
+                    await entityStore.AppendPostureAsync(judgement.Posture, ct);
+                }
                 break;
         }
 
@@ -144,18 +159,39 @@ public sealed class ProcessCheckInService
         CheckIn checkIn, VendorFileWriteService writeService,
         SaasProfile profile, DateTimeOffset now, CancellationToken ct)
     {
-        // Resolve dimension from claim-key catalogue; default to Financial when absent
-        var dimension = Dimension.Financial;
-        if (!string.IsNullOrEmpty(checkIn.TargetField)
-            && profile.ClaimKeyCatalogue.TryGetValue(checkIn.TargetField, out var ckDef)
-            && Enum.TryParse<Dimension>(ckDef.Dimension, ignoreCase: true, out var catalogueDim))
+        string claimKey;
+        Dimension dimension;
+        double rawValue;
+
+        // E2 bridge: a question bound to a claim_key_catalogue key (Question.TargetClaimKey,
+        // carried onto the check-in by GapCheckInStage) writes the REAL claim_key/dimension and
+        // bands the actual answer through the SAME rubric function BeliefPersistenceStage uses
+        // for extracted beliefs (ObservationModule.ScoreFromRubric) — so the belief is a real,
+        // scored contribution to RubricModule, not just a present-field signal.
+        if (TryResolveBoundBelief(checkIn, profile, out var boundClaimKey, out var boundDimension, out var bandedValue))
         {
-            dimension = catalogueDim;
+            claimKey  = boundClaimKey;
+            dimension = boundDimension;
+            rawValue  = bandedValue;
+        }
+        else
+        {
+            // Unbound question, OR a bound question whose answer didn't band (out-of-domain /
+            // unparseable) — exact prior behavior, unchanged. Resolve dimension from claim-key
+            // catalogue by TargetField itself (default Financial when absent/unmatched); never
+            // fabricate a score for an answer that couldn't be banded.
+            dimension = Dimension.Financial;
+            if (!string.IsNullOrEmpty(checkIn.TargetField)
+                && profile.ClaimKeyCatalogue.TryGetValue(checkIn.TargetField, out var ckDef)
+                && Enum.TryParse<Dimension>(ckDef.Dimension, ignoreCase: true, out var catalogueDim))
+            {
+                dimension = catalogueDim;
+            }
+
+            claimKey = checkIn.TargetField ?? "human_answer";
+            rawValue = 1.0; // human confirmed the field → present/positive signal
         }
 
-        var claimKey = checkIn.TargetField ?? "human_answer";
-
-        // Human confirmed the field → rawValue = 1.0 (present/positive signal).
         // Tier = Confirmed (weight/ceiling 0.65) — deliberately ABOVE the 0.60 L1 critical
         // confidence gate (CompletenessRubric.Compute requires answer.Confidence >=
         // question.RequiredConfidence), unlike Reported (0.50), which can never clear it
@@ -164,6 +200,11 @@ public sealed class ProcessCheckInService
         // through the check-in loop). Confirmed sits below Verified (0.80, a system fact) —
         // a human's direct answer is stronger evidence than someone else's report, weaker than
         // a system export. Provenance cites the check-in ID so the audit trail links back.
+        //
+        // ClaimKey and Criterion are BOTH set to the claim_key string (never the rubric_criterion
+        // string) — the same convention BeliefPersistenceStage uses for extracted beliefs, so a
+        // check-in-answered belief and a document/email-extracted belief for the same claim key
+        // land in the identical (vendor, claim_key, dimension, criterion) supersession slot.
         //
         // Derivation names the actual question and the actual answer, not the generic
         // "vendor-file:{claimKey}" template — AnsweringPrompt.BeliefView never serializes Value
@@ -174,7 +215,7 @@ public sealed class ProcessCheckInService
             claimKey:            claimKey,
             dimension:           dimension,
             criterion:           claimKey,
-            rawValue:            1.0,
+            rawValue:            rawValue,
             tier:                SourceTier.Confirmed,
             extractorConfidence: 0.65,
             observedAt:          now,
@@ -182,5 +223,43 @@ public sealed class ProcessCheckInService
             ingestedAt:          now,
             derivation:          $"Check-in answer to \"{checkIn.Question}\": {checkIn.ResponseValue}",
             ct:                  ct);
+    }
+
+    // ── E2 bridge — resolve a bound question's answer into a real scored belief ────────────────
+
+    private static bool TryResolveBoundBelief(
+        CheckIn checkIn, SaasProfile profile,
+        out string claimKey, out Dimension dimension, out double bandedValue)
+    {
+        claimKey = ""; dimension = Dimension.Financial; bandedValue = 0;
+
+        if (string.IsNullOrEmpty(checkIn.TargetClaimKey)) return false;
+        if (string.IsNullOrEmpty(checkIn.ResponseValue))  return false;
+        if (!profile.ClaimKeyCatalogue.TryGetValue(checkIn.TargetClaimKey, out var ckDef)) return false;
+        if (!Enum.TryParse<Dimension>(ckDef.Dimension, ignoreCase: true, out var dim))     return false;
+
+        var banded = BandIfScored(profile, checkIn.TargetClaimKey, ckDef, checkIn.ResponseValue);
+        if (banded is null) return false; // not scored, or the answer fell outside the rubric's
+                                           // domain — abstain rather than fabricate; caller falls
+                                           // back to the unbound present-field write.
+
+        claimKey    = checkIn.TargetClaimKey;
+        dimension   = dim;
+        bandedValue = banded.Value;
+        return true;
+    }
+
+    /// <summary>
+    /// Mirrors Kyv.ProgramRunner.BeliefPersistenceStage.BandIfScored exactly — same catalogue
+    /// field (RubricCriterion, falling back to the claim key itself), same scoring function.
+    /// A structural claim key (ClaimClass != "scored") is not bindable — null, not the raw value —
+    /// so TryResolveBoundBelief falls back to legacy behavior instead of persisting a magnitude
+    /// under a rubric-scored shape it was never authored to carry.
+    /// </summary>
+    private static double? BandIfScored(SaasProfile profile, string claimKey, ClaimKeyDefinition ckDef, string rawResponseValue)
+    {
+        if (ckDef.ClaimClass != "scored") return null;
+        var rubricCriterion = ckDef.RubricCriterion ?? claimKey;
+        return ObservationModule.ScoreFromRubric(rubricCriterion, rawResponseValue, profile);
     }
 }

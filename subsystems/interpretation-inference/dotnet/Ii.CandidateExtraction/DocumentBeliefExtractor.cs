@@ -363,6 +363,25 @@ public sealed class DocumentBeliefExtractor
                 ContainsMultiInvoiceAggregateLanguage(evidence!))
                 continue;
 
+            // E-docdepth build item 1 — support_responsiveness observed-vs-committed guard.
+            // support_responsiveness must capture an OBSERVED/actual response time (what already
+            // happened), never a vendor's marketed or promised future target — a forward
+            // commitment is an unverified promise, not measured performance, and scoring it as if
+            // it were the same fact would let a marketing target stand in for reality. Real
+            // corpus evidence (0128_escalation_13_0_0.eml: "each take over 8 hours for an initial
+            // response") is a customer's observation of past performance; this guard rejects the
+            // opposite shape.
+            //
+            // incident_duration_hours (mttr claim key) shares the exact same observed-vs-promised
+            // shape — "3-hour outage" (measured) vs. "we guarantee restoration within 2 hours
+            // going forward" (a promise) — so it reuses the same guard rather than a near-duplicate
+            // one. Real corpus evidence: 0186_escalation_19_5_4.eml, "a 3-hour outage on a core
+            // module is well outside what we'd expect from an SLA standpoint."
+            if ((string.Equals(criterion, "support_responsiveness", StringComparison.OrdinalIgnoreCase) ||
+                 string.Equals(criterion, "incident_duration_hours", StringComparison.OrdinalIgnoreCase)) &&
+                ContainsFutureCommitmentLanguage(evidence!))
+                continue;
+
             var rawConf = fact.TryGetProperty("confidence", out var cf) && cf.ValueKind == JsonValueKind.Number
                 ? cf.GetDouble()
                 : resultConfidence;
@@ -580,6 +599,20 @@ public sealed class DocumentBeliefExtractor
         MultiInvoiceAggregateLanguage.Any(kw => evidence.Contains(kw, StringComparison.OrdinalIgnoreCase)) ||
         InvoiceRangePattern.IsMatch(evidence) ||
         AcrossNInvoicesPattern.IsMatch(evidence);
+
+    // ── support_responsiveness observed-vs-committed guard (E-docdepth build item 1) ───
+
+    // support_responsiveness's definition is deliberately narrow to an ALREADY-OBSERVED response
+    // time (KYV_KNOWN_GAPS.md, E-docdepth survey: real evidence is a customer complaint about past
+    // performance, not a vendor's marketed SLA target). A forward-looking commitment names the
+    // same kind of number (hours) but describes a promise, not a measurement — extracting it as
+    // support_responsiveness would let an unverified target stand in for observed reality.
+    private static readonly string[] FutureCommitmentLanguage =
+        ["going forward", "will guarantee", "we aim to", "our target is", "committed to providing",
+         "we will ensure", "moving forward", "will commit to"];
+
+    internal static bool ContainsFutureCommitmentLanguage(string evidence) =>
+        FutureCommitmentLanguage.Any(kw => evidence.Contains(kw, StringComparison.OrdinalIgnoreCase));
 
     // ── JSON helpers ───────────────────────────────────────────────────────────
 

@@ -111,7 +111,8 @@ foreach (var path in allEmails)
     {
         // Correspondence tier always — every email is correspondence, never filename-inferred
         // the way a document's tier is (DocTypeInferrer.InferTier's heuristics don't apply here).
-        parties = await extractor.ExtractAsync(identityText, fileName, SourceTier.Correspondence);
+        parties = await extractor.ExtractAsync(
+            identityText, fileName, SourceTier.Correspondence, DocTypeInferrer.IsBankingContext(fileName));
     }
     catch (LlmCacheMissException)
     {

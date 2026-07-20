@@ -33,8 +33,8 @@ public sealed class Catalogue : ICatalogue
 
         var profile = Assemble(dims, rubric, weights, bands, postures, tiers, classify, decay, entityRes,
                                claimKeys, docTypeMap, extractionSchemas, metadataFields);
-        Validate(profile);
-        return profile;
+        var warnings = Validate(profile);
+        return profile with { ValidationWarnings = warnings };
     }
 
     private static JsonObject LoadJson(string dir, string file)
@@ -197,7 +197,10 @@ public sealed class Catalogue : ICatalogue
                     DeterministicGuard = ck["deterministic_guard"]?.GetValue<string>(),
                     PromptFragment     = ck["prompt_fragment"]?.GetValue<string>() ?? "",
                     RubricCriterion    = ck["rubric_criterion"]?.GetValue<string>(),
-                    ExpectedFor        = expectedFor
+                    ExpectedFor        = expectedFor,
+                    // E2.1 — defaults to "optional" for a pre-migration config missing the field
+                    // (preserves prior behavior: absent expected_for -> not counted).
+                    Requirement        = ck["requirement"]?.GetValue<string>() ?? "optional"
                 };
             }
         }
@@ -208,23 +211,28 @@ public sealed class Catalogue : ICatalogue
             foreach (var kv in docTypeMap["map"]!.AsObject())
                 docTypeTierMap[kv.Key] = kv.Value!.GetValue<string>();
 
-        // Expected belief sets (E1 Part 7 Step 7 Fix 2) — derived from each claim key's
-        // `expected_for` tags in claim_key_catalogue.saas.v1.json, not a separately-maintained
-        // file. The catalogue is the single source of truth for "which claim keys are expected
-        // for this vendor class"; there is nothing else to keep in sync.
+        // Expected belief sets (E2.1) — derived from each claim key's `requirement` field
+        // (required | expected -> counted; optional -> not), not from `expected_for` anymore.
+        // expected_for is retained on ClaimKeyDefinition only as the input to the boot-time
+        // coherence check in Validate() below, which hard-fails if this derivation ever disagrees
+        // with the legacy expected_for-derived set — the guarantee that this migration changed
+        // nothing behaviorally.
+        //
+        // Single vendor class ("saas_vendor"): this catalogue file has only ever served one vendor
+        // class — every populated expected_for tag today is exactly ["saas_vendor"], never another
+        // class, never more than one. Requirement is not vendor-class-scoped (a doctrine covers one
+        // type by construction — see kozmo_e2_unified_doctrine_spec.md's per-type catalogue-file
+        // design), so the derived set is placed under that same single class. Multi-vendor-type
+        // catalogues are a separate, later piece of E2 (a distinct catalogue file per type), not
+        // something this derivation needs to anticipate.
+        const string SingleVendorClass = "saas_vendor";
         var expectedBeliefSets = new Dictionary<string, IReadOnlyList<string>>();
-        foreach (var kv in claimKeyDefs)
-        {
-            foreach (var vendorClass in kv.Value.ExpectedFor)
-            {
-                if (!expectedBeliefSets.TryGetValue(vendorClass, out var list))
-                {
-                    list = new List<string>();
-                    expectedBeliefSets[vendorClass] = list;
-                }
-                ((List<string>)list).Add(kv.Key);
-            }
-        }
+        var requirementExpectedKeys = claimKeyDefs
+            .Where(kv => kv.Value.Requirement is "required" or "expected")
+            .Select(kv => kv.Key)
+            .ToList();
+        if (requirementExpectedKeys.Count > 0)
+            expectedBeliefSets[SingleVendorClass] = requirementExpectedKeys;
 
         // Document-type -> extraction-schema mapping (vendor file extension, E1 Part 7 Step 3/5/6)
         var defaultSchema       = new ExtractionSchema(Array.Empty<string>(), Array.Empty<MetadataFieldGroup>());
@@ -289,7 +297,7 @@ public sealed class Catalogue : ICatalogue
         return new ExtractionSchema(beliefKeys, metadataFieldGroups);
     }
 
-    private static void Validate(SaasProfile p)
+    private static IReadOnlyList<string> Validate(SaasProfile p)
     {
         // 1. Dimension weights must exist and sum to ~1.0
         if (p.DimensionWeights.Count == 0)
@@ -332,5 +340,116 @@ public sealed class Catalogue : ICatalogue
         foreach (var rule in p.PostureRules)
             if (!validStances.Contains(rule.Stance))
                 throw new InvalidOperationException($"Catalogue: posture rule has unknown stance '{rule.Stance}'.");
+
+        // ── E2.1 unified-doctrine coherence checks ──────────────────────────────────────────────
+
+        var warnings = new List<string>();
+
+        // 6. WARNING (not hard-fail — E2.3's job to fix): every "scored" claim key's effective
+        // rubric criterion (RubricCriterion, falling back to the claim key's own name — the same
+        // fallback ObservationModule.ScoreFromRubric callers use everywhere) must resolve in
+        // scoring_rubric.saas.v1.json. A scored key whose criterion doesn't resolve will never
+        // produce a score — a silent dead claim key. Catches usage_trend today.
+        foreach (var (key, ckDef) in p.ClaimKeyCatalogue)
+        {
+            if (ckDef.ClaimClass != "scored") continue;
+            var effectiveCriterion = ckDef.RubricCriterion ?? key;
+            if (!p.ScoringRubric.ContainsKey(effectiveCriterion))
+            {
+                warnings.Add(
+                    $"claim key '{key}' is class=scored but its rubric criterion '{effectiveCriterion}' " +
+                    "does not exist in scoring_rubric.saas.v1.json — it will never produce a score.");
+                continue; // the membership check below is moot if the criterion doesn't exist at all
+            }
+
+            // 7. WARNING: a scored key's effective criterion should also be listed under its own
+            // declared dimension in dimensions.saas.v1.json (criterion registry membership) —
+            // catches a key that scores fine but whose dimension registration has drifted.
+            if (!string.IsNullOrEmpty(ckDef.Dimension)
+                && p.Dimensions.TryGetValue(ckDef.Dimension, out var dimDef)
+                && !dimDef.Criteria.Contains(effectiveCriterion, StringComparer.OrdinalIgnoreCase))
+            {
+                warnings.Add(
+                    $"claim key '{key}' declares dimension '{ckDef.Dimension}' but its rubric criterion " +
+                    $"'{effectiveCriterion}' is not listed in dimensions.saas.v1.json's " +
+                    $"'{ckDef.Dimension}'.criteria — dimension/rubric registration has drifted.");
+            }
+        }
+
+        // 8. WARNING: every claim key's non-empty dimension must be a known dimension at all
+        // (distinct, coarser check than #7's membership check).
+        foreach (var (key, ckDef) in p.ClaimKeyCatalogue)
+            if (!string.IsNullOrEmpty(ckDef.Dimension) && !p.Dimensions.ContainsKey(ckDef.Dimension))
+                warnings.Add(
+                    $"claim key '{key}' declares dimension '{ckDef.Dimension}', which does not exist " +
+                    "in dimensions.saas.v1.json.");
+
+        // 9. HARD FAIL — migration coherence: the Requirement-derived ExpectedBeliefSets must equal
+        // the legacy ExpectedFor-derived set exactly. A mismatch means this migration changed
+        // behavior, which E2.1 must never do.
+        var legacyExpected = new Dictionary<string, List<string>>(StringComparer.Ordinal);
+        foreach (var (key, ckDef) in p.ClaimKeyCatalogue)
+            foreach (var vendorClass in ckDef.ExpectedFor)
+            {
+                if (!legacyExpected.TryGetValue(vendorClass, out var list))
+                    legacyExpected[vendorClass] = list = new List<string>();
+                list.Add(key);
+            }
+
+        if (legacyExpected.Count != p.ExpectedBeliefSets.Count)
+            throw new InvalidOperationException(
+                $"Catalogue coherence: requirement-derived expected_belief_sets has " +
+                $"{p.ExpectedBeliefSets.Count} vendor class(es) but the legacy expected_for-derived " +
+                $"set has {legacyExpected.Count}. The requirement migration changed behavior.");
+
+        foreach (var (vendorClass, legacyKeys) in legacyExpected)
+        {
+            if (!p.ExpectedBeliefSets.TryGetValue(vendorClass, out var newKeys))
+                throw new InvalidOperationException(
+                    $"Catalogue coherence: vendor class '{vendorClass}' is in the legacy " +
+                    "expected_for-derived set but missing from the requirement-derived one.");
+
+            var legacySet = legacyKeys.ToHashSet(StringComparer.Ordinal);
+            var newSet    = newKeys.ToHashSet(StringComparer.Ordinal);
+            if (!legacySet.SetEquals(newSet))
+                throw new InvalidOperationException(
+                    $"Catalogue coherence: expected_belief_sets['{vendorClass}'] differs between the " +
+                    $"requirement-derived set and the legacy expected_for-derived set. " +
+                    $"Legacy: [{string.Join(", ", legacySet.OrderBy(x => x, StringComparer.Ordinal))}]. " +
+                    $"New: [{string.Join(", ", newSet.OrderBy(x => x, StringComparer.Ordinal))}].");
+        }
+
+        // 10. HARD FAIL: every extraction schema's claim_keys entry must name a real catalogue
+        // claim key. BeliefExtractionPrompt.BuildSystem / EmailInterpretationPrompt.BuildBeliefSystem
+        // already throw on an unknown key — but only lazily, the first time that specific doc-type
+        // (or email) schema is actually used for a real extraction. This surfaces the identical
+        // error at boot, for every schema, unconditionally — an unknown key should never ship
+        // waiting to be discovered days later by whichever document type happens to trip it first.
+        ValidateExtractionSchemaKeys(p);
+
+        foreach (var w in warnings)
+            Console.WriteLine($"[Catalogue] WARNING: {w}");
+
+        return warnings;
+    }
+
+    /// <summary>
+    /// E2.2a — public and pure (profile in, throws or returns) so it's independently testable
+    /// without going through file-based Load(). Called from Validate() above for the real config.
+    /// </summary>
+    public static void ValidateExtractionSchemaKeys(SaasProfile p)
+    {
+        CheckSchema("default", p.DefaultExtractionSchema.BeliefKeys);
+        foreach (var (schemaName, schema) in p.ExtractionSchemas)
+            CheckSchema(schemaName, schema.BeliefKeys);
+
+        void CheckSchema(string schemaName, IReadOnlyList<string> beliefKeys)
+        {
+            foreach (var key in beliefKeys)
+                if (!p.ClaimKeyCatalogue.ContainsKey(key))
+                    throw new InvalidOperationException(
+                        $"Catalogue coherence: extraction schema '{schemaName}' references claim key " +
+                        $"'{key}', which does not exist in claim_key_catalogue.saas.v1.json.");
+        }
     }
 }

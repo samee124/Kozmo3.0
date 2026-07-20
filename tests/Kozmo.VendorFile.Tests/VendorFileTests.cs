@@ -37,7 +37,10 @@ public sealed class VendorFileTests
         // 15, not 14: E1 Part 7 Step 3 adds invoice_amount (invoices extract this instead of
         // annual_value) — a deliberate catalogue growth, not drift.
         Assert.True(profile.ClaimKeyCatalogue.ContainsKey("invoice_amount"));
-        Assert.Equal(15, profile.ClaimKeyCatalogue.Count);
+        // 16, not 15: incident_duration_hours completes the previously-bare mttr rubric criterion
+        // with an email-sourced claim key, same pattern as support_responsiveness.
+        Assert.True(profile.ClaimKeyCatalogue.ContainsKey("incident_duration_hours"));
+        Assert.Equal(16, profile.ClaimKeyCatalogue.Count);
     }
 
     [Fact, Trait("Category", "VendorFile")]
@@ -68,7 +71,52 @@ public sealed class VendorFileTests
         var profile = new Catalogue().Load(CataloguePath);
         Assert.True(profile.ExpectedBeliefSets.ContainsKey("saas_vendor"),
             "expected_belief_sets must define 'saas_vendor' class.");
-        Assert.Equal(10, profile.ExpectedBeliefSets["saas_vendor"].Count);
+        // 11, not 10: support_responsiveness (E-docdepth build item 1) completed with a real
+        // expected_for tag — the catalogue is the single source of truth for this count.
+        // 12, not 11: incident_duration_hours adds its own expected_for tag, same pattern.
+        Assert.Equal(12, profile.ExpectedBeliefSets["saas_vendor"].Count);
+    }
+
+    // ── E2.2a — extraction-schema coherence (Catalogue.ValidateExtractionSchemaKeys) ────────────
+
+    [Fact, Trait("Category", "VendorFile")]
+    public void Catalogue_RealConfig_ExtractionSchemaKeys_AllResolve()
+    {
+        // The real config must pass cleanly — this is the CRITICAL constraint E2.2a is built
+        // under. Load() already runs this check internally; asserting no throw here pins it.
+        var profile = new Catalogue().Load(CataloguePath);
+        Assert.NotNull(profile); // Load() would have thrown already if a schema key didn't resolve
+    }
+
+    [Fact, Trait("Category", "VendorFile")]
+    public void ValidateExtractionSchemaKeys_UnknownKeyInSchema_Throws()
+    {
+        var profile = new Catalogue().Load(CataloguePath);
+        var badProfile = profile with
+        {
+            ExtractionSchemas = new Dictionary<string, ExtractionSchema>
+            {
+                ["bad_doc_type"] = new(["totally_nonexistent_claim_key"], [])
+            }
+        };
+
+        var ex = Assert.Throws<InvalidOperationException>(
+            () => Catalogue.ValidateExtractionSchemaKeys(badProfile));
+        Assert.Contains("bad_doc_type", ex.Message);
+        Assert.Contains("totally_nonexistent_claim_key", ex.Message);
+    }
+
+    [Fact, Trait("Category", "VendorFile")]
+    public void ValidateExtractionSchemaKeys_UnknownKeyInDefaultSchema_Throws()
+    {
+        var profile = new Catalogue().Load(CataloguePath);
+        var badProfile = profile with
+        {
+            DefaultExtractionSchema = new(["totally_nonexistent_claim_key"], [])
+        };
+
+        Assert.Throws<InvalidOperationException>(
+            () => Catalogue.ValidateExtractionSchemaKeys(badProfile));
     }
 
     [Fact, Trait("Category", "VendorFile")]
@@ -556,9 +604,10 @@ public sealed class VendorFileTests
         var current = await store.GetCurrentBeliefsAsync(vendorId);
         var result  = comp.Compute(vendorId, current);
 
-        // saas_vendor expects 10 slots; 3 filled, 7 missing
+        // saas_vendor expects 12 slots (support_responsiveness + incident_duration_hours added);
+        // 3 filled, 9 missing
         Assert.Equal(3, result.FilledKeys.Count);
-        Assert.Equal(7, result.GapKeys.Count);
+        Assert.Equal(9, result.GapKeys.Count);
         Assert.True(result.Ratio < 0.5);
     }
 
@@ -966,17 +1015,21 @@ public sealed class VendorFileTests
         Assert.NotNull(judgement);
         var management = judgement.Management;
 
-        // Completeness: 6 / 10 filled (notice_period not in expected_belief_sets)
+        // Completeness: 6 / 12 filled (notice_period not in expected_belief_sets; expected count
+        // is 12, not 11, since incident_duration_hours was completed on top of support_responsiveness)
         Assert.Equal(6, management.FilledCount);
-        Assert.Equal(10, management.ExpectedCount);
-        Assert.Equal(6.0 / 10.0, management.Completeness, precision: 10);
+        Assert.Equal(12, management.ExpectedCount);
+        Assert.Equal(6.0 / 12.0, management.Completeness, precision: 10);
 
-        // Gaps: invoice_accuracy, renewal_intent, contract_on_file, payment_terms
-        Assert.Equal(4, management.GapSlots.Count);
-        Assert.Contains("invoice_accuracy",  management.GapSlots);
-        Assert.Contains("renewal_intent",    management.GapSlots);
-        Assert.Contains("contract_on_file",  management.GapSlots);
-        Assert.Contains("payment_terms",     management.GapSlots);
+        // Gaps: invoice_accuracy, renewal_intent, contract_on_file, payment_terms,
+        // support_responsiveness, incident_duration_hours
+        Assert.Equal(6, management.GapSlots.Count);
+        Assert.Contains("invoice_accuracy",        management.GapSlots);
+        Assert.Contains("renewal_intent",          management.GapSlots);
+        Assert.Contains("contract_on_file",        management.GapSlots);
+        Assert.Contains("payment_terms",           management.GapSlots);
+        Assert.Contains("support_responsiveness",  management.GapSlots);
+        Assert.Contains("incident_duration_hours", management.GapSlots);
 
         // Weak dimensions: only Operational (sla_uptime dim_score = 0.20 < AtRiskMin 0.40)
         Assert.Single(management.WeakDimensions);

@@ -28,6 +28,7 @@ public sealed class MetadataPersistenceStage
         IReadOnlyList<CandidateCluster>      clusters,
         IReadOnlyList<ResolutionDisposition> dispositions,
         DateTimeOffset                       now,
+        IReadOnlyDictionary<string, Guid>?   docIdToDocumentId = null,
         CancellationToken                    ct = default)
     {
         var docIdToEntityId = BuildDocIdToEntityMap(clusters, dispositions);
@@ -39,7 +40,13 @@ public sealed class MetadataPersistenceStage
             if (!docIdToEntityId.TryGetValue(docId, out var entityId)) continue;
 
             var documentType = DocTypeInferrer.InferDocType(docId);
-            var documentId   = Guid.NewGuid(); // no stable per-document identity in the KYV pipeline yet
+            // Document retention (see KYV_KNOWN_GAPS.md): when DocumentPersistenceStage ran for
+            // this document, reuse its real, stable documents.id — falls back to a fresh Guid only
+            // when no document store was supplied to this runner (documentStore: null, e.g.
+            // existing tests), preserving the exact prior placeholder behavior for those callers.
+            var documentId = docIdToDocumentId != null && docIdToDocumentId.TryGetValue(docId, out var docGuid)
+                ? docGuid
+                : Guid.NewGuid();
 
             foreach (var candidate in candidates)
             {

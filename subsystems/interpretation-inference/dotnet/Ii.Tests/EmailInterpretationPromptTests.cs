@@ -13,11 +13,14 @@ namespace Ii.Tests;
 /// </summary>
 public sealed class EmailInterpretationPromptTests
 {
-    // The five existing claim keys declared for the "email" doc type in
-    // extraction_schemas.saas.v1.json — every one already has a document-path prompt_fragment;
-    // email is just another (weaker) source for the SAME keys, never new ones.
+    // The claim keys declared for the "email" doc type in extraction_schemas.saas.v1.json.
+    // support_responsiveness (E-docdepth build item 1) is the first EMAIL-ONLY key — no document
+    // schema (msa/invoice/order_form/default) declares it, since the real evidence for it
+    // (Brookfield/OfficeSpace's escalation emails) is email-only; every other key already had a
+    // document-path prompt_fragment before this addition.
     private static readonly string[] EmailBeliefKeys =
-        ["payment_terms", "renewal_date", "annual_value", "invoice_amount", "sla_uptime"];
+        ["payment_terms", "renewal_date", "annual_value", "invoice_amount", "sla_uptime", "support_responsiveness",
+         "incident_duration_hours"];
 
     // The five relationship-intelligence signal types with no claim-key equivalent, declared as
     // the "relationship_signals" metadata_field_group for the "email" doc type. Exactly 5 — E1's

@@ -1,4 +1,4 @@
-using System.Text.Json;
+﻿using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Channels;
 using Ii.Completeness;
@@ -10,6 +10,7 @@ using Ii.Posture;
 using Ii.Rubric;
 using Ii.Spine;
 using Km.Store;
+using Km.Store.Metadata;
 using Kozmo.Api;
 using Kozmo.Contracts;
 using Kozmo.Contracts.Config;
@@ -47,8 +48,14 @@ var builder = WebApplication.CreateBuilder(args);
 
 var catalogueDir  = FindCatalogueDir();
 var profile       = new Catalogue().Load(catalogueDir);
+// E2.2a — boot-time coherence check Catalogue.Validate can't do itself (Km.Store must not
+// reference Ii.Completeness); see QuestionBankValidator's doc comment.
+QuestionBankValidator.ValidateBindings(profile);
 var dbPath        = ResolveDbPath();
 var store         = new SqliteEntityStore($"Data Source={dbPath}", profile);
+// E1 Part 7 Step 5 wiring — same db file as SqliteEntityStore, own table (document_metadata), own
+// connection. Never read by scoring/completeness (CI-enforced metadata wall); agent-facing only.
+var metadataStore = new SqliteMetadataStore($"Data Source={dbPath}");
 var registry      = BuildRegistry();
 await LoadPersistedVendorsAsync(store, registry);
 await store.ExpireDuplicatePendingCheckInsAsync(); // one-time dedup migration (no-op when clean)
@@ -87,6 +94,7 @@ builder.Services.AddSingleton(profile);
 builder.Services.AddSingleton(registry);
 builder.Services.AddSingleton(sseHub);
 builder.Services.AddSingleton(store);
+builder.Services.AddSingleton<IMetadataStore>(metadataStore);
 builder.Services.AddSingleton<ICheckInRowStore>(store);
 builder.Services.AddSingleton<ICheckInStore>(checkInRepo);
 builder.Services.AddSingleton<ICheckInTransport>(checkInRouter);
@@ -483,10 +491,33 @@ app.MapPost("/vendors/vendor-file/upload-contract", async (
     var pageTexts    = new PdfTextExtractor().ExtractPageTexts(pdfBytes);
     await lane.ExtractAndWriteAsync(vendorId, ev, pageTexts, DemoClock.AsOf);
 
-    // Recompute posture so the vendor-file Razor page sees fresh state on arrival
-    await f.RecomputeVendorAsync(vendorId);
+    // Document retention (see KYV_KNOWN_GAPS.md) — this endpoint previously read the upload
+    // straight into memory and discarded it once the request finished; content + content_text at
+    // minimum, no drive_file_id (manual upload, not sourced from Drive). Deterministic id is a
+    // content hash — the exact same file uploaded twice reuses the same document row.
+    var contentText = string.Join("\n", pageTexts.OrderBy(kv => kv.Key).Select(kv => kv.Value));
+    var documentId  = DocumentPersistenceStage.ComputeDocumentId(driveFileId: null, pdfBytes);
+    await storeInst.UpsertDocumentAsync(new DocumentRow(
+        Id:          documentId,
+        ProgramId:   null,
+        VendorId:    vendorId,
+        Filename:    file.FileName,
+        Content:     pdfBytes,
+        ContentText: string.IsNullOrEmpty(contentText) ? null : contentText,
+        DriveFileId: null,
+        IngestedAt:  DemoClock.AsOf), default);
 
-    return Results.Ok(new { vendorId = vendorId.ToString() });
+    // Recompute posture so the vendor-file Razor page sees fresh state on arrival — persisted the
+    // same way Kyv.ProgramRunner Stage 9 persists it, so GET /vendors/{id} sees it too (previously
+    // discarded; RecomputeVendorAsync itself never persists — see IIiFacade.cs doc comment).
+    var judgement = await f.RecomputeVendorAsync(vendorId);
+    if (judgement is not null)
+    {
+        await storeInst.SaveIndexAsync(judgement.Index);
+        await storeInst.AppendPostureAsync(judgement.Posture);
+    }
+
+    return Results.Ok(new { vendorId = vendorId.ToString(), documentId = documentId.ToString() });
 });
 
 // GET /vendors/{id}/vendor-file/markdown — render the vendor file as raw markdown text
@@ -551,6 +582,94 @@ app.MapGet("/vendors/{id}/vendor-file", async (
     });
 });
 
+// GET /vendors/{id}/metadata — retained, non-scored clauses (E1 metadata) for a vendor.
+// Agent-facing only: never confidence-scored, never read by scoring/completeness (CI-enforced
+// metadata wall in Kozmo.Architecture.Tests).
+app.MapGet("/vendors/{id}/metadata", async (
+    string            id,
+    EntityRegistry    reg,
+    IMetadataStore    metadataStore,
+    SqliteEntityStore storeInst) =>
+{
+    if (!Guid.TryParse(id, out var guid)) return Results.BadRequest("Invalid GUID");
+    if (reg.GetEntity(guid) is null) return Results.NotFound();
+
+    var knowledge = await metadataStore.GetForEntityAsync(guid);
+
+    // documentId is only included when it resolves to a real, retained documents.id row — never
+    // fabricated. MetadataPersistenceStage falls back to a fresh Guid.NewGuid() per run when no
+    // document store was supplied at persistence time, so a raw DocumentId here can't be trusted
+    // without checking it actually exists (see "view source" wiring in Pages/Workspace.cshtml).
+    var clauses = new List<object>();
+    foreach (var m in knowledge.Metadata)
+    {
+        var doc = m.DocumentId != Guid.Empty ? await storeInst.GetDocumentAsync(m.DocumentId) : null;
+        clauses.Add(new
+        {
+            field        = m.FieldName,
+            value        = m.Value,
+            derivation   = m.Derivation,
+            documentType = m.DocumentType,
+            observedAt   = m.ObservedAt,
+            documentId   = doc is not null ? m.DocumentId : (Guid?)null
+        });
+    }
+
+    return Results.Ok(new { vendorId = guid, clauses });
+});
+
+// GET /vendors/{id}/questions?dimension=Operational — ALL SIX authored completeness questions
+// (SaasQuestionBank — doctrine, never LLM-generated, L1+L2+L3) for one dimension, cross-referenced
+// against this vendor's real current beliefs. Only the two bound questions system-wide (sla_uptime ->
+// Operational, csat -> Experiential) can ever resolve a real answer; every other question is an
+// honest "not yet reviewed" gap, not a fabricated one — there is no path today that writes a
+// Dimension/Criterion-scoped belief for an unbound question.
+app.MapGet("/vendors/{id}/questions", async (
+    string            id,
+    string?           dimension,
+    EntityRegistry    reg,
+    SqliteEntityStore storeInst) =>
+{
+    if (!Guid.TryParse(id, out var guid)) return Results.BadRequest("Invalid GUID");
+    if (reg.GetEntity(guid) is null) return Results.NotFound();
+    if (!Enum.TryParse<Dimension>(dimension, ignoreCase: true, out var dim))
+        return Results.BadRequest("Invalid or missing dimension");
+
+    var beliefs = await storeInst.GetCurrentBeliefsAsync(guid);
+
+    var questions = SaasQuestionBank.All
+        .Where(q => q.Dimension == dim)
+        .OrderBy(q => q.DepthLevel)
+        .ThenBy(q => q.Id, StringComparer.Ordinal)
+        .Select(q =>
+        {
+            var belief = q.TargetClaimKey is not null
+                ? beliefs.FirstOrDefault(b => b.Criterion == q.TargetClaimKey)
+                : null;
+
+            return new
+            {
+                id             = q.Id,
+                text           = q.Text,
+                depthLevel     = q.DepthLevel.ToString(),
+                answerType     = q.AnswerType.ToString(),
+                targetClaimKey = q.TargetClaimKey,
+                answered       = belief is not null,
+                belief         = belief is null ? null : new
+                {
+                    value      = belief.Value,
+                    derivation = string.IsNullOrEmpty(belief.Derivation) ? null : belief.Derivation,
+                    sourceTier = belief.SourceTier.ToString(),
+                    confidence = belief.Confidence,
+                    criterion  = belief.Criterion
+                }
+            };
+        })
+        .ToList();
+
+    return Results.Ok(new { dimension = dim.ToString(), questions });
+});
+
 // GET /checkins — list all OPEN check-ins for the in-app pending view
 app.MapGet("/checkins", async (ICheckInStore checkInStore) =>
 {
@@ -595,6 +714,16 @@ app.MapPost("/checkins/{id}/answer", async (
             _                             => Results.Problem("Unexpected outcome.")
         };
 
+    // Process the now-ANSWERED check-in inline.
+    // Real IdentityRegistry backed by SqliteEntityStore (which implements IRegistryStore).
+    // IDENTITY_CONFIRM merge is correct in unit tests (registry pre-populated by the test).
+    // Live path: end-to-end-inert pending Phase 4 — the KYV resolution pipeline (Stage F)
+    // must persist CanonicalVendor rows into registry_vendors before a merge fires in production.
+    // DIMENSION_GAP and the wrong-match guard are unaffected by this gap.
+    var processSvc = new ProcessCheckInService();
+    await processSvc.ProcessAsync(
+        guid, checkInStore, new IdentityRegistry(storeInst), writeSvc, f, profile,
+        DateTimeOffset.UtcNow, entityStore: storeInst);
     return Results.Ok(new { outcome = "Ok", checkInId = result.Updated!.CheckInId });
 });
 
@@ -966,7 +1095,8 @@ app.MapPost("/kyv/run", async (
     KyvVendorTracker       kyvTracker,
     Func<IKozmoLlm?>       liveLlmFactory,
     SaasProfile            profile,
-    CompletenessHolder     completenessHolder) =>
+    CompletenessHolder     completenessHolder,
+    IMetadataStore         metadataStore) =>
 {
     if (string.IsNullOrWhiteSpace(request.DriveUrl))
         return Results.BadRequest(new { error = "driveUrl must not be empty." });
@@ -1011,13 +1141,16 @@ app.MapPost("/kyv/run", async (
 
     // Download Drive files to a local temp folder
     string tempFolder;
+    IReadOnlyDictionary<string, string> driveFileIdsByFilename;
     try
     {
         hub.Broadcast(JsonSerializer.Serialize(
             new { type = "kyv-downloading", ts = DateTimeOffset.UtcNow,
                   data = new { driveUrl = request.DriveUrl } }, JsonOpts));
 
-        tempFolder = await downloader.DownloadToTempFolderAsync(token, request.DriveUrl);
+        var downloadResult = await downloader.DownloadToTempFolderAsync(token, request.DriveUrl);
+        tempFolder              = downloadResult.TempDir;
+        driveFileIdsByFilename  = downloadResult.DriveFileIdsByFilename;
 
         var fileCount = Directory.GetFiles(tempFolder, "*.pdf", SearchOption.AllDirectories).Length;
         hub.Broadcast(JsonSerializer.Serialize(
@@ -1045,9 +1178,11 @@ app.MapPost("/kyv/run", async (
             profile:          profile,
             completeness:     completenessHolder.Value,
             spineRegistry:    entityRegistry,
+            metadataStore:    metadataStore,
+            documentStore:    storeInst,
             transport:        checkInTransport);
 
-        var run = await runner.RunAsync(tempFolder, DateTimeOffset.UtcNow);
+        var run = await runner.RunAsync(tempFolder, DateTimeOffset.UtcNow, driveFileIdsByFilename);
 
         // Replay stages over SSE for live UI feedback
         foreach (var stage in run.Stages)
@@ -1102,19 +1237,179 @@ app.MapPost("/kyv/run", async (
     }
 });
 
-// GET /kyv/vendors — vendors discovered through KYV ingestion (excludes seeded demo data)
-app.MapGet("/kyv/vendors", async (IIiFacade f, EntityRegistry reg, SaasProfile prof, KyvVendorTracker tracker) =>
+// POST /kyv/run-local — ingest a LOCAL folder through the identical KYV pipeline as POST /kyv/run,
+// skipping the Google Drive download hop entirely. No OAuth is required here: in the Drive path,
+// GoogleOAuthService/GoogleDriveDownloader exist solely to fetch files onto local disk before the
+// pipeline runs — once files are local, KyvProgramRunner.RunAsync never touches Drive or OAuth
+// itself. This calls the SAME RunAsync the Drive path and the test suite (KyvProgramRunnerTests,
+// CompletenessWiringTests) already exercise — identical six identity stages
+// (Normalize→Classify→Cluster→Annotate→Assign→Write), identical belief/metadata persistence,
+// identical completeness/index hooks. Not forked.
+app.MapPost("/kyv/run-local", async (
+    KyvRunLocalRequest     request,
+    SqliteEntityStore      storeInst,
+    ICheckInStore          checkInStore,
+    SseHub                 hub,
+    EntityRegistry         entityRegistry,
+    KyvVendorTracker       kyvTracker,
+    Func<IKozmoLlm?>       liveLlmFactory,
+    SaasProfile            profile,
+    CompletenessHolder     completenessHolder,
+    IMetadataStore         metadataStore) =>
 {
-    if (!tracker.HasRun) return Results.Ok(Array.Empty<VendorSummaryDto>());
-    var now     = DemoClock.AsOf;
-    var vendors = new List<VendorSummaryDto>();
-    foreach (var id in tracker.DiscoveredIds    )
+    if (string.IsNullOrWhiteSpace(request.LocalPath))
+        return Results.BadRequest(new { error = "localPath must not be empty." });
+
+    if (!Directory.Exists(request.LocalPath))
+        return Results.BadRequest(new { error = $"localPath does not exist: {request.LocalPath}" });
+
+    var liveLlm = liveLlmFactory();
+    if (liveLlm is null)
+        return Results.Problem(
+            detail:     "OPENAI_API_KEY is not set or fixture cache path is unavailable.",
+            statusCode: 503);
+
+    hub.Broadcast(JsonSerializer.Serialize(
+        new { type = "kyv-started", ts = DateTimeOffset.UtcNow,
+              data = new { localPath = request.LocalPath } }, JsonOpts));
+
+    var runner = new KyvProgramRunner(
+        llm:              liveLlm,
+        entityClassifier: new AlwaysCompanyClassifier(),
+        registry:         new IdentityRegistry(storeInst),
+        checkInStore:     checkInStore,
+        entityStore:      storeInst,
+        profile:          profile,
+        completeness:     completenessHolder.Value,
+        spineRegistry:    entityRegistry,
+        metadataStore:    metadataStore,
+        documentStore:    storeInst);
+
+    var run = await runner.RunAsync(request.LocalPath, DateTimeOffset.UtcNow);
+
+    foreach (var stage in run.Stages)
+    {
+        await Task.Delay(250);
+        hub.Broadcast(JsonSerializer.Serialize(
+            new { type = "kyv-stage", ts = DateTimeOffset.UtcNow,
+                  data = new { name = stage.StageName, order = stage.StageOrder,
+                               itemsProcessed = stage.ItemsProcessed } }, JsonOpts));
+    }
+
+    hub.Broadcast(JsonSerializer.Serialize(
+        new { type = "kyv-complete", ts = DateTimeOffset.UtcNow,
+              data = new { runId = run.RunId, status = run.Status.ToString() } }, JsonOpts));
+
+    var allVendors = await storeInst.LoadVendorsByRunAsync(run.RunId);
+    foreach (var (vid, vname, vren) in allVendors)
+        entityRegistry.Register(vid, vname, vren);
+
+    var seededSet = new HashSet<Guid>(SeedData.VendorIds);
+    kyvTracker.RecordDiscovered(allVendors.Select(v => v.Item1).Where(id => !seededSet.Contains(id)));
+
+    return Results.Ok(new
+    {
+        runId              = run.RunId,
+        programName        = run.ProgramName,
+        sourceFolder       = run.SourceFolder,
+        status             = run.Status.ToString(),
+        startedAt          = run.StartedAt,
+        finishedAt         = run.FinishedAt,
+        stages             = run.Stages.Select(s => new
+        {
+            order          = s.StageOrder,
+            name           = s.StageName,
+            itemsProcessed = s.ItemsProcessed
+        }),
+        unreadableDocuments = run.UnreadableDocuments.Select(u => new
+        {
+            path   = u.RelativePath,
+            reason = u.Reason
+        })
+    });
+});
+
+// GET /kyv/vendors — vendors discovered through KYV ingestion (excludes seeded demo data).
+app.MapGet("/kyv/vendors", async (IIiFacade f, EntityRegistry reg, SqliteEntityStore storeInst) =>
+{
+    var now        = DemoClock.AsOf;
+    var vendors    = new List<VendorSummaryDto>();
+    var discovered = await storeInst.LoadAllKyvVendorsAsync();
+    foreach (var (id, _, _) in discovered)
     {
         var entity = reg.GetEntity(id);
         if (entity is null) continue;
         var idx = await f.GetIndexAsync(id);
         var pos = await f.GetPostureAsync(id);
         vendors.Add(DtoMapper.ToSummary(id, entity, idx, pos, now));
+    }
+    return Results.Ok(vendors);
+});
+
+// GET /documents/{id} — metadata + extracted text for a retained source document. Never returns
+// raw bytes here (see /documents/{id}/raw) — a metadata fetch should never accidentally serve a
+// multi-hundred-KB blob.
+app.MapGet("/documents/{id}", async (string id, SqliteEntityStore storeInst) =>
+{
+    if (!Guid.TryParse(id, out var docId))
+        return Results.BadRequest(new { error = "invalid document id" });
+
+    var doc = await storeInst.GetDocumentAsync(docId);
+    if (doc is null) return Results.NotFound();
+
+    return Results.Ok(new
+    {
+        id          = doc.Id,
+        vendorId    = doc.VendorId,
+        filename    = doc.Filename,
+        contentText = doc.ContentText,
+        driveFileId = doc.DriveFileId,
+        hasContent  = doc.Content is not null,
+        ingestedAt  = doc.IngestedAt
+    });
+});
+
+// GET /documents/{id}/raw — the actual retained PDF bytes, only when explicitly requested.
+// No fileDownloadName passed to Results.File — passing one makes ASP.NET Core emit
+// Content-Disposition: attachment, which forces a download instead of letting the browser render
+// the PDF inline (the "view original PDF" link in the vendor detail UI expects inline viewing).
+app.MapGet("/documents/{id}/raw", async (string id, SqliteEntityStore storeInst) =>
+{
+    if (!Guid.TryParse(id, out var docId))
+        return Results.BadRequest(new { error = "invalid document id" });
+
+    var doc = await storeInst.GetDocumentAsync(docId);
+    if (doc is null || doc.Content is null) return Results.NotFound();
+
+    return Results.File(doc.Content, "application/pdf");
+});
+
+// GET /programs — real programs (just one today: "Vendor Cleanup Program"). A Program is a
+// durable container that can span multiple ingestion runs; program_run_id (one run) belongs to
+// program_id (its container) — see SqliteEntityStore.MigratePrograms.
+app.MapGet("/programs", async (SqliteEntityStore storeInst) =>
+{
+    var programs = await storeInst.GetAllProgramsAsync();
+    return Results.Ok(programs.Select(p => new ProgramDto(p.Id, p.Name, p.CreatedAt)));
+});
+
+// GET /programs/{id}/vendors — real vendors scoped to one program, across all of its runs.
+// Mirrors GET /kyv/vendors exactly, just filtered by program_id instead of "every KYV run".
+app.MapGet("/programs/{id}/vendors", async (string id, IIiFacade f, EntityRegistry reg, SqliteEntityStore storeInst) =>
+{
+    if (!Guid.TryParse(id, out var programId))
+        return Results.BadRequest(new { error = "invalid program id" });
+
+    var now        = DemoClock.AsOf;
+    var vendors    = new List<VendorSummaryDto>();
+    var discovered = await storeInst.LoadKyvVendorsByProgramAsync(programId);
+    foreach (var (vendorId, _, _) in discovered)
+    {
+        var entity = reg.GetEntity(vendorId);
+        if (entity is null) continue;
+        var idx = await f.GetIndexAsync(vendorId);
+        var pos = await f.GetPostureAsync(vendorId);
+        vendors.Add(DtoMapper.ToSummary(vendorId, entity, idx, pos, now));
     }
     return Results.Ok(vendors);
 });
@@ -1519,6 +1814,13 @@ public sealed class KyvVendorTracker
 
 record CheckInAnswerRequest(string? ResponseValue);
 record KyvRunRequest(string DriveUrl);
+// ProgramId is accepted for shape-compatibility with a future multi-program design but is
+// currently a no-op: the system has exactly one program today (VendorCleanupProgramId, a fixed
+// constant in SqliteEntityStore.SaveRegistryVendorAsync) — every KYV-discovered vendor is stamped
+// into it regardless of what's passed here. Wiring a real per-request program target would mean
+// threading a programId through RegistryWriter/KyvProgramRunner, out of scope for this endpoint
+// (which only replaces the Drive-download hop, not the pipeline itself).
+record KyvRunLocalRequest(string LocalPath, string? ProgramId = null);
 
 // Nullable-singleton wrapper — Microsoft.Extensions.DependencyInjection's AddSingleton(TService)
 // overload throws on a null instance, so a possibly-null CompletenessOrchestrator (absent when

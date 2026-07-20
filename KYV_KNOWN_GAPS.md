@@ -598,3 +598,144 @@ now with real semantic content) but will never visibly close a completeness gap 
 architecture — do not demo "answer a gap → watch it disappear" with a DIMENSION_GAP question. The
 payment-terms-style "real, already-catalogued evidence closes a gap" path is unaffected and remains
 the correct thing to demo.**
+
+## DECISION: Posture/Index gap — resolution direction (2026-07-07)
+
+**Problem:** IndexModule.Aggregate returns null whenever every dimension has zero
+ContributingBeliefIds — checked before any confidence math runs. Real ingested vendors' beliefs
+(e.g. invoice_amount, payment_terms) live in claim_key_catalogue.saas.v1.json (the completeness
+key space) but do not exist in scoring_rubric.saas.v1.json (uptime_sla, incident_volume, mttr,
+support_response_time, etc.). RubricModule never scores a criterion it doesn't recognize, so these
+beliefs can never trigger an Index, regardless of confidence. Not a threshold problem — a
+criteria-mismatch between two catalogues.
+
+**Decision: Option B — extend extraction, not the rubric.**
+Do NOT add financial-only criteria to scoring_rubric.saas.v1.json. The rubric's meaning (a posture
+reflects genuine operational/service assessment) stays intact. Instead, extend extraction —
+starting with E-docdepth's belief-catalogue growth (5→30+ types) — to look for the rubric's
+EXISTING criteria (uptime_sla, incident_volume, mttr, support_response_time) within documents
+already being processed (e.g. MSAs, SOWs), where such language may already exist but isn't being
+extracted for today.
+
+**Rationale:** preserves "abstain over guess" — a vendor with zero operational evidence should stay
+honestly "not assessed," not receive a diluted posture just because financial data exists. Contracts
+like OfficeSpace's MSA (26 real clauses: indemnification, liability cap, notice period, etc.)
+plausibly contain SLA/support language never extracted because extraction wasn't built to look for
+it — worth checking before concluding evidence is absent.
+
+**Practical effect:** E-docdepth's catalogue growth should be PRIORITIZED by the rubric's unmet
+criteria, not grown arbitrarily. Vendors with genuinely no operational content in their source
+documents (e.g. IIVS — invoices/QBRs only) will correctly remain "not assessed" — this is expected,
+honest behavior, not a bug.
+
+**Revisit condition:** if, after E-docdepth genuinely attempts this mapping, some vendors still have
+real evidence that structurally cannot map to any rubric criterion (e.g. invoice-only relationships
+with no contract at all), consider a narrower, explicitly-labeled "Financial-only" posture tier as a
+deliberate product decision — not before then, and not as a shortcut.
+
+## DECISION: E-signal Step 7 — threading DEFERRED (2026-07-07)
+
+Diagnosis confirmed: zero In-Reply-To/References headers across the 338-email corpus. A filename+
+subject heuristic is workable (participant-pair + normalized subject + temporal-proximity
+disambiguation) but requires a judgment-call threshold with no real consumer to validate against, and
+partially depends on synthetic-corpus-specific filename conventions that won't generalize to a real
+inbox.
+
+Confirmed via code: EmailInterpretationExtractor already extracts beliefs/signals per-message with
+no thread input; the one feature needing threading (responsiveness) is contractually inert
+(metadata_field_catalogue explicitly forbids it from firing); signals never enter scoring (Part 6,
+reserved for a Phase H momentum consumer that doesn't exist).
+
+DECISION: DEFER. Nothing today regresses or breaks. Cost is pure opportunity cost (responsiveness/
+thread-sentiment stay unbuilt) until a real consumer needs them.
+
+REVISIT WHEN: Phase H builds a momentum/responsiveness consumer. At that point, build against real
+production email data (not this synthetic corpus's filename tags), using the diagnosed approach:
+EmailThreadGrouper stage in Ii.CandidateExtraction, keyed on (participant pair, normalized subject),
+disambiguated by temporal proximity, ordered by Date with sequence-number fallback — contained,
+never touching Belief/Metadata shapes or completeness/scoring.
+
+## DECISION: processEmail stays OFF by default — identity resolution is not ready (2026-07-07)
+
+Diagnosis (real corpus, cassette-replayed, no live calls): turning processEmail:true against the
+full 151-PDF + 338-email corpus does not just trigger the two previously-known regression tests
+(Brookfield customer leak, ABC cluster assumption) — it demonstrably destabilizes vendors that were
+already CORRECT in the email-off baseline:
+
+- Institute for In Vitro Sciences, Inc.: Confirmed → Triage, with NO check-in raised to recover it.
+- Salesforce, Inc.: Confirmed → Triage, via a fresh collision against "Salesforce Professional
+  Services" that only appears once email is on.
+- OfficeSpace fragments silently into two unmerged entries with no IDENTITY_CONFIRM check-in raised
+  at all (not ambiguous — silent).
+- New customer bleed-through beyond Brookfield: "Nova"/"Nova University"/"OIIT" also resolve as
+  vendor-like entities.
+
+Root cause: THREE independent, interacting failure modes in the same clustering pass — a role-filter
+gap (unknown role isn't treated as non-vendor), a fuzzy-match threshold miss (0.90 doesn't catch
+"Office Space Software" vs "OfficeSpace"), and email-derived short-name variants creating fresh
+collisions against solid document-derived clusters (with at least one, IIVS, not even surfacing a
+check-in to resolve it). These interact — patching one risks masking or shifting the others.
+
+DECISION: processEmail remains OFF by default. This is NOT a quick unlock — it requires a real design
+pass against both corpora together (Dev A's core Ig.Resolution matching logic), not a contained patch.
+The support_response_time extraction mechanism (built and proven this session) is real and ready, but
+cannot safely reach a live email-sourced vendor until this identity-resolution work is done.
+
+SCOPE NOTE: bank/insurer entity bleed-through (Citibank, JPMorgan, TD Bank, First National, Marsh USA)
+is a PRE-EXISTING, SEPARATE issue already present in the email-off baseline — not introduced by email,
+not addressed by this decision.
+
+REVISIT: as a dedicated identity-resolution phase, owned with Dev A (Ig.Resolution), addressing role-
+filtering, fuzzy-match calibration, and email-derived collision handling together — not piecemeal.
+
+## DECISION: escalation_count / incident_volume — DEFERRED (2026-07-08)
+
+Real evidence exists (OfficeSpace/Brookfield: 5 escalation threads + outage/sync-failure references).
+Deferred, not built, for three compounding reasons:
+
+1. Aggregate extraction shape: unlike support_response_time and mttr (clean single-fact-per-message
+   reads, both built and proven), escalation_count requires counting distinct escalation threads
+   ACROSS the corpus — a fundamentally harder, cross-message extraction.
+2. Entangled with deferred thread-grouping: counting distinct threads depends on knowing which emails
+   belong to the same thread — exactly the problem deferred in E-signal Step 7 (no reference headers,
+   needs judgment-call temporal-proximity disambiguation). Building escalation_count properly requires
+   that deferred work first.
+3. Double-counting risk with incident_volume (and now mttr): an escalated outage could be counted as
+   an incident (mttr), an incident (incident_volume), AND an escalation (escalation_count) — inflating
+   risk three ways for one real event. incident_volume specifically is deferred because "count distinct
+   incidents" needs the same cross-message deduplication.
+
+Also dormant regardless: email-sourced, so blocked from live vendors by the identity-resolution gap
+(separately logged) even if built.
+
+REVISIT: when (a) E-signal thread-grouping is built (Phase H momentum consumer), giving a reliable way
+to count distinct threads/incidents without double-counting, AND (b) identity resolution lets email
+beliefs reach live vendors. At that point, likely Option C: define escalation and incident as distinct
+concepts (escalation = customer raised a formal complaint; incident/mttr = service failure event),
+with cross-message linking to avoid counting one real event as both.
+
+DONE this arc: support_response_time and mttr — two operational risk signals proven end-to-end
+(synthetic vendor null -> computed posture), demonstrating the extract->rubric->posture mechanism.
+
+## FINDING (E2.2 diagnosis, 2026-07-09): dispute_rate — a second fully-dead rubric criterion
+
+Same shape as escalation_count above, but distinct and additive: `dispute_rate` (in
+scoring_rubric.saas.v1.json) has **no catalogue claim key** (no `rubric_criterion` field anywhere
+points at it, and no claim key's own name coincides with it) **and no classification.saas.v1.json
+rule** either. Unlike escalation_count (which at least has a documented extraction-difficulty
+deferral above), dispute_rate has never had anything reach it — not deferred, just never wired.
+Fully unreachable by any path in the system today. For E2.3+ awareness alongside the usage_trend
+orphan (E2.1) and escalation_count.
+
+## FINDING (E2.2 diagnosis, 2026-07-09): notice_period / liability_cap — claim-key vs metadata-field name collision
+
+`notice_period` and `liability_cap` each name **two independent things** that happen to share a
+string: a claim key in claim_key_catalogue.saas.v1.json (class=structural, extracted into the
+`beliefs` table, Confidence forced to 0 by VendorFileWriteService, never actually referenced by any
+extraction schema's `claim_keys` array — so this half is itself unreachable via document/email
+extraction today) and a metadata field in metadata_field_catalogue.saas.v1.json (extracted via
+msa's `commercial_terms` metadata_field_group into the separate `document_metadata` store, never
+scored, never a belief). Two different pipelines, two different storage tables, one shared name —
+not by design, by coincidence. Ambiguous on any drill-down/audit view that shows the raw key name
+without saying which catalogue it came from. Flag for later disambiguation (rename one, or fold the
+claim-key half into the metadata-field half since the claim-key half is already unreachable).

@@ -46,10 +46,12 @@ public sealed class GoogleDriveDownloader
 
     /// <summary>
     /// Downloads all supported files from a Drive folder or single file URL
-    /// to a fresh temp directory. Returns the temp directory path.
+    /// to a fresh temp directory. Returns the temp directory path plus a
+    /// local-filename -&gt; Drive-file-id map (document retention — see
+    /// KYV_KNOWN_GAPS.md — needs the Drive id to survive past the temp folder's deletion).
     /// Caller is responsible for deleting the temp directory after use.
     /// </summary>
-    public async Task<string> DownloadToTempFolderAsync(
+    public async Task<DriveDownloadResult> DownloadToTempFolderAsync(
         OAuthToken        token,
         string            driveUrl,
         CancellationToken ct = default)
@@ -59,13 +61,14 @@ public sealed class GoogleDriveDownloader
         Directory.CreateDirectory(tempDir);
 
         var (kind, id) = ParseDriveUrl(driveUrl);
+        var driveFileIdsByFilename = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
         if (kind == DriveUrlKind.Folder)
-            await DownloadFolderContentsAsync(service, id, tempDir, ct);
+            await DownloadFolderContentsAsync(service, id, tempDir, driveFileIdsByFilename, ct);
         else
-            await DownloadSingleFileAsync(service, id, tempDir, ct);
+            await DownloadSingleFileAsync(service, id, tempDir, driveFileIdsByFilename, ct);
 
-        return tempDir;
+        return new DriveDownloadResult(tempDir, driveFileIdsByFilename);
     }
 
     // ── URL parsing ───────────────────────────────────────────────────────────
@@ -94,7 +97,8 @@ public sealed class GoogleDriveDownloader
     // ── Folder download ───────────────────────────────────────────────────────
 
     private async Task DownloadFolderContentsAsync(
-        DriveService service, string folderId, string destDir, CancellationToken ct)
+        DriveService service, string folderId, string destDir,
+        Dictionary<string, string> driveFileIdsByFilename, CancellationToken ct)
     {
         var listRequest = service.Files.List();
         listRequest.Q                         = $"'{folderId}' in parents and trashed = false";
@@ -113,9 +117,9 @@ public sealed class GoogleDriveDownloader
             {
                 // Recurse into subfolders so nested files are included
                 if (file.MimeType == "application/vnd.google-apps.folder")
-                    await DownloadFolderContentsAsync(service, file.Id, destDir, ct);
+                    await DownloadFolderContentsAsync(service, file.Id, destDir, driveFileIdsByFilename, ct);
                 else
-                    await DownloadOrExportAsync(service, file.Id, file.Name, file.MimeType, destDir, ct);
+                    await DownloadOrExportAsync(service, file.Id, file.Name, file.MimeType, destDir, driveFileIdsByFilename, ct);
             }
 
             pageToken = page.NextPageToken;
@@ -126,20 +130,21 @@ public sealed class GoogleDriveDownloader
     // ── Single file download ──────────────────────────────────────────────────
 
     private async Task DownloadSingleFileAsync(
-        DriveService service, string fileId, string destDir, CancellationToken ct)
+        DriveService service, string fileId, string destDir,
+        Dictionary<string, string> driveFileIdsByFilename, CancellationToken ct)
     {
         var req = service.Files.Get(fileId);
         req.Fields            = "id, name, mimeType";
         req.SupportsAllDrives = true;
         var meta = await req.ExecuteAsync(ct);
-        await DownloadOrExportAsync(service, meta.Id, meta.Name, meta.MimeType, destDir, ct);
+        await DownloadOrExportAsync(service, meta.Id, meta.Name, meta.MimeType, destDir, driveFileIdsByFilename, ct);
     }
 
     // ── Core download / export ────────────────────────────────────────────────
 
     private static async Task DownloadOrExportAsync(
-        DriveService service, string fileId, string fileName,
-        string mimeType, string destDir, CancellationToken ct)
+        DriveService service, string fileId, string fileName, string mimeType, string destDir,
+        Dictionary<string, string> driveFileIdsByFilename, CancellationToken ct)
     {
         var baseName  = SanitizeFileName(Path.GetFileNameWithoutExtension(fileName));
         var localPath = UniquePath(destDir, baseName + ".pdf");
@@ -151,6 +156,8 @@ public sealed class GoogleDriveDownloader
             var result = await req.DownloadAsync(stream, ct);
             if (result.Status != Google.Apis.Download.DownloadStatus.Completed)
                 File.Delete(localPath);
+            else
+                driveFileIdsByFilename[Path.GetFileName(localPath)] = fileId;
         }
         else if (ExportableMimeTypes.Contains(mimeType))
         {
@@ -159,6 +166,8 @@ public sealed class GoogleDriveDownloader
             var result = await req.DownloadAsync(stream, ct);
             if (result.Status != Google.Apis.Download.DownloadStatus.Completed)
                 File.Delete(localPath);
+            else
+                driveFileIdsByFilename[Path.GetFileName(localPath)] = fileId;
         }
         // other types: skip silently
     }
@@ -211,3 +220,14 @@ public sealed class GoogleDriveDownloader
 }
 
 internal enum DriveUrlKind { Folder, File }
+
+/// <summary>
+/// Result of a Drive download — the temp directory (caller deletes it after use) plus a
+/// local-filename -&gt; Drive-file-id map, keyed on the exact filename written to disk (matches
+/// KyvProgramRunner's docId = Path.GetFileName(pdfPath) convention). A filename with no entry
+/// means the file was skipped (unsupported type) or failed to download.
+/// </summary>
+public sealed record DriveDownloadResult(
+    string                              TempDir,
+    IReadOnlyDictionary<string, string> DriveFileIdsByFilename
+);

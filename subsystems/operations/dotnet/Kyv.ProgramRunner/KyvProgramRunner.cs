@@ -9,6 +9,7 @@ using Ii.Observation;
 using Ii.Posture;
 using Ii.Rubric;
 using Ii.Spine;
+using Km.Store;
 using Km.Store.Metadata;
 using Kozmo.Contracts;
 using Kozmo.Contracts.Config;
@@ -64,6 +65,7 @@ public sealed class KyvProgramRunner
     private readonly RegistryWriter                _stageF;
     private readonly BeliefPersistenceStage        _stageBeliefs;
     private readonly MetadataPersistenceStage?     _stageMetadata;
+    private readonly DocumentPersistenceStage?     _stageDocuments;
     private readonly IEntityStore                  _entityStore;
     private readonly SaasProfile                   _profile;
     private readonly RaiseCheckInsStage            _raiseStage;
@@ -95,7 +97,8 @@ public sealed class KyvProgramRunner
         IMetadataStore?            metadataStore = null,
         IKozmoLlm?                 emailInterpretationLlm = null,
         bool                       processEmail  = false,
-        ICheckInTransport?         transport     = null)
+        ICheckInTransport?         transport     = null,
+        IDocumentStore?            documentStore = null)
     {
         // E-signal Part 5 Step 6 — OFF by default, same opt-in shape as metadataStore/completeness
         // below. Real-corpus proof: turning email on unconditionally surfaced a genuine
@@ -133,6 +136,10 @@ public sealed class KyvProgramRunner
         // E1 Part 7 Step 5 — null when no caller supplies a metadata store (every existing
         // caller today), so metadata extraction still runs but is simply not persisted anywhere.
         _stageMetadata  = metadataStore is null ? null : new MetadataPersistenceStage(metadataStore);
+        // Document retention — null when no caller supplies a document store (every existing
+        // caller/test today), so beliefs/metadata fall back to their prior Guid.Empty/Guid.NewGuid()
+        // placeholder behavior, byte-for-byte unchanged for those callers.
+        _stageDocuments = documentStore is null ? null : new DocumentPersistenceStage(documentStore);
         _entityStore    = entityStore;
         _profile        = profile;
         _raiseStage     = new RaiseCheckInsStage();
@@ -151,9 +158,10 @@ public sealed class KyvProgramRunner
     }
 
     public async Task<ProgramRun> RunAsync(
-        string            workspacePath,
-        DateTimeOffset    now,
-        CancellationToken ct = default)
+        string                              workspacePath,
+        DateTimeOffset                      now,
+        IReadOnlyDictionary<string, string>? driveFileIdsByFilename = null,
+        CancellationToken                  ct = default)
     {
         var runId          = Guid.NewGuid();
         var executions     = new List<ProgramStageExecution>();
@@ -189,9 +197,17 @@ public sealed class KyvProgramRunner
         var allCandidates           = new List<CandidateIdentityBelief>();
         var factCandidatesByDoc     = new List<(string DocId, IReadOnlyList<BeliefCandidate> Candidates)>();
         var metadataCandidatesByDoc = new List<(string DocId, IReadOnlyList<MetadataCandidate> Candidates)>();
+        // Document retention (see KYV_KNOWN_GAPS.md) — captured here because this is the one place
+        // in the whole pipeline that ever has the raw bytes AND the extracted text for a PDF in
+        // hand together, before Program.cs's /kyv/run handler deletes the temp folder they came
+        // from. Captured for EVERY downloaded file, including ones that end up Unreadable below —
+        // retention is about the source, not extraction success.
+        var pdfDocuments = new List<(string DocId, byte[] Content, string ContentText, string? DriveFileId)>();
         foreach (var (pdfPath, tier) in classified)
         {
             var bytes = File.ReadAllBytes(pdfPath);
+            var docId = Path.GetFileName(pdfPath);
+            var driveFileId = driveFileIdsByFilename?.GetValueOrDefault(docId);
             var pages = _pdfReader.ExtractPageTexts(bytes);
             var text  = string.Join("\n", pages.OrderBy(kv => kv.Key).Select(kv => kv.Value));
             if (string.IsNullOrWhiteSpace(text))
@@ -227,12 +243,15 @@ public sealed class KyvProgramRunner
                     unreadable.Add(new UnreadableDocument(
                         RelativePath: Path.GetRelativePath(workspacePath, pdfPath),
                         Reason:       ocrFailReason ?? "unknown OCR failure"));
+                    pdfDocuments.Add((docId, bytes, "", driveFileId));
                     continue;
                 }
             }
 
-            var docId   = Path.GetFileName(pdfPath);
-            var beliefs = await extractor.ExtractAsync(text, docId, tier, ct);
+            pdfDocuments.Add((docId, bytes, text, driveFileId));
+
+            var beliefs = await extractor.ExtractAsync(
+                text, docId, tier, DocTypeInferrer.IsBankingContext(docId), ct);
             allCandidates.AddRange(beliefs);
 
             // Dimension-fact + metadata extraction (Commit 2 belief bridge; E1 Part 7 Step 5
@@ -276,7 +295,8 @@ public sealed class KyvProgramRunner
             var identityText = EmailParser.BuildIdentityText(email);
             try
             {
-                var candidates = await extractor.ExtractAsync(identityText, docId, SourceTier.Correspondence, ct);
+                var candidates = await extractor.ExtractAsync(
+                    identityText, docId, SourceTier.Correspondence, DocTypeInferrer.IsBankingContext(docId), ct);
                 allCandidates.AddRange(candidates);
             }
             catch (LlmCacheMissException)
@@ -328,13 +348,22 @@ public sealed class KyvProgramRunner
         var vendorCount = dispositions.Count(d => d.Disposition != Disposition.NonVendor);
         executions.Add(new(5, "resolve", now, vendorCount));
 
+        // Document retention (see KYV_KNOWN_GAPS.md) — persisted BEFORE beliefs/metadata, on the
+        // SAME doc-scoped ClusterId <- DocId correlation, so its returned docId -> documentId map
+        // is ready for BeliefPersistenceStage/MetadataPersistenceStage to point EvidenceId/
+        // DocumentId at real rows instead of Guid.Empty/a fresh Guid.NewGuid(). No-op (empty map)
+        // when no document store was supplied to this runner.
+        var docIdToDocumentId = _stageDocuments != null
+            ? await _stageDocuments.PersistAsync(pdfDocuments, annotated, dispositions, now, ct)
+            : new Dictionary<string, Guid>();
+
         // ── Stage 6: persist_beliefs — correlate doc-scoped facts to the resolved vendor ──
         // Uses the SAME ClusterId <- DocId path RegistryWriter.Build() uses (Stage F, above).
         // Value convention (see KYV_KNOWN_GAPS.md): scored claims (sla_uptime, csat) are banded
         // to 0-1 before persisting; structural claims (payment_terms, renewal_date, annual_value)
         // persist raw with Confidence forced to 0 by VendorFileWriteService.
         var beliefsWritten = await _stageBeliefs.PersistAsync(
-            factCandidatesByDoc, annotated, dispositions, now, ct);
+            factCandidatesByDoc, annotated, dispositions, now, docIdToDocumentId, ct);
         executions.Add(new(6, "persist_beliefs", now, beliefsWritten));
 
         // Metadata persistence (E1 Part 7 Step 5) — same doc-scoped correlation, routed to
@@ -342,7 +371,7 @@ public sealed class KyvProgramRunner
         // of "persist" conceptually, not a new pipeline phase) — no-op when no metadata store was
         // supplied to this runner.
         if (_stageMetadata != null)
-            await _stageMetadata.PersistAsync(metadataCandidatesByDoc, annotated, dispositions, now, ct);
+            await _stageMetadata.PersistAsync(metadataCandidatesByDoc, annotated, dispositions, now, docIdToDocumentId, ct);
 
         // ── Stage 7: raise_checkins ────────────────────────────────────────────
         // Identity check-ins: raised automatically from Triage+PossibleSameEntity dispositions.
